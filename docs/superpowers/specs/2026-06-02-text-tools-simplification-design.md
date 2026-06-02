@@ -41,8 +41,15 @@
 - **单条**：大号等宽字体（font-size 1.125rem），居中，无边框，下方有淡化提示"点击复制"。
 - **多条**：紧凑列表，每行 `<code>` 值 + 右侧复制按钮，列表右上角"复制全部"。
 
+### 依赖变更
+
+- 新增 `uuid` npm 包，替代手写的 `generateV1`/`generateV4`/`generateV7` 函数
+- 版本 chip 按版本号从小到大排列：v1 | v4 | v7
+
 ### 技术实现
 
+- 安装 `uuid` 包，使用 `v1()`、`v4()`、`v7()` 生成对应版本
+- 移除手写的 `generateV1`/`generateV4`/`generateV7` 函数
 - 移除 `generateBtnRef` 和 focus 逻辑
 - 移除 `handleExample` 方法
 - `watch([version, amount], generate, { immediate: false })` + `onMounted(generate)`
@@ -54,11 +61,12 @@
 
 **第一行**：
 ```
-长度 32  [字母+数字●] [仅数字] [+特殊字符] [自定义]
+长度 32  [字母+数字●] [仅数字] [+特殊字符] [自定义]  [大写] [小写]
 ```
 
 - **长度**：inline 数字输入，宽度 70px，label "长度"，范围 1-10000。
 - **字符集**：4 个 toggle chip，选中态用 accent 色填充。
+- **大小写**：两个可选 toggle chip（"大写"、"小写"），互斥且可选（默认都不选=原样）。仅当字符集包含字母时生效（"仅数字"模式下禁用或隐藏）。
 
 **第二行**（条件显示）：
 ```
@@ -74,7 +82,7 @@
 
 ### 结果展示
 
-同 UUID 方案。
+同 UUID 方案。结果区始终可见（默认展示），不做条件渲染。
 
 ### 实时校验
 
@@ -89,6 +97,8 @@
 - `watch([length, charsetPreset, customChars, amount], () => { validate && generate() })` + `onMounted(generate)`
 - 字符集选择从 `<select>` 改为一组 `<button>` 点击切换
 - 移除 `results.length` 的条件渲染（v-if），始终显示结果区
+- 新增 `letterCase` ref（值：'none' | 'upper' | 'lower'），watch 中监听，生成后对结果做大小写转换
+- 大小写 chip 仅在字符集包含字母时启用（"仅数字"时禁用并重置为 'none'）
 
 ## 共用样式规范
 
@@ -139,6 +149,7 @@
 - `ToolHeader` 组件本身不变，只传 `showExample: false`
 - `CopyButton`、`ClearButton` 组件保留在项目中（其他工具可能使用）
 - `copyToClipboard` 工具函数不变
-- 生成逻辑函数（generateV1/V4/V7, generateRandomString）不变
+- 生成逻辑函数（generateRandomString）不变
+- UUID 生成逻辑改为使用 `uuid` 包（移除手写实现）
 - 页面路由不变（uuid-generator.astro, random-string.astro）
 - design-tokens.css 不变
