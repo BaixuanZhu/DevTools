@@ -1,35 +1,8 @@
 ---
 import ToolLayout from '../layouts/ToolLayout.astro';
-import ToolHeader from '../components/ToolHeader.vue';
+import DeviceInfo from '../tools/DeviceInfo.vue';
 ---
 
-<ToolLayout title="设备信息与 UA - DevTools" toolId="device-info">
-  <div class="placeholder-tool">
-    <ToolHeader
-      client:idle
-      title="设备信息与 UserAgent"
-      description="查看浏览器、操作系统、屏幕等设备信息"
-      showExample={false}
-    />
-    <div class="coming-soon">
-      <p>功能开发中...</p>
-    </div>
-  </div>
+<ToolLayout title="设备信息与 UserAgent - DevTools" toolId="device-info">
+  <DeviceInfo client:idle />
 </ToolLayout>
-
-<style>
-  .placeholder-tool {
-    max-width: 720px;
-  }
-  .coming-soon {
-    padding: var(--space-xl);
-    text-align: center;
-    color: var(--color-muted);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-md);
-  }
-  .coming-soon p {
-    margin: 0;
-    font-size: 0.9375rem;
-  }
-</style>
