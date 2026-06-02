@@ -1,0 +1,61 @@
+---
+import type { ToolMeta } from '../data/tools';
+
+interface Props {
+  tool: ToolMeta;
+}
+
+const { tool } = Astro.props;
+---
+
+<a href={tool.path} class="tool-card">
+  <span class="tool-card-icon">{tool.icon}</span>
+  <div class="tool-card-body">
+    <h3 class="tool-card-name">{tool.name}</h3>
+    <p class="tool-card-desc">{tool.description}</p>
+  </div>
+</a>
+
+<style>
+  .tool-card {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    transition:
+      border-color var(--transition-fast),
+      box-shadow var(--transition-fast);
+  }
+
+  .tool-card:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  .tool-card-icon {
+    font-size: 1.75rem;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .tool-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tool-card-name {
+    margin: 0 0 var(--space-xs);
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .tool-card-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    line-height: 1.5;
+  }
+</style>
