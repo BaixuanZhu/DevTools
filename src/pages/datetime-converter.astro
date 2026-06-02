@@ -1,35 +1,8 @@
 ---
 import ToolLayout from '../layouts/ToolLayout.astro';
-import ToolHeader from '../components/ToolHeader.vue';
+import DateTimeConverter from '../tools/DateTimeConverter.vue';
 ---
 
 <ToolLayout title="日期时间转换器 - DevTools" toolId="datetime-converter">
-  <div class="placeholder-tool">
-    <ToolHeader
-      client:idle
-      title="日期时间转换器"
-      description="时间戳与日期格式互转，支持多种日期格式"
-      showExample={false}
-    />
-    <div class="coming-soon">
-      <p>功能开发中...</p>
-    </div>
-  </div>
+  <DateTimeConverter client:idle />
 </ToolLayout>
-
-<style>
-  .placeholder-tool {
-    max-width: 720px;
-  }
-  .coming-soon {
-    padding: var(--space-xl);
-    text-align: center;
-    color: var(--color-muted);
-    border: 1px dashed var(--color-border);
-    border-radius: var(--radius-md);
-  }
-  .coming-soon p {
-    margin: 0;
-    font-size: 0.9375rem;
-  }
-</style>
