@@ -1,0 +1,140 @@
+---
+import Layout from './Layout.astro';
+import Footer from '../components/Footer.astro';
+import Sidebar from '../components/Sidebar.vue';
+import SearchBar from '../components/SearchBar.vue';
+
+interface Props {
+  title?: string;
+  /** 当前工具 ID，用于侧边栏高亮 */
+  toolId?: string;
+}
+
+const { title = 'DevTools - 开发者工具集', toolId = '' } = Astro.props;
+const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
+---
+
+<Layout title={title}>
+  <div id="app">
+    <header class="header">
+      <div class="header-left">
+        <button
+          class="hamburger"
+          id="hamburger-btn"
+          aria-label="打开导航菜单"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <a href="/" class="logo">DevTools</a>
+      </div>
+      <div class="header-search">
+        <SearchBar client:load placeholder="搜索工具..." />
+      </div>
+    </header>
+
+    <div class="main-wrapper">
+      <Sidebar client:load currentPath={currentPath} />
+      <main class="content">
+        <slot />
+      </main>
+    </div>
+
+    <Footer />
+  </div>
+</Layout>
+
+<script>
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  // Sidebar manages its own isOpen state, communicates via DOM custom event
+  hamburgerBtn?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('sidebar-toggle'));
+  });
+</script>
+
+<style>
+  #app {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-lg);
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    height: 57px;
+    flex-shrink: 0;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+
+  .logo {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+
+  .logo:hover {
+    color: var(--color-accent);
+  }
+
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-sm);
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+
+  .hamburger span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background-color: var(--color-text);
+    border-radius: 1px;
+  }
+
+  .header-search {
+    width: 280px;
+  }
+
+  .main-wrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .content {
+    flex: 1;
+    padding: var(--space-xl);
+    overflow-y: auto;
+    max-width: 100%;
+  }
+
+  @media (max-width: 1023px) {
+    .hamburger {
+      display: flex;
+    }
+
+    .header-search {
+      display: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .content {
+      padding: var(--space-md);
+    }
+  }
+</style>
