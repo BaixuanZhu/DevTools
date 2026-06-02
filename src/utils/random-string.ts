@@ -27,3 +27,23 @@ export function generateRandomString(length: number, charset: CharsetPreset): st
   crypto.getRandomValues(array);
   return Array.from(array, (x) => chars[x % chars.length]).join('');
 }
+
+/** 字母大小写模式 */
+export type LetterCase = 'none' | 'upper' | 'lower';
+
+/** 对字符串应用大小写转换 */
+export function applyLetterCase(str: string, mode: LetterCase): string {
+  if (mode === 'upper') return str.toUpperCase();
+  if (mode === 'lower') return str.toLowerCase();
+  return str;
+}
+
+/** 判断字符集预设是否包含字母 */
+export function hasLetters(preset: CharsetPreset | string): boolean {
+  if (preset === 'digits') return false;
+  if (preset.startsWith('custom:')) {
+    const chars = preset.slice(7);
+    return /[a-zA-Z]/.test(chars);
+  }
+  return true;
+}
