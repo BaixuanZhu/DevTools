@@ -1,81 +1,69 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import ToolHeader from '../components/ToolHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
-import ClearButton from '../components/ClearButton.vue';
 import { copyToClipboard } from '../utils/clipboard';
+import {
+  generateUuids,
+  isNamespaceVersion,
+  hasConversion,
+  getConvertedUuid,
+  getConversionLabel,
+  NAMESPACE_PRESETS,
+  type UuidVersion,
+} from '../utils/uuid-generator';
 
-const version = ref('v4');
+/** 可选的 UUID 版本列表（从小到大排列） */
+const VERSIONS: { value: UuidVersion; label: string }[] = [
+  { value: 'v1', label: 'v1' },
+  { value: 'v3', label: 'v3' },
+  { value: 'v4', label: 'v4' },
+  { value: 'v5', label: 'v5' },
+  { value: 'v6', label: 'v6' },
+  { value: 'v7', label: 'v7' },
+];
+
+const version = ref<UuidVersion>('v4');
 const amount = ref(1);
 const results = ref<string[]>([]);
-const generateBtnRef = ref<HTMLButtonElement | null>(null);
 
-onMounted(() => {
-  generateBtnRef.value?.focus();
-});
+/** v3/v5 专用参数 */
+const nsName = ref('');
+const nsType = ref<'DNS' | 'URL' | 'custom'>('DNS');
+const nsCustom = ref('');
 
-/** 生成 UUID v4 */
-function generateV4(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
+/** 获取实际 namespace UUID */
+function getNamespace(): string {
+  if (nsType.value === 'custom') return nsCustom.value;
+  return NAMESPACE_PRESETS[nsType.value];
+}
+
+/** 是否需要 name/namespace 参数 */
+const needsNamespace = computed(() => isNamespaceVersion(version.value));
+
+/** 是否显示转换结果 */
+const showConversion = computed(() => hasConversion(version.value));
+
+/** 转换后的结果（每个 UUID 对应一个转换值） */
+const conversions = computed(() =>
+  results.value.map((uuid) => getConvertedUuid(version.value, uuid))
+);
+
+/** 转换标签 */
+const conversionLabel = computed(() => getConversionLabel(version.value));
+
+/** 生成 UUID */
+function generate() {
+  if (needsNamespace.value && !nsName.value.trim()) return;
+  if (needsNamespace.value && nsType.value === 'custom' && !nsCustom.value.trim()) return;
+
+  results.value = generateUuids(amount.value, version.value, {
+    name: nsName.value,
+    namespace: getNamespace(),
   });
 }
 
-/** 生成 UUID v1（简化版，基于时间戳和随机数） */
-function generateV1(): string {
-  const now = Date.now();
-  const hex = now.toString(16).padStart(12, '0');
-  const randHex = () =>
-    Math.floor(Math.random() * 0xffff)
-      .toString(16)
-      .padStart(4, '0');
-  // time_low (8 hex) - time_mid (4 hex) - version+time_hi (1+3 hex) - variant+clock (4 hex) - node (12 hex)
-  const timeLow = hex.slice(-8);
-  const timeMid = randHex();
-  const timeHi = `1${randHex().slice(1)}`;
-  // RFC 4122 variant: 10xx → 0x8000 | random 14 bits
-  const clockSeq = ((Math.floor(Math.random() * 0x3fff) | 0x8000)).toString(16).padStart(4, '0');
-  const node = `${randHex()}${randHex()}${randHex()}`;
-  return `${timeLow}-${timeMid}-${timeHi}-${clockSeq}-${node}`;
-}
-
-/** 生成 UUID v7（基于 Unix 时间戳） */
-function generateV7(): string {
-  const now = Date.now();
-  const hex = now.toString(16).padStart(12, '0');
-  const randHex = () =>
-    Math.floor(Math.random() * 0xffff)
-      .toString(16)
-      .padStart(4, '0');
-  // unix_ts_ms (48 bit = 12 hex) - version+rand_a (4 hex) - variant+rand_b (4 hex) - rand_b (12 hex)
-  const unixTs = hex.slice(0, 12);
-  const verAndRandA = `7${randHex().slice(1)}`;
-  // RFC 4122 variant: 10xx → 0x8000 | random 14 bits
-  const varAndRandB = ((Math.floor(Math.random() * 0x3fff) | 0x8000)).toString(16).padStart(4, '0');
-  const randB = `${randHex()}${randHex()}${randHex()}`;
-  return `${unixTs.slice(0, 8)}-${unixTs.slice(8, 12)}-${verAndRandA}-${varAndRandB}-${randB}`;
-}
-
-function generate() {
-  const count = Math.min(Math.max(amount.value || 1, 1), 100);
-  const gen = version.value === 'v1' ? generateV1 : version.value === 'v7' ? generateV7 : generateV4;
-  results.value = Array.from({ length: count }, () => gen());
-}
-
-function handleExample() {
-  version.value = 'v4';
-  amount.value = 5;
-  generate();
-}
-
-function handleClear() {
-  results.value = [];
-}
-
-const allResultsText = computed(() => results.value.join('\n'));
-
+/** 复制相关 */
 const copiedRow = ref(-1);
 
 async function copyRow(index: number) {
@@ -84,55 +72,119 @@ async function copyRow(index: number) {
   const success = await copyToClipboard(text);
   if (success) {
     copiedRow.value = index;
-    setTimeout(() => {
-      copiedRow.value = -1;
-    }, 1000);
+    setTimeout(() => { copiedRow.value = -1; }, 1000);
   }
 }
+
+const copiedConversion = ref(-1);
+
+async function copyConversion(index: number) {
+  const text = conversions.value[index];
+  if (!text) return;
+  const success = await copyToClipboard(text);
+  if (success) {
+    copiedConversion.value = index;
+    setTimeout(() => { copiedConversion.value = -1; }, 1000);
+  }
+}
+
+const allResultsText = computed(() => results.value.join('\n'));
+
+/** 监听参数变化自动重新生成 */
+watch(
+  [version, amount, nsName, nsType, nsCustom],
+  () => { generate(); },
+  { immediate: false }
+);
+
+onMounted(() => { generate(); });
 </script>
 
 <template>
   <div class="uuid-tool">
     <ToolHeader
       title="UUID 生成器"
-      description="生成多种版本的 UUID（v1、v4、v7 等）"
-      @example="handleExample"
+      description="生成多种版本的 UUID（v1、v3、v4、v5、v6、v7）"
+      :show-example="false"
     />
 
-    <div class="uuid-controls">
-      <div class="uuid-version">
-        <label class="field-label">UUID 版本</label>
-        <select v-model="version" class="field-select">
-          <option value="v4">v4（随机）</option>
-          <option value="v1">v1（时间戳）</option>
-          <option value="v7">v7（时间排序）</option>
-        </select>
+    <!-- 版本选择 + 数量 + 操作 -->
+    <div class="control-row">
+      <div class="chip-group">
+        <button
+          v-for="v in VERSIONS"
+          :key="v.value"
+          :class="['chip', { active: version === v.value }]"
+          @click="version = v.value"
+        >
+          {{ v.label }}
+        </button>
       </div>
-      <div class="uuid-amount">
-        <label class="field-label">生成数量</label>
-        <input v-model.number="amount" type="number" :min="1" :max="100" class="field-input" />
+      <div class="control-inline">
+        <label class="inline-label">×</label>
+        <input
+          v-model.number="amount"
+          type="number"
+          :min="1"
+          :max="100"
+          class="inline-input"
+        />
       </div>
-      <button ref="generateBtnRef" class="btn-primary" @click="generate">生成</button>
+      <button class="refresh-btn" @click="generate" title="重新生成">↻</button>
+      <CopyButton v-if="results.length" :text="allResultsText" label="复制全部" />
     </div>
 
-    <div class="uuid-output">
-      <div class="output-header">
-        <span class="output-label">生成结果</span>
-        <div class="output-actions">
-          <CopyButton v-if="results.length" :text="allResultsText" label="复制全部" />
-          <ClearButton @clear="handleClear" />
-        </div>
+    <!-- v3/v5 条件输入 -->
+    <div v-if="needsNamespace" class="namespace-row">
+      <div class="control-inline">
+        <label class="inline-label">名称</label>
+        <input
+          v-model="nsName"
+          class="inline-text"
+          placeholder="输入名称"
+        />
       </div>
-      <div class="results-area">
-        <p v-if="!results.length" class="results-placeholder">点击"生成"按钮或输入后自动生成 UUID</p>
-        <div
-          v-for="(uuid, index) in results"
-          :key="index"
-          class="result-row"
-        >
+      <div class="control-inline">
+        <label class="inline-label">命名空间</label>
+        <select v-model="nsType" class="inline-select">
+          <option value="DNS">DNS</option>
+          <option value="URL">URL</option>
+          <option value="custom">自定义</option>
+        </select>
+      </div>
+      <div v-if="nsType === 'custom'" class="control-inline">
+        <input
+          v-model="nsCustom"
+          class="inline-text"
+          placeholder="输入 UUID 命名空间"
+        />
+      </div>
+    </div>
+
+    <!-- 生成结果 -->
+    <div class="results-area">
+      <div
+        v-for="(uuid, index) in results"
+        :key="index"
+        class="result-row"
+      >
+        <div class="result-content">
           <code class="result-value">{{ uuid }}</code>
+          <template v-if="showConversion && conversions[index]">
+            <span class="conversion-label">{{ conversionLabel }}</span>
+            <code class="result-value result-conversion">{{ conversions[index] }}</code>
+          </template>
+        </div>
+        <div class="result-actions">
           <button class="result-copy" @click="copyRow(index)">
             {{ copiedRow === index ? '✓' : '复制' }}
+          </button>
+          <button
+            v-if="showConversion && conversions[index]"
+            class="result-copy"
+            @click="copyConversion(index)"
+          >
+            {{ copiedConversion === index ? '✓' : '复制转换' }}
           </button>
         </div>
       </div>
@@ -145,113 +197,181 @@ async function copyRow(index: number) {
   max-width: 720px;
 }
 
-.uuid-controls {
+/* 控制行 */
+.control-row {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: var(--space-md);
-  margin-bottom: var(--space-lg);
   flex-wrap: wrap;
+  margin-bottom: var(--space-md);
 }
 
-.uuid-version,
-.uuid-amount {
+/* Chip 切换组 */
+.chip-group {
   display: flex;
-  flex-direction: column;
+  gap: 4px;
+}
+
+.chip {
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.chip.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* inline 控件 */
+.control-inline {
+  display: flex;
+  align-items: center;
   gap: var(--space-xs);
 }
 
-.field-label {
+.inline-label {
   font-size: 0.8125rem;
-  font-weight: 500;
   color: var(--color-muted);
+  white-space: nowrap;
 }
 
-.field-select,
-.field-input {
-  padding: var(--space-sm) var(--space-md);
+.inline-input {
+  width: 50px;
+  padding: 4px var(--space-sm);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-family: var(--font-sans);
   color: var(--color-text);
-  background-color: var(--color-card);
+  background: var(--color-card);
 }
 
-.field-select:focus,
-.field-input:focus {
+.inline-input:focus {
   outline: none;
   border-color: var(--color-accent);
 }
 
-.field-input {
-  width: 80px;
-}
-
-.btn-primary {
-  padding: var(--space-sm) var(--space-lg);
-  border: none;
+.inline-text {
+  padding: 4px var(--space-sm);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  background-color: var(--color-accent);
-  color: #fff;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-family: var(--font-sans);
-  font-weight: 500;
+  color: var(--color-text);
+  background: var(--color-card);
+  min-width: 160px;
+}
+
+.inline-text:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.inline-select {
+  padding: 4px var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-card);
+}
+
+.inline-select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+/* 刷新按钮 */
+.refresh-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-card);
   cursor: pointer;
-  transition: opacity var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
+.refresh-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
-.output-header {
+/* namespace 条件行 */
+.namespace-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-sm);
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) 0;
 }
 
-.output-label {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.output-actions {
-  display: flex;
-  gap: var(--space-sm);
-}
-
+/* 结果区 */
 .results-area {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  min-height: 120px;
-  background-color: var(--color-card);
-}
-
-.results-placeholder {
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 0.875rem;
-  text-align: center;
-  padding: var(--space-xl) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .result-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-xs) 0;
+  padding: var(--space-sm) 0;
 }
 
 .result-row + .result-row {
   border-top: 1px solid var(--color-border);
 }
 
+.result-content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  flex: 1;
+}
+
 .result-value {
   font-family: var(--font-mono);
   font-size: 0.8125rem;
   color: var(--color-text);
+}
+
+.result-conversion {
+  color: var(--color-muted);
+}
+
+.conversion-label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+  flex-shrink: 0;
+}
+
+.result-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
 }
 
 .result-copy {
@@ -261,6 +381,7 @@ async function copyRow(index: number) {
   color: var(--color-muted);
   font-size: 0.75rem;
   padding: var(--space-xs) var(--space-sm);
+  white-space: nowrap;
 }
 
 .result-copy:hover {
