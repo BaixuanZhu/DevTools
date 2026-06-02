@@ -1,0 +1,48 @@
+---
+interface Props {
+  /** 备案号（可选，有值时显示备案信息） */
+  icp?: string;
+}
+
+const { icp = '' } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer-content">
+    <p>&copy; {year} DevTools. All rights reserved.</p>
+    {icp && (
+      <p>
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+          {icp}
+        </a>
+      </p>
+    )}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--color-border);
+    background-color: var(--color-card);
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  a:hover {
+    color: var(--color-accent);
+  }
+</style>
