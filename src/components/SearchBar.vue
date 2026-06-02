@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onUnmounted } from 'vue';
 import { searchTools } from '../data/tools';
 import type { ToolMeta } from '../data/tools';
 
@@ -21,8 +21,15 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 watch(query, (val) => {
   if (timer) clearTimeout(timer);
   timer = setTimeout(() => {
-    emit('results', searchTools(val));
+    const results = searchTools(val);
+    emit('results', results);
+    // 同时通过 DOM CustomEvent 通知非 Vue 消费者（如首页工具网格）
+    document.dispatchEvent(new CustomEvent('search-results', { detail: { tools: results, query: val } }));
   }, 150);
+});
+
+onUnmounted(() => {
+  if (timer) clearTimeout(timer);
 });
 </script>
 

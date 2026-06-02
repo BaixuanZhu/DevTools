@@ -34,7 +34,17 @@
   /* 侧边栏 */
   --sidebar-width: 240px;
 
+  /* 头部 */
+  --header-height: 57px;
+
   /* 过渡 */
   --transition-fast: 150ms ease;
   --transition-normal: 250ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-fast: 0ms;
+    --transition-normal: 0ms;
+  }
 }

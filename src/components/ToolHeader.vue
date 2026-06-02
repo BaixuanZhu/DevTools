@@ -4,6 +4,8 @@ defineProps<{
   title: string;
   /** 工具描述 */
   description: string;
+  /** 是否显示"填入示例"按钮，默认 true */
+  showExample?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -17,7 +19,7 @@ const emit = defineEmits<{
       <h1 class="tool-header-title">{{ title }}</h1>
       <p class="tool-header-desc">{{ description }}</p>
     </div>
-    <button class="tool-header-example" @click="$emit('example')">
+    <button v-if="showExample !== false" class="tool-header-example" @click="$emit('example')">
       填入示例
     </button>
   </div>

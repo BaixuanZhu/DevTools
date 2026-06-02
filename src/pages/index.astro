@@ -32,27 +32,43 @@ const categories = getCategories();
 </ToolLayout>
 
 <script>
-  // 分类过滤逻辑
+  import type { ToolMeta } from '../data/tools';
+
   const filterBtns = document.querySelectorAll('.filter-btn');
   const gridItems = document.querySelectorAll('.tool-grid-item');
+  let activeCategory = 'all';
+  let searchResults: ToolMeta[] | null = null;
 
+  /** 根据当前分类和搜索结果过滤工具卡片 */
+  function applyFilters() {
+    const searchIds = searchResults ? new Set(searchResults.map((t) => t.id)) : null;
+
+    gridItems.forEach((item) => {
+      const el = item as HTMLElement;
+      const cat = el.getAttribute('data-category')!;
+      const toolId = el.querySelector('a')?.getAttribute('href')?.slice(1);
+      const matchCategory = activeCategory === 'all' || cat === activeCategory;
+      const matchSearch = !searchIds || (toolId && searchIds.has(toolId));
+
+      el.style.display = matchCategory && matchSearch ? '' : 'none';
+    });
+  }
+
+  // 分类过滤
   filterBtns.forEach((btn) => {
     btn.addEventListener('click', () => {
-      // 切换激活状态
       filterBtns.forEach((b) => b.classList.remove('filter-btn--active'));
       btn.classList.add('filter-btn--active');
-
-      const category = btn.getAttribute('data-category');
-
-      gridItems.forEach((item) => {
-        if (category === 'all' || item.getAttribute('data-category') === category) {
-          (item as HTMLElement).style.display = '';
-        } else {
-          (item as HTMLElement).style.display = 'none';
-        }
-      });
+      activeCategory = btn.getAttribute('data-category') || 'all';
+      applyFilters();
     });
   });
+
+  // 搜索过滤（接收 SearchBar 的 DOM CustomEvent）
+  document.addEventListener('search-results', ((e: CustomEvent) => {
+    searchResults = e.detail.query ? e.detail.tools : null;
+    applyFilters();
+  }) as EventListener);
 </script>
 
 <style>

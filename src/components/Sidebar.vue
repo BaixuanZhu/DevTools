@@ -20,6 +20,7 @@ function isActive(path: string): boolean {
 
 function close() {
   isOpen.value = false;
+  document.dispatchEvent(new CustomEvent('sidebar-close'));
 }
 
 function toggle() {
@@ -54,9 +55,14 @@ onUnmounted(() => {
   <div
     v-if="isOpen"
     class="sidebar-overlay"
+    role="presentation"
     @click="close"
   />
-  <aside :class="['sidebar', { 'sidebar--open': isOpen }]">
+  <aside
+    :class="['sidebar', { 'sidebar--open': isOpen }]"
+    role="navigation"
+    aria-label="工具导航"
+  >
     <nav class="sidebar-nav">
       <div v-for="category in categories" :key="category" class="sidebar-group">
         <h3 class="sidebar-group-title">{{ category }}</h3>
@@ -83,7 +89,7 @@ onUnmounted(() => {
 
 .sidebar {
   width: var(--sidebar-width);
-  height: calc(100vh - 57px - 49px);
+  height: calc(100vh - var(--header-height) - 49px);
   overflow-y: auto;
   border-right: 1px solid var(--color-border);
   background-color: var(--color-card);
@@ -148,11 +154,11 @@ onUnmounted(() => {
   .sidebar {
     position: fixed;
     left: 0;
-    top: 57px;
+    top: var(--header-height);
     z-index: 100;
     transform: translateX(-100%);
     transition: transform var(--transition-normal);
-    height: calc(100vh - 57px);
+    height: calc(100vh - var(--header-height));
   }
 
   .sidebar--open {

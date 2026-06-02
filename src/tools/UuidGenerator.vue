@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import ToolHeader from '../components/ToolHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
 import ClearButton from '../components/ClearButton.vue';
@@ -8,6 +8,11 @@ import { copyToClipboard } from '../utils/clipboard';
 const version = ref('v4');
 const amount = ref(1);
 const results = ref<string[]>([]);
+const generateBtnRef = ref<HTMLButtonElement | null>(null);
+
+onMounted(() => {
+  generateBtnRef.value?.focus();
+});
 
 /** 生成 UUID v4 */
 function generateV4(): string {
@@ -22,22 +27,35 @@ function generateV4(): string {
 function generateV1(): string {
   const now = Date.now();
   const hex = now.toString(16).padStart(12, '0');
-  const rand = () => Math.random().toString(16).substring(2, 6);
-  return `${hex.slice(-8)}-${rand()}-1${rand().slice(1)}-${rand()}-${rand()}${rand()}`.replace(
-    /^(.{8})-(.{4})-(.{4})-(.{4})-(.{12}).*$/,
-    '$1-$2-$3-$4-$5',
-  );
+  const randHex = () =>
+    Math.floor(Math.random() * 0xffff)
+      .toString(16)
+      .padStart(4, '0');
+  // time_low (8 hex) - time_mid (4 hex) - version+time_hi (1+3 hex) - variant+clock (4 hex) - node (12 hex)
+  const timeLow = hex.slice(-8);
+  const timeMid = randHex();
+  const timeHi = `1${randHex().slice(1)}`;
+  // RFC 4122 variant: 10xx → 0x8000 | random 14 bits
+  const clockSeq = ((Math.floor(Math.random() * 0x3fff) | 0x8000)).toString(16).padStart(4, '0');
+  const node = `${randHex()}${randHex()}${randHex()}`;
+  return `${timeLow}-${timeMid}-${timeHi}-${clockSeq}-${node}`;
 }
 
 /** 生成 UUID v7（基于 Unix 时间戳） */
 function generateV7(): string {
   const now = Date.now();
   const hex = now.toString(16).padStart(12, '0');
-  const rand = () =>
+  const randHex = () =>
     Math.floor(Math.random() * 0xffff)
       .toString(16)
       .padStart(4, '0');
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-7${rand().slice(1)}-${rand()}-${rand()}${rand()}`;
+  // unix_ts_ms (48 bit = 12 hex) - version+rand_a (4 hex) - variant+rand_b (4 hex) - rand_b (12 hex)
+  const unixTs = hex.slice(0, 12);
+  const verAndRandA = `7${randHex().slice(1)}`;
+  // RFC 4122 variant: 10xx → 0x8000 | random 14 bits
+  const varAndRandB = ((Math.floor(Math.random() * 0x3fff) | 0x8000)).toString(16).padStart(4, '0');
+  const randB = `${randHex()}${randHex()}${randHex()}`;
+  return `${unixTs.slice(0, 8)}-${unixTs.slice(8, 12)}-${verAndRandA}-${varAndRandB}-${randB}`;
 }
 
 function generate() {
@@ -94,7 +112,7 @@ async function copyRow(index: number) {
         <label class="field-label">生成数量</label>
         <input v-model.number="amount" type="number" :min="1" :max="100" class="field-input" />
       </div>
-      <button class="btn-primary" @click="generate">生成</button>
+      <button ref="generateBtnRef" class="btn-primary" @click="generate">生成</button>
     </div>
 
     <div class="uuid-output">
