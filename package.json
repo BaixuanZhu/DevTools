@@ -19,7 +19,6 @@
     "bowser": "^2.14.1",
     "dayjs": "^1.11.21",
     "js-md5": "^0.8.3",
-    "jwt-decode": "^4.0.0",
     "vue": "^3.5.35"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+import { ref, computed } from 'vue';
 import ToolHeader from '../components/ToolHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
 import ClearButton from '../components/ClearButton.vue';

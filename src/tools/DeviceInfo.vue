@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue';
 import ToolHeader from '../components/ToolHeader.vue';
 import CopyButton from '../components/CopyButton.vue';
+import ClearButton from '../components/ClearButton.vue';
 import Bowser from 'bowser';
 
 interface InfoItem {
@@ -69,6 +70,11 @@ const allInfoJson = computed(() => {
   return JSON.stringify(obj, null, 2);
 });
 
+function clearCustomUA() {
+  customUA.value = '';
+  customItems.value = [];
+}
+
 onMounted(() => {
   collectDeviceInfo();
 });
@@ -102,6 +108,7 @@ onMounted(() => {
         placeholder="粘贴 UserAgent 字符串进行解析..."
         @input="parseCustomUA"
       ></textarea>
+      <ClearButton v-if="customUA" @clear="clearCustomUA" />
       <div v-if="customItems.length" class="info-grid">
         <div v-for="item in customItems" :key="item.label" class="info-card">
           <span class="info-label">{{ item.label }}</span>

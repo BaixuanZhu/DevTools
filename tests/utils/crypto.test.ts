@@ -2,9 +2,8 @@ import { describe, it, expect } from 'vitest';
 import {
   encryptAES,
   decryptAES,
-  arrayBufferToBase64,
-  base64ToArrayBuffer,
 } from '../../src/utils/crypto';
+import { arrayBufferToBase64, base64ToArrayBuffer } from '../../src/utils/array-buffer';
 
 describe('encryptAES & decryptAES', () => {
   it('应正确加密和解密文本（AES-GCM）', async () => {

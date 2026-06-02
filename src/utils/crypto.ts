@@ -1,35 +1,16 @@
+import { arrayBufferToBase64, base64ToArrayBuffer } from './array-buffer';
+
 /** AES 加密算法类型 */
 export type AESAlgorithm = 'AES-GCM' | 'AES-CBC' | 'AES-CTR';
 
 /** 支持的密钥长度 */
 export type AESKeyLength = 128 | 192 | 256;
 
-/** 加密结果（包含 salt 和 iv，用于后续解密） */
-export interface EncryptResult {
-  /** Base64 编码的密文（包含 salt + iv + ciphertext） */
-  data: string;
-}
-
 const PBKDF2_ITERATIONS = 100000;
 const SALT_LENGTH = 16;
 const IV_LENGTH_GCM = 12;
 const IV_LENGTH_CBC = 16;
 const IV_LENGTH_CTR = 16;
-
-/** ArrayBuffer 转 Base64 */
-export function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
-}
-
-/** Base64 转 ArrayBuffer */
-export function base64ToArrayBuffer(base64: string): ArrayBuffer {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return bytes.buffer;
-}
 
 /** 获取 IV 长度 */
 function getIvLength(algorithm: AESAlgorithm): number {

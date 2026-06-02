@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeHash, computeFileHash, HASH_ALGORITHMS, arrayBufferToHex, arrayBufferToBase64 } from '../../src/utils/hash';
+import { computeHash, computeFileHash, HASH_ALGORITHMS, arrayBufferToHex } from '../../src/utils/hash';
 
 describe('computeHash', () => {
   it('应正确计算 MD5 哈希', async () => {

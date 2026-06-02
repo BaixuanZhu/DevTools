@@ -1,4 +1,5 @@
 import md5 from 'js-md5';
+import { arrayBufferToBase64 } from './array-buffer';
 
 /** 支持的哈希算法 */
 export const HASH_ALGORITHMS = ['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'] as const;
@@ -21,11 +22,6 @@ export function arrayBufferToHex(buffer: ArrayBuffer): string {
   return Array.from(new Uint8Array(buffer))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
-}
-
-/** 将 ArrayBuffer 转为 Base64 字符串 */
-export function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
 
 /** 对文本计算哈希 */
