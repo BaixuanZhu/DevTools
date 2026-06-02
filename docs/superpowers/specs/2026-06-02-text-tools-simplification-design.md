@@ -25,34 +25,52 @@
 
 ## UUID 生成器设计
 
-### 控制行（单行）
+### 控制区
 
+**第一行**：
 ```
-[v1] [v4●] [v7]    ×1  [↻]  [复制]
+[v1] [v3] [v4●] [v5] [v6] [v7]    ×1  [↻]  [复制]
 ```
 
-- **版本选择**：3 个 toggle chip（v1 | v4 | v7），默认 v4。选中态用 accent 色填充。
+- **版本选择**：6 个 toggle chip（v1 | v3 | v4 | v5 | v6 | v7），按版本号从小到大排列，默认 v4。选中态用 accent 色填充。
 - **数量**：inline 数字输入，宽度 50px，前缀 label 简写 "×"，范围 1-100。
 - **刷新按钮**：↻ 图标按钮，同参数重新随机。
 - **复制按钮**：单条时复制该条；多条时等同于"复制全部"。
+
+**第二行**（条件显示，仅 v3/v5 时）：
+```
+名称 [_______________]  命名空间 [DNS ▼]
+```
+
+- **名称（name）**：文本输入框，v3/v5 的必填参数。
+- **命名空间（namespace）**：下拉选择，预设选项：
+  - `DNS`（`v3.DNS` / `v5.DNS`：`6ba7b810-9dad-11d1-80b4-00c04fd430c8`）
+  - `URL`（`v3.URL` / `v5.URL`：`6ba7b811-9dad-11d1-80b4-00c04fd430c8`）
+  - `自定义`（展开一个 UUID 输入框）
+- 选择 v3/v5 且 name 为空时不生成，显示提示"请输入名称"。
 
 ### 结果展示
 
 - **单条**：大号等宽字体（font-size 1.125rem），居中，无边框，下方有淡化提示"点击复制"。
 - **多条**：紧凑列表，每行 `<code>` 值 + 右侧复制按钮，列表右上角"复制全部"。
+- **转换值**（v1/v6 时）：生成结果下方显示转换后的对应版本值：
+  - 选中 v1 时：额外显示 `v1ToV6(uuid)` 的结果，label "→ v6"
+  - 选中 v6 时：额外显示 `v6ToV1(uuid)` 的结果，label "→ v1"
+  - 转换值右侧有独立复制按钮
 
 ### 依赖变更
 
-- 新增 `uuid` npm 包，替代手写的 `generateV1`/`generateV4`/`generateV7` 函数
-- 版本 chip 按版本号从小到大排列：v1 | v4 | v7
+- 新增 `uuid` npm 包（`import { v1, v3, v4, v5, v6, v7, v6ToV1, v1ToV6 } from 'uuid'`）
+- 移除手写的 `generateV1`/`generateV4`/`generateV7` 函数
 
 ### 技术实现
 
-- 安装 `uuid` 包，使用 `v1()`、`v4()`、`v7()` 生成对应版本
-- 移除手写的 `generateV1`/`generateV4`/`generateV7` 函数
+- 使用 `uuid` 包的 `v1()`、`v3(name, ns)`、`v4()`、`v5(name, ns)`、`v6()`、`v7()` 生成对应版本
+- 使用 `v6ToV1(uuidStr)` 和 `v1ToV6(uuidStr)` 做版本转换
+- v3/v5 的 namespace 下拉：DNS/URL 用包内置常量，自定义允许输入任意 UUID
 - 移除 `generateBtnRef` 和 focus 逻辑
 - 移除 `handleExample` 方法
-- `watch([version, amount], generate, { immediate: false })` + `onMounted(generate)`
+- `watch([version, amount, ...v3v5params], generate, { immediate: false })` + `onMounted(generate)`
 - 版本选择从 `<select>` 改为一组 `<button>` + v-model 式的点击切换
 
 ## 随机字符串生成器设计
@@ -150,6 +168,6 @@
 - `CopyButton`、`ClearButton` 组件保留在项目中（其他工具可能使用）
 - `copyToClipboard` 工具函数不变
 - 生成逻辑函数（generateRandomString）不变
-- UUID 生成逻辑改为使用 `uuid` 包（移除手写实现）
+- UUID 生成逻辑改为使用 `uuid` 包（移除手写实现，支持 v1/v3/v4/v5/v6/v7 全版本）
 - 页面路由不变（uuid-generator.astro, random-string.astro）
 - design-tokens.css 不变
