@@ -16,9 +16,10 @@ pnpm preview    # 预览构建结果
 
 ## Tech Stack
 
-- **Framework:** Astro 6.4.2（无 UI 框架集成，纯 Astro 组件 + 原生 JS）
+- **Framework:** Astro 6.4.2 + Vue 3（@astrojs/vue）
+- **UI:** Vue 3 `<script setup lang="ts">` + Composition API（交互型组件）
 - **Language:** TypeScript（strict 模式，继承 astro/tsconfigs/strict）
-- **Styling:** Astro scoped CSS（组件内 `<style>` 标签），无外部 CSS 框架
+- **Styling:** CSS 自定义属性（design-tokens.css）+ 组件 scoped style
 - **Package Manager:** pnpm
 - **Node:** >=22.12.0
 
@@ -26,14 +27,17 @@ pnpm preview    # 预览构建结果
 
 ```
 src/
-├── layouts/     # 页面骨架（Layout.astro）
+├── layouts/     # 页面骨架（Layout.astro, ToolLayout.astro）
 ├── pages/       # 基于文件的路由，每个 .astro 文件对应一个 URL
-├── components/  # 可复用 UI 组件
+├── components/  # 可复用 UI 组件（.vue 交互型 + .astro 纯展示）
+├── data/        # 工具注册表（tools.ts）
+├── utils/       # 工具函数
+├── styles/      # 设计令牌（design-tokens.css）
 └── assets/      # 静态资源（通过 Astro import 引用）
 public/          # 不经处理的静态文件（favicon 等）
 ```
 
-路由采用 Astro 文件路由：`src/pages/json-formatter.astro` → `/json-formatter`。工具页面直接作为 pages 下的 `.astro` 文件组织。
+路由采用 Astro 文件路由：`src/pages/uuid-generator.astro` → `/uuid-generator`。工具页面直接作为 pages 下的 `.astro` 文件组织，交互逻辑通过 Vue 3 组件实现。
 
 ## Security Rules（强制）
 
@@ -52,7 +56,8 @@ public/          # 不经处理的静态文件（favicon 等）
 
 ## Development Conventions
 
-- 页面 title 和布局使用 Layout.astro，通过 props 传递页面标题
-- 客户端交互逻辑使用 `<script>` 标签写在 `.astro` 文件内，利用 Astro 的 islands 架构保持零 JS 默认输出
-- CSS 使用 Astro scoped styles，组件内 `<style>` 标签编写，不引入全局样式文件
-- 新增公共组件/工具函数时必须写文档注释（JSDoc 格式）
+- 页面 title 和布局使用 Layout.astro / ToolLayout.astro，通过 props 传递页面标题
+- 交互型组件使用 Vue 3 `<script setup lang="ts">` + Composition API，通过 Astro `client:` 指令控制水合
+- 纯展示型组件使用 Astro 组件（.astro），保持零 JS 输出
+- CSS 使用 design-tokens.css 变量 + 组件 scoped style
+- 新增公共组件/工具函数时必须写文档注释（JSDoc / TSDoc 格式）

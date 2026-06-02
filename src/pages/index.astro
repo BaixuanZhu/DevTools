@@ -1,11 +1,111 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import ToolLayout from '../layouts/ToolLayout.astro';
+import ToolCard from '../components/ToolCard.astro';
+import { tools, getCategories } from '../data/tools';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const categories = getCategories();
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<ToolLayout title="DevTools - 开发者工具集">
+  <div class="dashboard">
+    <h1 class="dashboard-title">开发者工具集</h1>
+
+    <div class="category-filters">
+      <button class="filter-btn filter-btn--active" data-category="all">
+        全部
+      </button>
+      {categories.map((cat) => (
+        <button class="filter-btn" data-category={cat}>
+          {cat}
+        </button>
+      ))}
+    </div>
+
+    <div class="tool-grid" id="tool-grid">
+      {tools.map((tool) => (
+        <div class="tool-grid-item" data-category={tool.category}>
+          <ToolCard tool={tool} />
+        </div>
+      ))}
+    </div>
+  </div>
+</ToolLayout>
+
+<script>
+  // 分类过滤逻辑
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const gridItems = document.querySelectorAll('.tool-grid-item');
+
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      // 切换激活状态
+      filterBtns.forEach((b) => b.classList.remove('filter-btn--active'));
+      btn.classList.add('filter-btn--active');
+
+      const category = btn.getAttribute('data-category');
+
+      gridItems.forEach((item) => {
+        if (category === 'all' || item.getAttribute('data-category') === category) {
+          (item as HTMLElement).style.display = '';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  .dashboard {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 var(--space-lg);
+  }
+
+  .category-filters {
+    display: flex;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    padding-bottom: var(--space-sm);
+    margin-bottom: var(--space-lg);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filter-btn {
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-card);
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    font-family: var(--font-sans);
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--transition-fast),
+      color var(--transition-fast),
+      border-color var(--transition-fast);
+  }
+
+  .filter-btn:hover {
+    background-color: var(--color-hover);
+    color: var(--color-text);
+  }
+
+  .filter-btn--active {
+    background-color: var(--color-accent);
+    color: #fff;
+    border-color: var(--color-accent);
+  }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-md);
+  }
+</style>
