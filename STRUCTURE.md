@@ -148,25 +148,6 @@ Headless UI 提供无障碍交互组件（Listbox / Switch / Dialog 等）。
 | 测试 | Vitest |
 | 包管理 | pnpm |
 
-## 设计令牌 → Tailwind 映射
-
-在 `src/styles/global.css` 的 `@theme` 块中定义：
-
-| 旧 CSS 变量 | Tailwind 用法 |
-|---|---|
-| `--color-surface` | `bg-surface` |
-| `--color-text` | `text-text` |
-| `--color-muted` | `text-muted` |
-| `--color-border` | `border-border` |
-| `--color-accent` | `bg-accent` / `text-accent` / `border-accent` |
-| `--color-card` | `bg-card` |
-| `--color-hover` | `bg-hover` |
-| `--color-error` | `text-error` |
-| `--color-success` | `text-success` |
-| `--font-sans` | `font-sans` |
-| `--font-mono` | `font-mono` |
-| `--radius-sm/md/lg` | `rounded-sm` (4px) / `rounded-md` (8px) / `rounded-lg` (12px) |
-
 ## 分类映射
 
 | 分类目录 | 中文名 | 包含工具 |
