@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
+import SelectListbox from '../../components/ui/SelectListbox.vue';
+import DisclosureSection from '../../components/ui/DisclosureSection.vue';
 import { encryptAES, decryptAES, type AESAlgorithm, type AESKeyLength } from '../../utils/crypto/crypto';
 
 type Mode = 'encrypt' | 'decrypt';
@@ -16,6 +19,11 @@ const password = ref('');
 const output = ref('');
 const errorMsg = ref('');
 const isProcessing = ref(false);
+
+watch(mode, () => {
+  output.value = '';
+  errorMsg.value = '';
+});
 
 async function execute() {
   errorMsg.value = '';
@@ -43,12 +51,6 @@ async function execute() {
   }
 }
 
-function switchMode(newMode: Mode) {
-  mode.value = newMode;
-  output.value = '';
-  errorMsg.value = '';
-}
-
 function handleExample() {
   mode.value = 'encrypt';
   algorithm.value = 'AES-GCM';
@@ -71,28 +73,11 @@ function handleClear() {
   <div class="max-w-[720px]">
     <ToolHeader title="对称加解密" description="支持 AES 等主流对称加密算法的加解密" @example="handleExample" />
 
-    <div class="flex gap-1 mb-4">
-      <button :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'encrypt' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']" @click="switchMode('encrypt')">加密</button>
-      <button :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'decrypt' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']" @click="switchMode('decrypt')">解密</button>
-    </div>
+    <ModeTabGroup v-model="mode" :options="[{ key: 'encrypt', label: '加密' }, { key: 'decrypt', label: '解密' }]" />
 
     <div class="flex gap-4 mb-4 flex-wrap">
-      <div class="flex flex-col gap-1">
-        <label class="field-label">算法</label>
-        <select v-model="algorithm" class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans outline-none cursor-pointer focus:border-accent">
-          <option value="AES-GCM">AES-GCM</option>
-          <option value="AES-CBC">AES-CBC</option>
-          <option value="AES-CTR">AES-CTR</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="field-label">密钥长度</label>
-        <select v-model.number="keyLength" class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans outline-none cursor-pointer focus:border-accent">
-          <option :value="128">128 位</option>
-          <option :value="192">192 位</option>
-          <option :value="256">256 位</option>
-        </select>
-      </div>
+      <SelectListbox v-model="algorithm" label="算法" class="w-[140px]" :options="[{ value: 'AES-GCM', label: 'AES-GCM' }, { value: 'AES-CBC', label: 'AES-CBC' }, { value: 'AES-CTR', label: 'AES-CTR' }]" />
+      <SelectListbox v-model="keyLength" label="密钥长度" class="w-[140px]" :options="[{ value: 128, label: '128 位' }, { value: 192, label: '192 位' }, { value: 256, label: '256 位' }]" />
     </div>
 
     <div class="mb-4">
@@ -126,15 +111,12 @@ function handleClear() {
       </div>
     </div>
 
-    <details class="mt-6 border-t border-border pt-4">
-      <summary class="cursor-pointer text-[0.8125rem] text-muted hover:text-text">高级选项</summary>
-      <div class="pt-2">
-        <p class="text-[0.8125rem] text-muted m-0 leading-relaxed">
-          当前算法：<strong>{{ algorithm }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
-          密码通过 PBKDF2（100000 次迭代，SHA-256）派生为 AES 密钥。
-          加密结果格式：Base64(salt[16B] + iv[{{ algorithm === 'AES-GCM' ? '12' : '16' }}B] + ciphertext)。
-        </p>
-      </div>
-    </details>
+    <DisclosureSection title="高级选项">
+      <p class="text-[0.8125rem] text-muted m-0 leading-relaxed">
+        当前算法：<strong>{{ algorithm }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
+        密码通过 PBKDF2（100000 次迭代，SHA-256）派生为 AES 密钥。
+        加密结果格式：Base64(salt[16B] + iv[{{ algorithm === 'AES-GCM' ? '12' : '16' }}B] + ciphertext)。
+      </p>
+    </DisclosureSection>
   </div>
 </template>
