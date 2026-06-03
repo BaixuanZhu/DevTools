@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import { copyToClipboard } from '../../utils/shared/clipboard';
 import {
   detectTimestampUnit,
@@ -18,6 +19,11 @@ const dateInput = ref('');
 const dateInfo = ref<DateInfo | null>(null);
 const errorMsg = ref('');
 const copiedField = ref('');
+
+watch(inputMode, () => {
+  dateInfo.value = null;
+  errorMsg.value = '';
+});
 
 function parseTimestamp() {
   errorMsg.value = '';
@@ -89,10 +95,7 @@ const resultFields = computed(() => {
   <div class="max-w-[720px]">
     <ToolHeader title="日期时间转换器" description="时间戳与日期格式互转，支持多种日期格式" @example="handleExample" />
 
-    <div class="flex gap-1 mb-4">
-      <button :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', inputMode === 'timestamp' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']" @click="inputMode = 'timestamp'">时间戳 → 日期</button>
-      <button :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', inputMode === 'date' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']" @click="inputMode = 'date'">日期 → 时间戳</button>
-    </div>
+    <ModeTabGroup v-model="inputMode" :options="[{ key: 'timestamp', label: '时间戳 → 日期' }, { key: 'date', label: '日期 → 时间戳' }]" />
 
     <div class="mb-4">
       <div v-if="inputMode === 'timestamp'" class="flex flex-col gap-1">
