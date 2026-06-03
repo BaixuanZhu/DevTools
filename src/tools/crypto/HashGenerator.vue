@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import SelectListbox from '../../components/ui/SelectListbox.vue';
 import { computeHash, computeFileHash, HASH_ALGORITHMS, type HashAlgorithm } from '../../utils/crypto/hash';
 
 const inputText = ref('');
@@ -125,19 +126,20 @@ const allResultsText = computed(() =>
         <label class="field-label">哈希算法</label>
         <div class="flex gap-4 flex-wrap">
           <label v-for="algo in HASH_ALGORITHMS" :key="algo" class="flex items-center gap-1 text-[0.8125rem] cursor-pointer">
-            <input type="checkbox" :checked="selectedAlgorithms.includes(algo)" @change="toggleAlgorithm(algo)" />
+            <input type="checkbox" class="focus-visible:ring-2 focus-visible:ring-accent rounded-sm" :checked="selectedAlgorithms.includes(algo)" @change="toggleAlgorithm(algo)" />
             {{ algo }}
           </label>
         </div>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="field-label">输出格式</label>
-        <select v-model="outputFormat" class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans outline-none cursor-pointer focus:border-accent">
-          <option value="hex">小写 Hex</option>
-          <option value="hexUpper">大写 HEX</option>
-          <option value="base64">Base64</option>
-        </select>
-      </div>
+      <SelectListbox
+        v-model="outputFormat"
+        label="输出格式"
+        :options="[
+          { value: 'hex', label: '小写 Hex' },
+          { value: 'hexUpper', label: '大写 HEX' },
+          { value: 'base64', label: 'Base64' },
+        ]"
+      />
     </div>
 
     <div class="mb-4">
