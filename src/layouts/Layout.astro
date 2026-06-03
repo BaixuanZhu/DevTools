@@ -1,18 +1,19 @@
 ---
-import '../styles/design-tokens.css';
+import '../styles/global.css';
+import SeoHead from '../components/seo/SeoHead.astro';
 
 interface Props {
   title?: string;
+  description?: string;
 }
 
-const { title = 'DevTools - 开发者工具集' } = Astro.props;
+const { title = 'DevTools - 开发者工具集', description } = Astro.props;
 ---
 
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <SeoHead title={title} description={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link
@@ -21,41 +22,39 @@ const { title = 'DevTools - 开发者工具集' } = Astro.props;
     />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="bg-surface text-text font-sans text-base leading-normal antialiased">
     <slot />
   </body>
 </html>
 
-<style is:global>
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
+<script>
+  import Alpine from 'alpinejs';
 
-  html,
-  body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100vh;
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  window.Alpine = Alpine;
 
-  #app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
+  // 注册 Alpine store: toast（通过 DOM CustomEvent 触发）
+  Alpine.store('toast', {
+    items: [] as { id: number; type: string; message: string }[],
+    add(type: string, message: string, duration = 3000) {
+      const id = Date.now() + Math.random();
+      this.items.push({ id, type, message });
+      setTimeout(() => {
+        this.items = this.items.filter((t) => t.id !== id);
+      }, duration);
+    },
+    success(message: string) {
+      this.add('success', message);
+    },
+    error(message: string) {
+      this.add('error', message);
+    },
+  });
 
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-</style>
+  Alpine.start();
+
+  // 桥接 DOM CustomEvent → Alpine toast store
+  document.addEventListener('toast', ((e: CustomEvent) => {
+    const { type = 'success', message } = e.detail || {};
+    if (message) Alpine.store('toast').add(type, message);
+  }) as EventListener);
+</script>

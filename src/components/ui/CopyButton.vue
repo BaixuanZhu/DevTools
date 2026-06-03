@@ -3,9 +3,7 @@ import { ref } from 'vue';
 import { copyToClipboard } from '../../utils/shared/clipboard';
 
 const props = defineProps<{
-  /** 要复制的文本 */
   text: string;
-  /** 按钮文本 */
   label?: string;
 }>();
 
@@ -15,6 +13,8 @@ async function handleCopy() {
   const success = await copyToClipboard(props.text);
   if (success) {
     copied.value = true;
+    // 触发 Alpine toast
+    document.dispatchEvent(new CustomEvent('toast:success', { detail: { message: '已复制' } }));
     setTimeout(() => {
       copied.value = false;
     }, 1500);
@@ -24,40 +24,16 @@ async function handleCopy() {
 
 <template>
   <button
-    :class="['copy-btn', { 'copy-btn--copied': copied }]"
+    :class="[
+      'px-4 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150',
+      copied
+        ? 'border-success text-success bg-card'
+        : 'border-border text-text bg-card hover:bg-hover',
+      !text && 'opacity-50 cursor-not-allowed',
+    ]"
     @click="handleCopy"
     :disabled="!text"
   >
     {{ copied ? '✓ 已复制' : (label || '复制') }}
   </button>
 </template>
-
-<style scoped>
-.copy-btn {
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background-color: var(--color-card);
-  color: var(--color-text);
-  font-size: 0.8125rem;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-.copy-btn:hover:not(:disabled) {
-  background-color: var(--color-hover);
-}
-
-.copy-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.copy-btn--copied {
-  border-color: var(--color-success);
-  color: var(--color-success);
-}
-</style>

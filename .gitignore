@@ -27,3 +27,11 @@ pnpm-debug.log*
 .vscode
 # claude code folder
 .claude
+# workbuddy
+.workbuddy
+
+# impeccable
+.impeccable/
+
+# screenshots
+screenshots/

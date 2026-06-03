@@ -65,158 +65,57 @@ function handleClear() {
 </script>
 
 <template>
-  <div class="url-tool">
+  <div class="max-w-[720px]">
     <ToolHeader
       title="URL 编解码"
       description="URL 编码与解码，支持组件级和完整 URL 编码"
       @example="handleExample"
     />
 
-    <div class="mode-tabs">
-      <button :class="['tab-btn', { active: mode === 'encode' }]" @click="switchMode('encode')">编码</button>
-      <button :class="['tab-btn', { active: mode === 'decode' }]" @click="switchMode('decode')">解码</button>
+    <div class="flex gap-1 mb-4">
+      <button
+        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'encode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
+        @click="switchMode('encode')"
+      >编码</button>
+      <button
+        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'decode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
+        @click="switchMode('decode')"
+      >解码</button>
     </div>
 
-    <div class="input-section">
+    <div class="mb-4">
       <label class="field-label">输入</label>
-      <textarea v-model="input" class="field-textarea" rows="3" :placeholder="mode === 'encode' ? '输入要编码的文本或 URL' : '输入要解码的 percent-encoded 文本'"></textarea>
+      <textarea v-model="input" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="3" :placeholder="mode === 'encode' ? '输入要编码的文本或 URL' : '输入要解码的 percent-encoded 文本'"></textarea>
     </div>
 
-    <div class="action-bar">
-      <button class="btn-primary" @click="execute">{{ mode === 'encode' ? '编码' : '解码' }}</button>
+    <div class="flex gap-2 items-center mb-4">
+      <button class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90" @click="execute">{{ mode === 'encode' ? '编码' : '解码' }}</button>
       <ClearButton @clear="handleClear" />
     </div>
 
-    <p v-if="errorMsg" class="error-msg">{{ errorMsg }}</p>
+    <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
 
-    <div v-if="encodeComponentResult || decodeComponentResult" class="results-section">
-      <div class="result-block">
-        <div class="result-block-header">
-          <span class="result-label">{{ mode === 'encode' ? 'encodeURIComponent' : 'decodeURIComponent' }}</span>
-          <span class="result-hint">组件级，编码/解码所有特殊字符</span>
+    <div v-if="encodeComponentResult || decodeComponentResult" class="flex flex-col gap-4">
+      <div class="border border-border rounded-md p-4 bg-card">
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">{{ mode === 'encode' ? 'encodeURIComponent' : 'decodeURIComponent' }}</span>
+          <span class="text-[0.6875rem] text-muted">组件级，编码/解码所有特殊字符</span>
         </div>
-        <div class="result-value-box">
-          <code class="result-value">{{ mode === 'encode' ? encodeComponentResult : decodeComponentResult }}</code>
+        <div class="flex items-start gap-2">
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ mode === 'encode' ? encodeComponentResult : decodeComponentResult }}</code>
           <CopyButton :text="mode === 'encode' ? encodeComponentResult : decodeComponentResult" label="复制" />
         </div>
       </div>
-      <div class="result-block">
-        <div class="result-block-header">
-          <span class="result-label">{{ mode === 'encode' ? 'encodeURI' : 'decodeURI' }}</span>
-          <span class="result-hint">完整 URL 级，保留 URL 结构字符（: / ? & = #）</span>
+      <div class="border border-border rounded-md p-4 bg-card">
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">{{ mode === 'encode' ? 'encodeURI' : 'decodeURI' }}</span>
+          <span class="text-[0.6875rem] text-muted">完整 URL 级，保留 URL 结构字符（: / ? & = #）</span>
         </div>
-        <div class="result-value-box">
-          <code class="result-value">{{ mode === 'encode' ? encodeFullResult : decodeFullResult }}</code>
+        <div class="flex items-start gap-2">
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ mode === 'encode' ? encodeFullResult : decodeFullResult }}</code>
           <CopyButton :text="mode === 'encode' ? encodeFullResult : decodeFullResult" label="复制" />
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.url-tool { max-width: 720px; }
-
-.mode-tabs {
-  display: flex;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-md);
-}
-
-.tab-btn {
-  padding: var(--space-sm) var(--space-lg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-card);
-  color: var(--color-text);
-  font-size: 0.8125rem;
-  font-family: var(--font-sans);
-  cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.tab-btn.active {
-  background-color: var(--color-accent);
-  color: #fff;
-  border-color: var(--color-accent);
-}
-
-.input-section { margin-bottom: var(--space-md); }
-
-.field-textarea {
-  width: 100%;
-  padding: var(--space-sm) var(--space-md);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  font-family: var(--font-mono);
-  color: var(--color-text);
-  background-color: var(--color-card);
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-.field-textarea:focus {
-  outline: none;
-  border-color: var(--color-accent);
-}
-
-.action-bar {
-  display: flex;
-  gap: var(--space-sm);
-  align-items: center;
-  margin-bottom: var(--space-md);
-}
-
-.error-msg {
-  color: var(--color-error);
-  font-size: 0.8125rem;
-  margin: 0 0 var(--space-md);
-}
-
-.results-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-md);
-}
-
-.result-block {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-md);
-  background-color: var(--color-card);
-}
-
-.result-block-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-sm);
-}
-
-.result-label {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-accent);
-  font-family: var(--font-mono);
-}
-
-.result-hint {
-  font-size: 0.6875rem;
-  color: var(--color-muted);
-}
-
-.result-value-box {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-}
-
-.result-value {
-  flex: 1;
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  word-break: break-all;
-  color: var(--color-text);
-}
-</style>

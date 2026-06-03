@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors — 暖色调中性色 + 单一强调色 */
+  --color-surface: #faf9f7;
+  --color-text: #1a1a1a;
+  --color-muted: #6b7280;
+  --color-border: #e5e2dd;
+  --color-accent: #e8590c;
+  --color-card: #ffffff;
+  --color-hover: #f3f1ee;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+
+  /* Fonts */
+  --font-sans: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace,
+    monospace;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
+/* Alpine cloak — 避免未初始化时闪烁 */
+[x-cloak] {
+  display: none !important;
+}
+
+/* 减少动效偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}

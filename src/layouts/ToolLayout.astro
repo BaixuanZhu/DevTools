@@ -1,149 +1,190 @@
 ---
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
-import Sidebar from '../components/layout/Sidebar.vue';
-import SearchBar from '../components/ui/SearchBar.vue';
+import { getToolsByCategory, getCategories, tools, type ToolMeta } from '../data/tools';
 
 interface Props {
   title?: string;
-  /** 当前工具 ID，用于侧边栏高亮 */
+  description?: string;
   toolId?: string;
 }
 
-const { title = 'DevTools - 开发者工具集', toolId = '' } = Astro.props;
+const { title, description, toolId = '' } = Astro.props;
 const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
+const categories = getCategories();
+const toolsByCategory = getToolsByCategory();
+
+// 序列化工具数据供客户端搜索使用
+const toolsJson = JSON.stringify(
+  tools.map((t: ToolMeta) => ({
+    id: t.id,
+    name: t.name,
+    description: t.description,
+  })),
+);
 ---
 
-<Layout title={title}>
-  <div id="app">
-    <header class="header">
-      <div class="header-left">
+<Layout title={title} description={description}>
+  <div id="app" class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
+      <div class="flex items-center gap-4">
         <button
-          class="hamburger"
-          id="hamburger-btn"
+          class="hidden max-lg:flex flex-col gap-1 p-2 border-none bg-transparent cursor-pointer"
           aria-label="打开导航菜单"
-          aria-expanded="false"
+          x-data="{ expanded: false }"
+          :aria-expanded="expanded"
+          @click="$dispatch('sidebar-toggle'); expanded = !expanded"
+          @sidebar-toggle.window="expanded = !$el.getAttribute('aria-expanded')"
+          @sidebar-close.window="expanded = false"
         >
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
-          <span aria-hidden="true"></span>
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
         </button>
-        <a href="/" class="logo">DevTools</a>
+        <a href="/" class="text-lg font-semibold text-text hover:text-accent transition-colors duration-150">DevTools</a>
       </div>
-      <div class="header-search">
-        <SearchBar client:load placeholder="搜索工具..." />
+
+      <!-- SearchBar (Alpine) -->
+      <div
+        class="w-[280px] max-lg:hidden"
+        x-data="{
+          query: '',
+          tools: [],
+          init() {
+            this.tools = JSON.parse(decodeURIComponent('${encodeURIComponent(toolsJson)}'));
+          },
+          get filtered() {
+            if (!this.query.trim()) return null;
+            const q = this.query.toLowerCase();
+            return this.tools.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+          }
+        }"
+      >
+        <div class="flex items-center gap-2 px-4 py-2 border border-border rounded-md bg-card transition-colors duration-150 focus-within:border-accent">
+          <span class="text-sm shrink-0">🔍</span>
+          <input
+            type="text"
+            x-model="query"
+            placeholder="搜索工具..."
+            class="flex-1 border-none outline-none text-sm font-sans text-text bg-transparent placeholder:text-muted"
+            @input.debounce.150ms="$dispatch('search-results', { tools: filtered || [], query: query })"
+          />
+          <button
+            x-show="query"
+            x-cloak
+            @click="query = ''; $dispatch('search-results', { tools: [], query: '' })"
+            class="border-none bg-transparent cursor-pointer text-muted text-xs px-1 py-0.5 rounded-sm hover:text-text"
+            aria-label="清除搜索"
+          >✕</button>
+        </div>
       </div>
     </header>
 
-    <div class="main-wrapper">
-      <Sidebar client:load currentPath={currentPath} />
-      <main class="content">
+    <!-- Main area -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar (Alpine) -->
+      <aside
+        x-data="{ isOpen: false }"
+        @sidebar-toggle.window="isOpen = !isOpen"
+        @sidebar-close.window="isOpen = false"
+        @keydown.escape="isOpen = false"
+        :class="isOpen && 'sidebar-open'"
+        class="sidebar w-[240px] h-[calc(100vh-57px-49px)] overflow-y-auto border-r border-border bg-card py-2 shrink-0"
+        role="navigation"
+        aria-label="工具导航"
+      >
+        <!-- 首页 -->
+        <div class="py-1">
+          <a
+            href="/"
+            class:list={['flex items-center gap-2 px-4 py-2 text-sm text-text transition-colors duration-150 hover:bg-hover', currentPath === '/' && 'bg-hover text-accent font-medium border-r-2 border-accent']}
+          >
+            <span class="text-base w-6 text-center shrink-0">🏠</span>
+            <span>首页</span>
+          </a>
+        </div>
+        <div class="h-px bg-border mx-4 my-1"></div>
+
+        <!-- 分类导航 -->
+        {categories.map((category) => (
+          <div>
+            <h3 class="text-xs font-semibold text-muted px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
+            <ul class="list-none m-0 p-0">
+              {toolsByCategory[category].map((tool) => (
+                <li>
+                  <a
+                    href={tool.path}
+                    class:list={[
+                      'flex items-center gap-2 px-4 py-2 text-sm text-text transition-colors duration-150 hover:bg-hover',
+                      currentPath === tool.path && 'bg-hover text-accent font-medium border-r-2 border-accent',
+                    ]}
+                  >
+                    <span class="text-base w-6 text-center shrink-0">{tool.icon}</span>
+                    <span>{tool.name}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </aside>
+
+      <!-- Mobile overlay -->
+      <div
+        x-data
+        x-show="$el.closest('#app')?.querySelector('aside')?.classList.contains('sidebar-open')"
+        @click="$dispatch('sidebar-close')"
+        class="sidebar-overlay fixed inset-0 bg-black/30 z-[99] hidden"
+        x-cloak
+      ></div>
+
+      <!-- Content -->
+      <main class="flex-1 p-8 overflow-y-auto max-w-full max-md:p-4">
         <slot />
       </main>
     </div>
 
     <Footer />
   </div>
+
+  <!-- Alpine Toast -->
+  <div
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2"
+    x-cloak
+    x-data
+  >
+    <template x-for="toast in $store.toast.items" :key="toast.id">
+      <div
+        :class="{
+          'bg-card border-border text-success': toast.type === 'success',
+          'bg-red-50 border-error text-error': toast.type === 'error',
+        }"
+        class="px-4 py-2 rounded-md border shadow-sm text-sm font-sans"
+        x-text="toast.message"
+        x-transition
+      ></div>
+    </template>
+  </div>
 </Layout>
 
-<script>
-  const hamburgerBtn = document.getElementById('hamburger-btn');
-  // Sidebar manages its own isOpen state, communicates via DOM custom event
-  hamburgerBtn?.addEventListener('click', () => {
-    document.dispatchEvent(new CustomEvent('sidebar-toggle'));
-  });
-  // 同步 aria-expanded 状态
-  document.addEventListener('sidebar-toggle', () => {
-    const expanded = hamburgerBtn?.getAttribute('aria-expanded') === 'true';
-    hamburgerBtn?.setAttribute('aria-expanded', String(!expanded));
-  });
-  document.addEventListener('sidebar-close', () => {
-    hamburgerBtn?.setAttribute('aria-expanded', 'false');
-  });
-</script>
-
 <style>
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--space-sm) var(--space-lg);
-    border-bottom: 1px solid var(--color-border);
-    background-color: var(--color-card);
-    height: var(--header-height);
-    flex-shrink: 0;
-  }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-  }
-
-  .logo {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: var(--color-text);
-  }
-
-  .logo:hover {
-    color: var(--color-accent);
-  }
-
-  .hamburger {
-    display: none;
-    flex-direction: column;
-    gap: 4px;
-    padding: var(--space-sm);
-    border: none;
-    background: none;
-    cursor: pointer;
-  }
-
-  .hamburger span {
-    display: block;
-    width: 18px;
-    height: 2px;
-    background-color: var(--color-text);
-    border-radius: 1px;
-  }
-
-  .hamburger:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
-  }
-
-  .header-search {
-    width: 280px;
-  }
-
-  .main-wrapper {
-    display: flex;
-    flex: 1;
-    overflow: hidden;
-  }
-
-  .content {
-    flex: 1;
-    padding: var(--space-xl);
-    overflow-y: auto;
-    max-width: 100%;
-  }
-
+  /* 移动端侧边栏行为 — Alpine 与 Tailwind 响应式配合 */
   @media (max-width: 1023px) {
-    .hamburger {
-      display: flex;
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 57px;
+      z-index: 100;
+      transform: translateX(-100%);
+      transition: transform 250ms ease;
+      height: calc(100vh - 57px);
     }
-
-    .header-search {
-      display: none;
+    .sidebar.sidebar-open {
+      transform: translateX(0);
     }
-  }
-
-  @media (max-width: 767px) {
-    .content {
-      padding: var(--space-md);
+    .sidebar-overlay {
+      display: block;
     }
   }
 </style>

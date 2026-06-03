@@ -15,6 +15,8 @@
   },
   "dependencies": {
     "@astrojs/vue": "^6.0.1",
+    "@headlessui/vue": "^1.7.23",
+    "alpinejs": "^3.15.12",
     "astro": "^6.4.2",
     "bowser": "^2.14.1",
     "dayjs": "^1.11.21",
@@ -23,7 +25,10 @@
     "vue": "^3.5.35"
   },
   "devDependencies": {
+    "@astrojs/sitemap": "^3.7.3",
+    "@tailwindcss/vite": "^4.3.0",
     "@vitejs/plugin-vue": "^6.0.7",
+    "tailwindcss": "^4.3.0",
     "vitest": "^4.1.8"
   }
 }

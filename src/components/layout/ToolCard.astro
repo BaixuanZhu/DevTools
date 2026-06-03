@@ -8,54 +8,10 @@ interface Props {
 const { tool } = Astro.props;
 ---
 
-<a href={tool.path} class="tool-card">
-  <span class="tool-card-icon">{tool.icon}</span>
-  <div class="tool-card-body">
-    <h3 class="tool-card-name">{tool.name}</h3>
-    <p class="tool-card-desc">{tool.description}</p>
+<a href={tool.path} class="flex items-start gap-6 p-6 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+  <span class="text-[1.75rem] leading-none shrink-0">{tool.icon}</span>
+  <div class="flex-1 min-w-0">
+    <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold">{tool.name}</h3>
+    <p class="m-0 text-[0.8125rem] text-muted leading-normal">{tool.description}</p>
   </div>
 </a>
-
-<style>
-  .tool-card {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--space-md);
-    padding: var(--space-lg);
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    transition:
-      border-color var(--transition-fast),
-      box-shadow var(--transition-fast);
-  }
-
-  .tool-card:hover {
-    border-color: var(--color-accent);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  }
-
-  .tool-card-icon {
-    font-size: 1.75rem;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .tool-card-body {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .tool-card-name {
-    margin: 0 0 var(--space-xs);
-    font-size: 0.9375rem;
-    font-weight: 600;
-  }
-
-  .tool-card-desc {
-    margin: 0;
-    font-size: 0.8125rem;
-    color: var(--color-muted);
-    line-height: 1.5;
-  }
-</style>

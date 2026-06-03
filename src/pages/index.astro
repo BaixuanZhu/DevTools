@@ -7,121 +7,58 @@ const categories = getCategories();
 ---
 
 <ToolLayout title="DevTools - 开发者工具集">
-  <div class="dashboard">
-    <h1 class="dashboard-title">开发者工具集</h1>
+  <div class="max-w-[960px] mx-auto">
+    <h1 class="text-2xl font-semibold m-0 mb-6">开发者工具集</h1>
 
-    <div class="category-filters">
-      <button class="filter-btn filter-btn--active" data-category="all">
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-6 [-webkit-overflow-scrolling:touch]"
+      x-data="{ active: 'all' }"
+    >
+      <button
+        class="px-4 py-1 border border-border rounded-lg bg-card text-muted text-[0.8125rem] font-sans whitespace-nowrap cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text"
+        :class="active === 'all' && 'bg-accent text-white border-accent'"
+        @click="active = 'all'; applyFilter()"
+      >
         全部
       </button>
       {categories.map((cat) => (
-        <button class="filter-btn" data-category={cat}>
+        <button
+          class="px-4 py-1 border border-border rounded-lg bg-card text-muted text-[0.8125rem] font-sans whitespace-nowrap cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text"
+          :class={`active === '${cat}' && 'bg-accent text-white border-accent'`}
+          @click={`active = '${cat}'; applyFilter()`}
+        >
           {cat}
         </button>
       ))}
     </div>
 
-    <div class="tool-grid" id="tool-grid">
+    <div
+      class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4"
+      x-data="{
+        active: 'all',
+        searchIds: null as Set<string> | null,
+        init() {
+          document.addEventListener('search-results', ((e: CustomEvent) => {
+            this.searchIds = e.detail.query ? new Set(e.detail.tools.map((t: any) => t.id)) : null;
+            this.applyFilter();
+          }) as EventListener);
+        },
+        applyFilter() {
+          this.$refs.grid.querySelectorAll('[data-category]').forEach((el: HTMLElement) => {
+            const cat = el.getAttribute('data-category')!;
+            const id = el.querySelector('a')?.getAttribute('href')?.slice(1);
+            const matchCategory = this.active === 'all' || cat === this.active;
+            const matchSearch = !this.searchIds || (id && this.searchIds.has(id));
+            el.style.display = matchCategory && matchSearch ? '' : 'none';
+          });
+        }
+      }"
+      x-ref="grid"
+    >
       {tools.map((tool) => (
-        <div class="tool-grid-item" data-category={tool.category}>
+        <div data-category={tool.category}>
           <ToolCard tool={tool} />
         </div>
       ))}
     </div>
   </div>
 </ToolLayout>
-
-<script>
-  import type { ToolMeta } from '../data/tools';
-
-  const filterBtns = document.querySelectorAll('.filter-btn');
-  const gridItems = document.querySelectorAll('.tool-grid-item');
-  let activeCategory = 'all';
-  let searchResults: ToolMeta[] | null = null;
-
-  /** 根据当前分类和搜索结果过滤工具卡片 */
-  function applyFilters() {
-    const searchIds = searchResults ? new Set(searchResults.map((t) => t.id)) : null;
-
-    gridItems.forEach((item) => {
-      const el = item as HTMLElement;
-      const cat = el.getAttribute('data-category')!;
-      const toolId = el.querySelector('a')?.getAttribute('href')?.slice(1);
-      const matchCategory = activeCategory === 'all' || cat === activeCategory;
-      const matchSearch = !searchIds || (toolId && searchIds.has(toolId));
-
-      el.style.display = matchCategory && matchSearch ? '' : 'none';
-    });
-  }
-
-  // 分类过滤
-  filterBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      filterBtns.forEach((b) => b.classList.remove('filter-btn--active'));
-      btn.classList.add('filter-btn--active');
-      activeCategory = btn.getAttribute('data-category') || 'all';
-      applyFilters();
-    });
-  });
-
-  // 搜索过滤（接收 SearchBar 的 DOM CustomEvent）
-  document.addEventListener('search-results', ((e: CustomEvent) => {
-    searchResults = e.detail.query ? e.detail.tools : null;
-    applyFilters();
-  }) as EventListener);
-</script>
-
-<style>
-  .dashboard {
-    max-width: 960px;
-    margin: 0 auto;
-  }
-
-  .dashboard-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0 0 var(--space-lg);
-  }
-
-  .category-filters {
-    display: flex;
-    gap: var(--space-sm);
-    overflow-x: auto;
-    padding-bottom: var(--space-sm);
-    margin-bottom: var(--space-lg);
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .filter-btn {
-    padding: var(--space-xs) var(--space-md);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background-color: var(--color-card);
-    color: var(--color-muted);
-    font-size: 0.8125rem;
-    font-family: var(--font-sans);
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-      background-color var(--transition-fast),
-      color var(--transition-fast),
-      border-color var(--transition-fast);
-  }
-
-  .filter-btn:hover {
-    background-color: var(--color-hover);
-    color: var(--color-text);
-  }
-
-  .filter-btn--active {
-    background-color: var(--color-accent);
-    color: #fff;
-    border-color: var(--color-accent);
-  }
-
-  .tool-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: var(--space-md);
-  }
-</style>

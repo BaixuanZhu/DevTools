@@ -4,7 +4,7 @@
 
 ```
 dev-tools/
-├── astro.config.mjs            # Astro 配置
+├── astro.config.mjs            # Astro 配置（Vue + Tailwind + Sitemap）
 ├── tsconfig.json               # TypeScript 配置
 ├── vitest.config.ts            # 测试配置
 ├── package.json                # 项目依赖
@@ -22,28 +22,26 @@ dev-tools/
 │   └── favicon.svg
 │
 ├── src/                        # 源代码
-│   ├── assets/                 # 资源文件（图片、字体等）
-│   │
 │   ├── components/             # 共享 UI 组件
 │   │   ├── layout/             # 布局类组件
-│   │   │   ├── Footer.astro
-│   │   │   ├── Sidebar.vue
-│   │   │   ├── ToolHeader.vue
-│   │   │   └── ToolCard.astro
-│   │   └── ui/                 # 交互类组件
-│   │       ├── CopyButton.vue
-│   │       ├── ClearButton.vue
-│   │       └── SearchBar.vue
+│   │   │   ├── Footer.astro    # 页脚（Astro + Tailwind）
+│   │   │   ├── ToolHeader.vue  # 工具页标题（Vue 岛屿 + Tailwind）
+│   │   │   └── ToolCard.astro  # 首页工具卡片（Astro + Tailwind）
+│   │   ├── ui/                 # 交互类组件（Vue 岛屿 + Tailwind）
+│   │   │   ├── CopyButton.vue
+│   │   │   └── ClearButton.vue
+│   │   └── seo/                # SEO 组件
+│   │       └── SeoHead.astro   # Meta 标签（OG / description / canonical）
 │   │
 │   ├── data/                   # 数据集定义
 │   │   └── tools.ts            # 工具注册表（ToolMeta 类型、分类、搜索）
 │   │
 │   ├── layouts/                # 页面布局
-│   │   ├── Layout.astro        # 基础布局（HTML 骨架）
-│   │   └── ToolLayout.astro    # 工具页布局（Header + Sidebar + Content）
+│   │   ├── Layout.astro        # 基础布局（HTML 骨架 + Alpine 初始化 + Tailwind）
+│   │   └── ToolLayout.astro    # 工具页布局（Alpine Sidebar/SearchBar/Toast + Content）
 │   │
 │   ├── pages/                  # 页面路由（Astro 文件路由，保持扁平）
-│   │   ├── index.astro         # 首页（工具列表仪表盘）
+│   │   ├── index.astro         # 首页（工具列表仪表盘 + Alpine 过滤）
 │   │   ├── base64.astro
 │   │   ├── datetime-converter.astro
 │   │   ├── device-info.astro
@@ -55,9 +53,9 @@ dev-tools/
 │   │   └── uuid-generator.astro
 │   │
 │   ├── styles/                 # 样式
-│   │   └── design-tokens.css   # CSS 自定义属性（颜色、字体、间距等）
+│   │   └── global.css          # Tailwind v4 入口（@theme 设计令牌）
 │   │
-│   ├── tools/                  # 工具组件（按分类划分子目录）
+│   ├── tools/                  # 工具组件（按分类划分子目录，Vue 岛屿 + Tailwind）
 │   │   ├── encoding/           # 编码转换
 │   │   │   ├── Base64Codec.vue
 │   │   │   ├── JwtParser.vue
@@ -114,35 +112,62 @@ dev-tools/
     └── ...
 ```
 
-## 目录设计原则
+## 架构分层
 
-### 按业务功能分目录，而非按文件类型
+### 全局壳层：Astro + Tailwind CSS + Alpine.js
 
-**旧结构（按文件类型）：**
-```
-src/
-├── tools/      ← 所有 .vue 工具组件堆在一起
-├── utils/      ← 所有 .ts 工具函数堆在一起
-├── pages/      ← 所有 .astro 页面堆在一起
-└── tests/      ← 所有 .test.ts 堆在一起
-```
+Sidebar、SearchBar、Toast、Header 汉堡菜单等全局交互由 Alpine.js 驱动。
+这些组件在 Astro 模板中直接用 `x-data`/`x-show`/`x-on` 等 Alpine 指令编写，
+无需 Vue 运行时，首屏加载更轻量。
 
-**新结构（按工具分类）：**
-```
-src/
-├── tools/
-│   ├── encoding/   ← 编码转换类的 3 个工具
-│   ├── crypto/     ← 加密哈希类的 2 个工具
-│   └── ...
-├── utils/
-│   ├── encoding/   ← 编码转换类的 3 个工具函数
-│   ├── crypto/     ← 加密哈希类的 2 个工具函数
-│   └── ...
-```
+- **Sidebar**：Astro 服务端渲染导航 HTML，Alpine 控制移动端侧滑开关
+- **SearchBar**：Alpine `x-model` + `@input.debounce.150ms` 防抖搜索
+- **Toast**：Alpine store（`$store.toast`），Vue 岛屿通过 `document.dispatchEvent(new CustomEvent('toast', ...))` 触发
+- **首页过滤**：Alpine 驱动分类切换和搜索结果过滤
 
-**收益：** 修改某个工具时，Agent 只需扫描对应分类子目录，而不是全量扫描。
+### C 端工具交互：Vue 岛屿 + Tailwind CSS + Headless UI
 
-### 分类映射
+工具组件仍使用 Vue 3 岛屿（`client:idle`），通过 Tailwind utility class 编写样式。
+Headless UI 提供无障碍交互组件（Listbox / Switch / Dialog 等）。
+
+### SEO
+
+- `SeoHead.astro` 组件统一注入 meta description / OG 标签 / canonical
+- `@astrojs/sitemap` 自动生成 sitemap-index.xml
+
+## 技术栈
+
+| 层级 | 技术 |
+|---|---|
+| 框架 | Astro 6.x |
+| 全局交互 | Alpine.js 3.x |
+| C 端工具交互 | Vue 3 (Composition API) |
+| 无障碍组件 | Headless UI (@headlessui/vue) |
+| 样式 | Tailwind CSS v4（@theme 映射设计令牌） |
+| SEO | @astrojs/sitemap + SeoHead.astro |
+| 测试 | Vitest |
+| 包管理 | pnpm |
+
+## 设计令牌 → Tailwind 映射
+
+在 `src/styles/global.css` 的 `@theme` 块中定义：
+
+| 旧 CSS 变量 | Tailwind 用法 |
+|---|---|
+| `--color-surface` | `bg-surface` |
+| `--color-text` | `text-text` |
+| `--color-muted` | `text-muted` |
+| `--color-border` | `border-border` |
+| `--color-accent` | `bg-accent` / `text-accent` / `border-accent` |
+| `--color-card` | `bg-card` |
+| `--color-hover` | `bg-hover` |
+| `--color-error` | `text-error` |
+| `--color-success` | `text-success` |
+| `--font-sans` | `font-sans` |
+| `--font-mono` | `font-mono` |
+| `--radius-sm/md/lg` | `rounded-sm` (4px) / `rounded-md` (8px) / `rounded-lg` (12px) |
+
+## 分类映射
 
 | 分类目录 | 中文名 | 包含工具 |
 |---|---|---|
@@ -152,22 +177,11 @@ src/
 | `datetime/` | 日期时间 | 日期时间转换 |
 | `network/` | 网络工具 | 设备信息 |
 
-### Pages 目录为何保持扁平
+## Pages 目录为何保持扁平
 
 Astro 使用文件路由：`src/pages/base64.astro` → `/base64`。如果改为 `src/pages/encoding/base64.astro`，URL 会变成 `/encoding/base64`，这是破坏性变更。考虑到当前工具数量不多（10 个），pages 保持扁平是务实的做法。
 
-### 共享与专有工具函数的分离
+## 共享与专有工具函数的分离
 
 - **工具专有函数**放在对应分类目录（如 `utils/encoding/base64.ts`）
 - **跨分类共享函数**放在 `utils/shared/`（如 `array-buffer.ts` 被 `hash.ts` 和 `crypto.ts` 共同引用）
-
-## 技术栈
-
-| 层级 | 技术 |
-|---|---|
-| 框架 | Astro 6.x |
-| UI 框架 | Vue 3 (Composition API) |
-| 语言 | TypeScript |
-| 样式 | CSS Custom Properties (Design Tokens) |
-| 测试 | Vitest |
-| 包管理 | pnpm |
