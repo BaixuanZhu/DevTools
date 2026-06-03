@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
+import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import type { UuidVersion } from '../../utils/text/uuid-generator';
 import {
   generateUuids,
@@ -45,8 +47,7 @@ async function copyAll() {
   try { await navigator.clipboard.writeText(text); showToast('已复制'); } catch {}
 }
 
-function onVersionChange(ver: UuidVersion) {
-  version.value = ver;
+function onVersionChange(_ver: UuidVersion) {
   enableConversion.value = false;
 }
 </script>
@@ -56,17 +57,25 @@ function onVersionChange(ver: UuidVersion) {
     <ToolHeader title="UUID 生成器" description="在线生成 UUID v1/v3/v4/v5/v6/v7，支持批量生成及 v1↔v6 相互转换。" @example="generate" />
 
     <div class="border border-border rounded-md p-6 bg-card flex flex-col gap-4">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[48px] shrink-0">版本</span>
-        <div class="flex gap-1 flex-wrap">
-          <button v-for="ver in (['v1','v3','v4','v5','v6','v7'] as UuidVersion[])" :key="ver" :class="['px-2 py-1 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', version === ver ? 'bg-accent border-accent text-white' : 'bg-surface border-border text-text hover:bg-hover hover:border-accent']" @click="onVersionChange(ver)">{{ ver.toUpperCase() }}</button>
-        </div>
-      </div>
+      <OptionRadioGroup
+        v-model="version"
+        label="版本"
+        :options="[
+          { value: 'v1', label: 'V1' },
+          { value: 'v3', label: 'V3' },
+          { value: 'v4', label: 'V4' },
+          { value: 'v5', label: 'V5' },
+          { value: 'v6', label: 'V6' },
+          { value: 'v7', label: 'V7' },
+        ]"
+        @update:model-value="onVersionChange"
+      />
 
-      <div v-if="showConversion" class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[48px] shrink-0">转换</span>
-        <button :class="['px-2 py-1 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', enableConversion ? 'bg-accent border-accent text-white' : 'bg-surface border-border text-text hover:bg-hover hover:border-accent']" @click="enableConversion = !enableConversion">转{{ convLabel?.replace('→ ', '') }}</button>
-      </div>
+      <ToggleSwitch
+        v-if="showConversion"
+        v-model="enableConversion"
+        :label="`转${convLabel?.replace('→ ', '') ?? ''}`"
+      />
 
       <template v-if="showNamespace">
         <div class="flex items-center gap-2 flex-wrap">
