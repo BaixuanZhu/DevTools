@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import { encodeUrl, decodeUrl } from '../../utils/encoding/url-codec';
 
 type Mode = 'encode' | 'decode';
@@ -39,14 +40,13 @@ function execute() {
   }
 }
 
-function switchMode(newMode: Mode) {
-  mode.value = newMode;
+watch(mode, () => {
   errorMsg.value = '';
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
   decodeFullResult.value = '';
-}
+});
 
 function handleExample() {
   mode.value = 'encode';
@@ -72,16 +72,7 @@ function handleClear() {
       @example="handleExample"
     />
 
-    <div class="flex gap-1 mb-4">
-      <button
-        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'encode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
-        @click="switchMode('encode')"
-      >编码</button>
-      <button
-        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'decode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
-        @click="switchMode('decode')"
-      >解码</button>
-    </div>
+    <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />
 
     <div class="mb-4">
       <label class="field-label">输入</label>
