@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import { encodeBase64, decodeBase64 } from '../../utils/encoding/base64';
@@ -51,13 +52,12 @@ async function handleFile() {
   reader.readAsDataURL(file);
 }
 
-function switchMode(newMode: Mode) {
-  mode.value = newMode;
+watch(mode, () => {
   input.value = output.value;
   output.value = '';
   errorMsg.value = '';
   fileName.value = '';
-}
+});
 
 function handleExample() {
   mode.value = 'encode';
@@ -82,16 +82,7 @@ function handleClear() {
       @example="handleExample"
     />
 
-    <div class="flex gap-1 mb-4">
-      <button
-        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'encode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
-        @click="switchMode('encode')"
-      >编码</button>
-      <button
-        :class="['px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', mode === 'decode' ? 'bg-accent text-white border-accent' : 'bg-card text-text border-border']"
-        @click="switchMode('decode')"
-      >解码</button>
-    </div>
+    <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />
 
     <div class="mb-4">
       <div class="mb-2">
