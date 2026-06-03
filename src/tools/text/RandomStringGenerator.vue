@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import { generateRandomString, applyLetterCase, PRESET_CHARSETS } from '../../utils/text/random-string';
 import type { CharsetPreset, LetterCase } from '../../utils/text/random-string';
 
@@ -42,7 +43,6 @@ async function copyAll() {
 }
 
 function onCharsetModeChange(mode: typeof charsetMode.value) {
-  charsetMode.value = mode;
   if (mode === 'digits') letterCase.value = 'none';
 }
 </script>
@@ -57,19 +57,28 @@ function onCharsetModeChange(mode: typeof charsetMode.value) {
         <input v-model.number="length" type="number" min="1" max="4096" class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[64px]" />
       </div>
 
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">字符集</span>
-        <div class="flex gap-1 flex-wrap">
-          <button v-for="[mode, label] in [['alphanumeric', '字母 + 数字'], ['digits', '仅数字'], ['special', '含特殊字符'], ['custom', '自定义']] as const" :key="mode" :class="['px-2 py-1 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', charsetMode === mode ? 'bg-accent border-accent text-white' : 'bg-surface border-border text-text hover:bg-hover hover:border-accent']" @click="onCharsetModeChange(mode)">{{ label }}</button>
-        </div>
-      </div>
+      <OptionRadioGroup
+        v-model="charsetMode"
+        label="字符集"
+        :options="[
+          { value: 'alphanumeric', label: '字母 + 数字' },
+          { value: 'digits', label: '仅数字' },
+          { value: 'special', label: '含特殊字符' },
+          { value: 'custom', label: '自定义' },
+        ]"
+        @update:model-value="onCharsetModeChange"
+      />
 
-      <div v-if="showLetterCase" class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">大小写</span>
-        <div class="flex gap-1">
-          <button v-for="[val, label] in [['none', '保持'], ['upper', '大写'], ['lower', '小写']] as const" :key="val" :class="['px-2 py-1 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150', letterCase === val ? 'bg-accent border-accent text-white' : 'bg-surface border-border text-text hover:bg-hover hover:border-accent']" @click="letterCase = val as any">{{ label }}</button>
-        </div>
-      </div>
+      <OptionRadioGroup
+        v-if="showLetterCase"
+        v-model="letterCase"
+        label="大小写"
+        :options="[
+          { value: 'none', label: '保持' },
+          { value: 'upper', label: '大写' },
+          { value: 'lower', label: '小写' },
+        ]"
+      />
 
       <div v-if="charsetMode === 'custom'" class="flex items-center gap-2 flex-wrap">
         <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">自定义字符</span>
