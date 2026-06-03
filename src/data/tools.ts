@@ -32,7 +32,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'uuid-generator',
     name: 'UUID 生成器',
-    description: '生成多种版本的 UUID（v1、v4、v7 等）',
+    description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
     category: '文本处理',
     icon: '🔑',
     path: '/uuid-generator',
