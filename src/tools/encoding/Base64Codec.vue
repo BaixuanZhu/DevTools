@@ -239,8 +239,8 @@ function mimeToExt(mime: string | undefined): string {
     <!-- Error message -->
     <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-3">{{ errorMsg }}</p>
 
-    <!-- Encode output -->
-    <div v-if="mode === 'encode' && output" class="mb-3">
+    <!-- Encode output (always visible) -->
+    <div v-if="mode === 'encode'" class="mb-3">
       <div v-if="fileMeta" class="mb-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
         <span>📄</span>
         <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
@@ -251,41 +251,41 @@ function mimeToExt(mime: string | undefined): string {
         class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
         rows="6"
         readonly
+        :placeholder="output ? '' : '点击「编码」查看结果'"
       ></textarea>
-      <div class="mt-1.5">
+      <div v-if="output" class="mt-1.5">
         <CopyButton :text="output" label="复制结果" />
       </div>
     </div>
 
-    <!-- Decode output: text -->
-    <div v-if="mode === 'decode' && output && !isDecodeBinaryResult()" class="mb-3">
+    <!-- Decode output (always visible) -->
+    <div v-if="mode === 'decode'" class="mb-3">
       <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
-      <textarea
-        v-model="output"
-        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-        rows="6"
-        readonly
-      ></textarea>
-      <div class="mt-1.5">
-        <CopyButton :text="output" label="复制结果" />
-      </div>
-    </div>
 
-    <!-- Decode output: image preview -->
-    <div v-if="mode === 'decode' && decodedImageSrc" class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
-      <div class="p-3 border border-border rounded-sm bg-hover">
+      <!-- Text result -->
+      <template v-if="!isDecodeBinaryResult()">
+        <textarea
+          v-model="output"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+          rows="6"
+          readonly
+          :placeholder="output ? '' : '点击「解码」查看结果'"
+        ></textarea>
+        <div v-if="output" class="mt-1.5">
+          <CopyButton :text="output" label="复制结果" />
+        </div>
+      </template>
+
+      <!-- Image preview -->
+      <div v-if="decodedImageSrc" class="p-3 border border-border rounded-sm bg-hover">
         <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
       </div>
-      <div class="mt-1.5">
+      <div v-if="decodedImageSrc" class="mt-1.5">
         <CopyButton :text="input" label="复制原始 Base64" />
       </div>
-    </div>
 
-    <!-- Decode output: binary file card -->
-    <div v-if="mode === 'decode' && decodedBinaryMeta" class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
-      <div class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
+      <!-- Binary file card -->
+      <div v-if="decodedBinaryMeta" class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
         <div class="flex-1">
           <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
         </div>

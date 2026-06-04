@@ -161,8 +161,8 @@ const diffResult = computed(() => {
     </div>
 
     <div class="grid md:grid-cols-2 gap-4">
-      <!-- 编码结果 -->
-      <div v-if="encodeComponentResult || encodeFullResult" class="border border-border rounded-md p-4 bg-card">
+      <!-- 编码结果 (always visible) -->
+      <div class="border border-border rounded-md p-4 bg-card">
         <div class="text-[0.875rem] font-semibold text-accent mb-3">编码结果</div>
 
         <div class="mb-3">
@@ -171,8 +171,8 @@ const diffResult = computed(() => {
             <span class="text-[0.6875rem] text-muted">编码 :/?&amp;=# 等 URL 结构字符，适用于编码单个查询参数值</span>
           </div>
           <div class="flex items-start gap-2">
-            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeComponentResult }}</code>
-            <CopyButton :text="encodeComponentResult" label="复制" />
+            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeComponentResult || '—' }}</code>
+            <CopyButton v-if="encodeComponentResult" :text="encodeComponentResult" label="复制" />
           </div>
         </div>
 
@@ -182,8 +182,8 @@ const diffResult = computed(() => {
             <span class="text-[0.6875rem] text-muted">保留 URL 结构字符（:/?&amp;=#），适用于编码完整 URL</span>
           </div>
           <div class="flex items-start gap-2">
-            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeFullResult }}</code>
-            <CopyButton :text="encodeFullResult" label="复制" />
+            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeFullResult || '—' }}</code>
+            <CopyButton v-if="encodeFullResult" :text="encodeFullResult" label="复制" />
           </div>
         </div>
 
@@ -205,8 +205,8 @@ const diffResult = computed(() => {
         </DisclosureSection>
       </div>
 
-      <!-- 解码结果 -->
-      <div v-if="decodeComponentResult || decodeFullResult || decodeComponentError || decodeFullError" class="border border-border rounded-md p-4 bg-card">
+      <!-- 解码结果 (always visible) -->
+      <div class="border border-border rounded-md p-4 bg-card">
         <div class="text-[0.875rem] font-semibold text-accent mb-3">解码结果</div>
 
         <div class="mb-3">
@@ -216,8 +216,8 @@ const diffResult = computed(() => {
           </div>
           <div v-if="decodeComponentError" class="text-error text-[0.8125rem]">{{ decodeComponentError }}</div>
           <div v-else class="flex items-start gap-2">
-            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeComponentResult }}</code>
-            <CopyButton :text="decodeComponentResult" label="复制" />
+            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeComponentResult || '—' }}</code>
+            <CopyButton v-if="decodeComponentResult" :text="decodeComponentResult" label="复制" />
           </div>
         </div>
 
@@ -228,8 +228,8 @@ const diffResult = computed(() => {
           </div>
           <div v-if="decodeFullError" class="text-error text-[0.8125rem]">{{ decodeFullError }}</div>
           <div v-else class="flex items-start gap-2">
-            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeFullResult }}</code>
-            <CopyButton :text="decodeFullResult" label="复制" />
+            <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeFullResult || '—' }}</code>
+            <CopyButton v-if="decodeFullResult" :text="decodeFullResult" label="复制" />
           </div>
         </div>
       </div>
