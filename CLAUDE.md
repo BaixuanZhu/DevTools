@@ -29,6 +29,7 @@ pnpm preview    # 预览构建结果
 - **UI:** Vue 3 `<script setup lang="ts">` + Composition API（交互型组件）
 - **Language:** TypeScript（strict 模式，继承 astro/tsconfigs/strict）
 - **Styling:** Tailwind CSS v4 — 令牌定义于 `src/styles/global.css` 的 `@theme` 块，组件通过 utility class 消费
+- **UI Components:** @headlessui/vue — 无样式可访问组件（Tab、Switch、Listbox、Disclosure 等），用 Tailwind class 定制外观
 - **Package Manager:** pnpm
 - **Node:** >=22.12.0
 
@@ -69,3 +70,20 @@ public/          # 不经处理的静态文件（favicon 等）
 - 纯展示型组件使用 Astro 组件（.astro），保持零 JS 输出
 - 样式统一使用 Tailwind utility class，令牌和组件规范见 DESIGN.md
 - 新增公共组件/工具函数时必须写文档注释（JSDoc / TSDoc 格式）
+
+## Dependency & Component Rules（强制）
+
+### 库选型原则
+- **优先使用稳定成熟的库**：选择 npm 周下载量高、维护活跃、无已知安全漏洞的库（如 dayjs、@noble/ciphers、uuid）。新增依赖前需确认其社区活跃度和兼容性
+- **禁止引入未经广泛验证的实验性库**：如果功能可用浏览器原生 API（Web Crypto API、TextEncoder、URL 等）实现，优先使用原生方案
+- **同类库不重复引入**：已有 dayjs 处理日期则不再引入 moment/luxon；已有 @noble/ciphers 则不再引入 crypto-js
+
+### UI 组件规则
+- **优先使用 @headlessui/vue 组件**：涉及 Tab 切换、开关、下拉选择、折叠面板、对话框、弹出层等交互模式时，使用 Headless UI 的对应组件（TabGroup/Switch/Listbox/Disclosure/Dialog/Popover 等），不要手写或引入其他 UI 框架
+- **已有封装组件优先复用**：`src/components/ui/` 下已有 ToggleSwitch、SelectListbox、ModeTabGroup、CopyButton、ClearButton 等封装组件，新功能应先检查是否有可复用的组件
+- **自定义交互组件走 Vue 3 Composition API**：Headless UI 无法覆盖的交互需求，使用 Vue 3 `<script setup lang="ts">` + Composition API 自行实现，保持无障碍（ARIA、键盘导航、focus 管理）
+
+### 样式规则
+- **统一使用 Tailwind utility class**：所有样式通过 Tailwind class 表达，禁止内联 style、禁止引入额外 CSS 框架（如 Bootstrap、Element Plus、Ant Design Vue）
+- **消费设计令牌**：颜色、间距、圆角、字体使用 `global.css` @theme 中定义的令牌（如 `text-surface`、`bg-card`、`border-default`），避免硬编码数值
+- **组件状态完整**：每个可交互元素必须覆盖 hover / focus / active / disabled 状态，状态样式参考 DESIGN.md 组件状态矩阵
