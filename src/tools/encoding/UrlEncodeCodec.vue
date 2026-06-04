@@ -10,7 +10,6 @@ type Mode = 'encode' | 'decode';
 
 const mode = ref<Mode>('encode');
 const input = ref('');
-const errorMsg = ref('');
 
 const encodeComponentResult = ref('');
 const encodeFullResult = ref('');
@@ -20,7 +19,6 @@ const decodeComponentError = ref('');
 const decodeFullError = ref('');
 
 function execute() {
-  errorMsg.value = '';
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
@@ -29,9 +27,6 @@ function execute() {
   decodeFullError.value = '';
 
   if (!input.value.trim()) {
-    if (mode.value === 'encode') {
-      errorMsg.value = '请输入要编码的文本';
-    }
     return;
   }
 
@@ -50,7 +45,6 @@ function execute() {
 
 watch(mode, () => {
   input.value = '';
-  errorMsg.value = '';
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
@@ -59,15 +53,17 @@ watch(mode, () => {
   decodeFullError.value = '';
 });
 
+watch(input, () => {
+  execute();
+});
+
 function handleExample() {
   mode.value = 'encode';
   input.value = 'https://example.com/search?q=你好世界&lang=zh-CN';
-  execute();
 }
 
 function handleClear() {
   input.value = '';
-  errorMsg.value = '';
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
@@ -89,15 +85,12 @@ function handleClear() {
 
     <div class="mb-4">
       <label class="field-label">输入</label>
-      <textarea v-model="input" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="3" :placeholder="mode === 'encode' ? '输入要编码的文本或 URL' : '输入要解码的 percent-encoded 文本'"></textarea>
+      <textarea v-model="input" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="3" :placeholder="mode === 'encode' ? '输入要编码的文本或 URL' : '输入要解码的 percent-encoded 文本'" @input="execute"></textarea>
     </div>
 
-    <div class="flex gap-2 items-center mb-4">
-      <button class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90" @click="execute">{{ mode === 'encode' ? '编码' : '解码' }}</button>
+    <div class="mb-4">
       <ClearButton @clear="handleClear" />
     </div>
-
-    <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
 
     <div v-if="mode === 'encode' && (encodeComponentResult || encodeFullResult)" class="flex flex-col gap-4">
       <div class="border border-border rounded-md p-4 bg-card">
