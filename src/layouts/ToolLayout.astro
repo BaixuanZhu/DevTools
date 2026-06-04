@@ -16,9 +16,9 @@ const toolsByCategory = getToolsByCategory();
 ---
 
 <Layout title={title} description={description}>
-  <div id="app" class="min-h-screen flex flex-col">
+  <div id="app" class="h-screen grid grid-rows-[auto_minmax(0,1fr)_auto]">
     <!-- Header (simplified - no search bar) -->
-    <header class="flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
+    <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
       <div class="flex items-center gap-4">
         <button
           class="hidden max-lg:flex flex-col gap-1 p-2 border-none bg-transparent cursor-pointer"
@@ -38,7 +38,7 @@ const toolsByCategory = getToolsByCategory();
     </header>
 
     <!-- Main area -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex overflow-hidden min-h-0">
       <!-- Sidebar (Alpine) -->
       <aside
         x-data="{ isOpen: false }"
@@ -46,7 +46,7 @@ const toolsByCategory = getToolsByCategory();
         @sidebar-close.window="isOpen = false"
         @keydown.escape="isOpen = false"
         :class="isOpen && 'sidebar-open'"
-        class="sidebar w-[240px] h-[calc(100vh-57px-49px)] overflow-y-auto border-r border-border bg-card py-2 shrink-0"
+        class="sidebar w-[240px] overflow-y-auto border-r border-border bg-card py-2 shrink-0"
         role="navigation"
         aria-label="工具导航"
       >
