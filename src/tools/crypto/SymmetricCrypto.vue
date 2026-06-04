@@ -1,28 +1,75 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import DisclosureSection from '../../components/ui/DisclosureSection.vue';
-import { encryptAES, decryptAES, type AESAlgorithm, type AESKeyLength } from '../../utils/crypto/crypto';
+import { encrypt, decrypt } from '../../utils/crypto/crypto';
+import { getAlgorithm, ALL_ALGORITHM_IDS } from '../../utils/crypto/algorithms/registry';
+import type { AlgorithmId } from '../../utils/crypto/algorithms/types';
+import type { OutputFormat } from '../../utils/shared/array-buffer';
 
 type Mode = 'encrypt' | 'decrypt';
 
 const mode = ref<Mode>('encrypt');
-const algorithm = ref<AESAlgorithm>('AES-GCM');
-const keyLength = ref<AESKeyLength>(256);
+const algorithm = ref<AlgorithmId>('AES-GCM');
+const format = ref<OutputFormat>('base64');
 const plaintext = ref('');
 const ciphertext = ref('');
 const password = ref('');
 const output = ref('');
 const errorMsg = ref('');
+const keyLength = ref<number>(256);
 const isProcessing = ref(false);
 
+/** 当前算法适配器 */
+const currentAlgo = computed(() => getAlgorithm(algorithm.value));
+
+/** 是否显示密钥长度选择（算法有多种密钥长度时显示） */
+const showKeyLength = computed(() => currentAlgo.value.keyLengths.length > 1);
+
+/** 密钥长度选项 */
+const keyLengthOptions = computed(() =>
+  currentAlgo.value.keyLengths.map((len) => ({ value: len, label: `${len} 位` })),
+);
+
+/** 格式选择器标签（根据加解密模式变化） */
+const formatLabel = computed(() => (mode.value === 'encrypt' ? '输出格式' : '输入格式'));
+
+/** 解密模式下的 textarea 占位符 */
+const ciphertextPlaceholder = computed(() => {
+  if (format.value === 'base64') return '输入 Base64 编码的密文';
+  return '输入 Hex 编码的密文';
+});
+
+/** 高级选项中的二进制格式描述 */
+const binaryFormatDesc = computed(() => {
+  const a = currentAlgo.value;
+  const tagInfo = a.isAead ? '+tag' : '';
+  return `salt[16B] + iv[${a.ivLength}B] + ciphertext${tagInfo}`;
+});
+
+/** 算法下拉选项 */
+const algorithmOptions = computed(() =>
+  ALL_ALGORITHM_IDS.map((id) => {
+    const algo = getAlgorithm(id);
+    return { value: id, label: algo.label };
+  }),
+);
+
+// 切换模式时清空输出
 watch(mode, () => {
   output.value = '';
   errorMsg.value = '';
+});
+
+// 切换算法时清空输出并重置密钥长度为该算法的默认值
+watch(algorithm, () => {
+  output.value = '';
+  errorMsg.value = '';
+  keyLength.value = currentAlgo.value.defaultKeyLength;
 });
 
 async function execute() {
@@ -40,9 +87,9 @@ async function execute() {
   isProcessing.value = true;
   try {
     if (mode.value === 'encrypt') {
-      output.value = await encryptAES(plaintext.value, password.value, algorithm.value, keyLength.value);
+      output.value = await encrypt(plaintext.value, password.value, algorithm.value, keyLength.value, format.value);
     } else {
-      output.value = await decryptAES(ciphertext.value, password.value, algorithm.value, keyLength.value);
+      output.value = await decrypt(ciphertext.value, password.value, algorithm.value, keyLength.value, format.value);
     }
   } catch {
     errorMsg.value = mode.value === 'encrypt' ? '加密失败，请检查输入' : '解密失败，请检查密码或密文是否正确';
@@ -54,7 +101,7 @@ async function execute() {
 function handleExample() {
   mode.value = 'encrypt';
   algorithm.value = 'AES-GCM';
-  keyLength.value = 256;
+  format.value = 'base64';
   plaintext.value = 'Hello, DevTools! 你好，开发者工具！';
   password.value = 'my-secret-password';
   execute();
@@ -71,20 +118,33 @@ function handleClear() {
 
 <template>
   <div class="max-w-[720px]">
-    <ToolHeader title="对称加解密" description="支持 AES 等主流对称加密算法的加解密" @example="handleExample" />
+    <ToolHeader title="对称加解密" description="支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密" @example="handleExample" />
 
     <ModeTabGroup v-model="mode" :options="[{ key: 'encrypt', label: '加密' }, { key: 'decrypt', label: '解密' }]" />
 
     <div class="flex gap-4 mb-4 flex-wrap">
-      <SelectListbox v-model="algorithm" label="算法" class="w-[140px]" :options="[{ value: 'AES-GCM', label: 'AES-GCM' }, { value: 'AES-CBC', label: 'AES-CBC' }, { value: 'AES-CTR', label: 'AES-CTR' }]" />
-      <SelectListbox v-model="keyLength" label="密钥长度" class="w-[140px]" :options="[{ value: 128, label: '128 位' }, { value: 192, label: '192 位' }, { value: 256, label: '256 位' }]" />
+      <SelectListbox v-model="algorithm" label="算法" class="w-[200px]" :options="algorithmOptions" />
+      <SelectListbox v-if="showKeyLength" v-model="keyLength" label="密钥长度" class="w-[140px]" :options="keyLengthOptions" />
+    </div>
+
+    <!-- 格式选择器 -->
+    <div class="mb-4">
+      <SelectListbox
+        v-model="format"
+        :label="formatLabel"
+        :options="[
+          { value: 'base64', label: 'Base64' },
+          { value: 'hex', label: '小写 Hex' },
+          { value: 'hexUpper', label: '大写 HEX' },
+        ]"
+      />
     </div>
 
     <div class="mb-4">
       <div class="mb-2">
-        <label class="field-label">{{ mode === 'encrypt' ? '明文' : '密文（Base64）' }}</label>
+        <label class="field-label">{{ mode === 'encrypt' ? '明文' : '密文' }}</label>
         <textarea v-if="mode === 'encrypt'" v-model="plaintext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" placeholder="输入要加密的文本"></textarea>
-        <textarea v-else v-model="ciphertext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" placeholder="输入 Base64 编码的密文"></textarea>
+        <textarea v-else v-model="ciphertext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" :placeholder="ciphertextPlaceholder"></textarea>
       </div>
       <div>
         <label class="field-label">密码</label>
@@ -113,9 +173,9 @@ function handleClear() {
 
     <DisclosureSection title="高级选项">
       <p class="text-[0.8125rem] text-muted m-0 leading-relaxed">
-        当前算法：<strong>{{ algorithm }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
-        密码通过 PBKDF2（100000 次迭代，SHA-256）派生为 AES 密钥。
-        加密结果格式：Base64(salt[16B] + iv[{{ algorithm === 'AES-GCM' ? '12' : '16' }}B] + ciphertext)。
+        当前算法：<strong>{{ currentAlgo.label }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
+        密码通过 PBKDF2（100000 次迭代，SHA-256）派生为加密密钥。
+        二进制格式：{{ binaryFormatDesc }}。
       </p>
     </DisclosureSection>
   </div>

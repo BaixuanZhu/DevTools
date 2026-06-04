@@ -110,7 +110,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'symmetric-crypto',
     name: '对称加解密',
-    description: '支持 AES、DES 等主流对称加密算法的加解密',
+    description: '支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密',
     category: '加密哈希',
     icon: '🛡️',
     path: '/crypto/symmetric-crypto',

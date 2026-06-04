@@ -1,5 +1,5 @@
 import md5 from 'js-md5';
-import { arrayBufferToBase64 } from '../shared/array-buffer';
+import { arrayBufferToBase64, arrayBufferToHex, hexToArrayBuffer } from '../shared/array-buffer';
 
 /** 支持的哈希算法 */
 export const HASH_ALGORITHMS = ['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'] as const;
@@ -15,13 +15,6 @@ export interface HashResult {
   hexUpper: string;
   /** Base64 编码 */
   base64: string;
-}
-
-/** 将 ArrayBuffer 转为小写十六进制字符串 */
-export function arrayBufferToHex(buffer: ArrayBuffer): string {
-  return Array.from(new Uint8Array(buffer))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
 }
 
 /** 对文本计算哈希 */
@@ -50,13 +43,4 @@ export async function computeFileHash(
     hexUpper: hex.toUpperCase(),
     base64: arrayBufferToBase64(raw),
   };
-}
-
-/** 将十六进制字符串转为 ArrayBuffer */
-function hexToArrayBuffer(hex: string): ArrayBuffer {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes.buffer;
 }
