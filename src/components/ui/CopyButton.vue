@@ -14,7 +14,7 @@ async function handleCopy() {
   if (success) {
     copied.value = true;
     // 触发 Alpine toast
-    document.dispatchEvent(new CustomEvent('toast:success', { detail: { message: '已复制' } }));
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已复制' } }));
     setTimeout(() => {
       copied.value = false;
     }, 1500);
