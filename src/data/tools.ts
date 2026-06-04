@@ -115,6 +115,14 @@ export const tools: ToolMeta[] = [
     icon: '🛡️',
     path: '/crypto/symmetric-crypto',
   },
+  {
+    id: 'asymmetric-crypto',
+    name: '非对称加解密',
+    description: '支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等非对称加密算法的密钥生成、加解密与签名验签',
+    category: '加密哈希',
+    icon: '🔐',
+    path: '/crypto/asymmetric-crypto',
+  },
 ];
 
 /** 按分类分组工具列表 */
