@@ -26,7 +26,7 @@ function base64UrlDecode(str: string): string {
   let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
   const pad = base64.length % 4;
   if (pad) base64 += '='.repeat(4 - pad);
-  return atob(base64);
+  return decodeURIComponent(escape(atob(base64)));
 }
 
 /** Base64URL 解码为 JSON 对象 */
