@@ -24,6 +24,45 @@ export interface UrlDecodeResult {
 }
 
 /**
+ * URL 解析结果
+ */
+export interface UrlParseResult {
+  protocol: string;
+  host: string;
+  port: string;
+  pathname: string;
+  search: string;
+  hash: string;
+  searchParams: Array<{ key: string; value: string }>;
+}
+
+/**
+ * URL 解析
+ * @param url - 待解析的 URL 字符串
+ * @returns 解析结果，无效 URL 返回 null
+ */
+export function parseUrl(url: string): UrlParseResult | null {
+  try {
+    const parsed = new URL(url);
+    const searchParams: Array<{ key: string; value: string }> = [];
+    parsed.searchParams.forEach((value, key) => {
+      searchParams.push({ key, value });
+    });
+    return {
+      protocol: parsed.protocol,
+      host: parsed.host,
+      port: parsed.port,
+      pathname: parsed.pathname,
+      search: parsed.search,
+      hash: parsed.hash,
+      searchParams,
+    };
+  } catch {
+    return null;
+  }
+}
+
+/**
  * URL 编码
  * @param text - 原始文本
  * @returns 编码结果，包含 component（全编码）和 full（保留结构）两种方式
