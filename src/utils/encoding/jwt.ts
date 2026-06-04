@@ -111,3 +111,40 @@ export function isTokenExpired(payload: Record<string, unknown>): boolean | null
   if (typeof payload.exp !== 'number') return null;
   return Date.now() / 1000 > payload.exp;
 }
+
+/** JWT 编码选项 */
+export interface EncodeJwtOptions {
+  header?: Record<string, unknown>;
+  payload: Record<string, unknown>;
+  secret: string;
+  algorithm?: 'HS256' | 'HS384' | 'HS512';
+}
+
+/** 使用 HMAC 签名生成 JWT */
+export async function encodeJwt(options: EncodeJwtOptions): Promise<string> {
+  const { header = {}, payload, secret, algorithm = 'HS256' } = options;
+
+  const fullHeader = { typ: 'JWT', alg: algorithm, ...header };
+  const encodedHeader = base64UrlEncode(
+    new TextEncoder().encode(JSON.stringify(fullHeader)),
+  );
+  const encodedPayload = base64UrlEncode(
+    new TextEncoder().encode(JSON.stringify(payload)),
+  );
+
+  const message = `${encodedHeader}.${encodedPayload}`;
+  const encoder = new TextEncoder();
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: HMAC_ALGO_MAP[algorithm] },
+    false,
+    ['sign'],
+  );
+
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
+  const encodedSignature = base64UrlEncode(signature);
+
+  return `${message}.${encodedSignature}`;
+}

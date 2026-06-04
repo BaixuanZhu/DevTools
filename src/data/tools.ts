@@ -93,8 +93,8 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'jwt-parser',
-    name: 'JWT 解析器',
-    description: '解析和验证 JSON Web Token，展示 Header、Payload、Signature',
+    name: 'JWT 编解码',
+    description: '解析和生成 JSON Web Token，支持 HMAC 签名验证与编码',
     category: '编码转换',
     icon: '🎫',
     path: '/encoding/jwt-parser',

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseJwt, isTokenExpired } from '../../utils/encoding/jwt';
+import { parseJwt, isTokenExpired, encodeJwt, verifyHmacSignature } from '../../utils/encoding/jwt';
 
 const SAMPLE_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4iLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
@@ -70,5 +70,77 @@ describe('isTokenExpired', () => {
 
   it('exp 为非数字类型应返回 null', () => {
     expect(isTokenExpired({ exp: 'not-a-number' })).toBeNull();
+  });
+});
+
+describe('encodeJwt', () => {
+  it('应生成有效的 JWT 并可通过解析验证', async () => {
+    const token = await encodeJwt({
+      payload: { sub: '123', name: 'Test' },
+      secret: 'secret',
+      algorithm: 'HS256',
+    });
+
+    const parsed = parseJwt(token);
+    expect(parsed.error).toBeUndefined();
+    expect(parsed.header.alg).toBe('HS256');
+    expect(parsed.header.typ).toBe('JWT');
+    expect(parsed.payload.sub).toBe('123');
+    expect(parsed.payload.name).toBe('Test');
+  });
+
+  it('应支持自定义 header', async () => {
+    const token = await encodeJwt({
+      header: { kid: 'key-1' },
+      payload: { sub: '123' },
+      secret: 'secret',
+      algorithm: 'HS256',
+    });
+
+    const parsed = parseJwt(token);
+    expect(parsed.header.kid).toBe('key-1');
+    expect(parsed.header.alg).toBe('HS256');
+    expect(parsed.header.typ).toBe('JWT');
+  });
+
+  it('应支持 HS384 和 HS512 算法', async () => {
+    const token384 = await encodeJwt({
+      payload: { sub: '123' },
+      secret: 'secret',
+      algorithm: 'HS384',
+    });
+    const parsed384 = parseJwt(token384);
+    expect(parsed384.header.alg).toBe('HS384');
+
+    const token512 = await encodeJwt({
+      payload: { sub: '123' },
+      secret: 'secret',
+      algorithm: 'HS512',
+    });
+    const parsed512 = parseJwt(token512);
+    expect(parsed512.header.alg).toBe('HS512');
+  });
+
+  it('生成的 Token 签名应可通过 verifyHmacSignature 验证', async () => {
+    const secret = 'my-super-secret-key';
+    const token = await encodeJwt({
+      payload: { sub: '123', name: 'Test' },
+      secret,
+      algorithm: 'HS256',
+    });
+
+    const isValid = await verifyHmacSignature(token, secret, 'HS256');
+    expect(isValid).toBe(true);
+  });
+
+  it('使用错误密钥验证应失败', async () => {
+    const token = await encodeJwt({
+      payload: { sub: '123' },
+      secret: 'correct-secret',
+      algorithm: 'HS256',
+    });
+
+    const isValid = await verifyHmacSignature(token, 'wrong-secret', 'HS256');
+    expect(isValid).toBe(false);
   });
 });
