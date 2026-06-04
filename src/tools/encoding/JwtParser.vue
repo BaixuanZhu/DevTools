@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, reactive } from 'vue';
+import { ref, computed, reactive, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import { parseJwt, isTokenExpired, JWT_CLAIM_LABELS } from '../../utils/encoding/jwt';
+import { parseJwt, isTokenExpired, verifyHmacSignature, JWT_CLAIM_LABELS } from '../../utils/encoding/jwt';
 import dayjs from 'dayjs';
 
 const tokenInput = ref('');
@@ -118,6 +118,51 @@ function handleClear() {
 function segmentJson(obj: Record<string, unknown>): string {
   return JSON.stringify(obj, null, 2);
 }
+
+// Signature verification state
+const HMAC_ALGORITHMS = ['HS256', 'HS384', 'HS512'] as const;
+type HmacAlgorithm = (typeof HMAC_ALGORITHMS)[number];
+
+const verifyExpanded = ref(false);
+const verifyAlgorithm = ref<HmacAlgorithm>('HS256');
+const verifySecret = ref('');
+const verifySecretVisible = ref(false);
+const verifyResult = ref<boolean | null>(null);
+const verifyLoading = ref(false);
+
+// Auto-select algorithm from parsed header
+watch(
+  () => parsed.value?.header?.alg,
+  (alg) => {
+    if (alg === 'HS256' || alg === 'HS384' || alg === 'HS512') {
+      verifyAlgorithm.value = alg;
+    } else {
+      verifyAlgorithm.value = 'HS256';
+    }
+  },
+);
+
+// Clear result when secret or algorithm changes
+watch([verifySecret, verifyAlgorithm], () => {
+  verifyResult.value = null;
+});
+
+async function handleVerify() {
+  if (!parsed.value || !verifySecret.value) return;
+  verifyLoading.value = true;
+  verifyResult.value = null;
+  try {
+    verifyResult.value = await verifyHmacSignature(
+      tokenInput.value,
+      verifySecret.value,
+      verifyAlgorithm.value,
+    );
+  } catch {
+    verifyResult.value = false;
+  } finally {
+    verifyLoading.value = false;
+  }
+}
 </script>
 
 <template>
@@ -218,6 +263,59 @@ function segmentJson(obj: Record<string, unknown>): string {
         </div>
         <code class="block font-mono text-[0.8125rem] break-all text-text mb-2">{{ parsed.signature }}</code>
         <CopyButton :text="parsed.signature" label="复制" />
+      </div>
+
+      <!-- Verify Signature Panel -->
+      <div class="border border-border rounded-md bg-card">
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold cursor-pointer bg-transparent border-none text-text"
+          @click="verifyExpanded = !verifyExpanded"
+        >
+          <span>验证签名</span>
+          <span class="text-xs">{{ verifyExpanded ? '▼' : '▶' }}</span>
+        </button>
+
+        <div v-if="verifyExpanded" class="px-4 pb-4 flex flex-col gap-3">
+          <div class="flex flex-col gap-1">
+            <label class="text-[0.75rem] text-muted">算法</label>
+            <select
+              v-model="verifyAlgorithm"
+              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] bg-card text-text focus:outline-none focus:border-accent"
+            >
+              <option v-for="alg in HMAC_ALGORITHMS" :key="alg" :value="alg">{{ alg }}</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-[0.75rem] text-muted">密钥</label>
+            <div class="flex gap-2">
+              <input
+                v-model="verifySecret"
+                :type="verifySecretVisible ? 'text' : 'password'"
+                placeholder="输入 HMAC 密钥"
+                class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+              />
+              <button
+                class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
+                @click="verifySecretVisible = !verifySecretVisible"
+              >
+                {{ verifySecretVisible ? '隐藏' : '显示' }}
+              </button>
+            </div>
+          </div>
+
+          <button
+            class="self-start px-4 py-1.5 rounded-sm text-[0.8125rem] font-semibold cursor-pointer border-none text-white"
+            :class="verifySecret && !verifyLoading ? 'bg-accent hover:opacity-90' : 'bg-gray-400 cursor-not-allowed'"
+            :disabled="!verifySecret || verifyLoading"
+            @click="handleVerify"
+          >
+            {{ verifyLoading ? '验证中...' : '验证' }}
+          </button>
+
+          <p v-if="verifyResult === true" class="text-success text-[0.8125rem] m-0">✅ 签名匹配</p>
+          <p v-if="verifyResult === false" class="text-error text-[0.8125rem] m-0">❌ 签名不匹配</p>
+        </div>
       </div>
     </div>
 
