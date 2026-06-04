@@ -34,4 +34,7 @@ pnpm-debug.log*
 .impeccable/
 
 # screenshots
-screenshots/
+screenshots
+
+# superpowers
+docs
