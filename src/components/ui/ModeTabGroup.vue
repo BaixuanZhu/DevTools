@@ -30,15 +30,21 @@ function handleChange(index: number) {
       <Tab
         v-for="option in options"
         :key="option.key"
-        :class="[
-          'px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
-          'transition-[background-color,border-color] duration-150',
-          'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
-          'ui-selected:bg-accent ui-selected:text-white ui-selected:border-accent',
-          'ui-not-selected:bg-card ui-not-selected:text-text ui-not-selected:border-border ui-not-selected:hover:bg-hover',
-        ]"
+        v-slot="{ selected }"
+        as="template"
       >
-        {{ option.label }}
+        <button
+          :class="[
+            'px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
+            'transition-[background-color,border-color] duration-150',
+            'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
+            selected
+              ? 'bg-accent text-white border-accent'
+              : 'bg-card text-text border-border hover:bg-hover',
+          ]"
+        >
+          {{ option.label }}
+        </button>
       </Tab>
     </TabList>
     <TabPanels>

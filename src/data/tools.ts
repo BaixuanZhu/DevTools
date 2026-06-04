@@ -11,9 +11,23 @@ export type ToolCategory =
   | 'CSS 工具'
   | 'API 工具';
 
+/** 分类 slug 映射（中 → 英） */
+export const categorySlugMap: Record<ToolCategory, string> = {
+  '编码转换': 'encoding',
+  '加密哈希': 'crypto',
+  '格式化': 'format',
+  '文本处理': 'text',
+  '正则工具': 'regex',
+  '网络工具': 'network',
+  '颜色工具': 'color',
+  '日期时间': 'datetime',
+  'CSS 工具': 'css',
+  'API 工具': 'api',
+};
+
 /** 工具元数据 */
 export interface ToolMeta {
-  /** 工具唯一 ID，同时用作 URL slug */
+  /** 工具唯一 ID（即 URL slug，不含分类前缀） */
   id: string;
   /** 显示名称 */
   name: string;
@@ -23,7 +37,7 @@ export interface ToolMeta {
   category: ToolCategory;
   /** 图标（emoji） */
   icon: string;
-  /** 路由路径 */
+  /** 路由路径（二级路径格式：/category/id） */
   path: string;
 }
 
@@ -35,7 +49,7 @@ export const tools: ToolMeta[] = [
     description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
     category: '文本处理',
     icon: '🔑',
-    path: '/uuid-generator',
+    path: '/text/uuid-generator',
   },
   {
     id: 'hash-generator',
@@ -43,7 +57,7 @@ export const tools: ToolMeta[] = [
     description: '支持 MD5、SHA-1、SHA-256 等多种哈希算法，结果可转换为不同进制',
     category: '加密哈希',
     icon: '🔒',
-    path: '/hash-generator',
+    path: '/crypto/hash-generator',
   },
   {
     id: 'random-string',
@@ -51,7 +65,7 @@ export const tools: ToolMeta[] = [
     description: '自定义长度和字符集的随机字符串生成器',
     category: '文本处理',
     icon: '🎲',
-    path: '/random-string',
+    path: '/text/random-string',
   },
   {
     id: 'base64',
@@ -59,7 +73,7 @@ export const tools: ToolMeta[] = [
     description: 'Base64 编码与解码，支持文本和文件',
     category: '编码转换',
     icon: '📄',
-    path: '/base64',
+    path: '/encoding/base64',
   },
   {
     id: 'datetime-converter',
@@ -67,7 +81,7 @@ export const tools: ToolMeta[] = [
     description: '时间戳与日期格式互转，支持多种日期格式',
     category: '日期时间',
     icon: '🕐',
-    path: '/datetime-converter',
+    path: '/datetime/datetime-converter',
   },
   {
     id: 'url-encode',
@@ -75,7 +89,7 @@ export const tools: ToolMeta[] = [
     description: 'URL 编码与解码，支持组件级和完整 URL 编码',
     category: '编码转换',
     icon: '🔗',
-    path: '/url-encode',
+    path: '/encoding/url-encode',
   },
   {
     id: 'jwt-parser',
@@ -83,7 +97,7 @@ export const tools: ToolMeta[] = [
     description: '解析和验证 JSON Web Token，展示 Header、Payload、Signature',
     category: '编码转换',
     icon: '🎫',
-    path: '/jwt-parser',
+    path: '/encoding/jwt-parser',
   },
   {
     id: 'device-info',
@@ -91,7 +105,7 @@ export const tools: ToolMeta[] = [
     description: '查看浏览器、操作系统、屏幕等设备信息',
     category: '网络工具',
     icon: '💻',
-    path: '/device-info',
+    path: '/network/device-info',
   },
   {
     id: 'symmetric-crypto',
@@ -99,7 +113,7 @@ export const tools: ToolMeta[] = [
     description: '支持 AES、DES 等主流对称加密算法的加解密',
     category: '加密哈希',
     icon: '🛡️',
-    path: '/symmetric-crypto',
+    path: '/crypto/symmetric-crypto',
   },
 ];
 

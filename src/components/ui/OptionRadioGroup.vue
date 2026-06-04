@@ -27,16 +27,22 @@ const emit = defineEmits<{
       <RadioGroupOption
         v-for="option in options"
         :key="option.value"
+        v-slot="{ checked }"
         :value="option.value"
-        :class="[
-          'px-2 py-1 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
-          'transition-[background-color,border-color] duration-150',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
-          'ui-checked:bg-accent ui-checked:border-accent ui-checked:text-white',
-          'ui-unchecked:bg-surface ui-unchecked:border-border ui-unchecked:text-text ui-unchecked:hover:bg-hover ui-unchecked:hover:border-accent',
-        ]"
+        as="template"
       >
-        {{ option.label }}
+        <button
+          :class="[
+            'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
+            'transition-[background-color,border-color] duration-150',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
+            checked
+              ? 'bg-accent border-accent text-white'
+              : 'bg-surface border-border text-text hover:bg-hover hover:border-accent',
+          ]"
+        >
+          {{ option.label }}
+        </button>
       </RadioGroupOption>
     </RadioGroup>
   </div>

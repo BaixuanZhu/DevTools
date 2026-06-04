@@ -37,3 +37,47 @@
     animation-duration: 0ms !important;
   }
 }
+
+/* Category Filter Chip */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.chip:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
+}
+
+.chip-default {
+  background-color: var(--color-card);
+  color: var(--color-muted);
+  border-color: var(--color-border);
+}
+
+.chip-default:hover {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.chip-active {
+  background-color: var(--color-text);
+  color: var(--color-surface);
+  border-color: var(--color-text);
+}
+
+.chip-active:hover {
+  background-color: #333;
+  border-color: #333;
+}

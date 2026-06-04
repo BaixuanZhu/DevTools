@@ -1,7 +1,7 @@
 ---
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
-import { getToolsByCategory, getCategories, tools, type ToolMeta } from '../data/tools';
+import { getToolsByCategory, getCategories } from '../data/tools';
 
 interface Props {
   title?: string;
@@ -13,20 +13,11 @@ const { title, description, toolId = '' } = Astro.props;
 const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
 const categories = getCategories();
 const toolsByCategory = getToolsByCategory();
-
-// 序列化工具数据供客户端搜索使用
-const toolsJson = JSON.stringify(
-  tools.map((t: ToolMeta) => ({
-    id: t.id,
-    name: t.name,
-    description: t.description,
-  })),
-);
 ---
 
 <Layout title={title} description={description}>
   <div id="app" class="min-h-screen flex flex-col">
-    <!-- Header -->
+    <!-- Header (simplified - no search bar) -->
     <header class="flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
       <div class="flex items-center gap-4">
         <button
@@ -43,41 +34,6 @@ const toolsJson = JSON.stringify(
           <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
         </button>
         <a href="/" class="text-lg font-semibold text-text hover:text-accent transition-colors duration-150">DevTools</a>
-      </div>
-
-      <!-- SearchBar (Alpine) -->
-      <div
-        class="w-[280px] max-lg:hidden"
-        x-data="{
-          query: '',
-          tools: [],
-          init() {
-            this.tools = JSON.parse(decodeURIComponent('${encodeURIComponent(toolsJson)}'));
-          },
-          get filtered() {
-            if (!this.query.trim()) return null;
-            const q = this.query.toLowerCase();
-            return this.tools.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
-          }
-        }"
-      >
-        <div class="flex items-center gap-2 px-4 py-2 border border-border rounded-md bg-card transition-colors duration-150 focus-within:border-accent">
-          <span class="text-sm shrink-0">🔍</span>
-          <input
-            type="text"
-            x-model="query"
-            placeholder="搜索工具..."
-            class="flex-1 border-none outline-none text-sm font-sans text-text bg-transparent placeholder:text-muted"
-            @input.debounce.150ms="$dispatch('search-results', { tools: filtered || [], query: query })"
-          />
-          <button
-            x-show="query"
-            x-cloak
-            @click="query = ''; $dispatch('search-results', { tools: [], query: '' })"
-            class="border-none bg-transparent cursor-pointer text-muted text-xs px-1 py-0.5 rounded-sm hover:text-text"
-            aria-label="清除搜索"
-          >✕</button>
-        </div>
       </div>
     </header>
 

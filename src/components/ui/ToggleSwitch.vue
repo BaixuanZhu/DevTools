@@ -5,8 +5,9 @@ withDefaults(
   defineProps<{
     modelValue: boolean;
     label?: string;
+    description?: string;
   }>(),
-  { label: undefined },
+  { label: undefined, description: undefined },
 );
 
 const emit = defineEmits<{
@@ -33,6 +34,6 @@ const emit = defineEmits<{
         ]"
       />
     </Switch>
-    <span class="text-[0.8125rem] text-text">{{ modelValue ? '已开启' : '已关闭' }}</span>
+    <span class="text-[0.8125rem] text-muted">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
   </div>
 </template>
