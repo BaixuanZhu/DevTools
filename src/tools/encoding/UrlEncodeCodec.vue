@@ -16,9 +16,18 @@ const encodeComponentResult = ref('');
 const encodeFullResult = ref('');
 const decodeComponentResult = ref('');
 const decodeFullResult = ref('');
+const decodeComponentError = ref('');
+const decodeFullError = ref('');
 
 function execute() {
   errorMsg.value = '';
+  encodeComponentResult.value = '';
+  encodeFullResult.value = '';
+  decodeComponentResult.value = '';
+  decodeFullResult.value = '';
+  decodeComponentError.value = '';
+  decodeFullError.value = '';
+
   if (!input.value.trim()) {
     errorMsg.value = mode.value === 'encode' ? '请输入要编码的文本' : '请输入要解码的文本';
     return;
@@ -26,26 +35,26 @@ function execute() {
 
   if (mode.value === 'encode') {
     const result = encodeUrl(input.value);
-    encodeComponentResult.value = result.component;
-    encodeFullResult.value = result.full;
-    decodeComponentResult.value = '';
-    decodeFullResult.value = '';
+    encodeComponentResult.value = result.component.value;
+    encodeFullResult.value = result.full.value;
   } else {
     const result = decodeUrl(input.value);
-    decodeComponentResult.value = result.component;
-    decodeFullResult.value = result.full;
-    encodeComponentResult.value = '';
-    encodeFullResult.value = '';
-    if (result.error) errorMsg.value = result.error;
+    decodeComponentResult.value = result.component.value;
+    decodeComponentError.value = result.component.error ?? '';
+    decodeFullResult.value = result.full.value;
+    decodeFullError.value = result.full.error ?? '';
   }
 }
 
 watch(mode, () => {
+  input.value = '';
   errorMsg.value = '';
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
   decodeFullResult.value = '';
+  decodeComponentError.value = '';
+  decodeFullError.value = '';
 });
 
 function handleExample() {
@@ -61,6 +70,8 @@ function handleClear() {
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
   decodeFullResult.value = '';
+  decodeComponentError.value = '';
+  decodeFullError.value = '';
 }
 </script>
 
@@ -86,25 +97,50 @@ function handleClear() {
 
     <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
 
-    <div v-if="encodeComponentResult || decodeComponentResult" class="flex flex-col gap-4">
+    <div v-if="mode === 'encode' && (encodeComponentResult || encodeFullResult)" class="flex flex-col gap-4">
       <div class="border border-border rounded-md p-4 bg-card">
         <div class="flex items-baseline gap-2 mb-2">
-          <span class="text-[0.8125rem] font-semibold text-accent font-mono">{{ mode === 'encode' ? 'encodeURIComponent' : 'decodeURIComponent' }}</span>
-          <span class="text-[0.6875rem] text-muted">组件级，编码/解码所有特殊字符</span>
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURIComponent</span>
+          <span class="text-[0.6875rem] text-muted">组件级，编码所有特殊字符</span>
         </div>
         <div class="flex items-start gap-2">
-          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ mode === 'encode' ? encodeComponentResult : decodeComponentResult }}</code>
-          <CopyButton :text="mode === 'encode' ? encodeComponentResult : decodeComponentResult" label="复制" />
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeComponentResult }}</code>
+          <CopyButton :text="encodeComponentResult" label="复制" />
         </div>
       </div>
       <div class="border border-border rounded-md p-4 bg-card">
         <div class="flex items-baseline gap-2 mb-2">
-          <span class="text-[0.8125rem] font-semibold text-accent font-mono">{{ mode === 'encode' ? 'encodeURI' : 'decodeURI' }}</span>
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURI</span>
           <span class="text-[0.6875rem] text-muted">完整 URL 级，保留 URL 结构字符（: / ? & = #）</span>
         </div>
         <div class="flex items-start gap-2">
-          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ mode === 'encode' ? encodeFullResult : decodeFullResult }}</code>
-          <CopyButton :text="mode === 'encode' ? encodeFullResult : decodeFullResult" label="复制" />
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeFullResult }}</code>
+          <CopyButton :text="encodeFullResult" label="复制" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="mode === 'decode' && (decodeComponentResult || decodeFullResult || decodeComponentError || decodeFullError)" class="flex flex-col gap-4">
+      <div class="border border-border rounded-md p-4 bg-card">
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURIComponent</span>
+          <span class="text-[0.6875rem] text-muted">组件级解码</span>
+        </div>
+        <div v-if="decodeComponentError" class="text-error text-[0.8125rem]">{{ decodeComponentError }}</div>
+        <div v-else class="flex items-start gap-2">
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeComponentResult }}</code>
+          <CopyButton :text="decodeComponentResult" label="复制" />
+        </div>
+      </div>
+      <div class="border border-border rounded-md p-4 bg-card">
+        <div class="flex items-baseline gap-2 mb-2">
+          <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURI</span>
+          <span class="text-[0.6875rem] text-muted">完整 URL 级解码</span>
+        </div>
+        <div v-if="decodeFullError" class="text-error text-[0.8125rem]">{{ decodeFullError }}</div>
+        <div v-else class="flex items-start gap-2">
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeFullResult }}</code>
+          <CopyButton :text="decodeFullResult" label="复制" />
         </div>
       </div>
     </div>

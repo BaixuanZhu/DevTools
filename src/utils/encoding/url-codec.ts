@@ -8,9 +8,9 @@
  */
 export interface UrlEncodeResult {
   /** encodeURIComponent 编码结果（编码所有特殊字符） */
-  component: string;
+  component: { value: string };
   /** encodeURI 编码结果（保留 URL 结构字符如 :/?&=） */
-  full: string;
+  full: { value: string };
 }
 
 /**
@@ -18,11 +18,9 @@ export interface UrlEncodeResult {
  */
 export interface UrlDecodeResult {
   /** decodeURIComponent 解码结果 */
-  component: string;
+  component: { value: string; error?: string };
   /** decodeURI 解码结果 */
-  full: string;
-  /** 解码错误信息（如果解码失败） */
-  error?: string;
+  full: { value: string; error?: string };
 }
 
 /**
@@ -32,34 +30,36 @@ export interface UrlDecodeResult {
  */
 export function encodeUrl(text: string): UrlEncodeResult {
   return {
-    component: encodeURIComponent(text),
-    full: encodeURI(text),
+    component: { value: encodeURIComponent(text) },
+    full: { value: encodeURI(text) },
   };
 }
 
 /**
  * URL 解码
  * @param encoded - 编码后的字符串
- * @returns 解码结果，包含两种解码方式和可能的错误信息
+ * @returns 解码结果，每种方式独立报告成功或失败
  */
 export function decodeUrl(encoded: string): UrlDecodeResult {
-  let component = '';
-  let full = '';
-  let error: string | undefined;
+  let componentValue = '';
+  let componentError: string | undefined;
+  let fullValue = '';
+  let fullError: string | undefined;
 
   try {
-    component = decodeURIComponent(encoded);
+    componentValue = decodeURIComponent(encoded);
   } catch {
-    error = 'URIComponent 解码失败：输入包含非法的 percent-encoded 序列';
+    componentError = 'URIComponent 解码失败：输入包含非法的 percent-encoded 序列';
   }
 
   try {
-    full = decodeURI(encoded);
+    fullValue = decodeURI(encoded);
   } catch {
-    error = error
-      ? error + '；URI 解码也失败'
-      : 'URI 解码失败：输入包含非法的 percent-encoded 序列';
+    fullError = 'URI 解码失败：输入包含非法的 percent-encoded 序列';
   }
 
-  return { component, full, error };
+  return {
+    component: { value: componentValue, error: componentError },
+    full: { value: fullValue, error: fullError },
+  };
 }

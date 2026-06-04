@@ -29,6 +29,14 @@ function base64UrlDecode(str: string): string {
   return decodeURIComponent(escape(atob(base64)));
 }
 
+/** ArrayBuffer 编码为 Base64URL 字符串 */
+function base64UrlEncode(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 /** Base64URL 解码为 JSON 对象 */
 function base64UrlToJson(str: string): Record<string, unknown> | null {
   try {
@@ -65,6 +73,37 @@ export function parseJwt(token: string): JwtSegments {
     payload,
     signature: parts[2],
   };
+}
+
+/** HMAC 算法名称到 Web Crypto SHA 算法的映射 */
+const HMAC_ALGO_MAP: Record<string, string> = {
+  HS256: 'SHA-256',
+  HS384: 'SHA-384',
+  HS512: 'SHA-512',
+};
+
+/** 验证 JWT 的 HMAC 签名 */
+export async function verifyHmacSignature(
+  token: string,
+  secret: string,
+  algorithm: 'HS256' | 'HS384' | 'HS512',
+): Promise<boolean> {
+  const parts = token.split('.');
+  if (parts.length !== 3) return false;
+
+  const message = `${parts[0]}.${parts[1]}`;
+  const encoder = new TextEncoder();
+
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: HMAC_ALGO_MAP[algorithm] },
+    false,
+    ['sign'],
+  );
+
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
+  return base64UrlEncode(signature) === parts[2];
 }
 
 /** 判断 Token 是否已过期 */

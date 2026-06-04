@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import { parseJwt, isTokenExpired, JWT_CLAIM_LABELS } from '../../utils/encoding/jwt';
+import { parseJwt, isTokenExpired, JWT_CLAIM_LABELS, verifyHmacSignature } from '../../utils/encoding/jwt';
 import dayjs from 'dayjs';
 
 const tokenInput = ref('');
@@ -50,6 +50,36 @@ function handleClear() {
 
 function segmentJson(obj: Record<string, unknown>): string {
   return JSON.stringify(obj, null, 2);
+}
+
+// 签名验证相关状态
+const verifyExpanded = ref(false);
+const verifyAlgorithm = ref<'HS256' | 'HS384' | 'HS512'>('HS256');
+const verifySecret = ref('');
+const verifyShowSecret = ref(false);
+const verifyLoading = ref(false);
+const verifyResult = ref<boolean | null>(null);
+
+const hmacAlgorithms = ['HS256', 'HS384', 'HS512'] as const;
+
+watch(parsed, (val) => {
+  if (val?.header?.alg && hmacAlgorithms.includes(val.header.alg as typeof hmacAlgorithms[number])) {
+    verifyAlgorithm.value = val.header.alg as typeof hmacAlgorithms[number];
+  }
+  verifyResult.value = null;
+});
+
+async function handleVerify() {
+  if (!parsed.value || !tokenInput.value) return;
+  verifyLoading.value = true;
+  verifyResult.value = null;
+  try {
+    verifyResult.value = await verifyHmacSignature(tokenInput.value, verifySecret.value, verifyAlgorithm.value);
+  } catch {
+    verifyResult.value = false;
+  } finally {
+    verifyLoading.value = false;
+  }
 }
 </script>
 
@@ -112,6 +142,53 @@ function segmentJson(obj: Record<string, unknown>): string {
         </div>
         <code class="block font-mono text-[0.8125rem] break-all text-text mb-2">{{ parsed.signature }}</code>
         <CopyButton :text="parsed.signature" label="复制" />
+      </div>
+
+      <!-- 验证签名面板 -->
+      <div class="border border-border rounded-md bg-card overflow-hidden">
+        <button
+          class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-text bg-transparent border-none cursor-pointer hover:bg-hover transition-colors"
+          @click="verifyExpanded = !verifyExpanded"
+        >
+          <span>验证签名</span>
+          <span class="text-xs transition-transform" :class="verifyExpanded ? 'rotate-0' : '-rotate-90'">▼</span>
+        </button>
+        <div v-if="verifyExpanded" class="px-4 pb-4 flex flex-col gap-3">
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-muted min-w-fit">算法</label>
+            <select
+              v-model="verifyAlgorithm"
+              class="px-2 py-1 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+            >
+              <option v-for="alg in hmacAlgorithms" :key="alg" :value="alg">{{ alg }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-muted min-w-fit">密钥</label>
+            <div class="flex-1 flex items-center gap-2">
+              <input
+                v-model="verifySecret"
+                :type="verifyShowSecret ? 'text' : 'password'"
+                class="flex-1 px-3 py-1 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+                placeholder="输入 HMAC 密钥"
+                @input="verifyResult = null"
+              />
+              <button
+                class="px-2 py-1 text-xs text-muted bg-transparent border border-border rounded-sm cursor-pointer hover:text-text hover:border-accent transition-colors"
+                @click="verifyShowSecret = !verifyShowSecret"
+              >{{ verifyShowSecret ? '隐藏' : '显示' }}</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              class="px-4 py-1.5 text-[0.8125rem] font-semibold text-white bg-accent rounded-sm border-none cursor-pointer hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="verifyLoading || !verifySecret"
+              @click="handleVerify"
+            >{{ verifyLoading ? '验证中...' : '验证' }}</button>
+            <span v-if="verifyResult === true" class="text-success text-[0.8125rem] font-semibold">✓ 签名匹配</span>
+            <span v-else-if="verifyResult === false" class="text-error text-[0.8125rem] font-semibold">✗ 签名不匹配</span>
+          </div>
+        </div>
       </div>
     </div>
 
