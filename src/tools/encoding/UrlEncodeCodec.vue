@@ -29,7 +29,9 @@ function execute() {
   decodeFullError.value = '';
 
   if (!input.value.trim()) {
-    errorMsg.value = mode.value === 'encode' ? '请输入要编码的文本' : '请输入要解码的文本';
+    if (mode.value === 'encode') {
+      errorMsg.value = '请输入要编码的文本';
+    }
     return;
   }
 
