@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
-import { encodeUrl, decodeUrl } from '../../utils/encoding/url-codec';
+import { encodeUrl, decodeUrl, parseUrl, type UrlParseResult } from '../../utils/encoding/url-codec';
 
 type Mode = 'encode' | 'decode';
 
@@ -17,6 +17,12 @@ const decodeComponentResult = ref('');
 const decodeFullResult = ref('');
 const decodeComponentError = ref('');
 const decodeFullError = ref('');
+const showDiff = ref(false);
+
+const urlParsed = ref<UrlParseResult | null>(null);
+const urlParseExpanded = ref(false);
+
+const isUrlInput = computed(() => /^https?:\/\//.test(input.value) || /:\/\//.test(input.value));
 
 function execute() {
   encodeComponentResult.value = '';
@@ -55,6 +61,11 @@ watch(mode, () => {
 
 watch(input, () => {
   execute();
+  if (isUrlInput.value) {
+    urlParsed.value = parseUrl(input.value);
+  } else {
+    urlParsed.value = null;
+  }
 });
 
 function handleExample() {
@@ -70,7 +81,87 @@ function handleClear() {
   decodeFullResult.value = '';
   decodeComponentError.value = '';
   decodeFullError.value = '';
+  urlParsed.value = null;
+  urlParseExpanded.value = false;
 }
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+const diffResult = computed(() => {
+  const comp = encodeComponentResult.value;
+  const full = encodeFullResult.value;
+  if (!comp || !full) return null;
+
+  let ci = 0;
+  let fi = 0;
+  const compParts: Array<{ text: string; diff: boolean }> = [];
+  const fullParts: Array<{ text: string; diff: boolean }> = [];
+
+  while (ci < comp.length && fi < full.length) {
+    if (comp[ci] === full[fi]) {
+      const cs = ci;
+      const fs = fi;
+      while (ci < comp.length && fi < full.length && comp[ci] === full[fi]) {
+        ci++;
+        fi++;
+      }
+      compParts.push({ text: comp.slice(cs, ci), diff: false });
+      fullParts.push({ text: full.slice(fs, fi), diff: false });
+    } else {
+      const cs = ci;
+      const fs = fi;
+      if (comp[ci] === '%') {
+        let count = 0;
+        while (ci < comp.length && comp[ci] === '%') {
+          ci += 3;
+          count++;
+        }
+        fi += count;
+      } else if (full[fi] === '%') {
+        let count = 0;
+        while (fi < full.length && full[fi] === '%') {
+          fi += 3;
+          count++;
+        }
+        ci += count;
+      } else {
+        ci++;
+        fi++;
+      }
+      compParts.push({ text: comp.slice(cs, ci), diff: true });
+      fullParts.push({ text: full.slice(fs, fi), diff: true });
+    }
+  }
+
+  if (ci < comp.length) compParts.push({ text: comp.slice(ci), diff: false });
+  if (fi < full.length) fullParts.push({ text: full.slice(fi), diff: false });
+
+  const hasDiff = compParts.some((p) => p.diff);
+  if (!hasDiff) return null;
+
+  const compHtml = compParts
+    .map((p) =>
+      p.diff
+        ? `<span class="bg-amber-100 text-amber-800 rounded-sm px-0.5">${escapeHtml(p.text)}</span>`
+        : escapeHtml(p.text),
+    )
+    .join('');
+  const fullHtml = fullParts
+    .map((p) =>
+      p.diff
+        ? `<span class="bg-green-100 text-green-800 rounded-sm px-0.5">${escapeHtml(p.text)}</span>`
+        : escapeHtml(p.text),
+    )
+    .join('');
+
+  return { compHtml, fullHtml };
+});
 </script>
 
 <template>
@@ -96,7 +187,7 @@ function handleClear() {
       <div class="border border-border rounded-md p-4 bg-card">
         <div class="flex items-baseline gap-2 mb-2">
           <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURIComponent</span>
-          <span class="text-[0.6875rem] text-muted">组件级，编码所有特殊字符</span>
+          <span class="text-[0.6875rem] text-muted">编码 :/?&amp;=# 等 URL 结构字符，适用于编码单个查询参数值</span>
         </div>
         <div class="flex items-start gap-2">
           <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeComponentResult }}</code>
@@ -106,11 +197,34 @@ function handleClear() {
       <div class="border border-border rounded-md p-4 bg-card">
         <div class="flex items-baseline gap-2 mb-2">
           <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURI</span>
-          <span class="text-[0.6875rem] text-muted">完整 URL 级，保留 URL 结构字符（: / ? & = #）</span>
+          <span class="text-[0.6875rem] text-muted">保留 URL 结构字符（:/?&amp;=#），适用于编码完整 URL</span>
         </div>
         <div class="flex items-start gap-2">
           <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ encodeFullResult }}</code>
           <CopyButton :text="encodeFullResult" label="复制" />
+        </div>
+      </div>
+      <div v-if="diffResult" class="flex items-center gap-2 -mt-2">
+        <button
+          class="text-[0.75rem] text-accent hover:underline cursor-pointer"
+          @click="showDiff = !showDiff"
+        >{{ showDiff ? '收起差异' : '查看差异' }}</button>
+      </div>
+      <div v-if="showDiff && diffResult" class="border border-border rounded-md p-4 bg-card">
+        <div class="mb-3">
+          <div class="text-[0.75rem] text-muted mb-2">差异对照</div>
+          <div class="flex items-start gap-2 mb-1.5">
+            <span class="text-[0.6875rem] text-muted shrink-0 w-[7.5rem] pt-0.5">encodeURIComponent</span>
+            <code class="flex-1 font-mono text-[0.8125rem] break-all" v-html="diffResult.compHtml"></code>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-[0.6875rem] text-muted shrink-0 w-[7.5rem] pt-0.5">encodeURI</span>
+            <code class="flex-1 font-mono text-[0.8125rem] break-all" v-html="diffResult.fullHtml"></code>
+          </div>
+        </div>
+        <div class="text-[0.6875rem] text-muted leading-relaxed border-t border-border pt-2">
+          <span class="inline-block bg-amber-100 text-amber-800 rounded-sm px-1 mr-1">橙色</span>部分表示 encodeURIComponent 额外编码的字符，
+          <span class="inline-block bg-green-100 text-green-800 rounded-sm px-1 mr-1">绿色</span>部分表示 encodeURI 保留的 URL 结构字符
         </div>
       </div>
     </div>
@@ -136,6 +250,51 @@ function handleClear() {
         <div v-else class="flex items-start gap-2">
           <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ decodeFullResult }}</code>
           <CopyButton :text="decodeFullResult" label="复制" />
+        </div>
+      </div>
+    </div>
+
+    <div v-if="urlParsed" class="mt-4 border border-border rounded-md p-4 bg-card">
+      <div class="flex items-center gap-2 cursor-pointer select-none" @click="urlParseExpanded = !urlParseExpanded">
+        <span class="text-[0.875rem] font-semibold text-accent">🔗 检测到 URL · 点击{{ urlParseExpanded ? '收起' : '查看解析' }}</span>
+        <span class="text-muted text-[0.75rem]">{{ urlParseExpanded ? '▲' : '▼' }}</span>
+      </div>
+      <div v-if="urlParseExpanded" class="mt-3 flex flex-col gap-2">
+        <div class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">协议</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.protocol }}</code>
+          <CopyButton :text="urlParsed.protocol" label="复制" />
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">主机</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.host }}</code>
+          <CopyButton :text="urlParsed.host" label="复制" />
+        </div>
+        <div v-if="urlParsed.port" class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">端口</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.port }}</code>
+          <CopyButton :text="urlParsed.port" label="复制" />
+        </div>
+        <div class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">路径</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.pathname }}</code>
+          <CopyButton :text="urlParsed.pathname" label="复制" />
+        </div>
+        <div v-if="urlParsed.searchParams.length > 0" class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">查询参数</span>
+          <div class="flex-1 flex flex-col gap-1">
+            <div v-for="param in urlParsed.searchParams" :key="param.key" class="flex items-start gap-2">
+              <code class="font-mono text-[0.8125rem] text-accent">{{ param.key }}</code>
+              <span class="text-muted text-[0.8125rem]">=</span>
+              <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ param.value }}</code>
+              <CopyButton :text="`${param.key}=${param.value}`" label="复制" />
+            </div>
+          </div>
+        </div>
+        <div v-if="urlParsed.hash" class="flex items-start gap-2">
+          <span class="text-[0.8125rem] text-muted shrink-0 w-20">哈希</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.hash }}</code>
+          <CopyButton :text="urlParsed.hash" label="复制" />
         </div>
       </div>
     </div>
