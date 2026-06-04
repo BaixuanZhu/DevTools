@@ -3,6 +3,8 @@ import { ref, computed, reactive, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+import SelectListbox from '../../components/ui/SelectListbox.vue';
 import { parseJwt, isTokenExpired, verifyHmacSignature, JWT_CLAIM_LABELS } from '../../utils/encoding/jwt';
 import dayjs from 'dayjs';
 
@@ -123,7 +125,6 @@ function segmentJson(obj: Record<string, unknown>): string {
 const HMAC_ALGORITHMS = ['HS256', 'HS384', 'HS512'] as const;
 type HmacAlgorithm = (typeof HMAC_ALGORITHMS)[number];
 
-const verifyExpanded = ref(false);
 const verifyAlgorithm = ref<HmacAlgorithm>('HS256');
 const verifySecret = ref('');
 const verifySecretVisible = ref(false);
@@ -174,7 +175,7 @@ async function handleVerify() {
     />
 
     <div class="mb-4">
-      <label class="field-label">输入 JWT Token</label>
+      <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入 JWT Token</label>
       <textarea
         v-model="tokenInput"
         class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
@@ -266,28 +267,16 @@ async function handleVerify() {
       </div>
 
       <!-- Verify Signature Panel -->
-      <div class="border border-border rounded-md bg-card">
-        <button
-          class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold cursor-pointer bg-transparent border-none text-text"
-          @click="verifyExpanded = !verifyExpanded"
-        >
-          <span>验证签名</span>
-          <span class="text-xs">{{ verifyExpanded ? '▼' : '▶' }}</span>
-        </button>
-
-        <div v-if="verifyExpanded" class="px-4 pb-4 flex flex-col gap-3">
-          <div class="flex flex-col gap-1">
-            <label class="text-[0.75rem] text-muted">算法</label>
-            <select
-              v-model="verifyAlgorithm"
-              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] bg-card text-text focus:outline-none focus:border-accent"
-            >
-              <option v-for="alg in HMAC_ALGORITHMS" :key="alg" :value="alg">{{ alg }}</option>
-            </select>
-          </div>
+      <DisclosureSection title="验证签名">
+        <div class="flex flex-col gap-3">
+          <SelectListbox
+            v-model="verifyAlgorithm"
+            :options="[{value:'HS256',label:'HS256'},{value:'HS384',label:'HS384'},{value:'HS512',label:'HS512'}]"
+            label="算法"
+          />
 
           <div class="flex flex-col gap-1">
-            <label class="text-[0.75rem] text-muted">密钥</label>
+            <label class="block text-[0.8125rem] text-muted font-medium mb-1">密钥</label>
             <div class="flex gap-2">
               <input
                 v-model="verifySecret"
@@ -316,7 +305,7 @@ async function handleVerify() {
           <p v-if="verifyResult === true" class="text-success text-[0.8125rem] m-0">✅ 签名匹配</p>
           <p v-if="verifyResult === false" class="text-error text-[0.8125rem] m-0">❌ 签名不匹配</p>
         </div>
-      </div>
+      </DisclosureSection>
     </div>
 
     <div v-if="parsed && !errorMsg" class="mt-4">
