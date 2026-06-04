@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# TODO: 部署后替换为实际域名
-# Sitemap: https://your-domain.com/sitemap-index.xml
+Sitemap: https://tools.openbong.cloud/sitemap-index.xml

@@ -6,7 +6,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://devtools.app',
+  site: 'https://tools.openbong.cloud',
   integrations: [
     vue(),
     sitemap({
