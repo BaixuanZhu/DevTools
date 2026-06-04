@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import {
@@ -13,21 +12,21 @@ import {
   formatFileSize,
 } from '../../utils/encoding/base64';
 
-type Mode = 'encode' | 'decode';
-
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp', 'image/bmp'];
 
-const mode = ref<Mode>('encode');
-const input = ref('');
-const output = ref('');
-const errorMsg = ref('');
-const fileInputRef = ref<HTMLInputElement | null>(null);
-const fileName = ref('');
-
-// Encode meta info
+// Encode state
+const encodeInput = ref('');
+const encodeOutput = ref('');
+const encodeError = ref('');
+const encodeFileName = ref('');
 const fileMeta = ref<{ mime: string; size: string } | null>(null);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+const isDragging = ref(false);
 
-// Decode result types
+// Decode state
+const decodeInput = ref('');
+const decodeOutput = ref('');
+const decodeError = ref('');
 const decodedImageSrc = ref('');
 const decodedBinaryMeta = ref<{ mime: string; size: string } | null>(null);
 const decodedBinaryBase64 = ref('');
@@ -36,37 +35,49 @@ function isDecodeBinaryResult(): boolean {
   return !!decodedImageSrc.value || !!decodedBinaryMeta.value;
 }
 
-function execute() {
-  errorMsg.value = '';
-  output.value = '';
+function executeEncode() {
+  encodeError.value = '';
+  encodeOutput.value = '';
   fileMeta.value = null;
-  decodedImageSrc.value = '';
-  decodedBinaryMeta.value = null;
-  decodedBinaryBase64.value = '';
 
-  if (!input.value.trim() && !fileName.value) {
-    errorMsg.value = mode.value === 'encode' ? '请输入要编码的文本' : '请输入要解码的 Base64 字符串';
+  if (!encodeInput.value.trim() && !encodeFileName.value) {
+    encodeError.value = '请输入要编码的文本';
     return;
   }
 
   try {
-    if (mode.value === 'encode') {
-      output.value = encodeBase64(input.value);
-    } else {
-      try {
-        output.value = decodeBase64(input.value);
-      } catch {
-        // Text decode failed — treat as binary
-        handleBinaryDecode();
-      }
+    encodeOutput.value = encodeBase64(encodeInput.value);
+  } catch (e) {
+    encodeError.value = e instanceof Error ? e.message : '编码时出错';
+  }
+}
+
+function executeDecode() {
+  decodeError.value = '';
+  decodeOutput.value = '';
+  decodedImageSrc.value = '';
+  decodedBinaryMeta.value = null;
+  decodedBinaryBase64.value = '';
+
+  if (!decodeInput.value.trim()) {
+    decodeError.value = '请输入要解码的 Base64 字符串';
+    return;
+  }
+
+  try {
+    try {
+      decodeOutput.value = decodeBase64(decodeInput.value);
+    } catch {
+      // Text decode failed — treat as binary
+      handleBinaryDecode();
     }
   } catch (e) {
-    errorMsg.value = e instanceof Error ? e.message : '处理时出错';
+    decodeError.value = e instanceof Error ? e.message : '解码时出错';
   }
 }
 
 function handleBinaryDecode() {
-  const base64 = input.value.trim();
+  const base64 = decodeInput.value.trim();
   const mime = detectMimeType(base64);
   const buffer = base64ToArrayBuffer(base64);
   const size = formatFileSize(buffer.byteLength);
@@ -82,46 +93,47 @@ function handleBinaryDecode() {
 async function handleFile() {
   const file = fileInputRef.value?.files?.[0];
   if (!file) return;
+  processFile(file);
+}
 
-  errorMsg.value = '';
-  output.value = '';
-  fileName.value = file.name;
+function handleDrop(event: DragEvent) {
+  isDragging.value = false;
+  const file = event.dataTransfer?.files[0];
+  if (!file) return;
+  processFile(file);
+}
+
+function processFile(file: File) {
+  encodeError.value = '';
+  encodeOutput.value = '';
+  encodeFileName.value = file.name;
   fileMeta.value = { mime: file.type || '未知类型', size: formatFileSize(file.size) };
 
   const reader = new FileReader();
   reader.onload = () => {
-    output.value = arrayBufferToBase64(reader.result as ArrayBuffer);
+    encodeOutput.value = arrayBufferToBase64(reader.result as ArrayBuffer);
   };
   reader.onerror = () => {
-    errorMsg.value = '读取文件时出错';
+    encodeError.value = '读取文件时出错';
   };
   reader.readAsArrayBuffer(file);
 }
 
-watch(mode, () => {
-  input.value = '';
-  output.value = '';
-  errorMsg.value = '';
-  fileName.value = '';
-  fileMeta.value = null;
-  decodedImageSrc.value = '';
-  decodedBinaryMeta.value = null;
-  decodedBinaryBase64.value = '';
-});
-
 function handleExample() {
-  mode.value = 'encode';
-  input.value = 'Hello, DevTools! 你好，开发者工具！';
-  fileName.value = '';
-  execute();
+  encodeInput.value = 'Hello, DevTools! 你好，开发者工具！';
+  encodeFileName.value = '';
+  executeEncode();
 }
 
 function handleClear() {
-  input.value = '';
-  output.value = '';
-  errorMsg.value = '';
-  fileName.value = '';
+  encodeInput.value = '';
+  encodeOutput.value = '';
+  encodeError.value = '';
+  encodeFileName.value = '';
   fileMeta.value = null;
+  decodeInput.value = '';
+  decodeOutput.value = '';
+  decodeError.value = '';
   decodedImageSrc.value = '';
   decodedBinaryMeta.value = null;
   decodedBinaryBase64.value = '';
@@ -158,70 +170,134 @@ function mimeToExt(mime: string | undefined): string {
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div>
     <ToolHeader
       title="Base64 编解码"
       description="Base64 编码与解码，支持文本和文件"
       @example="handleExample"
     />
 
-    <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />
+    <div class="grid md:grid-cols-2 gap-4">
+      <!-- Left column: Encode -->
+      <div>
+        <h3 class="text-[0.9375rem] font-semibold text-text mb-3">编码</h3>
 
-    <div class="mb-4">
-      <div class="mb-2">
-        <label class="field-label">{{ mode === 'encode' ? '输入文本' : '输入 Base64' }}</label>
-        <textarea v-model="input" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="6" :placeholder="mode === 'encode' ? '输入要编码的文本' : '输入要解码的 Base64 字符串'"></textarea>
-      </div>
+        <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入文本</label>
+        <textarea
+          v-model="encodeInput"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          rows="6"
+          placeholder="输入要编码的文本"
+        ></textarea>
 
-      <div v-if="mode === 'encode'" class="mb-2">
-        <label class="field-label">或上传文件编码</label>
-        <div class="flex items-center gap-2">
-          <input ref="fileInputRef" type="file" class="text-[0.8125rem]" @change="handleFile" />
-          <span v-if="fileName" class="text-[0.8125rem] text-muted">{{ fileName }}</span>
+        <!-- Drag-and-drop file upload -->
+        <div
+          class="mt-2 border-dashed border-2 border-border rounded-md p-6 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
+          :class="{ 'border-accent bg-hover': isDragging }"
+          @dragover.prevent="isDragging = true"
+          @dragleave="isDragging = false"
+          @drop.prevent="handleDrop"
+          @click="fileInputRef?.click()"
+        >
+          <input ref="fileInputRef" type="file" class="hidden" @change="handleFile" />
+          <template v-if="fileMeta && encodeFileName">
+            <span>📄 {{ encodeFileName }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
+          </template>
+          <template v-else>
+            <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
+          </template>
         </div>
-      </div>
 
-      <!-- Encode: file meta info bar -->
-      <div v-if="fileMeta" class="mb-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
-        <span>📄</span>
-        <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
-      </div>
-
-      <!-- Decode: image preview -->
-      <div v-if="decodedImageSrc" class="mb-2">
-        <label class="field-label">输出结果</label>
-        <div class="p-3 border border-border rounded-sm bg-hover">
-          <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
+        <!-- File meta info bar -->
+        <div v-if="fileMeta" class="mt-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
+          <span>📄</span>
+          <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
         </div>
-      </div>
 
-      <!-- Decode: binary file card -->
-      <div v-else-if="decodedBinaryMeta" class="mb-2">
-        <label class="field-label">输出结果</label>
-        <div class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
-          <div class="flex-1">
-            <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
-          </div>
+        <p v-if="encodeError" class="text-error text-[0.8125rem] m-0 mt-2">{{ encodeError }}</p>
+
+        <div class="mt-3 flex gap-2 items-center">
           <button
-            class="px-3 py-1.5 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90"
-            @click="handleDownload"
-          >下载文件</button>
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+            @click="executeEncode"
+          >编码</button>
+        </div>
+
+        <!-- Encode output -->
+        <div v-if="encodeOutput" class="mt-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
+          <textarea
+            v-model="encodeOutput"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+            rows="6"
+            readonly
+          ></textarea>
+          <div class="mt-1">
+            <CopyButton :text="encodeOutput" label="复制结果" />
+          </div>
         </div>
       </div>
 
-      <!-- Text output (encode result or decode text result) -->
-      <div v-if="output && !isDecodeBinaryResult()" class="mb-2">
-        <label class="field-label">输出结果</label>
-        <textarea v-model="output" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent" rows="6" readonly></textarea>
+      <!-- Right column: Decode -->
+      <div>
+        <h3 class="text-[0.9375rem] font-semibold text-text mb-3">解码</h3>
+
+        <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入 Base64</label>
+        <textarea
+          v-model="decodeInput"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          rows="6"
+          placeholder="输入要解码的 Base64 字符串"
+        ></textarea>
+
+        <p v-if="decodeError" class="text-error text-[0.8125rem] m-0 mt-2">{{ decodeError }}</p>
+
+        <div class="mt-3 flex gap-2 items-center">
+          <button
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+            @click="executeDecode"
+          >解码</button>
+        </div>
+
+        <!-- Decode output -->
+        <div v-if="decodeOutput && !isDecodeBinaryResult()" class="mt-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
+          <textarea
+            v-model="decodeOutput"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+            rows="6"
+            readonly
+          ></textarea>
+        </div>
+
+        <!-- Image preview -->
+        <div v-if="decodedImageSrc" class="mt-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
+          <div class="p-3 border border-border rounded-sm bg-hover">
+            <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
+          </div>
+        </div>
+
+        <!-- Binary file card -->
+        <div v-else-if="decodedBinaryMeta" class="mt-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
+          <div class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
+            <div class="flex-1">
+              <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
+            </div>
+            <button
+              class="px-3 py-1.5 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90"
+              @click="handleDownload"
+            >下载文件</button>
+          </div>
+        </div>
+
+        <!-- Decode action buttons -->
+        <div v-if="decodeOutput || isDecodeBinaryResult()" class="mt-2 flex gap-2 items-center">
+          <CopyButton v-if="decodeOutput && !isDecodeBinaryResult()" :text="decodeOutput" label="复制结果" />
+          <ClearButton @clear="handleClear" />
+        </div>
       </div>
-    </div>
-
-    <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
-
-    <div class="flex gap-2 items-center">
-      <button class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90" @click="execute">{{ mode === 'encode' ? '编码' : '解码' }}</button>
-      <CopyButton v-if="output" :text="output" label="复制结果" />
-      <ClearButton @clear="handleClear" />
     </div>
   </div>
 </template>
