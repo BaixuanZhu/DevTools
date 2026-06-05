@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import HttpStatusCodes from '../../tools/network/HttpStatusCodes.vue';
+---
+
+<ToolLayout title="HTTP 状态码查询 - DevTools" toolId="network/http-status-codes">
+  <HttpStatusCodes client:idle />
+</ToolLayout>
