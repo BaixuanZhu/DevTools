@@ -9,7 +9,8 @@ export type ToolCategory =
   | '颜色工具'
   | '日期时间'
   | 'CSS 工具'
-  | 'API 工具';
+  | 'API 工具'
+  | '媒体工具';
 
 /** 分类 slug 映射（中 → 英） */
 export const categorySlugMap: Record<ToolCategory, string> = {
@@ -23,6 +24,7 @@ export const categorySlugMap: Record<ToolCategory, string> = {
   '日期时间': 'datetime',
   'CSS 工具': 'css',
   'API 工具': 'api',
+  '媒体工具': 'media',
 };
 
 /** 工具元数据 */
@@ -170,6 +172,15 @@ export const tools: ToolMeta[] = [
     category: '加密哈希',
     icon: '🔐',
     path: '/crypto/sm2-crypto',
+  },
+  {
+    id: 'qr-code-generator',
+    name: '二维码生成器',
+    description: '在线生成自定义颜色、尺寸和容错级别的二维码，支持 PNG 与 SVG 下载',
+    seoDescription: '在线二维码生成工具，支持自定义前景色/背景色/尺寸/容错级别(L/M/Q/H)，可下载 PNG 与 SVG 两种格式，纯浏览器端生成，数据不上传。',
+    category: '媒体工具',
+    icon: '🔳',
+    path: '/media/qr-code-generator',
   },
 ];
 
