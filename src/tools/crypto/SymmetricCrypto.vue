@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
@@ -117,7 +118,7 @@ function handleClear() {
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div>
     <ToolHeader title="对称加解密" description="支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密" @example="handleExample" />
 
     <ModeTabGroup v-model="mode" :options="[{ key: 'encrypt', label: '加密' }, { key: 'decrypt', label: '解密' }]" />
@@ -140,38 +141,46 @@ function handleClear() {
       />
     </div>
 
-    <div class="mb-4">
-      <div class="mb-2">
-        <label class="field-label">{{ mode === 'encrypt' ? '明文' : '密文' }}</label>
-        <textarea v-if="mode === 'encrypt'" v-model="plaintext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" placeholder="输入要加密的文本"></textarea>
-        <textarea v-else v-model="ciphertext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" :placeholder="ciphertextPlaceholder"></textarea>
-      </div>
-      <div>
-        <label class="field-label">密码</label>
-        <input v-model="password" type="password" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent" placeholder="输入加密密码" />
-      </div>
-    </div>
+    <ResponsiveWorkspace mode="horizontal">
+      <template #input>
+        <div>
+          <div class="mb-2">
+            <label class="field-label">{{ mode === 'encrypt' ? '明文' : '密文' }}</label>
+            <textarea v-if="mode === 'encrypt'" v-model="plaintext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" placeholder="输入要加密的文本"></textarea>
+            <textarea v-else v-model="ciphertext" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="4" :placeholder="ciphertextPlaceholder"></textarea>
+          </div>
+          <div>
+            <label class="field-label">密码</label>
+            <input v-model="password" type="password" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent" placeholder="输入加密密码" />
+          </div>
+        </div>
+      </template>
 
-    <div class="flex gap-2 items-center mb-4">
-      <button class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isProcessing" @click="execute">
-        {{ isProcessing ? '处理中...' : (mode === 'encrypt' ? '加密' : '解密') }}
-      </button>
-      <ClearButton @clear="handleClear" />
-    </div>
+      <template #actions>
+        <div class="flex gap-2 items-center">
+          <button class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed" :disabled="isProcessing" @click="execute">
+            {{ isProcessing ? '处理中...' : (mode === 'encrypt' ? '加密' : '解密') }}
+          </button>
+          <ClearButton @clear="handleClear" />
+        </div>
+      </template>
 
-    <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
+      <template #output>
+        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ errorMsg }}</p>
 
-    <div v-if="output" class="mb-4">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium">{{ mode === 'encrypt' ? '密文' : '明文' }}</span>
-        <CopyButton :text="output" label="复制结果" />
-      </div>
-      <div class="border border-border rounded-md p-4 bg-card">
-        <code class="font-mono text-[0.8125rem] break-all text-text">{{ output }}</code>
-      </div>
-    </div>
+        <div v-if="output">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-sm font-medium">{{ mode === 'encrypt' ? '密文' : '明文' }}</span>
+            <CopyButton :text="output" label="复制结果" />
+          </div>
+          <div class="border border-border rounded-md p-4 bg-card">
+            <code class="font-mono text-[0.8125rem] break-all text-text">{{ output }}</code>
+          </div>
+        </div>
+      </template>
+    </ResponsiveWorkspace>
 
-    <DisclosureSection title="高级选项">
+    <DisclosureSection title="高级选项" class="mt-4">
       <p class="text-[0.8125rem] text-muted m-0 leading-relaxed">
         当前算法：<strong>{{ currentAlgo.label }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
         密码通过 PBKDF2（100000 次迭代，SHA-256）派生为加密密钥。
