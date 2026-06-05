@@ -4,6 +4,7 @@ import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import {
   encodeBase64,
   decodeBase64,
@@ -185,7 +186,7 @@ function mimeToExt(mime: string | undefined): string {
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div>
     <ToolHeader
       title="Base64 编解码"
       description="Base64 编码与解码，支持文本和文件"
@@ -194,106 +195,114 @@ function mimeToExt(mime: string | undefined): string {
 
     <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />
 
-    <!-- Input area -->
-    <div class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">
-        {{ mode === 'encode' ? '输入文本' : '输入 Base64' }}
-      </label>
-      <textarea
-        v-model="input"
-        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-        rows="6"
-        :placeholder="mode === 'encode' ? '输入要编码的文本' : '输入要解码的 Base64 字符串'"
-      ></textarea>
-    </div>
+    <ResponsiveWorkspace mode="horizontal">
+      <template #input>
+        <!-- Input area -->
+        <div class="mb-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">
+            {{ mode === 'encode' ? '输入文本' : '输入 Base64' }}
+          </label>
+          <textarea
+            v-model="input"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="6"
+            :placeholder="mode === 'encode' ? '输入要编码的文本' : '输入要解码的 Base64 字符串'"
+          ></textarea>
+        </div>
 
-    <!-- Encode mode: drag-drop file upload -->
-    <div v-if="mode === 'encode'" class="mb-3">
-      <div
-        class="border-dashed border-2 border-border rounded-md p-5 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
-        :class="{ 'border-accent bg-hover': isDragging }"
-        @dragover.prevent="isDragging = true"
-        @dragleave="isDragging = false"
-        @drop.prevent="handleDrop"
-        @click="fileInputRef?.click()"
-      >
-        <input ref="fileInputRef" type="file" class="hidden" @change="handleFile" />
-        <template v-if="fileMeta && fileName">
-          <span class="text-[0.8125rem] text-text">📄 {{ fileName }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
-        </template>
-        <template v-else>
-          <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
-        </template>
-      </div>
-    </div>
-
-    <!-- Action buttons -->
-    <div class="flex gap-2 items-center mb-4">
-      <button
-        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
-        @click="execute"
-      >{{ mode === 'encode' ? '编码' : '解码' }}</button>
-      <ClearButton @clear="handleClear" />
-    </div>
-
-    <!-- Error message -->
-    <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-3">{{ errorMsg }}</p>
-
-    <!-- Encode output (always visible) -->
-    <div v-if="mode === 'encode'" class="mb-3">
-      <div v-if="fileMeta" class="mb-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
-        <span>📄</span>
-        <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
-      </div>
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
-      <textarea
-        v-model="output"
-        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-        rows="6"
-        readonly
-        :placeholder="output ? '' : '点击「编码」查看结果'"
-      ></textarea>
-      <div v-if="output" class="mt-1.5">
-        <CopyButton :text="output" label="复制结果" />
-      </div>
-    </div>
-
-    <!-- Decode output (always visible) -->
-    <div v-if="mode === 'decode'" class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
-
-      <!-- Text result -->
-      <template v-if="!isDecodeBinaryResult()">
-        <textarea
-          v-model="output"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-          rows="6"
-          readonly
-          :placeholder="output ? '' : '点击「解码」查看结果'"
-        ></textarea>
-        <div v-if="output" class="mt-1.5">
-          <CopyButton :text="output" label="复制结果" />
+        <!-- Encode mode: drag-drop file upload -->
+        <div v-if="mode === 'encode'" class="mb-3">
+          <div
+            class="border-dashed border-2 border-border rounded-md p-5 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
+            :class="{ 'border-accent bg-hover': isDragging }"
+            @dragover.prevent="isDragging = true"
+            @dragleave="isDragging = false"
+            @drop.prevent="handleDrop"
+            @click="fileInputRef?.click()"
+          >
+            <input ref="fileInputRef" type="file" class="hidden" @change="handleFile" />
+            <template v-if="fileMeta && fileName">
+              <span class="text-[0.8125rem] text-text">📄 {{ fileName }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
+            </template>
+            <template v-else>
+              <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
+            </template>
+          </div>
         </div>
       </template>
 
-      <!-- Image preview -->
-      <div v-if="decodedImageSrc" class="p-3 border border-border rounded-sm bg-hover">
-        <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
-      </div>
-      <div v-if="decodedImageSrc" class="mt-1.5">
-        <CopyButton :text="input" label="复制原始 Base64" />
-      </div>
-
-      <!-- Binary file card -->
-      <div v-if="decodedBinaryMeta" class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
-        <div class="flex-1">
-          <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
+      <template #actions>
+        <!-- Action buttons -->
+        <div class="flex gap-2 items-center">
+          <button
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+            @click="execute"
+          >{{ mode === 'encode' ? '编码' : '解码' }}</button>
+          <ClearButton @clear="handleClear" />
         </div>
-        <button
-          class="px-3 py-1.5 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90"
-          @click="handleDownload"
-        >下载文件</button>
-      </div>
-    </div>
+      </template>
+
+      <template #output>
+        <!-- Error message -->
+        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-3">{{ errorMsg }}</p>
+
+        <!-- Encode output (always visible) -->
+        <div v-if="mode === 'encode'" class="mb-3">
+          <div v-if="fileMeta" class="mb-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
+            <span>📄</span>
+            <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
+          </div>
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
+          <textarea
+            v-model="output"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+            rows="6"
+            readonly
+            :placeholder="output ? '' : '点击「编码」查看结果'"
+          ></textarea>
+          <div v-if="output" class="mt-1.5">
+            <CopyButton :text="output" label="复制结果" />
+          </div>
+        </div>
+
+        <!-- Decode output (always visible) -->
+        <div v-if="mode === 'decode'" class="mb-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
+
+          <!-- Text result -->
+          <template v-if="!isDecodeBinaryResult()">
+            <textarea
+              v-model="output"
+              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+              rows="6"
+              readonly
+              :placeholder="output ? '' : '点击「解码」查看结果'"
+            ></textarea>
+            <div v-if="output" class="mt-1.5">
+              <CopyButton :text="output" label="复制结果" />
+            </div>
+          </template>
+
+          <!-- Image preview -->
+          <div v-if="decodedImageSrc" class="p-3 border border-border rounded-sm bg-hover">
+            <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
+          </div>
+          <div v-if="decodedImageSrc" class="mt-1.5">
+            <CopyButton :text="input" label="复制原始 Base64" />
+          </div>
+
+          <!-- Binary file card -->
+          <div v-if="decodedBinaryMeta" class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
+            <div class="flex-1">
+              <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
+            </div>
+            <button
+              class="px-3 py-1.5 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90"
+              @click="handleDownload"
+            >下载文件</button>
+          </div>
+        </div>
+      </template>
+    </ResponsiveWorkspace>
   </div>
 </template>
