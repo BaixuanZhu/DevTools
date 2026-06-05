@@ -229,9 +229,7 @@ function mimeToExt(mime: string | undefined): string {
             </template>
           </div>
         </div>
-      </template>
 
-      <template #actions>
         <!-- Action buttons -->
         <div class="flex gap-2 items-center">
           <button
@@ -240,18 +238,14 @@ function mimeToExt(mime: string | undefined): string {
           >{{ mode === 'encode' ? '编码' : '解码' }}</button>
           <ClearButton @clear="handleClear" />
         </div>
+
+        <!-- Error message -->
+        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mt-3">{{ errorMsg }}</p>
       </template>
 
       <template #output>
-        <!-- Error message -->
-        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mb-3">{{ errorMsg }}</p>
-
         <!-- Encode output (always visible) -->
         <div v-if="mode === 'encode'" class="mb-3">
-          <div v-if="fileMeta" class="mb-2 px-3 py-1.5 bg-hover border border-border rounded-sm text-[0.8125rem] text-muted flex items-center gap-1.5">
-            <span>📄</span>
-            <span>{{ fileMeta.mime }} · {{ fileMeta.size }}</span>
-          </div>
           <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
           <textarea
             v-model="output"
