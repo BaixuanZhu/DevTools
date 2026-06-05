@@ -26,12 +26,19 @@ export const QR_ERROR_LEVELS: ReadonlyArray<{
 export const QR_DEFAULT_FOREGROUND = '#000000';
 /** 默认背景色（亮色模块） */
 export const QR_DEFAULT_BACKGROUND = '#FFFFFF';
-/** 默认输出尺寸（px） */
+/** 默认输出尺寸（px），用于预览 */
 export const QR_DEFAULT_SIZE = 256;
 /** 最小允许尺寸（px） */
 export const QR_MIN_SIZE = 64;
 /** 最大允许尺寸（px） */
 export const QR_MAX_SIZE = 1024;
+
+/** 下载时默认尺寸（px） */
+export const QR_DOWNLOAD_DEFAULT_SIZE = 512;
+/** 下载时最小允许尺寸（px） */
+export const QR_DOWNLOAD_MIN_SIZE = 128;
+/** 下载时最大允许尺寸（px） */
+export const QR_DOWNLOAD_MAX_SIZE = 2048;
 
 /** 二维码生成配置项 */
 export interface QrGenerateOptions {
