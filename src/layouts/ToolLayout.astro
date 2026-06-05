@@ -187,7 +187,7 @@ const breadcrumbItems = toolId && toolMeta
       ></div>
 
       <!-- Content -->
-      <main class="flex-1 p-8 overflow-y-auto max-w-full max-md:p-4">
+      <main class="flex-1 p-8 overflow-y-auto overflow-x-hidden max-w-full max-md:p-4">
         {breadcrumbItems.length > 0 && <Breadcrumb items={breadcrumbItems} />}
         <slot />
       </main>
