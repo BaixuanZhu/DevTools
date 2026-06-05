@@ -508,8 +508,8 @@ function handleClear() {
       />
     </div>
 
-    <!-- 操作模式输入区域 -->
-    <div class="mb-4">
+    <!-- 操作模式输入区域（仅非生成模式显示） -->
+    <div v-if="mode !== 'generate'" class="mb-4">
       <div class="mb-3">
         <label class="block text-[0.8125rem] text-muted font-medium mb-1">{{ inputLabel }}</label>
         <textarea
