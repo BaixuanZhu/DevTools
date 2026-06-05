@@ -135,6 +135,15 @@ export const tools: ToolMeta[] = [
     icon: '🔐',
     path: '/crypto/asymmetric-crypto',
   },
+  {
+    id: 'sm2-crypto',
+    name: 'SM2 国密加解密',
+    description: 'SM2 国密非对称加密算法，支持密钥对生成、公钥加密与私钥解密',
+    seoDescription: '在线 SM2 国密非对称加解密工具，支持密钥对生成、公钥加密与私钥解密，支持 C1C3C2/C1C2C3 密文模式，纯浏览器端运算。',
+    category: '加密哈希',
+    icon: '🔐',
+    path: '/crypto/sm2-crypto',
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
