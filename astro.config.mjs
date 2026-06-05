@@ -24,6 +24,21 @@ export default defineConfig({
           return true;
         }
       },
+      /**
+       * 为每个 URL 添加 priority 和 changefreq，
+       * 帮助搜索引擎理解页面重要程度和更新频率
+       */
+      serialize: ({ url, ...rest }) => {
+        const pathname = new URL(url).pathname.replace(/\/$/, '');
+
+        // 首页：最高优先级，更新较频繁
+        if (pathname === '') {
+          return { url, ...rest, priority: 1.0, changefreq: 'weekly' };
+        }
+
+        // 工具页面：较高优先级，更新较少
+        return { url, ...rest, priority: 0.8, changefreq: 'monthly' };
+      },
     }),
   ],
   vite: {

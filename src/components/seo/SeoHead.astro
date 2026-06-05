@@ -1,18 +1,31 @@
 ---
 interface Props {
+  /** 页面标题 */
   title?: string;
+  /** 页面描述（用于 meta description） */
   description?: string;
+  /** 规范链接 */
   canonical?: string;
+  /** JSON-LD 结构化数据（单个或多个） */
+  jsonLd?: object | object[];
 }
 
 const {
   title = 'DevTools - 开发者工具集',
   description = '零门槛的浏览器端开发者工具集合，开箱即用',
   canonical = Astro.url.href,
+  jsonLd,
 } = Astro.props;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || '';
 const ogImage = `${siteUrl}/og.png`;
+
+/** 将 JSON-LD 数据序列化为字符串 */
+const jsonLdItems = jsonLd
+  ? Array.isArray(jsonLd)
+    ? jsonLd
+    : [jsonLd]
+  : [];
 ---
 
 <meta charset="UTF-8" />
@@ -32,3 +45,8 @@ const ogImage = `${siteUrl}/og.png`;
 <meta name="twitter:card" content="summary" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={description} />
+
+<!-- JSON-LD 结构化数据 -->
+{jsonLdItems.map((item) => (
+  <script type="application/ld+json" set:html={JSON.stringify(item)} />
+))}

@@ -5,15 +5,34 @@ import SeoHead from '../components/seo/SeoHead.astro';
 interface Props {
   title?: string;
   description?: string;
+  jsonLd?: object | object[];
 }
 
-const { title = 'DevTools - 开发者工具集', description } = Astro.props;
+const { title = 'DevTools - 开发者工具集', description, jsonLd } = Astro.props;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
+
+/** 首页 WebSite 结构化数据 */
+const websiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'DevTools',
+  url: siteUrl,
+  description: '零门槛的浏览器端开发者工具集合，即开即用，纯浏览器端运算',
+  inLanguage: 'zh-CN',
+};
+
+/** 合并 WebSite JSON-LD 与页面自定义 JSON-LD */
+const allJsonLd: object[] = [websiteJsonLd];
+if (jsonLd) {
+  allJsonLd.push(...(Array.isArray(jsonLd) ? jsonLd : [jsonLd]));
+}
 ---
 
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <SeoHead title={title} description={description} />
+    <SeoHead title={title} description={description} jsonLd={allJsonLd} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link

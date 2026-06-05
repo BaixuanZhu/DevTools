@@ -1,0 +1,40 @@
+---
+/**
+ * 面包屑导航组件
+ *
+ * 纯 Astro 组件（零 JS），提供 SEO 友好的面包屑导航。
+ * 遵循 DESIGN.md 设计令牌，使用 text-muted / text-text / text-accent。
+ */
+interface Props {
+  /** 面包屑项列表 */
+  items: { label: string; href?: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav aria-label="面包屑导航" class="mb-4">
+  <ol class="flex items-center gap-1 text-sm list-none m-0 p-0 flex-wrap">
+    {items.map((item, index) => (
+      <>
+        {index > 0 && (
+          <li aria-hidden="true" class="text-muted select-none">/</li>
+        )}
+        <li>
+          {item.href ? (
+            <a
+              href={item.href}
+              class="text-muted hover:text-accent transition-[color] duration-150"
+            >
+              {item.label}
+            </a>
+          ) : (
+            <span class="text-text font-medium" aria-current="page">
+              {item.label}
+            </span>
+          )}
+        </li>
+      </>
+    ))}
+  </ol>
+</nav>

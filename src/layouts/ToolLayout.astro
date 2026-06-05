@@ -1,11 +1,15 @@
 ---
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
-import { getToolsByCategory, getCategories } from '../data/tools';
+import Breadcrumb from '../components/layout/Breadcrumb.astro';
+import { getToolsByCategory, getCategories, getToolBySlug, slugCategoryMap, categorySlugMap, type ToolCategory } from '../data/tools';
 
 interface Props {
+  /** 页面标题 */
   title?: string;
+  /** 页面描述（优先使用传入值，否则从 seoDescription 回退） */
   description?: string;
+  /** 工具 ID（格式：categorySlug/toolSlug，如 encoding/base64） */
   toolId?: string;
 }
 
@@ -13,9 +17,96 @@ const { title, description, toolId = '' } = Astro.props;
 const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
 const categories = getCategories();
 const toolsByCategory = getToolsByCategory();
+
+/** 通过 toolId 查找工具元数据 */
+const toolMeta = toolId ? getToolBySlug(toolId) : undefined;
+
+/** 确定最终 description：优先 props → seoDescription → 默认值 */
+const finalDescription = description || toolMeta?.seoDescription || undefined;
+
+/** 站点基础 URL */
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
+
+/** 构建 JSON-LD 结构化数据 */
+const jsonLdItems: object[] = [];
+
+if (toolId && toolMeta) {
+  const [categorySlug] = toolId.split('/');
+  const categoryName = slugCategoryMap[categorySlug] || categorySlug;
+  const toolPageUrl = `${siteUrl}/${toolId}`;
+
+  // 1. BreadcrumbList — 面包屑结构化数据
+  jsonLdItems.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: '首页',
+        item: siteUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: categoryName,
+        item: `${siteUrl}/${categorySlug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: toolMeta.name,
+      },
+    ],
+  });
+
+  // 2. WebPage — 页面信息
+  jsonLdItems.push({
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: toolMeta.name,
+    description: toolMeta.seoDescription,
+    url: toolPageUrl,
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: '首页', item: siteUrl },
+        { '@type': 'ListItem', position: 2, name: categoryName },
+        { '@type': 'ListItem', position: 3, name: toolMeta.name },
+      ],
+    },
+  });
+
+  // 3. SoftwareApplication — 工具信息
+  jsonLdItems.push({
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: toolMeta.name,
+    description: toolMeta.seoDescription,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Browser',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+    },
+  });
+}
+
+/** 构建面包屑导航项 */
+const breadcrumbItems = toolId && toolMeta
+  ? (() => {
+      const [categorySlug] = toolId.split('/');
+      const categoryName = slugCategoryMap[categorySlug] || categorySlug;
+      return [
+        { label: '首页', href: '/' },
+        { label: categoryName },
+        { label: toolMeta.name },
+      ];
+    })()
+  : [];
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={finalDescription} jsonLd={jsonLdItems}>
   <div id="app" class="h-screen grid grid-rows-[auto_minmax(0,1fr)_auto]">
     <!-- Header (simplified - no search bar) -->
     <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
@@ -97,6 +188,7 @@ const toolsByCategory = getToolsByCategory();
 
       <!-- Content -->
       <main class="flex-1 p-8 overflow-y-auto max-w-full max-md:p-4">
+        {breadcrumbItems.length > 0 && <Breadcrumb items={breadcrumbItems} />}
         <slot />
       </main>
     </div>

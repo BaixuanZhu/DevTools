@@ -33,6 +33,8 @@ export interface ToolMeta {
   name: string;
   /** 一句话描述 */
   description: string;
+  /** SEO 专用描述（120-160 字符，用于 meta description） */
+  seoDescription: string;
   /** 分类 */
   category: ToolCategory;
   /** 图标（emoji） */
@@ -47,6 +49,7 @@ export const tools: ToolMeta[] = [
     id: 'uuid-generator',
     name: 'UUID 生成器',
     description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
+    seoDescription: '在线 UUID 生成器与解析工具，支持 v1/v3/v4/v5/v6/v7 多版本生成、格式转换与解码分析，纯浏览器端运算。',
     category: '文本处理',
     icon: '🔑',
     path: '/text/uuid-generator',
@@ -55,6 +58,7 @@ export const tools: ToolMeta[] = [
     id: 'hash-generator',
     name: '哈希生成器',
     description: '支持 MD5、SHA-1、SHA-256 等多种哈希算法，结果可转换为不同进制',
+    seoDescription: '在线哈希生成工具，支持 MD5、SHA-1、SHA-256、SHA-512 等多种算法，支持文本与文件哈希、多格式输出，纯浏览器端运算。',
     category: '加密哈希',
     icon: '🔒',
     path: '/crypto/hash-generator',
@@ -63,6 +67,7 @@ export const tools: ToolMeta[] = [
     id: 'random-string',
     name: '随机字符串生成',
     description: '自定义长度和字符集的随机字符串生成器',
+    seoDescription: '在线随机字符串生成工具，支持自定义长度、字符集与排除规则，批量生成密码或随机文本，纯浏览器端运算。',
     category: '文本处理',
     icon: '🎲',
     path: '/text/random-string',
@@ -71,6 +76,7 @@ export const tools: ToolMeta[] = [
     id: 'base64',
     name: 'Base64 编解码',
     description: 'Base64 编码与解码，支持文本和文件',
+    seoDescription: '在线 Base64 编解码工具，支持文本与文件的 Base64 编码和解码，纯浏览器运算无需上传数据，即时转换。',
     category: '编码转换',
     icon: '📄',
     path: '/encoding/base64',
@@ -79,6 +85,7 @@ export const tools: ToolMeta[] = [
     id: 'datetime-converter',
     name: '日期时间转换器',
     description: '时间戳与日期格式互转，支持多种日期格式',
+    seoDescription: '在线日期时间转换工具，支持时间戳与日期格式互转、多时区对比、多种日期格式输出，纯浏览器端运算。',
     category: '日期时间',
     icon: '🕐',
     path: '/datetime/datetime-converter',
@@ -87,6 +94,7 @@ export const tools: ToolMeta[] = [
     id: 'url-encode',
     name: 'URL 编解码',
     description: 'URL 编码与解码，支持组件级和完整 URL 编码',
+    seoDescription: '在线 URL 编解码工具，支持 encodeURI 与 encodeURIComponent 两种模式，批量处理 URL 编码与解码，纯浏览器端运算。',
     category: '编码转换',
     icon: '🔗',
     path: '/encoding/url-encode',
@@ -95,6 +103,7 @@ export const tools: ToolMeta[] = [
     id: 'jwt-parser',
     name: 'JWT 编解码',
     description: '解析和生成 JSON Web Token，支持 HMAC 签名验证与编码',
+    seoDescription: '在线 JWT 解析与生成工具，支持 JSON Web Token 解码查看、HMAC 签名验证与编码生成，纯浏览器端运算无需上传。',
     category: '编码转换',
     icon: '🎫',
     path: '/encoding/jwt-parser',
@@ -103,6 +112,7 @@ export const tools: ToolMeta[] = [
     id: 'device-info',
     name: '设备信息与 UserAgent',
     description: '查看浏览器、操作系统、屏幕等设备信息',
+    seoDescription: '在线设备信息查看工具，一键获取浏览器 UserAgent、操作系统、屏幕分辨率、网络连接等设备信息，纯浏览器端检测。',
     category: '网络工具',
     icon: '💻',
     path: '/network/device-info',
@@ -111,6 +121,7 @@ export const tools: ToolMeta[] = [
     id: 'symmetric-crypto',
     name: '对称加解密',
     description: '支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密',
+    seoDescription: '在线对称加解密工具，支持 AES-CBC/GCM、SM4、ChaCha20、DES 等算法，多格式输入输出，纯浏览器端加密无需上传。',
     category: '加密哈希',
     icon: '🛡️',
     path: '/crypto/symmetric-crypto',
@@ -119,11 +130,28 @@ export const tools: ToolMeta[] = [
     id: 'asymmetric-crypto',
     name: '非对称加解密',
     description: '支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等非对称加密算法的密钥生成、加解密与签名验签',
+    seoDescription: '在线非对称加解密工具，支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 算法的密钥生成、加密解密与签名验签，纯浏览器端运算。',
     category: '加密哈希',
     icon: '🔐',
     path: '/crypto/asymmetric-crypto',
   },
 ];
+
+/** 分类 slug 反向映射（英 → 中） */
+export const slugCategoryMap: Record<string, ToolCategory> = Object.fromEntries(
+  Object.entries(categorySlugMap).map(([cn, en]) => [en, cn as ToolCategory]),
+) as Record<string, ToolCategory>;
+
+/** 通过工具 ID 查找工具元数据 */
+export function getToolById(id: string): ToolMeta | undefined {
+  return tools.find((t) => t.id === id);
+}
+
+/** 通过完整 toolId（如 encoding/base64）查找工具元数据 */
+export function getToolBySlug(toolId: string): ToolMeta | undefined {
+  const slug = toolId.split('/').pop() || '';
+  return getToolById(slug);
+}
 
 /** 按分类分组工具列表 */
 export function getToolsByCategory(): Record<ToolCategory, ToolMeta[]> {
