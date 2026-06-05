@@ -37,7 +37,6 @@ describe('ipRangeToCIDRs', () => {
     expect(result.totalIPs).toBe(6);
     // 验证所有 CIDR 块覆盖的范围精确
     const firstNetwork = result.cidrs[0];
-    const lastCIDR = result.cidrs[result.cidrs.length - 1];
     expect(firstNetwork.network).toBe('10.0.0.5');
     // 验证总 IP 数等于范围大小
     let sumHosts = 0;

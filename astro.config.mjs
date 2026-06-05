@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
-import sitemap from '@astrojs/sitemap';
+import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -33,11 +33,11 @@ export default defineConfig({
 
         // 首页：最高优先级，更新较频繁
         if (pathname === '') {
-          return { url, ...rest, priority: 1.0, changefreq: 'weekly' };
+          return { url, ...rest, priority: 1.0, changefreq: ChangeFreqEnum.WEEKLY };
         }
 
         // 工具页面：较高优先级，更新较少
-        return { url, ...rest, priority: 0.8, changefreq: 'monthly' };
+        return { url, ...rest, priority: 0.8, changefreq: ChangeFreqEnum.MONTHLY };
       },
     }),
   ],

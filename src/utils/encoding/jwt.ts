@@ -1,3 +1,5 @@
+import { toArrayBuffer } from '../shared/array-buffer';
+
 /** JWT 标准声明字段的中文名映射 */
 export const JWT_CLAIM_LABELS: Record<string, string> = {
   iss: '签发者',
@@ -26,7 +28,10 @@ function base64UrlDecode(str: string): string {
   let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
   const pad = base64.length % 4;
   if (pad) base64 += '='.repeat(4 - pad);
-  return decodeURIComponent(escape(atob(base64)));
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 /** ArrayBuffer 编码为 Base64URL 字符串 */
@@ -126,10 +131,10 @@ export async function encodeJwt(options: EncodeJwtOptions): Promise<string> {
 
   const fullHeader = { typ: 'JWT', alg: algorithm, ...header };
   const encodedHeader = base64UrlEncode(
-    new TextEncoder().encode(JSON.stringify(fullHeader)),
+    toArrayBuffer(new TextEncoder().encode(JSON.stringify(fullHeader))),
   );
   const encodedPayload = base64UrlEncode(
-    new TextEncoder().encode(JSON.stringify(payload)),
+    toArrayBuffer(new TextEncoder().encode(JSON.stringify(payload))),
   );
 
   const message = `${encodedHeader}.${encodedPayload}`;

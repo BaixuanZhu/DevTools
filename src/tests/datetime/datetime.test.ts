@@ -9,7 +9,6 @@ import {
   getLiveClockInfo,
   TIMEZONES,
   QUICK_TIME_OPTIONS,
-  type DateInfo,
 } from '../../utils/datetime/datetime';
 
 describe('detectTimestampUnit', () => {

@@ -1,4 +1,4 @@
-import md5 from 'js-md5';
+import { md5 } from 'js-md5';
 import { arrayBufferToBase64, arrayBufferToHex, hexToArrayBuffer } from '../shared/array-buffer';
 
 /** 支持的哈希算法 */

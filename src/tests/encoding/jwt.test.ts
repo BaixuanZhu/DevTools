@@ -1,6 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { parseJwt, isTokenExpired, encodeJwt, verifyHmacSignature } from '../../utils/encoding/jwt';
 
+/** 将 JSON 字符串编码为 Base64URL（用于构造测试 token） */
+function toBase64Url(str: string): string {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (const b of bytes) binary += String.fromCharCode(b);
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
 const SAMPLE_JWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4iLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
 
 describe('parseJwt', () => {
@@ -29,11 +37,9 @@ describe('parseJwt', () => {
   });
 
   it('应正确解析包含 Unicode 字符的 payload', () => {
-    // 手动构造 header 和 payload
-    const header = btoa(unescape(encodeURIComponent(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ name: '你好世界' }))))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // 手动构造 header 和 payload（使用 TextEncoder 替代已废弃的 unescape）
+    const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = toBase64Url(JSON.stringify({ name: '你好世界' }));
     const token = `${header}.${payload}.fake-signature`;
     const result = parseJwt(token);
     expect(result.error).toBeUndefined();
@@ -41,10 +47,8 @@ describe('parseJwt', () => {
   });
 
   it('应正确解析包含自定义 claims 的 payload', () => {
-    const header = btoa(unescape(encodeURIComponent(JSON.stringify({ alg: 'HS256', typ: 'JWT' }))))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-    const payload = btoa(unescape(encodeURIComponent(JSON.stringify({ email: 'test@example.com', role: 'admin' }))))
-      .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const header = toBase64Url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = toBase64Url(JSON.stringify({ email: 'test@example.com', role: 'admin' }));
     const token = `${header}.${payload}.fake-signature`;
     const result = parseJwt(token);
     expect(result.error).toBeUndefined();

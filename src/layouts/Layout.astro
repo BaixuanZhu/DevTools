@@ -58,7 +58,7 @@ if (jsonLd) {
       const id = Date.now() + Math.random();
       this.items.push({ id, type, message });
       setTimeout(() => {
-        this.items = this.items.filter((t) => t.id !== id);
+        this.items = this.items.filter((t: { id: number }) => t.id !== id);
       }, duration);
     },
     success(message: string) {

@@ -306,39 +306,33 @@ export async function importKeyString(
       case 'RSA-OAEP': {
         const h = hash ?? 'SHA-256';
         const usages: KeyUsage[] = target === 'public' ? ['encrypt'] : ['decrypt'];
-        return await crypto.subtle.importKey(
-          importFormat,
-          key,
-          { name: 'RSA-OAEP', hash: h },
-          false,
-          usages,
-        );
+        if (importFormat === 'jwk') {
+          return await crypto.subtle.importKey('jwk', key as JsonWebKey, { name: 'RSA-OAEP', hash: h }, false, usages);
+        }
+        return await crypto.subtle.importKey(importFormat, key as ArrayBuffer, { name: 'RSA-OAEP', hash: h }, false, usages);
       }
       case 'RSA-PSS': {
         const h = hash ?? 'SHA-256';
         const usages: KeyUsage[] = target === 'public' ? ['verify'] : ['sign'];
-        return await crypto.subtle.importKey(
-          importFormat,
-          key,
-          { name: 'RSA-PSS', hash: h },
-          false,
-          usages,
-        );
+        if (importFormat === 'jwk') {
+          return await crypto.subtle.importKey('jwk', key as JsonWebKey, { name: 'RSA-PSS', hash: h }, false, usages);
+        }
+        return await crypto.subtle.importKey(importFormat, key as ArrayBuffer, { name: 'RSA-PSS', hash: h }, false, usages);
       }
       case 'ECDSA': {
         const namedCurve = curve ?? 'P-256';
         const usages: KeyUsage[] = target === 'public' ? ['verify'] : ['sign'];
-        return await crypto.subtle.importKey(
-          importFormat,
-          key,
-          { name: 'ECDSA', namedCurve },
-          false,
-          usages,
-        );
+        if (importFormat === 'jwk') {
+          return await crypto.subtle.importKey('jwk', key as JsonWebKey, { name: 'ECDSA', namedCurve }, false, usages);
+        }
+        return await crypto.subtle.importKey(importFormat, key as ArrayBuffer, { name: 'ECDSA', namedCurve }, false, usages);
       }
       case 'Ed25519': {
         const usages: KeyUsage[] = target === 'public' ? ['verify'] : ['sign'];
-        return await crypto.subtle.importKey(importFormat, key, 'Ed25519', false, usages);
+        if (importFormat === 'jwk') {
+          return await crypto.subtle.importKey('jwk', key as JsonWebKey, 'Ed25519', false, usages);
+        }
+        return await crypto.subtle.importKey(importFormat, key as ArrayBuffer, 'Ed25519', false, usages);
       }
     }
   } catch (err) {

@@ -19,6 +19,7 @@ export async function copyToClipboard(text: string): Promise<boolean> {
       textarea.style.top = '-9999px';
       document.body.appendChild(textarea);
       textarea.select();
+      // execCommand 已废弃，但作为旧浏览器 fallback 暂时保留
       const success = document.execCommand('copy');
       document.body.removeChild(textarea);
       return success;

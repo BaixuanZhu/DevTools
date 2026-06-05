@@ -1,6 +1,17 @@
 /** 编码输出格式 */
 export type OutputFormat = 'base64' | 'hex' | 'hexUpper';
 
+/**
+ * 将 Uint8Array 底层 buffer 转为 ArrayBuffer。
+ * TypeScript 6.0 中 Uint8Array.buffer 类型为 ArrayBufferLike（含 SharedArrayBuffer），
+ * 而 Web Crypto API 要求 ArrayBuffer。本函数提供安全的类型桥接。
+ * @param data - Uint8Array 数据
+ * @returns 底层 ArrayBuffer
+ */
+export function toArrayBuffer(data: Uint8Array): ArrayBuffer {
+  return data.buffer as ArrayBuffer;
+}
+
 /** 将 ArrayBuffer 转为 Base64 字符串（支持大型数据） */
 export function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);

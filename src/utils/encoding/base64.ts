@@ -1,7 +1,10 @@
 /** 将文本编码为 Base64（支持 Unicode） */
 export function encodeBase64(text: string): string {
   if (!text) return '';
-  return btoa(unescape(encodeURIComponent(text)));
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary);
 }
 
 /** 从 Base64 字符串中提取纯 Base64 数据（去除 Data URL 前缀） */
@@ -15,7 +18,10 @@ export function decodeBase64(base64: string): string {
   if (!base64.trim()) return '';
   const pure = stripDataUrl(base64.trim());
   try {
-    return decodeURIComponent(escape(atob(pure)));
+    const binary = atob(pure);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
   } catch {
     throw new Error('无效的 Base64 输入，请检查格式是否正确');
   }

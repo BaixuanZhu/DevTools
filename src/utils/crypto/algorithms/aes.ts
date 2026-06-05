@@ -1,4 +1,5 @@
 import type { SymmetricAlgorithm } from './types';
+import { toArrayBuffer } from '../../shared/array-buffer';
 
 /** AES-GCM 适配器（Web Crypto API） */
 export const aesGcm: SymmetricAlgorithm = {
@@ -11,13 +12,21 @@ export const aesGcm: SymmetricAlgorithm = {
 
   async encrypt(plaintext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-GCM', false);
-    const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, cryptoKey, plaintext);
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: toArrayBuffer(iv) },
+      cryptoKey,
+      toArrayBuffer(plaintext),
+    );
     return new Uint8Array(encrypted);
   },
 
   async decrypt(ciphertext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-GCM', false);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, cryptoKey, ciphertext);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: toArrayBuffer(iv) },
+      cryptoKey,
+      toArrayBuffer(ciphertext),
+    );
     return new Uint8Array(decrypted);
   },
 };
@@ -33,13 +42,21 @@ export const aesCbc: SymmetricAlgorithm = {
 
   async encrypt(plaintext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-CBC', false);
-    const encrypted = await crypto.subtle.encrypt({ name: 'AES-CBC', iv }, cryptoKey, plaintext);
+    const encrypted = await crypto.subtle.encrypt(
+      { name: 'AES-CBC', iv: toArrayBuffer(iv) },
+      cryptoKey,
+      toArrayBuffer(plaintext),
+    );
     return new Uint8Array(encrypted);
   },
 
   async decrypt(ciphertext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-CBC', false);
-    const decrypted = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, cryptoKey, ciphertext);
+    const decrypted = await crypto.subtle.decrypt(
+      { name: 'AES-CBC', iv: toArrayBuffer(iv) },
+      cryptoKey,
+      toArrayBuffer(ciphertext),
+    );
     return new Uint8Array(decrypted);
   },
 };
@@ -56,9 +73,9 @@ export const aesCtr: SymmetricAlgorithm = {
   async encrypt(plaintext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-CTR', false);
     const encrypted = await crypto.subtle.encrypt(
-      { name: 'AES-CTR', counter: iv, length: 64 },
+      { name: 'AES-CTR', counter: toArrayBuffer(iv), length: 64 },
       cryptoKey,
-      plaintext,
+      toArrayBuffer(plaintext),
     );
     return new Uint8Array(encrypted);
   },
@@ -66,9 +83,9 @@ export const aesCtr: SymmetricAlgorithm = {
   async decrypt(ciphertext, key, iv) {
     const cryptoKey = await importAesKey(key, 'AES-CTR', false);
     const decrypted = await crypto.subtle.decrypt(
-      { name: 'AES-CTR', counter: iv, length: 64 },
+      { name: 'AES-CTR', counter: toArrayBuffer(iv), length: 64 },
       cryptoKey,
-      ciphertext,
+      toArrayBuffer(ciphertext),
     );
     return new Uint8Array(decrypted);
   },
@@ -84,7 +101,7 @@ async function importAesKey(
   algorithm: string,
   extractable: boolean,
 ): Promise<CryptoKey> {
-  return crypto.subtle.importKey('raw', rawKey, { name: algorithm }, extractable, [
+  return crypto.subtle.importKey('raw', toArrayBuffer(rawKey), { name: algorithm }, extractable, [
     'encrypt',
     'decrypt',
   ]);

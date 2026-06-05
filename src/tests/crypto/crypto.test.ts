@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   encrypt,
   decrypt,
+  // 向后兼容 API 测试（已废弃但需保留测试直到移除）
   encryptAES,
   decryptAES,
 } from '../../utils/crypto/crypto';

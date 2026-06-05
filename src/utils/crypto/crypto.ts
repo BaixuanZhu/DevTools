@@ -1,6 +1,6 @@
 import type { AlgorithmId } from './algorithms/types';
 import type { OutputFormat } from '../shared/array-buffer';
-import { encodeBuffer, decodeToBuffer } from '../shared/array-buffer';
+import { encodeBuffer, decodeToBuffer, toArrayBuffer } from '../shared/array-buffer';
 import { getAlgorithm } from './algorithms/registry';
 
 /** 兼容旧 API 的类型（保留向后兼容） */
@@ -30,7 +30,7 @@ async function deriveKeyBytes(
     ['deriveBits'],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt: toArrayBuffer(salt), iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
     keyMaterial,
     keyLengthBits,
   );
