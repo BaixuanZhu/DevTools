@@ -15,6 +15,12 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | number];
 }>();
 
+/** 通过计算属性 getter/setter 实现 v-model 转发 */
+const model = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val),
+});
+
 const selectedLabel = computed(() => {
   const opt = props.options.find((o) => o.value === props.modelValue);
   return opt?.label ?? '';
@@ -24,7 +30,7 @@ const selectedLabel = computed(() => {
 <template>
   <div class="relative">
     <label v-if="label" class="block mb-1 text-[0.8125rem] text-muted font-sans">{{ label }}</label>
-    <Listbox :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)">
+    <Listbox v-model="model">
       <ListboxButton
         :class="[
           'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer text-left',

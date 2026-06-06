@@ -7,6 +7,7 @@ import {
   base64ToArrayBuffer,
   base64ToArrayBufferAsync,
   cleanBase64,
+  detectMimeType,
 } from './base64';
 
 /** 文件解码结果 */
@@ -23,11 +24,13 @@ export interface FileDecodeResult {
   extension: string;
   /** 推断的文件名（如 decoded-file.txt） */
   fileName: string;
+  /** 是否通过文件头魔数自动识别出 MIME 类型 */
+  isDetectedByMagic: boolean;
 }
 
-/** 常用 MIME 类型选项（用于无 data URI 时手动选择） */
+/** 常用非图片 MIME 类型选项（用于无 data URI 时手动选择） */
 export const COMMON_MIME_TYPES = [
-  { value: 'application/octet-stream', label: 'application/octet-stream（未知）' },
+  { value: 'application/octet-stream', label: 'application/octet-stream（未知二进制）' },
   { value: 'text/plain', label: 'text/plain（纯文本）' },
   { value: 'application/json', label: 'application/json（JSON）' },
   { value: 'application/pdf', label: 'application/pdf（PDF）' },
@@ -35,8 +38,6 @@ export const COMMON_MIME_TYPES = [
   { value: 'text/csv', label: 'text/csv（CSV）' },
   { value: 'application/zip', label: 'application/zip（ZIP）' },
   { value: 'application/gzip', label: 'application/gzip（GZIP）' },
-  { value: 'image/png', label: 'image/png（PNG）' },
-  { value: 'image/jpeg', label: 'image/jpeg（JPEG）' },
 ];
 
 /**
@@ -90,12 +91,57 @@ export function mimeToExtension(mimeType: string): string {
 }
 
 /**
+ * 判断 MIME 类型是否为图片。
+ * 用于 Base64 转文件与 Base64 转图片的格式互斥。
+ */
+function isImageMimeType(mimeType: string | null): boolean {
+  if (!mimeType) return false;
+  return mimeType.startsWith('image/');
+}
+
+/**
+ * 根据清理后的 Base64 和 data URI 信息推断最终 MIME 类型，
+ * 并与图片格式做互斥检查。
+ *
+ * 优先级：魔数检测（非图片）> data URI 声明（非图片）> fallbackMimeType。
+ * 若魔数或 data URI 检测到图片格式，抛出互斥提示错误。
+ *
+ * @returns 包含最终 MIME 类型和是否通过魔数检测的标志
+ */
+function resolveFileMimeType(
+  cleaned: string,
+  uriMime: string | null,
+  fallbackMimeType: string,
+): { mimeType: string; isDetectedByMagic: boolean } {
+  // 1. 魔数检测：若检测到非图片格式，直接采用（最可信）
+  const detected = detectMimeType(cleaned);
+  if (detected) {
+    if (isImageMimeType(detected)) {
+      throw new Error('检测到图片格式，请使用「Base64 转图片」工具进行预览和下载');
+    }
+    return { mimeType: detected, isDetectedByMagic: true };
+  }
+
+  // 2. data URI 声明的 MIME：若声明为图片也做互斥提示
+  if (uriMime) {
+    if (isImageMimeType(uriMime)) {
+      throw new Error('检测到图片格式，请使用「Base64 转图片」工具进行预览和下载');
+    }
+    return { mimeType: uriMime, isDetectedByMagic: false };
+  }
+
+  // 3. 回退到用户选择的 MIME 类型
+  return { mimeType: fallbackMimeType, isDetectedByMagic: false };
+}
+
+/**
  * 将 Base64 字符串解码为文件（同步版本，适合小文件）
  *
  * 自动清理输入中的空白字符和 URL-safe 字符。
+ * 通过文件头魔数检测实际格式；若检测到图片格式会提示用户转用「Base64 转图片」。
  *
  * @param base64Input data URI 或纯 Base64 字符串
- * @param fallbackMimeType 无 data URI 时的备用 MIME 类型，默认 application/octet-stream
+ * @param fallbackMimeType 无 data URI 且魔数未识别时的备用 MIME 类型，默认 application/octet-stream
  */
 export function decodeBase64ToFile(
   base64Input: string,
@@ -118,7 +164,7 @@ export function decodeBase64ToFile(
     throw new Error('输入不是有效的 Base64 编码');
   }
 
-  const mimeType = uriMime ?? fallbackMimeType;
+  const { mimeType, isDetectedByMagic } = resolveFileMimeType(cleaned, uriMime, fallbackMimeType);
   const buffer = base64ToArrayBuffer(cleaned);
   const size = buffer.byteLength;
   const blob = new Blob([buffer], { type: mimeType });
@@ -131,6 +177,7 @@ export function decodeBase64ToFile(
     sizeFormatted: formatFileSize(size),
     extension,
     fileName: `decoded-file${extension}`,
+    isDetectedByMagic,
   };
 }
 
@@ -138,9 +185,10 @@ export function decodeBase64ToFile(
  * 将 Base64 字符串异步解码为文件（大文件不阻塞主线程）
  *
  * 与同步版本功能相同，但对大文件使用分块异步处理。
+ * 通过文件头魔数检测实际格式；若检测到图片格式会提示用户转用「Base64 转图片」。
  *
  * @param base64Input data URI 或纯 Base64 字符串
- * @param fallbackMimeType 无 data URI 时的备用 MIME 类型
+ * @param fallbackMimeType 无 data URI 且魔数未识别时的备用 MIME 类型
  * @param onProgress 可选进度回调，参数为 0-1 之间的比例
  */
 export async function decodeBase64ToFileAsync(
@@ -165,7 +213,7 @@ export async function decodeBase64ToFileAsync(
     throw new Error('输入不是有效的 Base64 编码');
   }
 
-  const mimeType = uriMime ?? fallbackMimeType;
+  const { mimeType, isDetectedByMagic } = resolveFileMimeType(cleaned, uriMime, fallbackMimeType);
   const buffer = await base64ToArrayBufferAsync(cleaned, onProgress);
   const size = buffer.byteLength;
   const blob = new Blob([buffer], { type: mimeType });
@@ -178,6 +226,7 @@ export async function decodeBase64ToFileAsync(
     sizeFormatted: formatFileSize(size),
     extension,
     fileName: `decoded-file${extension}`,
+    isDetectedByMagic,
   };
 }
 
