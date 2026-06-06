@@ -8,13 +8,18 @@ import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue
 import {
   encodeBase64,
   decodeBase64,
-  arrayBufferToBase64,
+  arrayBufferToBase64Async,
   base64ToArrayBuffer,
   detectMimeType,
   formatFileSize,
 } from '../../utils/encoding/base64';
 
 const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp', 'image/bmp', 'image/avif', 'image/heic', 'image/heif'];
+
+/** 文件大小上限：50MB（大结果自动提供下载，无需复制） */
+const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
+/** 大编码结果阈值：500KB 的 Base64 字符数 */
+const LARGE_OUTPUT_THRESHOLD = 500 * 1024;
 
 type Mode = 'encode' | 'decode';
 const mode = ref<Mode>('encode');
@@ -112,10 +117,10 @@ function handleDrop(event: DragEvent) {
 }
 
 /**
- * 处理文件编码：使用 readAsDataURL 获取带 MIME 的 data URI
+ * 处理文件编码：使用 readAsArrayBuffer + arrayBufferToBase64Async
  *
- * 相比 readAsArrayBuffer + arrayBufferToBase64 的手动编码，
- * readAsDataURL 是浏览器原生异步方法，大文件不阻塞主线程。
+ * 相比 readAsDataURL，此方式在编码过程中每 512KB yield 一次，
+ * 避免单次大字符串操作阻塞主线程，UI 保持响应。
  */
 async function processFile(file: File) {
   errorMsg.value = '';
@@ -123,16 +128,15 @@ async function processFile(file: File) {
   fileName.value = file.name;
   fileMeta.value = { mime: file.type || '未知类型', size: formatFileSize(file.size) };
 
-  if (file.size > 100 * 1024 * 1024) {
-    errorMsg.value = '文件过大（超过 100MB），请选择较小的文件';
+  if (file.size > FILE_SIZE_LIMIT) {
+    errorMsg.value = `文件过大（超过 ${formatFileSize(FILE_SIZE_LIMIT)}），请选择较小的文件。如需处理大文件，建议用命令行工具。`;
     return;
   }
 
   isProcessing.value = true;
   try {
-    const dataUrl = await readFileAsDataURL(file);
-    // 提取纯 base64 部分（去掉 data:mime;base64, 前缀）
-    const base64Content = dataUrl.split(',')[1] || '';
+    const buffer = await readFileAsArrayBuffer(file);
+    const base64Content = await arrayBufferToBase64Async(buffer);
     output.value = base64Content;
   } catch {
     errorMsg.value = '读取文件时出错';
@@ -141,13 +145,13 @@ async function processFile(file: File) {
   }
 }
 
-/** 将文件读取为 data URL（Promise 包装 FileReader） */
-function readFileAsDataURL(file: File): Promise<string> {
+/** 将文件读取为 ArrayBuffer（Promise 包装 FileReader） */
+function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
+    reader.onload = () => resolve(reader.result as ArrayBuffer);
     reader.onerror = () => reject(new Error('读取文件时出错'));
-    reader.readAsDataURL(file);
+    reader.readAsArrayBuffer(file);
   });
 }
 
@@ -183,6 +187,18 @@ function handleDownload() {
   const a = document.createElement('a');
   a.href = url;
   a.download = `decoded${ext}`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/** 将编码结果下载为文本文件，避免大字符串复制卡顿 */
+function handleDownloadOutput() {
+  if (!output.value) return;
+  const blob = new Blob([output.value], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName.value ? `${fileName.value}.base64.txt` : 'base64.txt';
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -247,6 +263,7 @@ function mimeToExt(mime: string | undefined): string {
             </template>
             <template v-else>
               <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
+              <span class="text-muted text-[0.75rem] block mt-1">支持最大 50MB 的文件，大结果自动提供下载</span>
             </template>
           </div>
         </div>
@@ -269,16 +286,47 @@ function mimeToExt(mime: string | undefined): string {
         <!-- Encode output (always visible) -->
         <div v-if="mode === 'encode'" class="mb-3">
           <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
+
+          <!-- 小结果：正常显示在 textarea -->
+          <template v-if="output && output.length <= LARGE_OUTPUT_THRESHOLD">
+            <textarea
+              v-model="output"
+              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
+              rows="6"
+              readonly
+              :placeholder="output ? '' : '点击「编码」查看结果'"
+            ></textarea>
+            <div v-if="output" class="mt-1.5">
+              <CopyButton :text="output" label="复制结果" />
+            </div>
+          </template>
+
+          <!-- 大结果：不渲染进 DOM，显示占位提示并提供下载 -->
+          <template v-else-if="output && output.length > LARGE_OUTPUT_THRESHOLD">
+            <div class="px-4 py-6 border border-border rounded-sm bg-hover text-center">
+              <p class="text-muted text-sm m-0 mb-2">
+                编码完成，结果共 {{ formatFileSize(output.length) }}
+              </p>
+              <p class="text-muted text-[0.75rem] m-0">
+                内容过大已隐藏显示，避免页面卡顿
+              </p>
+            </div>
+            <div class="mt-1.5">
+              <button
+                class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+                @click="handleDownloadOutput"
+              >下载结果</button>
+            </div>
+          </template>
+
+          <!-- 空状态 -->
           <textarea
-            v-model="output"
+            v-else
             class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
             rows="6"
             readonly
-            :placeholder="output ? '' : '点击「编码」查看结果'"
+            placeholder="点击「编码」查看结果"
           ></textarea>
-          <div v-if="output" class="mt-1.5">
-            <CopyButton :text="output" label="复制结果" />
-          </div>
         </div>
 
         <!-- Decode output (always visible) -->
