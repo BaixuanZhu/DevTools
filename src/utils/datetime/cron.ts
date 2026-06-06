@@ -2,8 +2,7 @@
  * Cron 表达式解析工具函数
  * 基于 cron-parser 库，提供表达式解析、字段构建和模板管理
  */
-import cronParser from 'cron-parser';
-const { parseExpression } = cronParser;
+import { CronExpressionParser } from 'cron-parser';
 
 /** Cron 字段结构（标准 5 字段格式） */
 export interface CronFields {
@@ -105,9 +104,8 @@ export function parseCronExpression(expression: string, count: number = 10): Cro
   }
 
   try {
-    const interval = parseExpression(trimmed, {
+    const interval = CronExpressionParser.parse(trimmed, {
       currentDate: new Date(),
-      iterator: false,
     });
 
     const nextExecutions: Date[] = [];

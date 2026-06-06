@@ -22,7 +22,7 @@ const model = computed({
 });
 
 const selectedLabel = computed(() => {
-  const opt = props.options.find((o) => o.value === props.modelValue);
+  const opt = props.options.find((o) => o.value === props.modelValue || (o as any).key === props.modelValue);
   return opt?.label ?? '';
 });
 </script>
@@ -53,8 +53,8 @@ const selectedLabel = computed(() => {
       >
         <ListboxOption
           v-for="option in options"
-          :key="option.value"
-          :value="option.value"
+          :key="(option as any).key ?? option.value"
+          :value="(option as any).key ?? option.value"
           :class="[
             'relative cursor-pointer select-none py-1.5 pl-7 pr-2',
             'ui-active:bg-hover ui-active:text-text',
