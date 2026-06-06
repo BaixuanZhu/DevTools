@@ -7,7 +7,7 @@ import SelectListbox from '../../components/ui/SelectListbox.vue';
 import { computeHash, computeFileHash, HASH_ALGORITHMS, type HashAlgorithm } from '../../utils/crypto/hash';
 import { formatFileSize } from '../../utils/encoding/base64';
 
-const inputText = ref('');
+const inputText = ref('Hello, DevTools!');
 const selectedAlgorithms = ref<HashAlgorithm[]>([...HASH_ALGORITHMS]);
 const outputFormat = ref<'hex' | 'hexUpper' | 'base64'>('base64');
 const results = ref<Record<string, string>>({});
@@ -125,21 +125,13 @@ function handleClear() {
   errorMsg.value = '';
 }
 
-/** 填入示例数据，watcher 会自动触发计算 */
-function handleExample() {
-  inputText.value = 'Hello, DevTools!';
-  clearFile();
-  selectedAlgorithms.value = [...HASH_ALGORITHMS];
-  outputFormat.value = 'base64';
-}
-
 // 监听输入变化，自动触发哈希计算
 watch(
   [inputText, fileData, selectedAlgorithms, outputFormat],
   () => {
     computeHashes();
   },
-  { deep: true },
+  { deep: true, immediate: true },
 );
 </script>
 
@@ -148,7 +140,7 @@ watch(
     <ToolHeader
       title="哈希生成器"
       description="支持 MD5、SHA-1、SHA-256 等多种哈希算法，结果可转换为不同进制"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 文本输入 -->

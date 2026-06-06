@@ -23,9 +23,6 @@ const result = ref<FileDecodeResult | null>(null);
 const selectedMimeType = ref('application/octet-stream');
 const showMimeSelector = ref(false);
 
-/** 示例数据：JSON 文本的 Base64 */
-const EXAMPLE_BASE64 = 'eyJuYW1lIjoiRGV2VG9vbHMiLCJ2ZXJzaW9uIjoiMS4wIiwiZGVzY3JpcHRpb24iOiLlnLDlnZror77nqIvlt6XkvZzmiJDliqDku6znmoTmlofmoaYifQ==';
-
 async function decode() {
   errorMsg.value = '';
   result.value = null;
@@ -72,11 +69,6 @@ watch(selectedMimeType, async () => {
   }
 });
 
-function handleExample() {
-  input.value = EXAMPLE_BASE64;
-  decode();
-}
-
 function handleClear() {
   input.value = '';
   errorMsg.value = '';
@@ -95,7 +87,7 @@ function handleDownload() {
     <ToolHeader
       title="Base64 转文件"
       description="将 Base64 字符串解码为文件，支持 Data URI 格式自动识别"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <ResponsiveWorkspace mode="horizontal">

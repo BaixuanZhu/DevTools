@@ -73,12 +73,6 @@ function handleTemplate(template: (typeof CRON_TEMPLATES)[number]) {
   fields.value = getFieldsFromExpression(template.expression);
 }
 
-function handleExample() {
-  expression.value = '*/5 * * * *';
-  fields.value = getFieldsFromExpression('*/5 * * * *');
-  parse();
-}
-
 function handleClear() {
   expression.value = '';
   errorMsg.value = '';
@@ -99,7 +93,7 @@ parse();
     <ToolHeader
       title="Cron 表达式解析器"
       description="解析 Cron 表达式，预览执行时间，可视化构建"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- Cron 输入框 -->

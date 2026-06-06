@@ -162,13 +162,6 @@ watch(mode, () => {
   decodedBinaryBase64.value = '';
 });
 
-function handleExample() {
-  mode.value = 'encode';
-  input.value = 'Hello, DevTools! 你好，开发者工具！';
-  fileName.value = '';
-  executeEncode();
-}
-
 function handleClear() {
   input.value = '';
   output.value = '';
@@ -218,7 +211,7 @@ function mimeToExt(mime: string | undefined): string {
     <ToolHeader
       title="Base64 编解码"
       description="Base64 编码与解码，支持文本和文件"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />

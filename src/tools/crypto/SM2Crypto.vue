@@ -201,23 +201,6 @@ function handleAction() {
 }
 
 /**
- * 填入示例数据
- */
-function handleExample() {
-  handleClear();
-  cipherMode.value = 'C1C3C2';
-
-  // 先生成密钥对
-  const keyPair = generateSM2KeyPair();
-  publicKeyText.value = keyPair.publicKey;
-  privateKeyText.value = keyPair.privateKey;
-
-  // 切换到加密模式并填入明文
-  mode.value = 'encrypt';
-  inputText.value = 'Hello, DevTools! 你好，国密 SM2！';
-}
-
-/**
  * 清空所有输入和输出
  */
 function handleClear() {
@@ -234,7 +217,7 @@ function handleClear() {
     <ToolHeader
       title="SM2 国密加解密"
       description="SM2 国密非对称加密算法，支持密钥对生成、公钥加密与私钥解密"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 操作模式切换 -->

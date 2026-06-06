@@ -32,7 +32,7 @@ const PREVIEW_SIZES = [64, 128, 256] as const;
 type PreviewSize = (typeof PREVIEW_SIZES)[number];
 
 // 状态
-const text = ref('');
+const text = ref('https://tools.openbong.cloud');
 const foreground = ref(QR_DEFAULT_FOREGROUND);
 const background = ref(QR_DEFAULT_BACKGROUND);
 const errorLevel = ref<QrErrorLevel>('M');
@@ -68,7 +68,7 @@ watch([text, foreground, background, errorLevel], () => {
   debounceTimer = setTimeout(() => {
     void regenerate();
   }, 150);
-});
+}, { immediate: true });
 
 /**
  * 重新生成预览二维码：并行生成三张固定尺寸预览 PNG。
@@ -148,15 +148,6 @@ async function downloadSvg() {
   }
 }
 
-/** 填入示例数据 */
-function handleExample() {
-  text.value = 'https://tools.openbong.cloud';
-  foreground.value = QR_DEFAULT_FOREGROUND;
-  background.value = QR_DEFAULT_BACKGROUND;
-  errorLevel.value = 'M';
-  downloadSize.value = QR_DOWNLOAD_DEFAULT_SIZE;
-}
-
 /** 按需生成并复制 SVG 到剪贴板 */
 async function copySvg() {
   if (!text.value.trim()) return;
@@ -191,7 +182,7 @@ onMounted(() => {
     <ToolHeader
       title="二维码生成器"
       description="输入文本生成二维码，支持自定义前景色、背景色、容错级别和下载尺寸，可下载 PNG 与 SVG 两种格式"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 输入区 -->

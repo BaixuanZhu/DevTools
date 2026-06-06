@@ -29,14 +29,6 @@ const allCidrsText = computed(() => {
 });
 
 /**
- * 填入示例数据
- */
-function handleExample() {
-  startIP.value = '192.168.0.0';
-  endIP.value = '192.168.1.255';
-}
-
-/**
  * 清空所有状态
  */
 function handleClear() {
@@ -98,7 +90,7 @@ watch([startIP, endIP], () => {
     <ToolHeader
       title="IPv4 范围展开"
       description="给定起始和结束 IPv4 地址，计算覆盖该范围的最简 CIDR 列表"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 输入区域 -->

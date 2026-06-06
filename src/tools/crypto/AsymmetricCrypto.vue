@@ -367,24 +367,6 @@ async function handleAction() {
 }
 
 /**
- * 填入示例数据
- */
-async function handleExample() {
-  handleClear();
-  algorithm.value = 'RSA-OAEP';
-  mode.value = 'generate';
-  exportFormat.value = 'spki';
-  keyEncoding.value = 'pem';
-  hash.value = 'SHA-256';
-  keySize.value = 2048;
-
-  await handleGenerateKeys();
-
-  mode.value = 'encrypt';
-  inputText.value = 'Hello, DevTools! 你好，非对称加密！';
-}
-
-/**
  * 清空所有输入和输出
  */
 function handleClear() {
@@ -402,7 +384,7 @@ function handleClear() {
     <ToolHeader
       title="非对称加解密"
       description="支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等算法的密钥生成、加解密与签名验签"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- Ed25519 不支持提示 -->

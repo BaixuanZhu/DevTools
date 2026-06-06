@@ -98,13 +98,18 @@ async function execute() {
   }
 }
 
-function handleExample() {
-  mode.value = 'encrypt';
-  algorithm.value = 'AES-GCM';
-  format.value = 'base64';
-  plaintext.value = 'Hello, DevTools! 你好，开发者工具！';
-  password.value = 'my-secret-password';
-  execute();
+/**
+ * 生成随机密码
+ */
+function generatePassword() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+  const randomValues = new Uint8Array(16);
+  crypto.getRandomValues(randomValues);
+  let result = '';
+  for (let i = 0; i < 16; i++) {
+    result += chars[randomValues[i] % chars.length];
+  }
+  password.value = result;
 }
 
 function handleClear() {
@@ -118,7 +123,7 @@ function handleClear() {
 
 <template>
   <div class="max-w-[720px]">
-    <ToolHeader title="对称加解密" description="支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密" @example="handleExample" />
+    <ToolHeader title="对称加解密" description="支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密" :show-example="false" />
 
     <ModeTabGroup v-model="mode" :options="[{ key: 'encrypt', label: '加密' }, { key: 'decrypt', label: '解密' }]" />
 
@@ -148,7 +153,12 @@ function handleClear() {
       </div>
       <div class="mb-3">
         <label class="block text-[0.8125rem] text-muted font-medium mb-1">密码</label>
-        <input v-model="password" type="password" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent" placeholder="输入加密密码" />
+        <div class="flex gap-2">
+          <input v-model="password" type="password" class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent" placeholder="输入加密密码" />
+          <button class="px-3 py-2 border border-border rounded-sm bg-card text-text text-[0.75rem] font-sans cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150" @click="generatePassword">
+            生成
+          </button>
+        </div>
       </div>
 
       <!-- 操作按钮行 -->

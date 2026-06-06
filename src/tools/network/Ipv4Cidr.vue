@@ -42,13 +42,6 @@ const prefixReference = [
 ];
 
 /**
- * 填入示例数据
- */
-function handleExample() {
-  cidrInput.value = '192.168.1.0/24';
-}
-
-/**
  * 清空所有状态
  */
 function handleClear() {
@@ -81,7 +74,7 @@ watch(cidrInput, (val) => {
     <ToolHeader
       title="IPv4 子网计算器"
       description="输入 IP 地址和子网掩码，计算网络地址、广播地址、可用主机数等子网信息"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- CIDR 术语说明 -->

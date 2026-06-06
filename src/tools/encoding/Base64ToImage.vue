@@ -20,11 +20,6 @@ const errorMsg = ref('');
 const isLoading = ref(false);
 const result = ref<ImageDecodeResult | null>(null);
 
-/** 示例数据：1×1 红色像素 PNG */
-const EXAMPLE_BASE64 =
-  'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVQYV2P4z8BQDwIMAQR' +
-  'TEDEhAKkKDP8PhRjhAAAAAElFTkSuQmCC';
-
 async function decode() {
   errorMsg.value = '';
   result.value = null;
@@ -64,11 +59,6 @@ watch(input, () => {
   }
 });
 
-function handleExample() {
-  input.value = EXAMPLE_BASE64;
-  decode();
-}
-
 function handleClear() {
   input.value = '';
   errorMsg.value = '';
@@ -86,7 +76,7 @@ function handleDownload() {
     <ToolHeader
       title="Base64 转图片"
       description="将 Base64 字符串解码为图片，支持预览和下载"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <ResponsiveWorkspace mode="horizontal">

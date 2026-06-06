@@ -107,11 +107,6 @@ function handleQuickTime(type: QuickTimeType) {
   parseTimestamp();
 }
 
-function handleExample() {
-  timestampInput.value = '1700000000000';
-  parseTimestamp();
-}
-
 function clearTimestamp() {
   timestampInput.value = '';
   tsDateInfo.value = null;
@@ -188,7 +183,7 @@ const customPreview = computed(() => {
 
 <template>
   <div class="max-w-[760px]">
-    <ToolHeader title="日期时间转换器" description="时间戳与日期格式互转，支持时区与自定义格式" @example="handleExample" />
+    <ToolHeader title="日期时间转换器" description="时间戳与日期格式互转，支持时区与自定义格式" :show-example="false" />
 
     <!-- ═══ 实时时钟区 ═══ -->
     <section class="mb-6 p-4 border border-border rounded-md bg-card">

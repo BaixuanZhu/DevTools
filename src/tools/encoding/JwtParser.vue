@@ -274,21 +274,6 @@ function handleClearEncode() {
   customPayloadJson.value = '';
 }
 
-function handleExample() {
-  if (mode.value === 'parse') {
-    tokenInput.value = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.4DLyM2DJpI8jiV8sRz7i1MSsiWRF7LPtIMzflaU6mFs';
-    runParse();
-  } else {
-    quickClaims.sub = '1234567890';
-    quickClaims.name = 'John Doe';
-    quickClaims.iat = String(dayjs().unix());
-    quickClaims.exp = String(dayjs().add(1, 'hour').unix());
-    encodeSecret.value = 'your-256-bit-secret';
-    customPayloadJson.value = JSON.stringify({ role: 'admin' }, null, 2);
-    handleEncode();
-  }
-}
-
 // Watch mode switch to clear states
 watch(mode, (newMode) => {
   if (newMode === 'parse') {
@@ -311,7 +296,7 @@ watch(mode, (newMode) => {
     <ToolHeader
       title="JWT 解析器"
       description="解析和生成 JSON Web Token，支持 HMAC 签名验证与编码"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <ModeTabGroup

@@ -81,7 +81,7 @@ function copyAll() {
     <ToolHeader
       title="随机字符串生成"
       description="生成密码学安全的随机字符串，支持大小写、编码等多种输出格式"
-      @example="generate"
+      :show-example="false"
     />
 
     <div class="border border-border rounded-md p-6 bg-card flex flex-col gap-4">

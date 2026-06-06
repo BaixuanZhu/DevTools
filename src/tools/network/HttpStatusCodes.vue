@@ -46,13 +46,6 @@ const allStatusText = computed(() =>
 );
 
 /**
- * 填入示例数据
- */
-function handleExample() {
-  searchQuery.value = '404';
-}
-
-/**
  * 清空所有筛选条件
  */
 function handleClear() {
@@ -80,7 +73,7 @@ function getCategoryColor(category: StatusCategory): string {
     <ToolHeader
       title="HTTP 状态码查询"
       description="查询 HTTP 状态码含义，支持分类筛选与关键词搜索"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 分类筛选按钮组 -->
