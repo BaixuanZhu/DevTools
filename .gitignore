@@ -27,6 +27,8 @@ pnpm-debug.log*
 .vscode
 # claude code folder
 .claude
+.mcp.json
+.codegraph
 # workbuddy
 .workbuddy
 
