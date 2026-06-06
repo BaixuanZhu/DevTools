@@ -14,7 +14,7 @@ import {
   formatFileSize,
 } from '../../utils/encoding/base64';
 
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp', 'image/bmp'];
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp', 'image/bmp', 'image/avif', 'image/heic', 'image/heif'];
 
 type Mode = 'encode' | 'decode';
 const mode = ref<Mode>('encode');
@@ -25,6 +25,7 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const fileName = ref('');
 const fileMeta = ref<{ mime: string; size: string } | null>(null);
 const isDragging = ref(false);
+const isProcessing = ref(false);
 
 // Decode-specific state
 const decodedImageSrc = ref('');
@@ -100,7 +101,7 @@ function execute() {
 async function handleFile() {
   const file = fileInputRef.value?.files?.[0];
   if (!file) return;
-  processFile(file);
+  await processFile(file);
 }
 
 function handleDrop(event: DragEvent) {
@@ -110,20 +111,44 @@ function handleDrop(event: DragEvent) {
   processFile(file);
 }
 
-function processFile(file: File) {
+/**
+ * 处理文件编码：使用 readAsDataURL 获取带 MIME 的 data URI
+ *
+ * 相比 readAsArrayBuffer + arrayBufferToBase64 的手动编码，
+ * readAsDataURL 是浏览器原生异步方法，大文件不阻塞主线程。
+ */
+async function processFile(file: File) {
   errorMsg.value = '';
   output.value = '';
   fileName.value = file.name;
   fileMeta.value = { mime: file.type || '未知类型', size: formatFileSize(file.size) };
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    output.value = arrayBufferToBase64(reader.result as ArrayBuffer);
-  };
-  reader.onerror = () => {
+  if (file.size > 100 * 1024 * 1024) {
+    errorMsg.value = '文件过大（超过 100MB），请选择较小的文件';
+    return;
+  }
+
+  isProcessing.value = true;
+  try {
+    const dataUrl = await readFileAsDataURL(file);
+    // 提取纯 base64 部分（去掉 data:mime;base64, 前缀）
+    const base64Content = dataUrl.split(',')[1] || '';
+    output.value = base64Content;
+  } catch {
     errorMsg.value = '读取文件时出错';
-  };
-  reader.readAsArrayBuffer(file);
+  } finally {
+    isProcessing.value = false;
+  }
+}
+
+/** 将文件读取为 data URL（Promise 包装 FileReader） */
+function readFileAsDataURL(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error('读取文件时出错'));
+    reader.readAsDataURL(file);
+  });
 }
 
 watch(mode, () => {
@@ -180,6 +205,9 @@ function mimeToExt(mime: string | undefined): string {
     'image/webp': '.webp',
     'image/bmp': '.bmp',
     'image/svg+xml': '.svg',
+    'image/avif': '.avif',
+    'image/heic': '.heic',
+    'image/heif': '.heif',
   };
   return map[mime] ?? '';
 }
@@ -233,9 +261,10 @@ function mimeToExt(mime: string | undefined): string {
         <!-- Action buttons -->
         <div class="flex gap-2 items-center">
           <button
-            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isProcessing"
             @click="execute"
-          >{{ mode === 'encode' ? '编码' : '解码' }}</button>
+          >{{ isProcessing ? '处理中...' : (mode === 'encode' ? '编码' : '解码') }}</button>
           <ClearButton @clear="handleClear" />
         </div>
 

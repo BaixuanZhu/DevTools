@@ -5,15 +5,20 @@ import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue
 import ClearButton from '../../components/ui/ClearButton.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import {
-  decodeBase64ToFile,
+  decodeBase64ToFileAsync,
   downloadFile,
   hasDataUriPrefix,
   COMMON_MIME_TYPES,
   type FileDecodeResult,
 } from '../../utils/encoding/base64-file';
+import { formatFileSize } from '../../utils/encoding/base64';
+
+/** 硬性上限：超过此大小拒绝处理 */
+const SIZE_HARD = 100 * 1024 * 1024;
 
 const input = ref('');
 const errorMsg = ref('');
+const isProcessing = ref(false);
 const result = ref<FileDecodeResult | null>(null);
 const selectedMimeType = ref('application/octet-stream');
 const showMimeSelector = ref(false);
@@ -21,26 +26,31 @@ const showMimeSelector = ref(false);
 /** 示例数据：JSON 文本的 Base64 */
 const EXAMPLE_BASE64 = 'eyJuYW1lIjoiRGV2VG9vbHMiLCJ2ZXJzaW9uIjoiMS4wIiwiZGVzY3JpcHRpb24iOiLlnLDlnZror77nqIvlt6XkvZzmiJDliqDku6znmoTmlofmoaYifQ==';
 
-function decode() {
+async function decode() {
   errorMsg.value = '';
   result.value = null;
 
   const trimmed = input.value.trim();
   if (!trimmed) return;
 
-  // 大文件警告
-  const raw = trimmed.replace(/^data:[^;]+;base64,/, '');
+  // 大小估算
+  const raw = trimmed.replace(/^data:[^;]+;base64,/, '').replace(/\s/g, '');
   const estimatedSize = Math.ceil((raw.length * 3) / 4);
-  if (estimatedSize > 10 * 1024 * 1024) {
-    errorMsg.value = '文件较大（超过 10MB），可能影响浏览器性能';
+
+  if (estimatedSize > SIZE_HARD) {
+    errorMsg.value = `文件过大（约 ${formatFileSize(estimatedSize)}），超过 100MB 上限`;
     return;
   }
 
+  showMimeSelector.value = !hasDataUriPrefix(trimmed);
+
+  isProcessing.value = true;
   try {
-    showMimeSelector.value = !hasDataUriPrefix(trimmed);
-    result.value = decodeBase64ToFile(trimmed, selectedMimeType.value);
+    result.value = await decodeBase64ToFileAsync(trimmed, selectedMimeType.value);
   } catch (e) {
     errorMsg.value = e instanceof Error ? e.message : '解码时出错';
+  } finally {
+    isProcessing.value = false;
   }
 }
 
@@ -52,11 +62,10 @@ watch(input, () => {
   }
 });
 
-watch(selectedMimeType, () => {
+watch(selectedMimeType, async () => {
   if (result.value && showMimeSelector.value) {
-    // 重新解码以应用新的 MIME 类型
     try {
-      result.value = decodeBase64ToFile(input.value, selectedMimeType.value);
+      result.value = await decodeBase64ToFileAsync(input.value, selectedMimeType.value);
     } catch {
       // 静默处理
     }
@@ -105,10 +114,11 @@ function handleDownload() {
 
         <div class="flex gap-2 items-center">
           <button
-            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isProcessing"
             @click="decode"
           >
-            解析文件
+            {{ isProcessing ? '解析中...' : '解析文件' }}
           </button>
           <ClearButton @clear="handleClear" />
         </div>

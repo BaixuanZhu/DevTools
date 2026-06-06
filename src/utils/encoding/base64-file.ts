@@ -2,7 +2,12 @@
  * Base64 转文件工具函数
  * 将 Base64 字符串解码为文件 Blob，提供信息提取和下载能力
  */
-import { formatFileSize, base64ToArrayBuffer } from './base64';
+import {
+  formatFileSize,
+  base64ToArrayBuffer,
+  base64ToArrayBufferAsync,
+  cleanBase64,
+} from './base64';
 
 /** 文件解码结果 */
 export interface FileDecodeResult {
@@ -72,6 +77,9 @@ export function mimeToExtension(mimeType: string): string {
     'image/webp': '.webp',
     'image/bmp': '.bmp',
     'image/x-icon': '.ico',
+    'image/avif': '.avif',
+    'image/heic': '.heic',
+    'image/heif': '.heif',
     'audio/mpeg': '.mp3',
     'audio/wav': '.wav',
     'audio/ogg': '.ogg',
@@ -82,7 +90,10 @@ export function mimeToExtension(mimeType: string): string {
 }
 
 /**
- * 将 Base64 字符串解码为文件
+ * 将 Base64 字符串解码为文件（同步版本，适合小文件）
+ *
+ * 自动清理输入中的空白字符和 URL-safe 字符。
+ *
  * @param base64Input data URI 或纯 Base64 字符串
  * @param fallbackMimeType 无 data URI 时的备用 MIME 类型，默认 application/octet-stream
  */
@@ -96,14 +107,66 @@ export function decodeBase64ToFile(
   }
 
   const { pureBase64, mimeType: uriMime } = parseDataUri(trimmed);
+  const cleaned = cleanBase64(pureBase64);
+
+  if (!cleaned) {
+    throw new Error('请输入 Base64 字符串');
+  }
 
   // 校验 Base64 有效性
-  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(pureBase64.replace(/\s/g, ''))) {
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(cleaned)) {
     throw new Error('输入不是有效的 Base64 编码');
   }
 
   const mimeType = uriMime ?? fallbackMimeType;
-  const buffer = base64ToArrayBuffer(pureBase64);
+  const buffer = base64ToArrayBuffer(cleaned);
+  const size = buffer.byteLength;
+  const blob = new Blob([buffer], { type: mimeType });
+  const extension = mimeToExtension(mimeType);
+
+  return {
+    blob,
+    mimeType,
+    size,
+    sizeFormatted: formatFileSize(size),
+    extension,
+    fileName: `decoded-file${extension}`,
+  };
+}
+
+/**
+ * 将 Base64 字符串异步解码为文件（大文件不阻塞主线程）
+ *
+ * 与同步版本功能相同，但对大文件使用分块异步处理。
+ *
+ * @param base64Input data URI 或纯 Base64 字符串
+ * @param fallbackMimeType 无 data URI 时的备用 MIME 类型
+ * @param onProgress 可选进度回调，参数为 0-1 之间的比例
+ */
+export async function decodeBase64ToFileAsync(
+  base64Input: string,
+  fallbackMimeType: string = 'application/octet-stream',
+  onProgress?: (ratio: number) => void,
+): Promise<FileDecodeResult> {
+  const trimmed = base64Input.trim();
+  if (!trimmed) {
+    throw new Error('请输入 Base64 字符串');
+  }
+
+  const { pureBase64, mimeType: uriMime } = parseDataUri(trimmed);
+  const cleaned = cleanBase64(pureBase64);
+
+  if (!cleaned) {
+    throw new Error('请输入 Base64 字符串');
+  }
+
+  // 校验 Base64 有效性
+  if (!/^[A-Za-z0-9+/]*={0,2}$/.test(cleaned)) {
+    throw new Error('输入不是有效的 Base64 编码');
+  }
+
+  const mimeType = uriMime ?? fallbackMimeType;
+  const buffer = await base64ToArrayBufferAsync(cleaned, onProgress);
   const size = buffer.byteLength;
   const blob = new Blob([buffer], { type: mimeType });
   const extension = mimeToExtension(mimeType);

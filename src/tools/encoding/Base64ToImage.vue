@@ -5,11 +5,15 @@ import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import {
-  decodeBase64ToImageBlob,
+  decodeBase64ToImageBlobAsync,
   loadImageDimensions,
   downloadImageBlob,
   type ImageDecodeResult,
 } from '../../utils/encoding/base64-image';
+import { formatFileSize } from '../../utils/encoding/base64';
+
+/** 硬性上限：超过此大小拒绝处理 */
+const SIZE_HARD = 100 * 1024 * 1024;
 
 const input = ref('');
 const errorMsg = ref('');
@@ -28,17 +32,18 @@ async function decode() {
   const trimmed = input.value.trim();
   if (!trimmed) return;
 
-  // 大文件警告
-  const raw = trimmed.replace(/^data:[^;]+;base64,/, '');
+  // 大小估算
+  const raw = trimmed.replace(/^data:[^;]+;base64,/, '').replace(/\s/g, '');
   const estimatedSize = Math.ceil((raw.length * 3) / 4);
-  if (estimatedSize > 10 * 1024 * 1024) {
-    errorMsg.value = '文件较大（超过 10MB），可能影响浏览器性能';
+
+  if (estimatedSize > SIZE_HARD) {
+    errorMsg.value = `文件过大（约 ${formatFileSize(estimatedSize)}），超过 100MB 上限`;
     return;
   }
 
   isLoading.value = true;
   try {
-    const partial = decodeBase64ToImageBlob(trimmed);
+    const partial = await decodeBase64ToImageBlobAsync(trimmed);
     const dims = await loadImageDimensions(partial.objectUrl);
     result.value = {
       ...partial,
