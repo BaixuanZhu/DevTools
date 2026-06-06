@@ -3,7 +3,7 @@
  * 响应式布局骨架组件，为工具页面提供统一的输入/输出/操作区域布局。
  *
  * 支持 vertical（垂直堆叠）和 horizontal（左右并排）两种模式。
- * horizontal 模式在屏幕宽度 ≥1920px 时自动切换为 Input | Output 左右双栏布局，
+ * horizontal 模式在屏幕宽度 ≥1024px（lg 断点）时自动切换为 Input | Output 左右双栏布局，
  * 否则降级为垂直堆叠。所有 slot 均为可选，为空时对应区域自动隐藏。
  *
  * @example
@@ -44,7 +44,7 @@ withDefaults(defineProps<Props>(), {
   <div
     :class="[
       'mx-auto w-full transition-all duration-300 ease-in-out',
-      mode === 'vertical' ? 'max-w-[720px] flex flex-col' : 'max-w-[1600px] grid grid-cols-1 min-w-[1920px]:grid-cols-2',
+      mode === 'vertical' ? 'max-w-[720px] flex flex-col' : 'max-w-[1600px] grid grid-cols-1 lg:grid-cols-2',
       gap,
     ]"
   >
@@ -53,7 +53,7 @@ withDefaults(defineProps<Props>(), {
       v-if="$slots.actions"
       :class="[
         'flex flex-wrap items-center justify-center',
-        mode === 'horizontal' && 'min-w-[1920px]:col-span-2',
+        mode === 'horizontal' && 'lg:col-span-2',
       ]"
     >
       <slot name="actions" />
