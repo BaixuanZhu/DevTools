@@ -8,10 +8,48 @@ interface Props {
 const { tool } = Astro.props;
 ---
 
-<a href={tool.path} class="flex items-start gap-4 p-5 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full">
-  <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
-  <div class="flex-1 min-w-0">
-    <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug">{tool.name}</h3>
-    <p class="m-0 text-[0.8125rem] text-muted leading-relaxed">{tool.description}</p>
-  </div>
-</a>
+<div class="relative flex h-full">
+  <a
+    href={tool.path}
+    class="flex items-start gap-4 p-5 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
+  >
+    <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
+    <div class="flex-1 min-w-0">
+      <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug">{tool.name}</h3>
+      <p class="m-0 text-[0.8125rem] text-muted leading-relaxed">{tool.description}</p>
+    </div>
+  </a>
+
+  <!-- 收藏星标按钮（常驻可见） -->
+  <button
+    class="absolute top-3 right-3 z-10 shrink-0 p-1 rounded-sm border-none bg-transparent cursor-pointer text-muted hover:text-accent transition-[color] duration-150"
+    :class={`$store.favorites.isFavorite('${tool.path}') ? 'text-accent' : 'text-muted hover:text-accent'`}
+    :aria-label={`$store.favorites.isFavorite('${tool.path}') ? '取消收藏 ${tool.name}' : '收藏 ${tool.name}'`}
+    @click.prevent={`$store.favorites.toggle('${tool.path}', '${tool.name}', '${tool.icon}')`}
+  >
+    <!-- 实心星标（已收藏） -->
+    <svg
+      x-show={`$store.favorites.isFavorite('${tool.path}')`}
+      class="w-4 h-4"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      stroke="currentColor"
+      stroke-width="1"
+      aria-hidden="true"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+    <!-- 轮廓星标（未收藏） -->
+    <svg
+      x-show={`!$store.favorites.isFavorite('${tool.path}')`}
+      class="w-4 h-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+    </svg>
+  </button>
+</div>
