@@ -1,13 +1,23 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue';
+/**
+ * URL 编解码工具组件
+ * 提供 encodeURIComponent / encodeURI 编码与对应解码功能，
+ * 并在检测到 URL（明文或编码后）时实时展示 URL 解析结果。
+ */
+import { ref, computed, watch, onMounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import { encodeUrl, decodeUrl, parseUrl, type UrlParseResult } from '../../utils/encoding/url-codec';
 
-const input = ref('');
+type Action = 'encode' | 'decode';
+
+/** 默认示例数据 */
+const DEFAULT_INPUT = 'https://example.com/search?q=你好世界&lang=zh-CN';
+
+const input = ref(DEFAULT_INPUT);
+const currentAction = ref<Action | null>('encode');
 
 const encodeComponentResult = ref('');
 const encodeFullResult = ref('');
@@ -18,44 +28,78 @@ const decodeFullError = ref('');
 
 const urlParsed = ref<UrlParseResult | null>(null);
 
-function execute() {
-  encodeComponentResult.value = '';
-  encodeFullResult.value = '';
+/** 执行编码操作 */
+function executeEncode() {
+  const result = encodeUrl(input.value);
+  encodeComponentResult.value = result.component.value;
+  encodeFullResult.value = result.full.value;
+}
+
+/** 执行解码操作 */
+function executeDecode() {
+  const result = decodeUrl(input.value);
+  decodeComponentResult.value = result.component.value;
+  decodeComponentError.value = result.component.error ?? '';
+  decodeFullResult.value = result.full.value;
+  decodeFullError.value = result.full.error ?? '';
+}
+
+/** 点击编码按钮 */
+function handleEncode() {
+  if (!input.value.trim()) return;
+  currentAction.value = 'encode';
   decodeComponentResult.value = '';
   decodeFullResult.value = '';
   decodeComponentError.value = '';
   decodeFullError.value = '';
-
-  if (!input.value.trim()) {
-    return;
-  }
-
-  const encResult = encodeUrl(input.value);
-  encodeComponentResult.value = encResult.component.value;
-  encodeFullResult.value = encResult.full.value;
-
-  const decResult = decodeUrl(input.value);
-  decodeComponentResult.value = decResult.component.value;
-  decodeComponentError.value = decResult.component.error ?? '';
-  decodeFullResult.value = decResult.full.value;
-  decodeFullError.value = decResult.full.error ?? '';
+  executeEncode();
 }
 
+/** 点击解码按钮 */
+function handleDecode() {
+  if (!input.value.trim()) return;
+  currentAction.value = 'decode';
+  encodeComponentResult.value = '';
+  encodeFullResult.value = '';
+  executeDecode();
+}
+
+/** 输入变化时重新执行当前操作并检测 URL */
 watch(input, () => {
-  execute();
-  if (/^https?:\/\//.test(input.value) || /:\/\//.test(input.value)) {
-    urlParsed.value = parseUrl(input.value);
-  } else {
-    urlParsed.value = null;
+  if (currentAction.value === 'encode') {
+    executeEncode();
+  } else if (currentAction.value === 'decode') {
+    executeDecode();
   }
+  urlParsed.value = tryParseUrl(input.value);
 });
 
-function handleExample() {
-  input.value = 'https://example.com/search?q=你好世界&lang=zh-CN';
+/** 组件挂载时执行默认编码并检测 URL */
+onMounted(() => {
+  executeEncode();
+  urlParsed.value = tryParseUrl(input.value);
+});
+
+/** 尝试将输入解析为 URL，支持明文和编码后的 URL */
+function tryParseUrl(text: string): UrlParseResult | null {
+  if (!text.trim()) return null;
+  // 1. 直接尝试解析明文 URL
+  if (/^https?:\/\//.test(text)) {
+    return parseUrl(text);
+  }
+  // 2. 尝试解码后再解析（处理编码后的 URL）
+  try {
+    const decoded = decodeURIComponent(text);
+    if (/^https?:\/\//.test(decoded)) {
+      return parseUrl(decoded);
+    }
+  } catch { /* 解码失败，忽略 */ }
+  return null;
 }
 
 function handleClear() {
   input.value = '';
+  currentAction.value = null;
   encodeComponentResult.value = '';
   encodeFullResult.value = '';
   decodeComponentResult.value = '';
@@ -73,6 +117,7 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/** 差异对照 HTML（仅当两种编码结果不同时才有值） */
 const diffResult = computed(() => {
   const comp = encodeComponentResult.value;
   const full = encodeFullResult.value;
@@ -149,18 +194,40 @@ const diffResult = computed(() => {
     <ToolHeader
       title="URL 编解码"
       description="URL 编码与解码，实时展示编码和解码结果"
-      @example="handleExample"
+      :showExample="false"
     />
 
     <ResponsiveWorkspace mode="horizontal">
       <template #input>
-        <div class="mb-4">
+        <!-- 输入区 -->
+        <div class="mb-3">
           <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入</label>
-          <textarea v-model="input" class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent" rows="3" placeholder="输入文本或 URL，同时查看编码与解码结果"></textarea>
+          <textarea
+            v-model="input"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="4"
+            placeholder="输入文本或 URL"
+          ></textarea>
         </div>
 
-        <!-- URL 解析 -->
-        <DisclosureSection v-if="urlParsed" title="🔗 检测到 URL" class="mb-4">
+        <!-- 操作按钮 -->
+        <div class="flex gap-2 items-center mb-4">
+          <button
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!input.trim()"
+            @click="handleEncode"
+          >编码</button>
+          <button
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="!input.trim()"
+            @click="handleDecode"
+          >解码</button>
+          <ClearButton @clear="handleClear" />
+        </div>
+
+        <!-- URL 解析（常驻，独立于编码/解码操作） -->
+        <div v-if="urlParsed" class="border border-border rounded-md p-4 bg-card">
+          <div class="text-[0.875rem] font-semibold text-accent mb-3">URL 解析</div>
           <div class="flex flex-col gap-2">
             <div class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">协议</span>
@@ -199,89 +266,90 @@ const diffResult = computed(() => {
               <CopyButton :text="urlParsed.hash" label="复制" />
             </div>
           </div>
-        </DisclosureSection>
-      </template>
-
-      <template #actions>
-        <ClearButton @clear="handleClear" />
+        </div>
       </template>
 
       <template #output>
         <!-- 编码结果 -->
-        <div class="border border-border rounded-md p-4 bg-card mb-4">
-          <div class="text-[0.875rem] font-semibold text-accent mb-3">编码结果</div>
+        <template v-if="currentAction === 'encode'">
+          <div class="border border-border rounded-md p-4 bg-card">
+            <div class="text-[0.875rem] font-semibold text-accent mb-3">编码结果</div>
 
-          <div class="mb-3">
-            <div class="flex items-baseline gap-2 mb-1.5">
-              <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURIComponent</span>
-              <span class="text-[0.6875rem] text-muted">编码 :/?&amp;=# 等 URL 结构字符，适用于编码单个查询参数值</span>
+            <div class="mb-3">
+              <div class="flex items-baseline gap-2 mb-1.5">
+                <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURIComponent</span>
+                <span class="text-[0.6875rem] text-muted">编码 :/?&amp;=# 等 URL 结构字符，适用于编码单个查询参数值</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
+                <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ encodeComponentResult || '—' }}</code>
+                <CopyButton v-if="encodeComponentResult" :text="encodeComponentResult" label="复制" class="shrink-0" />
+              </div>
             </div>
-            <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
-              <code class="font-mono text-[0.8125rem] break-all text-text min-w-0">{{ encodeComponentResult || '—' }}</code>
-              <CopyButton v-if="encodeComponentResult" :text="encodeComponentResult" label="复制" class="shrink-0" />
-              <span v-else class="shrink-0 w-[3.75rem]"></span>
-            </div>
-          </div>
 
-          <div class="mb-4">
-            <div class="flex items-baseline gap-2 mb-1.5">
-              <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURI</span>
-              <span class="text-[0.6875rem] text-muted">保留 URL 结构字符（:/?&amp;=#），适用于编码完整 URL</span>
+            <div class="mb-3">
+              <div class="flex items-baseline gap-2 mb-1.5">
+                <span class="text-[0.8125rem] font-semibold text-accent font-mono">encodeURI</span>
+                <span class="text-[0.6875rem] text-muted">保留 URL 结构字符（:/?&amp;=#），适用于编码完整 URL</span>
+              </div>
+              <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
+                <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ encodeFullResult || '—' }}</code>
+                <CopyButton v-if="encodeFullResult" :text="encodeFullResult" label="复制" class="shrink-0" />
+              </div>
             </div>
-            <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
-              <code class="font-mono text-[0.8125rem] break-all text-text min-w-0">{{ encodeFullResult || '—' }}</code>
-              <CopyButton v-if="encodeFullResult" :text="encodeFullResult" label="复制" class="shrink-0" />
-              <span v-else class="shrink-0 w-[3.75rem]"></span>
-            </div>
-          </div>
 
-          <DisclosureSection v-if="diffResult" title="差异对照" class="mt-4">
-            <div class="mb-2">
+            <!-- 差异对照（仅当两种编码不同时显示） -->
+            <div v-if="diffResult" class="border-t border-border pt-3 mt-3">
+              <div class="text-[0.8125rem] font-semibold text-accent mb-2">差异对照</div>
               <div class="grid grid-cols-[auto_1fr] gap-2 items-start mb-1.5">
                 <span class="text-[0.6875rem] text-muted shrink-0 w-[7.5rem] pt-0.5">encodeURIComponent</span>
                 <code class="font-mono text-[0.8125rem] break-all min-w-0" v-html="diffResult.compHtml"></code>
               </div>
-              <div class="grid grid-cols-[auto_1fr] gap-2 items-start">
+              <div class="grid grid-cols-[auto_1fr] gap-2 items-start mb-2">
                 <span class="text-[0.6875rem] text-muted shrink-0 w-[7.5rem] pt-0.5">encodeURI</span>
                 <code class="font-mono text-[0.8125rem] break-all min-w-0" v-html="diffResult.fullHtml"></code>
               </div>
+              <div class="text-[0.6875rem] text-muted leading-relaxed">
+                <span class="inline-block bg-amber-100 text-amber-800 rounded-sm px-1 mr-1">橙色</span>部分表示 encodeURIComponent 额外编码的字符，
+                <span class="inline-block bg-green-100 text-green-800 rounded-sm px-1 mr-1">绿色</span>部分表示 encodeURI 保留的 URL 结构字符
+              </div>
             </div>
-            <div class="text-[0.6875rem] text-muted leading-relaxed">
-              <span class="inline-block bg-amber-100 text-amber-800 rounded-sm px-1 mr-1">橙色</span>部分表示 encodeURIComponent 额外编码的字符，
-              <span class="inline-block bg-green-100 text-green-800 rounded-sm px-1 mr-1">绿色</span>部分表示 encodeURI 保留的 URL 结构字符
-            </div>
-          </DisclosureSection>
-        </div>
+          </div>
+        </template>
 
         <!-- 解码结果 -->
-        <div class="border border-border rounded-md p-4 bg-card">
-          <div class="text-[0.875rem] font-semibold text-accent mb-3">解码结果</div>
+        <template v-if="currentAction === 'decode'">
+          <div class="border border-border rounded-md p-4 bg-card">
+            <div class="text-[0.875rem] font-semibold text-accent mb-3">解码结果</div>
 
-          <div class="mb-3">
-            <div class="flex items-baseline gap-2 mb-1.5">
-              <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURIComponent</span>
-              <span class="text-[0.6875rem] text-muted">组件级解码</span>
+            <div class="mb-3">
+              <div class="flex items-baseline gap-2 mb-1.5">
+                <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURIComponent</span>
+                <span class="text-[0.6875rem] text-muted">组件级解码</span>
+              </div>
+              <div v-if="decodeComponentError" class="text-error text-[0.8125rem]">{{ decodeComponentError }}</div>
+              <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
+                <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ decodeComponentResult || '—' }}</code>
+                <CopyButton v-if="decodeComponentResult" :text="decodeComponentResult" label="复制" class="shrink-0" />
+              </div>
             </div>
-            <div v-if="decodeComponentError" class="text-error text-[0.8125rem]">{{ decodeComponentError }}</div>
-            <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
-              <code class="font-mono text-[0.8125rem] break-all text-text min-w-0">{{ decodeComponentResult || '—' }}</code>
-              <CopyButton v-if="decodeComponentResult" :text="decodeComponentResult" label="复制" class="shrink-0" />
-              <span v-else class="shrink-0 w-[3.75rem]"></span>
+
+            <div>
+              <div class="flex items-baseline gap-2 mb-1.5">
+                <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURI</span>
+                <span class="text-[0.6875rem] text-muted">完整 URL 级解码</span>
+              </div>
+              <div v-if="decodeFullError" class="text-error text-[0.8125rem]">{{ decodeFullError }}</div>
+              <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
+                <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ decodeFullResult || '—' }}</code>
+                <CopyButton v-if="decodeFullResult" :text="decodeFullResult" label="复制" class="shrink-0" />
+              </div>
             </div>
           </div>
+        </template>
 
-          <div>
-            <div class="flex items-baseline gap-2 mb-1.5">
-              <span class="text-[0.8125rem] font-semibold text-accent font-mono">decodeURI</span>
-              <span class="text-[0.6875rem] text-muted">完整 URL 级解码</span>
-            </div>
-            <div v-if="decodeFullError" class="text-error text-[0.8125rem]">{{ decodeFullError }}</div>
-            <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
-              <code class="font-mono text-[0.8125rem] break-all text-text min-w-0">{{ decodeFullResult || '—' }}</code>
-              <CopyButton v-if="decodeFullResult" :text="decodeFullResult" label="复制" class="shrink-0" />
-              <span v-else class="shrink-0 w-[3.75rem]"></span>
-            </div>
-          </div>
+        <!-- 空状态 -->
+        <div v-if="!currentAction" class="border border-border rounded-md p-4 bg-card">
+          <p class="text-muted text-[0.8125rem] m-0 text-center">点击「编码」或「解码」按钮查看结果</p>
         </div>
       </template>
     </ResponsiveWorkspace>
