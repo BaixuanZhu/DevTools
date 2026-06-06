@@ -108,8 +108,9 @@ const breadcrumbItems = toolId && toolMeta
 
 <Layout title={title} description={finalDescription} jsonLd={jsonLdItems}>
   <div id="app" class="h-screen grid grid-rows-[auto_minmax(0,1fr)_auto]">
-    <!-- Header (simplified - no search bar) -->
+    <!-- Header -->
     <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
+      <!-- 左侧：汉堡按钮 + Logo -->
       <div class="flex items-center gap-4">
         <button
           class="hidden max-lg:flex flex-col gap-1 p-2 border-none bg-transparent cursor-pointer"
@@ -124,7 +125,119 @@ const breadcrumbItems = toolId && toolMeta
           <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
           <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
         </button>
-        <a href="/" class="text-lg font-semibold text-text hover:text-accent transition-colors duration-150">DevTools</a>
+        <!-- 品牌化动效 Logo -->
+        <a href="/" class="group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150" aria-label="DevTools 首页">
+          <!-- `</>` 代码括号图标 -->
+          <svg class="w-6 h-6 text-text group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+          <span>DevTools</span>
+        </a>
+      </div>
+
+      <!-- 右侧：工具按钮区 -->
+      <div class="flex items-center gap-1" x-data="{ showPanel: false }">
+
+        <!-- 收藏夹按钮 + 下拉面板 -->
+        <div class="relative">
+          <button
+            class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent"
+            aria-label="收藏的工具"
+            @click="showPanel = !showPanel"
+            :aria-expanded="showPanel.toString()"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+
+          <!-- 收藏夹下拉面板 -->
+          <div
+            x-show="showPanel"
+            @click.outside="showPanel = false"
+            @keydown.escape="showPanel = false"
+            x-transition:enter="transition ease-out duration-150"
+            x-transition:enter-start="opacity-0 -translate-y-1"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-100"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 -translate-y-1"
+            class="absolute right-0 top-full mt-2 w-[260px] bg-card border border-border rounded-lg shadow-lg py-2 z-50"
+            x-cloak
+            role="menu"
+          >
+            <!-- 标题区 -->
+            <div class="flex items-center justify-between px-4 pb-2 mb-1 border-b border-border">
+              <span class="text-xs font-semibold text-muted uppercase tracking-wider">收藏的工具</span>
+              <span
+                x-show="$store.favorites.list.length > 0"
+                class="text-xs text-muted bg-hover px-1.5 py-0.5 rounded-sm"
+                x-text="$store.favorites.list.length"
+              ></span>
+            </div>
+
+            <!-- 工具列表 -->
+            <template x-for="tool in $store.favorites.list" :key="tool.path">
+              <a
+                :href="tool.path"
+                class="flex items-center gap-2 px-4 py-2 text-sm text-text hover:bg-hover transition-[background-color] duration-150"
+                @click="showPanel = false"
+              >
+                <span class="text-base w-6 text-center shrink-0" x-text="tool.icon"></span>
+                <span x-text="tool.name"></span>
+              </a>
+            </template>
+
+            <!-- 空状态 -->
+            <div x-show="$store.favorites.list.length === 0" class="px-4 py-6 text-center">
+              <p class="text-sm text-muted mb-1">还没有收藏的工具</p>
+              <p class="text-xs text-muted">在侧边栏中点击 ⭐ 收藏常用工具</p>
+            </div>
+
+            <!-- 底部操作 -->
+            <div x-show="$store.favorites.list.length > 0" class="border-t border-border mt-1 pt-1 px-4">
+              <button
+                class="text-xs text-muted hover:text-accent transition-[color] duration-150 cursor-pointer bg-transparent border-none py-1"
+                @click.prevent="$store.favorites.clearAll(); showPanel = false"
+              >
+                清空全部
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 暗色模式按钮（仅 UI 预留） -->
+        <button
+          class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent"
+          aria-label="切换暗色模式（即将支持）"
+          @click="$store.toast.success('暗色模式即将支持，敬请期待')"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <!-- GitHub 链接 -->
+        <a
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150"
+          aria-label="GitHub 仓库"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path>
+          </svg>
+        </a>
       </div>
     </header>
 
@@ -159,16 +272,32 @@ const breadcrumbItems = toolId && toolMeta
             <h3 class="text-xs font-semibold text-muted px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
             <ul class="list-none m-0 p-0">
               {toolsByCategory[category].map((tool) => (
-                <li>
+                <li class="group/sidebar relative">
                   <a
                     href={tool.path}
                     class:list={[
-                      'flex items-center gap-2 px-4 py-2 text-sm text-text transition-colors duration-150 hover:bg-hover',
+                      'flex items-center gap-2 px-4 py-2 text-sm text-text transition-[background-color] duration-150 hover:bg-hover',
                       currentPath === tool.path && 'bg-hover text-accent font-medium border-r-2 border-accent',
                     ]}
                   >
                     <span class="text-base w-6 text-center shrink-0">{tool.icon}</span>
                     <span>{tool.name}</span>
+                    <!-- 收藏星标按钮 -->
+                    <button
+                      class="ml-auto shrink-0 p-0.5 rounded-sm border-none bg-transparent cursor-pointer opacity-0 group-hover/sidebar:opacity-100 focus:opacity-100 transition-[opacity,color] duration-150"
+                      :class={`$store.favorites.isFavorite('${tool.path}') ? '!opacity-100 text-accent' : 'text-muted hover:text-accent'`}
+                      :aria-label={`$store.favorites.isFavorite('${tool.path}') ? '取消收藏 ${tool.name}' : '收藏 ${tool.name}'`}
+                      @click.prevent={`$store.favorites.toggle('${tool.path}', '${tool.name}', '${tool.icon}')`}
+                    >
+                      <!-- 实心星标（已收藏） -->
+                      <svg x-show={`$store.favorites.isFavorite('${tool.path}')`} class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                      <!-- 轮廓星标（未收藏） -->
+                      <svg x-show={`!$store.favorites.isFavorite('${tool.path}')`} class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    </button>
                   </a>
                 </li>
               ))}

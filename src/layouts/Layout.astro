@@ -69,7 +69,67 @@ if (jsonLd) {
     },
   });
 
+  /** 收藏夹元数据 */
+  interface FavoriteItem {
+    path: string;
+    name: string;
+    icon: string;
+  }
+
+  // 注册 Alpine store: favorites（Header 下拉面板 + 侧边栏星标共享）
+  Alpine.store('favorites', {
+    list: [] as FavoriteItem[],
+    maxCount: 10,
+    storageKey: 'devtools-favorites',
+
+    /** 从 localStorage 加载收藏数据 */
+    load() {
+      try {
+        const raw = localStorage.getItem(this.storageKey);
+        this.list = raw ? JSON.parse(raw) : [];
+      } catch {
+        this.list = [];
+      }
+    },
+
+    /** 持久化到 localStorage */
+    save() {
+      localStorage.setItem(this.storageKey, JSON.stringify(this.list));
+    },
+
+    /** 判断指定路径的工具是否已收藏 */
+    isFavorite(path: string): boolean {
+      return this.list.some((f) => f.path === path);
+    },
+
+    /** 切换收藏状态 */
+    toggle(path: string, name: string, icon: string) {
+      if (this.isFavorite(path)) {
+        this.list = this.list.filter((f) => f.path !== path);
+        Alpine.store('toast').success(`已取消收藏 ${name}`);
+      } else {
+        if (this.list.length >= this.maxCount) {
+          Alpine.store('toast').error(`最多收藏 ${this.maxCount} 个工具`);
+          return;
+        }
+        this.list = [...this.list, { path, name, icon }];
+        Alpine.store('toast').success(`已收藏 ${name}`);
+      }
+      this.save();
+    },
+
+    /** 清空全部收藏 */
+    clearAll() {
+      this.list = [];
+      this.save();
+      Alpine.store('toast').success('已清空全部收藏');
+    },
+  });
+
   Alpine.start();
+
+  // 页面加载时初始化收藏数据
+  Alpine.store('favorites').load();
 
   // 桥接 DOM CustomEvent → Alpine toast store
   document.addEventListener('toast', ((e: CustomEvent) => {
