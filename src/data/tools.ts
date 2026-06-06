@@ -182,6 +182,33 @@ export const tools: ToolMeta[] = [
     icon: '🔳',
     path: '/media/qr-code-generator',
   },
+  {
+    id: 'base64-to-image',
+    name: 'Base64 转图片',
+    description: '将 Base64 字符串解码为图片，支持预览和下载',
+    seoDescription: '在线 Base64 转图片工具，支持 PNG、JPEG、GIF、SVG、WebP 等格式，实时预览图片、显示尺寸大小信息，一键下载。',
+    category: '编码转换',
+    icon: '🖼️',
+    path: '/encoding/base64-to-image',
+  },
+  {
+    id: 'base64-to-file',
+    name: 'Base64 转文件',
+    description: '将 Base64 字符串解码为文件，支持 Data URI 格式自动识别',
+    seoDescription: '在线 Base64 转文件工具，支持 Data URI 格式输入，自动识别 MIME 类型，一键下载还原文件。',
+    category: '编码转换',
+    icon: '📎',
+    path: '/encoding/base64-to-file',
+  },
+  {
+    id: 'cron-parser',
+    name: 'Cron 表达式解析器',
+    description: '解析 Cron 表达式，预览执行时间，可视化构建',
+    seoDescription: '在线 Cron 表达式解析器，支持可视化构建、执行时间预览和常用模板，帮助开发者快速编写和验证定时任务表达式。',
+    category: '日期时间',
+    icon: '⏰',
+    path: '/datetime/cron-parser',
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */

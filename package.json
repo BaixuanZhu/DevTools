@@ -20,6 +20,7 @@
     "alpinejs": "^3.15.12",
     "astro": "^6.4.2",
     "bowser": "^2.14.1",
+    "cron-parser": "^5.5.0",
     "dayjs": "^1.11.21",
     "des.js": "^1.1.0",
     "gm-crypto": "^0.1.12",

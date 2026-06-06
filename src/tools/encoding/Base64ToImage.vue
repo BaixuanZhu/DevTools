@@ -1,0 +1,157 @@
+<script setup lang="ts">
+import { ref, watch } from 'vue';
+import ToolHeader from '../../components/layout/ToolHeader.vue';
+import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
+import CopyButton from '../../components/ui/CopyButton.vue';
+import ClearButton from '../../components/ui/ClearButton.vue';
+import {
+  decodeBase64ToImageBlob,
+  loadImageDimensions,
+  downloadImageBlob,
+  type ImageDecodeResult,
+} from '../../utils/encoding/base64-image';
+
+const input = ref('');
+const errorMsg = ref('');
+const isLoading = ref(false);
+const result = ref<ImageDecodeResult | null>(null);
+
+/** 示例数据：1×1 红色像素 PNG */
+const EXAMPLE_BASE64 =
+  'iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFklEQVQYV2P4z8BQDwIMAQR' +
+  'TEDEhAKkKDP8PhRjhAAAAAElFTkSuQmCC';
+
+async function decode() {
+  errorMsg.value = '';
+  result.value = null;
+
+  const trimmed = input.value.trim();
+  if (!trimmed) return;
+
+  // 大文件警告
+  const raw = trimmed.replace(/^data:[^;]+;base64,/, '');
+  const estimatedSize = Math.ceil((raw.length * 3) / 4);
+  if (estimatedSize > 10 * 1024 * 1024) {
+    errorMsg.value = '文件较大（超过 10MB），可能影响浏览器性能';
+    return;
+  }
+
+  isLoading.value = true;
+  try {
+    const partial = decodeBase64ToImageBlob(trimmed);
+    const dims = await loadImageDimensions(partial.objectUrl);
+    result.value = {
+      ...partial,
+      width: dims.width,
+      height: dims.height,
+    };
+  } catch (e) {
+    errorMsg.value = e instanceof Error ? e.message : '解码时出错';
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+watch(input, () => {
+  if (!input.value.trim()) {
+    result.value = null;
+    errorMsg.value = '';
+  }
+});
+
+function handleExample() {
+  input.value = EXAMPLE_BASE64;
+  decode();
+}
+
+function handleClear() {
+  input.value = '';
+  errorMsg.value = '';
+  result.value = null;
+}
+
+function handleDownload() {
+  if (!result.value) return;
+  downloadImageBlob(result.value.blob, result.value.mimeType);
+}
+</script>
+
+<template>
+  <div>
+    <ToolHeader
+      title="Base64 转图片"
+      description="将 Base64 字符串解码为图片，支持预览和下载"
+      @example="handleExample"
+    />
+
+    <ResponsiveWorkspace mode="horizontal">
+      <template #input>
+        <div class="mb-3">
+          <label class="block text-[0.8125rem] text-muted font-medium mb-1">
+            Base64 字符串
+          </label>
+          <textarea
+            v-model="input"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="8"
+            placeholder="粘贴 Base64 字符串或 data:image/...;base64,... 格式"
+          ></textarea>
+        </div>
+
+        <div class="flex gap-2 items-center">
+          <button
+            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isLoading"
+            @click="decode"
+          >
+            {{ isLoading ? '解析中...' : '解析图片' }}
+          </button>
+          <ClearButton @clear="handleClear" />
+        </div>
+
+        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mt-3">{{ errorMsg }}</p>
+      </template>
+
+      <template #output>
+        <div v-if="result">
+          <div class="mb-3 p-3 border border-border rounded-sm bg-hover">
+            <img
+              :src="result.objectUrl"
+              alt="解码图片"
+              class="max-w-full max-h-80 rounded-sm"
+            />
+          </div>
+
+          <div class="flex flex-col gap-1.5 mb-3">
+            <div class="flex items-center gap-2 text-[0.8125rem]">
+              <span class="text-muted min-w-[60px]">尺寸：</span>
+              <span class="text-text">{{ result.width }} × {{ result.height }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[0.8125rem]">
+              <span class="text-muted min-w-[60px]">大小：</span>
+              <span class="text-text">{{ result.sizeFormatted }}</span>
+            </div>
+            <div class="flex items-center gap-2 text-[0.8125rem]">
+              <span class="text-muted min-w-[60px]">格式：</span>
+              <span class="text-text">{{ result.mimeType }}</span>
+            </div>
+          </div>
+
+          <div class="flex gap-2 items-center">
+            <button
+              class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              @click="handleDownload"
+            >
+              下载图片
+            </button>
+            <CopyButton v-if="input.trim()" :text="input.trim()" label="复制 Base64" />
+          </div>
+        </div>
+
+        <div v-else class="text-muted text-sm py-8 text-center">
+          输入 Base64 字符串后点击「解析图片」查看结果
+        </div>
+      </template>
+    </ResponsiveWorkspace>
+  </div>
+</template>
