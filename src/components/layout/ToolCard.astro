@@ -22,6 +22,7 @@ const { tool } = Astro.props;
 
   <!-- 收藏星标按钮（常驻可见） -->
   <button
+    x-cloak
     class="absolute top-3 right-3 z-10 shrink-0 p-1 rounded-sm border-none bg-transparent cursor-pointer text-muted hover:text-accent transition-[color] duration-150"
     :class={`$store.favorites.isFavorite('${tool.path}') ? 'text-accent' : 'text-muted hover:text-accent'`}
     :aria-label={`$store.favorites.isFavorite('${tool.path}') ? '取消收藏 ${tool.name}' : '收藏 ${tool.name}'`}

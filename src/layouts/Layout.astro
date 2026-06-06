@@ -126,10 +126,10 @@ if (jsonLd) {
     },
   });
 
-  Alpine.start();
-
-  // 页面加载时初始化收藏数据
+  // 页面加载时先初始化收藏数据（在 Alpine 启动前，避免首帧闪动）
   Alpine.store('favorites').load();
+
+  Alpine.start();
 
   // 桥接 DOM CustomEvent → Alpine toast store
   document.addEventListener('toast', ((e: CustomEvent) => {
