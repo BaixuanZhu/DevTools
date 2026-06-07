@@ -282,7 +282,7 @@ parseExpression();
                 :class="[
                   'flex flex-col items-center gap-0.5 px-3 py-2 border border-solid rounded-t-md cursor-pointer min-w-[48px] -mb-px relative z-10',
                   'transition-[background-color,border-color] duration-150',
-                  'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
+                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
                   selected
                     ? 'border-accent border-b-card bg-accent/5'
                     : 'border-transparent bg-transparent hover:bg-hover',
@@ -298,7 +298,7 @@ parseExpression();
             </Tab>
           </TabList>
 
-          <TabPanels class="p-4 max-h-[480px] overflow-y-auto">
+          <TabPanels class="p-4">
             <TabPanel v-for="config in FIELD_CONFIGS" :key="config.key">
               <div class="flex flex-col gap-2">
                 <template v-for="mode in config.modes" :key="mode">
