@@ -259,13 +259,14 @@ export function buildFieldValue(state: FieldState): string {
  * @param input 用户输入的逗号分隔字符串
  * @param min 字段最小值
  * @param max 字段最大值
+ * @param skipRangeCheck 是否跳过范围校验（年字段使用，输入阶段不做限制）
  * @returns 有效数字数组（已去重排序）
  */
-export function parseSpecificValues(input: string, min: number, max: number): number[] {
+export function parseSpecificValues(input: string, min: number, max: number, skipRangeCheck = false): number[] {
   return input
     .split(',')
     .map(v => parseInt(v.trim(), 10))
-    .filter(n => !isNaN(n) && n >= min && n <= max)
+    .filter(n => !isNaN(n) && (skipRangeCheck || (n >= min && n <= max)))
     .filter((n, i, arr) => arr.indexOf(n) === i)
     .sort((a, b) => a - b);
 }
@@ -491,15 +492,15 @@ export function getModeLabel(fieldKey: keyof CronFields7, mode: FieldMode): stri
 
   const labels: Record<FieldMode, string> = {
     every: '每秒',
-    range: '周期',
-    step: '从X每Y',
-    specific: '指定值',
+    range: '范围',
+    step: '间隔',
+    specific: '指定',
     lastDay: '最后一天',
-    lastNDay: '倒数第N天',
+    lastNDay: '倒数第 N 天',
     nearWeekday: '最近工作日',
     lastWeekday: '最后工作日',
-    lastN: '最后周X',
-    nthDay: '第N个周X',
+    lastN: '最后一个星期',
+    nthDay: '第 N 个星期',
   };
   return labels[mode] ?? mode;
 }

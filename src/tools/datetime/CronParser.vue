@@ -44,7 +44,7 @@ const fields = ref<Record<keyof CronFields7, FieldState>>({
 });
 
 /** 当前激活的字段 Tab */
-const activeFieldTab = ref<keyof CronFields7>('minute');
+const activeFieldTab = ref<keyof CronFields7>('second');
 
 /** 防止字段更新与表达式更新形成循环 */
 let isFieldUpdateInProgress = false;
@@ -249,7 +249,8 @@ function handleClear() {
  */
 function handleSpecificInput(key: keyof CronFields7, config: FieldConfig, event: Event) {
   const value = (event.target as HTMLInputElement).value;
-  fields.value[key].specificValues = parseSpecificValues(value, config.min, config.max);
+  const skipRange = key === 'year';
+  fields.value[key].specificValues = parseSpecificValues(value, config.min, config.max, skipRange);
 }
 
 // =============================================================================
@@ -300,353 +301,298 @@ parseExpression();
 
           <TabPanels class="p-4 h-160">
             <TabPanel class="h-full" v-for="config in FIELD_CONFIGS" :key="config.key">
-              <div class="flex flex-col gap-1.5 h-full">
-                <template v-for="mode in config.modes" :key="mode">
-                  <!-- specific 模式：保持大面积布局 -->
-                  <template v-if="mode === 'specific'">
-                    <div
-                        @click="activateMode(config.key, mode)"
+              <div class="flex flex-col gap-1.5 h-full overflow-y-auto">
+                <div
+                    v-for="mode in config.modes"
+                    :key="mode"
+                    @click="activateMode(config.key, mode)"
+                    :class="[
+                      mode === 'specific' ? 'flex items-start' : 'flex items-center',
+                      'gap-3 px-3 py-2 rounded-md border cursor-pointer',
+                      'transition-[background-color] duration-150',
+                      fields[config.key].mode === mode
+                        ? 'border-border bg-accent/5'
+                        : 'border-border bg-card hover:bg-hover',
+                    ]"
+                >
+                  <!-- 左列：Checkbox + 模式标签 -->
+                  <div class="flex items-center gap-2 shrink-0" @click.stop>
+                    <span
                         :class="[
-                        'rounded-md border cursor-pointer transition-[background-color] duration-150 overflow-hidden',
-                        fields[config.key].mode === mode
-                          ? 'border-border bg-accent/5'
-                          : 'border-border bg-card hover:bg-hover',
-                      ]"
+                          'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0',
+                          'transition-[border-color,background-color] duration-150',
+                          fields[config.key].mode === mode
+                            ? 'border-accent bg-accent'
+                            : 'border-border',
+                        ]"
                     >
-                      <!-- 模式标题行 -->
-                      <div class="flex items-center gap-2 px-3 py-2">
-                        <span
-                            :class="[
-                            'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0 transition-[border-color,background-color] duration-150',
-                            fields[config.key].mode === mode
-                              ? 'border-accent bg-accent'
-                              : 'border-border',
-                          ]"
-                        >
-                          <svg
-                              v-if="fields[config.key].mode === mode"
-                              class="w-2.5 h-2.5 text-white"
-                              viewBox="0 0 12 12"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
+                      <svg
+                          v-if="fields[config.key].mode === mode"
+                          class="w-2.5 h-2.5 text-white"
+                          viewBox="0 0 12 12"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                      >
+                        <path d="M2.5 6L5 8.5L9.5 3.5"/>
+                      </svg>
+                    </span>
+                    <span
+                        :class="[
+                          'text-sm font-medium whitespace-nowrap',
+                          fields[config.key].mode === mode ? 'text-accent' : 'text-muted',
+                        ]"
+                    >
+                      {{ getModeLabel(config.key, mode) }}
+                    </span>
+                  </div>
+
+                  <!-- 右列：模式内容 -->
+                  <div
+                      class="flex items-center gap-2 flex-wrap flex-1 min-w-0"
+                      @focusin="activateMode(config.key, mode)"
+                      @click.stop
+                  >
+                    <!-- every 模式 -->
+                    <div v-if="mode === 'every'" class="text-sm text-muted">
+                      {{ getModeLabel(config.key, 'every') }}
+                    </div>
+
+                    <!-- range 模式 -->
+                    <div v-else-if="mode === 'range'" class="flex items-center gap-2">
+                      <span class="text-sm text-muted shrink-0">从</span>
+                      <input
+                          type="text"
+                          :value="fields[config.key].rangeStart ?? ''"
+                          :aria-label="`${config.label}范围起始值`"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          placeholder="0"
+                          @input="fields[config.key].rangeStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
+                      />
+                      <span class="text-muted text-sm">到</span>
+                      <input
+                          type="text"
+                          :value="fields[config.key].rangeEnd ?? ''"
+                          :aria-label="`${config.label}范围结束值`"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          placeholder="0"
+                          @input="fields[config.key].rangeEnd = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
+                      />
+                    </div>
+
+                    <!-- step 模式 -->
+                    <div v-else-if="mode === 'step'" class="flex items-center gap-2 flex-wrap">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm text-muted shrink-0">从</span>
+                        <input
+                            type="text"
+                            :value="fields[config.key].stepStart ?? ''"
+                            :aria-label="`${config.label}步长起始值`"
+                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            placeholder="0"
+                            @input="fields[config.key].stepStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
+                        />
+                        <span class="text-sm text-muted shrink-0">开始，每隔</span>
+                      </div>
+                      <div class="flex items-center gap-2">
+                        <input
+                            type="text"
+                            :value="fields[config.key].stepInterval ?? ''"
+                            :aria-label="`${config.label}步长间隔`"
+                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            placeholder="1"
+                            @input="fields[config.key].stepInterval = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
+                        />
+                        <span class="text-sm text-muted shrink-0">{{ config.label }}</span>
+                      </div>
+                    </div>
+
+                    <!-- specific 模式 -->
+                    <div v-else-if="mode === 'specific'" class="w-full">
+                      <!-- 秒/分 (0-59, 10列) -->
+                      <div v-if="config.key === 'second' || config.key === 'minute'">
+                        <div class="grid grid-cols-10 gap-1">
+                          <button
+                              v-for="i in 60"
+                              :key="i - 1"
+                              @click="toggleSpecificValue(config.key, config, i - 1); activateMode(config.key, 'specific')"
+                              :class="[
+                                'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
+                                (fields[config.key].specificValues ?? []).includes(i - 1)
+                                  ? 'bg-accent text-white border-accent'
+                                  : 'bg-surface text-text border-border hover:bg-hover',
+                              ]"
                           >
-                            <path d="M2.5 6L5 8.5L9.5 3.5"/>
-                          </svg>
-                        </span>
-                        <span
-                            :class="[
-                            'text-sm font-medium',
-                            fields[config.key].mode === mode ? 'text-accent' : 'text-muted',
-                          ]"
-                        >
-                          {{ getModeLabel(config.key, mode) }}
-                        </span>
+                            {{ i - 1 }}
+                          </button>
+                        </div>
                       </div>
 
-                      <!-- 控件区 -->
-                      <div class="px-3 pb-3" @focusin="activateMode(config.key, mode)">
-                        <!-- 秒/分 (0-59, 10列) -->
-                        <div v-if="config.key === 'second' || config.key === 'minute'">
-                          <div class="grid grid-cols-10 gap-1">
-                            <button
-                                v-for="i in 60"
-                                :key="i - 1"
-                                @click="toggleSpecificValue(config.key, config, i - 1); activateMode(config.key, 'specific')"
-                                :class="[
+                      <!-- 时 (0-23, 8列) -->
+                      <div v-else-if="config.key === 'hour'">
+                        <div class="grid grid-cols-8 gap-1">
+                          <button
+                              v-for="i in 24"
+                              :key="i - 1"
+                              @click="toggleSpecificValue(config.key, config, i - 1); activateMode(config.key, 'specific')"
+                              :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i - 1)
                                   ? 'bg-accent text-white border-accent'
                                   : 'bg-surface text-text border-border hover:bg-hover',
                               ]"
-                            >
-                              {{ i - 1 }}
-                            </button>
-                          </div>
+                          >
+                            {{ i - 1 }}
+                          </button>
                         </div>
+                      </div>
 
-                        <!-- 时 (0-23, 8列) -->
-                        <div v-else-if="config.key === 'hour'">
-                          <div class="grid grid-cols-8 gap-1">
-                            <button
-                                v-for="i in 24"
-                                :key="i - 1"
-                                @click="toggleSpecificValue(config.key, config, i - 1); activateMode(config.key, 'specific')"
-                                :class="[
-                                'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
-                                (fields[config.key].specificValues ?? []).includes(i - 1)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
-                              ]"
-                            >
-                              {{ i - 1 }}
-                            </button>
-                          </div>
-                        </div>
-
-                        <!-- 日 (1-31, 7列) -->
-                        <div v-else-if="config.key === 'day'">
-                          <div class="grid grid-cols-7 gap-1">
-                            <button
-                                v-for="i in 31"
-                                :key="i"
-                                @click="toggleSpecificValue(config.key, config, i); activateMode(config.key, 'specific')"
-                                :class="[
+                      <!-- 日 (1-31, 7列) -->
+                      <div v-else-if="config.key === 'day'">
+                        <div class="grid grid-cols-7 gap-1">
+                          <button
+                              v-for="i in 31"
+                              :key="i"
+                              @click="toggleSpecificValue(config.key, config, i); activateMode(config.key, 'specific')"
+                              :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
                                   ? 'bg-accent text-white border-accent'
                                   : 'bg-surface text-text border-border hover:bg-hover',
                               ]"
-                            >
-                              {{ i }}
-                            </button>
-                          </div>
+                          >
+                            {{ i }}
+                          </button>
                         </div>
+                      </div>
 
-                        <!-- 月 (1-12, 6列, 显示月份名) -->
-                        <div v-else-if="config.key === 'month'">
-                          <div class="grid grid-cols-6 gap-1">
-                            <button
-                                v-for="i in 12"
-                                :key="i"
-                                @click="toggleSpecificValue(config.key, config, i); activateMode(config.key, 'specific')"
-                                :class="[
+                      <!-- 月 (1-12, 6列, 显示月份名) -->
+                      <div v-else-if="config.key === 'month'">
+                        <div class="grid grid-cols-6 gap-1">
+                          <button
+                              v-for="i in 12"
+                              :key="i"
+                              @click="toggleSpecificValue(config.key, config, i); activateMode(config.key, 'specific')"
+                              :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
                                   ? 'bg-accent text-white border-accent'
                                   : 'bg-surface text-text border-border hover:bg-hover',
                               ]"
-                            >
-                              {{ MONTH_NAMES[i - 1] }}
-                            </button>
-                          </div>
+                          >
+                            {{ MONTH_NAMES[i - 1] }}
+                          </button>
                         </div>
+                      </div>
 
-                        <!-- 周 (7个按钮, 显示星期名) -->
-                        <div v-else-if="config.key === 'dayOfWeek'">
-                          <div class="grid grid-cols-7 gap-1">
-                            <button
-                                v-for="(name, idx) in WEEKDAY_NAMES"
-                                :key="idx"
-                                @click="toggleSpecificValue(config.key, config, idx); activateMode(config.key, 'specific')"
-                                :class="[
+                      <!-- 周 (7个按钮, 显示星期名) -->
+                      <div v-else-if="config.key === 'dayOfWeek'">
+                        <div class="grid grid-cols-7 gap-1">
+                          <button
+                              v-for="(name, idx) in WEEKDAY_NAMES"
+                              :key="idx"
+                              @click="toggleSpecificValue(config.key, config, idx); activateMode(config.key, 'specific')"
+                              :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(idx)
                                   ? 'bg-accent text-white border-accent'
                                   : 'bg-surface text-text border-border hover:bg-hover',
                               ]"
-                            >
-                              {{ name }}
-                            </button>
-                          </div>
+                          >
+                            {{ name }}
+                          </button>
                         </div>
+                      </div>
 
-                        <!-- 年 (文本输入) -->
-                        <div v-else-if="config.key === 'year'" class="flex items-center gap-2">
-                          <input
-                              type="text"
-                              :value="fields[config.key].specificValues?.join(',') ?? ''"
-                              :aria-label="`${config.label}指定值`"
-                              class="w-full px-3 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                              placeholder="逗号分隔，如 2024,2025,2026"
-                              @input="handleSpecificInput(config.key, config, $event); activateMode(config.key, 'specific')"
-                          />
-                          <span class="text-[0.75rem] text-muted">
-                            有效范围 {{ config.min }} ~ {{ config.max }}
-                          </span>
-                        </div>
+                      <!-- 年 (文本输入，不限制范围) -->
+                      <div v-else-if="config.key === 'year'" class="flex items-center gap-2">
+                        <input
+                            type="text"
+                            :value="fields[config.key].specificValues?.join(',') ?? ''"
+                            :aria-label="`${config.label}指定值`"
+                            class="w-full px-3 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            placeholder="逗号分隔，如 2024,2025,2026"
+                            @input="handleSpecificInput(config.key, config, $event); activateMode(config.key, 'specific')"
+                        />
                       </div>
                     </div>
-                  </template>
 
-                  <!-- 其他模式：单行 flex -->
-                  <template v-else>
-                    <div
-                        @click="activateMode(config.key, mode)"
-                        :class="[
-                        'flex items-center gap-3 px-3 py-2 rounded-md border cursor-pointer transition-[background-color] duration-150 flex-wrap',
-                        fields[config.key].mode === mode
-                          ? 'border-border bg-accent/5'
-                          : 'border-border bg-card hover:bg-hover',
-                      ]"
-                    >
-                      <!-- Checkbox + 标签 -->
-                      <div class="flex items-center gap-2 shrink-0" @click.stop>
-                        <span
-                            :class="[
-                            'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0 transition-[border-color,background-color] duration-150',
-                            fields[config.key].mode === mode
-                              ? 'border-accent bg-accent'
-                              : 'border-border',
-                          ]"
-                        >
-                          <svg
-                              v-if="fields[config.key].mode === mode"
-                              class="w-2.5 h-2.5 text-white"
-                              viewBox="0 0 12 12"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                          >
-                            <path d="M2.5 6L5 8.5L9.5 3.5"/>
-                          </svg>
-                        </span>
-                        <span
-                            :class="[
-                            'text-sm font-medium',
-                            fields[config.key].mode === mode ? 'text-accent' : 'text-muted',
-                          ]"
-                        >
-                          {{ getModeLabel(config.key, mode) }}
-                        </span>
-                      </div>
+                    <!-- lastDay 模式 (L) -->
+                    <div v-else-if="mode === 'lastDay'" class="text-sm text-muted">
+                      每月最后一天 (L)
+                    </div>
 
-                      <!-- 控件区（行内） -->
-                      <div
-                          class="flex items-center gap-2 flex-wrap flex-1"
-                          @focusin="activateMode(config.key, mode)"
-                          @click.stop
+                    <!-- lastNDay 模式 (L-N) -->
+                    <div v-else-if="mode === 'lastNDay'" class="flex items-center gap-2">
+                      <span class="text-sm text-muted shrink-0">倒数第</span>
+                      <input
+                          type="text"
+                          :value="fields[config.key].lastN ?? ''"
+                          aria-label="倒数天数"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          @input="fields[config.key].lastN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'lastNDay')"
+                      />
+                      <span class="text-sm text-muted shrink-0">天</span>
+                    </div>
+
+                    <!-- nearWeekday 模式 (W) -->
+                    <div v-else-if="mode === 'nearWeekday'" class="flex items-center gap-2">
+                      <span class="text-sm text-muted shrink-0">每月第</span>
+                      <input
+                          type="text"
+                          :value="fields[config.key].nearWDay ?? ''"
+                          aria-label="最近工作日的日期"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          @input="fields[config.key].nearWDay = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nearWeekday')"
+                      />
+                      <span class="text-sm text-muted shrink-0">日最近的工作日 (W)</span>
+                    </div>
+
+                    <!-- lastWeekday 模式 (LW) -->
+                    <div v-else-if="mode === 'lastWeekday'" class="text-sm text-muted">
+                      每月最后一个工作日 (LW)
+                    </div>
+
+                    <!-- lastN 模式 (最后一个周X) -->
+                    <div v-else-if="mode === 'lastN'" class="flex items-center gap-2">
+                      <span class="text-sm text-muted shrink-0">最后一个</span>
+                      <select
+                          :value="fields[config.key].nthDayWeekday ?? 0"
+                          aria-label="星期几"
+                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
+                          @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'lastN')"
                       >
-                        <!-- every 模式 -->
-                        <div v-if="mode === 'every'" class="text-sm text-muted">
-                          {{ getModeLabel(config.key, 'every') }}
-                        </div>
-
-                        <!-- range 模式 -->
-                        <div v-else-if="mode === 'range'" class="flex items-center gap-2">
-                          <span class="text-sm text-muted shrink-0">从</span>
-                          <input
-                              type="text"
-                              :value="fields[config.key].rangeStart ?? ''"
-                              :aria-label="`${config.label}范围起始值`"
-                              class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                              placeholder="0"
-                              @input="fields[config.key].rangeStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
-                          />
-                          <span class="text-muted text-sm">到</span>
-                          <input
-                              type="text"
-                              :value="fields[config.key].rangeEnd ?? ''"
-                              :aria-label="`${config.label}范围结束值`"
-                              class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                              placeholder="0"
-                              @input="fields[config.key].rangeEnd = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
-                          />
-                        </div>
-
-                        <!-- step 模式 -->
-                        <div v-else-if="mode === 'step'" class="flex items-center gap-2 flex-wrap">
-                          <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted shrink-0">从</span>
-                            <input
-                                type="text"
-                                :value="fields[config.key].stepStart ?? ''"
-                                :aria-label="`${config.label}步长起始值`"
-                                class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                                placeholder="0"
-                                @input="fields[config.key].stepStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
-                            />
-                            <span class="text-sm text-muted shrink-0">开始</span>
-                          </div>
-                          <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted shrink-0">每</span>
-                            <input
-                                type="text"
-                                :value="fields[config.key].stepInterval ?? ''"
-                                :aria-label="`${config.label}步长间隔`"
-                                class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                                placeholder="1"
-                                @input="fields[config.key].stepInterval = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
-                            />
-                            <span class="text-sm text-muted shrink-0">{{ config.label }}一次</span>
-                          </div>
-                        </div>
-
-                        <!-- lastDay 模式 (L) -->
-                        <div v-else-if="mode === 'lastDay'" class="text-sm text-muted">
-                          每月最后一天 (L)
-                        </div>
-
-                        <!-- lastNDay 模式 (L-N) -->
-                        <div v-else-if="mode === 'lastNDay'" class="flex items-center gap-2">
-                          <span class="text-sm text-muted shrink-0">倒数第</span>
-                          <input
-                              type="text"
-                              :value="fields[config.key].lastN ?? ''"
-                              aria-label="倒数天数"
-                              class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                              @input="fields[config.key].lastN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'lastNDay')"
-                          />
-                          <span class="text-sm text-muted shrink-0">天</span>
-                        </div>
-
-                        <!-- nearWeekday 模式 (W) -->
-                        <div v-else-if="mode === 'nearWeekday'" class="flex items-center gap-2">
-                          <span class="text-sm text-muted shrink-0">每月第</span>
-                          <input
-                              type="text"
-                              :value="fields[config.key].nearWDay ?? ''"
-                              aria-label="最近工作日的日期"
-                              class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                              @input="fields[config.key].nearWDay = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nearWeekday')"
-                          />
-                          <span class="text-sm text-muted shrink-0">日最近的工作日 (W)</span>
-                        </div>
-
-                        <!-- lastWeekday 模式 (LW) -->
-                        <div v-else-if="mode === 'lastWeekday'" class="text-sm text-muted">
-                          每月最后一个工作日 (LW)
-                        </div>
-
-                        <!-- lastN 模式 (最后一个周X) -->
-                        <div v-else-if="mode === 'lastN'" class="flex items-center gap-2">
-                          <span class="text-sm text-muted shrink-0">最后一个</span>
-                          <select
-                              :value="fields[config.key].nthDayWeekday ?? 0"
-                              aria-label="星期几"
-                              class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
-                              @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'lastN')"
-                          >
-                            <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
-                          </select>
-                        </div>
-
-                        <!-- nthDay 模式 (第N个周X) -->
-                        <div v-else-if="mode === 'nthDay'" class="flex items-center gap-2 flex-wrap">
-                          <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted shrink-0">第</span>
-                            <input
-                                type="text"
-                                :value="fields[config.key].nthDayN ?? ''"
-                                aria-label="第几个"
-                                class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
-                                @input="fields[config.key].nthDayN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nthDay')"
-                            />
-                            <span class="text-sm text-muted shrink-0">个</span>
-                          </div>
-                          <div class="flex items-center gap-2">
-                            <span class="text-sm text-muted shrink-0">星期</span>
-                            <select
-                                :value="fields[config.key].nthDayWeekday ?? 0"
-                                aria-label="星期几"
-                                class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
-                                @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'nthDay')"
-                            >
-                              <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <!-- 兜底 -->
-                        <div v-else class="text-sm text-muted"></div>
-                      </div>
+                        <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
+                      </select>
                     </div>
-                  </template>
-                </template>
+
+                    <!-- nthDay 模式 (第N个周X) -->
+                    <div v-else-if="mode === 'nthDay'" class="flex items-center gap-2 flex-wrap">
+                      <span class="text-sm text-muted shrink-0">第</span>
+                      <input
+                          type="text"
+                          :value="fields[config.key].nthDayN ?? ''"
+                          aria-label="第几个"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          @input="fields[config.key].nthDayN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nthDay')"
+                      />
+                      <span class="text-sm text-muted shrink-0">个</span>
+                      <select
+                          :value="fields[config.key].nthDayWeekday ?? 0"
+                          aria-label="星期几"
+                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
+                          @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'nthDay')"
+                      >
+                        <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
+                      </select>
+                    </div>
+
+                    <!-- 兜底 -->
+                    <div v-else class="text-sm text-muted"></div>
+                  </div>
+                </div>
               </div>
             </TabPanel>
           </TabPanels>
@@ -748,6 +694,7 @@ parseExpression();
                   <th class="text-left py-2 pr-4 font-medium text-muted">字段</th>
                   <th class="text-left py-2 pr-4 font-medium text-muted">必填</th>
                   <th class="text-left py-2 pr-4 font-medium text-muted">允许值</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted">特殊字符</th>
                   <th class="text-left py-2 font-medium text-muted">说明</th>
                 </tr>
                 </thead>
@@ -756,42 +703,56 @@ parseExpression();
                   <td class="py-2 pr-4 font-mono text-text">秒</td>
                   <td class="py-2 pr-4 text-muted">可选</td>
                   <td class="py-2 pr-4 font-mono text-text">0 ~ 59</td>
+                  <td class="py-2 pr-4 text-muted">—</td>
                   <td class="py-2 text-muted">省略时默认为 <code class="font-mono text-accent">*</code></td>
                 </tr>
                 <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">分</td>
                   <td class="py-2 pr-4 text-muted">必填</td>
                   <td class="py-2 pr-4 font-mono text-text">0 ~ 59</td>
-                  <td class="py-2 text-muted"></td>
+                  <td class="py-2 pr-4 text-muted">—</td>
+                  <td class="py-2 text-muted">每分钟的第几分执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">时</td>
                   <td class="py-2 pr-4 text-muted">必填</td>
                   <td class="py-2 pr-4 font-mono text-text">0 ~ 23</td>
+                  <td class="py-2 pr-4 text-muted">—</td>
                   <td class="py-2 text-muted">24 小时制</td>
                 </tr>
                 <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">日</td>
                   <td class="py-2 pr-4 text-muted">必填</td>
                   <td class="py-2 pr-4 font-mono text-text">1 ~ 31</td>
+                  <td class="py-2 pr-4">
+                    <code class="font-mono text-accent text-xs">L</code>
+                    <code class="font-mono text-accent text-xs ml-1">W</code>
+                    <code class="font-mono text-accent text-xs ml-1">LW</code>
+                  </td>
                   <td class="py-2 text-muted">每月第几天</td>
                 </tr>
                 <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">月</td>
                   <td class="py-2 pr-4 text-muted">必填</td>
                   <td class="py-2 pr-4 font-mono text-text">1 ~ 12</td>
-                  <td class="py-2 text-muted"></td>
+                  <td class="py-2 pr-4 text-muted">—</td>
+                  <td class="py-2 text-muted">月份，1 = 一月</td>
                 </tr>
                 <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">周</td>
                   <td class="py-2 pr-4 text-muted">必填</td>
                   <td class="py-2 pr-4 font-mono text-text">0 ~ 6</td>
+                  <td class="py-2 pr-4">
+                    <code class="font-mono text-accent text-xs">L</code>
+                    <code class="font-mono text-accent text-xs ml-1">#</code>
+                  </td>
                   <td class="py-2 text-muted">0 = 周日，1 = 周一</td>
                 </tr>
                 <tr>
                   <td class="py-2 pr-4 font-mono text-text">年</td>
                   <td class="py-2 pr-4 text-muted">可选</td>
                   <td class="py-2 pr-4 font-mono text-text">1970 ~ 2099</td>
+                  <td class="py-2 pr-4 text-muted">—</td>
                   <td class="py-2 text-muted">省略时默认为 <code class="font-mono text-accent">*</code></td>
                 </tr>
                 </tbody>
@@ -840,6 +801,68 @@ parseExpression();
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- 特殊字符说明 -->
+          <div class="bg-card border border-border rounded-sm p-4 mb-4">
+            <h3 class="text-sm font-semibold text-text m-0 mb-3">特殊字符说明</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex items-start gap-3">
+                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">L</code>
+                <div>
+                  <p class="text-sm font-medium text-text m-0">最后 (Last)</p>
+                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                    日字段：表示月末最后一天。周字段：表示该星期最后一次出现，如 <code class="font-mono">5L</code> = 最后一个周五。
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">W</code>
+                <div>
+                  <p class="text-sm font-medium text-text m-0">最近工作日</p>
+                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                    仅日字段。如 <code class="font-mono">15W</code> 表示离 15 号最近的工作日。若 15 号是周六则取周五 14
+                    号，是周日则取周一 16 号。
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">LW</code>
+                <div>
+                  <p class="text-sm font-medium text-text m-0">最后工作日</p>
+                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                    仅日字段。表示每月最后一个工作日（周一至周五）。
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">L-N</code>
+                <div>
+                  <p class="text-sm font-medium text-text m-0">倒数第 N 天</p>
+                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                    仅日字段。如 <code class="font-mono">L-3</code> 表示月末倒数第 3 天。
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3">
+                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">#</code>
+                <div>
+                  <p class="text-sm font-medium text-text m-0">第 N 个星期 X</p>
+                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                    仅周字段。格式 <code class="font-mono">X#N</code>，如 <code class="font-mono">1#3</code> = 第 3 个周一。N
+                    范围 1~5。
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-border/50">
+              <p class="text-[0.8125rem] text-muted m-0">
+                <strong class="text-text">可用范围：</strong>
+                <code class="font-mono text-xs">L</code>、<code class="font-mono text-xs">W</code>、<code
+                  class="font-mono text-xs">LW</code>、<code class="font-mono text-xs">L-N</code> 仅日字段；
+                <code class="font-mono text-xs">L</code>、<code class="font-mono text-xs">#</code> 仅周字段。
+              </p>
             </div>
           </div>
 
@@ -914,9 +937,25 @@ parseExpression();
                   <td class="py-2 pr-4 font-mono text-text">0 9,18 * * *</td>
                   <td class="py-2 text-muted">每天 9 点和 18 点执行</td>
                 </tr>
-                <tr>
+                <tr class="border-b border-border/50">
                   <td class="py-2 pr-4 font-mono text-text">0 0 * * 1</td>
                   <td class="py-2 text-muted">每周一零点执行</td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="py-2 pr-4 font-mono text-text">0 0 L * *</td>
+                  <td class="py-2 text-muted">每月最后一天零点执行</td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="py-2 pr-4 font-mono text-text">0 0 1W * *</td>
+                  <td class="py-2 text-muted">每月 1 号最近工作日零点执行</td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="py-2 pr-4 font-mono text-text">0 0 * * 1#2</td>
+                  <td class="py-2 text-muted">每月第 2 个周一零点执行</td>
+                </tr>
+                <tr>
+                  <td class="py-2 pr-4 font-mono text-text">0 0 LW * *</td>
+                  <td class="py-2 text-muted">每月最后一个工作日零点执行</td>
                 </tr>
                 </tbody>
               </table>
