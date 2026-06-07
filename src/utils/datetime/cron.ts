@@ -10,7 +10,13 @@ import { CronExpressionParser } from 'cron-parser';
 // =============================================================================
 
 /** 字段模式类型 */
-export type FieldMode = 'every' | 'range' | 'step' | 'specific';
+export type FieldMode =
+  // 通用模式（所有字段共享）
+  | 'every' | 'range' | 'step' | 'specific'
+  // 日字段专属
+  | 'lastDay' | 'lastNDay' | 'nearWeekday' | 'lastWeekday'
+  // 周字段专属
+  | 'lastN' | 'nthDay';
 
 /** 单个字段的构建状态 */
 export interface FieldState {
@@ -26,6 +32,14 @@ export interface FieldState {
   stepInterval?: number;
   /** 指定值模式：具体值列表 */
   specificValues?: number[];
+  /** 日字段 L-N 模式：倒数第 N 天 */
+  lastN?: number;
+  /** 日字段 W 模式：最近工作日的日期 */
+  nearWDay?: number;
+  /** 周字段 N#M 模式：第 N 个 */
+  nthDayN?: number;
+  /** 周字段 N#M 模式：星期几 */
+  nthDayWeekday?: number;
 }
 
 /** 7 字段 Cron 字段结构 */
@@ -57,6 +71,8 @@ export interface FieldConfig {
   min: number;
   /** 最大值 */
   max: number;
+  /** 该字段支持的模式列表 */
+  modes: FieldMode[];
 }
 
 // =============================================================================
@@ -65,13 +81,13 @@ export interface FieldConfig {
 
 /** 7 个字段的配置信息 */
 export const FIELD_CONFIGS: FieldConfig[] = [
-  { key: 'second', label: '秒', min: 0, max: 59 },
-  { key: 'minute', label: '分', min: 0, max: 59 },
-  { key: 'hour', label: '时', min: 0, max: 23 },
-  { key: 'day', label: '日', min: 1, max: 31 },
-  { key: 'month', label: '月', min: 1, max: 12 },
-  { key: 'dayOfWeek', label: '周', min: 0, max: 6 },
-  { key: 'year', label: '年', min: 1970, max: 2099 },
+  { key: 'second', label: '秒', min: 0, max: 59, modes: ['every', 'range', 'step', 'specific'] },
+  { key: 'minute', label: '分', min: 0, max: 59, modes: ['every', 'range', 'step', 'specific'] },
+  { key: 'hour', label: '时', min: 0, max: 23, modes: ['every', 'range', 'step', 'specific'] },
+  { key: 'day', label: '日', min: 1, max: 31, modes: ['every', 'range', 'step', 'specific', 'lastDay', 'lastNDay', 'nearWeekday', 'lastWeekday'] },
+  { key: 'month', label: '月', min: 1, max: 12, modes: ['every', 'range', 'step', 'specific'] },
+  { key: 'dayOfWeek', label: '周', min: 0, max: 6, modes: ['every', 'range', 'step', 'specific', 'lastN', 'nthDay'] },
+  { key: 'year', label: '年', min: 1970, max: 2099, modes: ['every', 'range', 'specific'] },
 ];
 
 /** 字段配置映射（按 key 索引） */
@@ -84,14 +100,6 @@ export const FIELD_CONFIG_MAP: Record<keyof CronFields7, FieldConfig> = {
   dayOfWeek: FIELD_CONFIGS[5],
   year: FIELD_CONFIGS[6],
 };
-
-/** 模式选项（用于 UI 单选） */
-export const MODE_OPTIONS: { value: FieldMode; label: string }[] = [
-  { value: 'every', label: '每秒' },
-  { value: 'range', label: '周期' },
-  { value: 'step', label: '从X每Y' },
-  { value: 'specific', label: '指定值' },
-];
 
 /** 常用 Cron 模板 */
 export const CRON_TEMPLATES = [
@@ -106,6 +114,12 @@ export const CRON_TEMPLATES = [
   { label: '每 5 分钟', expression: '*/5 * * * *' },
   { label: '每 30 分钟', expression: '0,30 * * * *' },
 ] as const;
+
+/** 星期名称（0=周日, 1=周一, ..., 6=周六） */
+export const WEEKDAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'] as const;
+
+/** 月份名称（1月~12月，索引 0 对应 1 月） */
+export const MONTH_NAMES = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'] as const;
 
 /** 默认 7 字段状态（全为 every） */
 export const DEFAULT_FIELDS_7: Record<keyof CronFields7, FieldState> = {
@@ -132,6 +146,34 @@ export function parseFieldValue(value: string): FieldState {
 
   if (trimmed === '*') {
     return { mode: 'every' };
+  }
+
+  // 先检查 L 和 W 系列语法（必须在 - 检查之前，因为 L-3 包含 -）
+  if (trimmed === 'L') {
+    return { mode: 'lastDay' };
+  }
+  if (trimmed === 'LW') {
+    return { mode: 'lastWeekday' };
+  }
+  if (/^L-\d+$/.test(trimmed)) {
+    const n = parseInt(trimmed.slice(2), 10);
+    return { mode: 'lastNDay', lastN: n };
+  }
+  if (/^\d+W$/.test(trimmed)) {
+    const day = parseInt(trimmed.slice(0, -1), 10);
+    return { mode: 'nearWeekday', nearWDay: day };
+  }
+  if (/^\d+L$/.test(trimmed)) {
+    const weekday = parseInt(trimmed.slice(0, -1), 10);
+    return { mode: 'lastN', nthDayWeekday: weekday };
+  }
+  if (trimmed.includes('#')) {
+    const [weekday, n] = trimmed.split('#');
+    const nthDayWeekday = parseInt(weekday, 10);
+    const nthDayN = parseInt(n, 10);
+    if (!isNaN(nthDayWeekday) && !isNaN(nthDayN)) {
+      return { mode: 'nthDay', nthDayN, nthDayWeekday };
+    }
   }
 
   if (trimmed.includes('/')) {
@@ -191,9 +233,41 @@ export function buildFieldValue(state: FieldState): string {
     case 'specific':
       if (!state.specificValues?.length) return '*';
       return state.specificValues.join(',');
+    case 'lastDay':
+      return 'L';
+    case 'lastNDay':
+      if (state.lastN === undefined) return 'L';
+      return `L-${state.lastN}`;
+    case 'nearWeekday':
+      if (state.nearWDay === undefined) return '*';
+      return `${state.nearWDay}W`;
+    case 'lastWeekday':
+      return 'LW';
+    case 'lastN':
+      if (state.nthDayWeekday === undefined) return '*';
+      return `${state.nthDayWeekday}L`;
+    case 'nthDay':
+      if (state.nthDayN === undefined || state.nthDayWeekday === undefined) return '*';
+      return `${state.nthDayWeekday}#${state.nthDayN}`;
     default:
       return '*';
   }
+}
+
+/**
+ * 解析指定值输入字符串为去重排序的数字数组
+ * @param input 用户输入的逗号分隔字符串
+ * @param min 字段最小值
+ * @param max 字段最大值
+ * @returns 有效数字数组（已去重排序）
+ */
+export function parseSpecificValues(input: string, min: number, max: number): number[] {
+  return input
+    .split(',')
+    .map(v => parseInt(v.trim(), 10))
+    .filter(n => !isNaN(n) && n >= min && n <= max)
+    .filter((n, i, arr) => arr.indexOf(n) === i)
+    .sort((a, b) => a - b);
 }
 
 // =============================================================================
@@ -401,14 +475,7 @@ export function formatExecutionTime(date: Date): string {
  * @returns 模式标签
  */
 export function getModeLabel(fieldKey: keyof CronFields7, mode: FieldMode): string {
-  const labels: Record<FieldMode, string> = {
-    every: '每秒',
-    range: '周期',
-    step: '从X每Y',
-    specific: '指定值',
-  };
-
-  // 根据字段调整 "每秒" 为更合适的描述
+  // every 模式按字段返回
   if (mode === 'every') {
     const everyLabels: Partial<Record<keyof CronFields7, string>> = {
       second: '每秒',
@@ -422,5 +489,17 @@ export function getModeLabel(fieldKey: keyof CronFields7, mode: FieldMode): stri
     return everyLabels[fieldKey] ?? '任意';
   }
 
-  return labels[mode];
+  const labels: Record<FieldMode, string> = {
+    every: '每秒',
+    range: '周期',
+    step: '从X每Y',
+    specific: '指定值',
+    lastDay: '最后一天',
+    lastNDay: '倒数第N天',
+    nearWeekday: '最近工作日',
+    lastWeekday: '最后工作日',
+    lastN: '最后周X',
+    nthDay: '第N个周X',
+  };
+  return labels[mode] ?? mode;
 }
