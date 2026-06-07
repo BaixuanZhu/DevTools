@@ -18,8 +18,8 @@ const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'i
 
 /** 文件大小上限：50MB（大结果自动提供下载，无需复制） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
-/** 大编码结果阈值：500KB 的 Base64 字符数 */
-const LARGE_OUTPUT_THRESHOLD = 500 * 1024;
+/** 大编码结果阈值：5MB 的 Base64 字符数 */
+const LARGE_OUTPUT_THRESHOLD = 5 * 1024 * 1024;
 
 type Mode = 'encode' | 'decode';
 const mode = ref<Mode>('encode');

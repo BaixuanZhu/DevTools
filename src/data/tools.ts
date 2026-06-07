@@ -75,15 +75,6 @@ export const tools: ToolMeta[] = [
     path: '/text/random-string',
   },
   {
-    id: 'base64',
-    name: 'Base64 编解码',
-    description: 'Base64 编码与解码，支持文本和文件',
-    seoDescription: '在线 Base64 编解码工具，支持文本与文件的 Base64 编码和解码，纯浏览器运算无需上传数据，即时转换。',
-    category: '编码转换',
-    icon: '📄',
-    path: '/encoding/base64',
-  },
-  {
     id: 'datetime-converter',
     name: '日期时间转换器',
     description: '时间戳与日期格式互转，支持多种日期格式',
@@ -181,6 +172,15 @@ export const tools: ToolMeta[] = [
     category: '媒体工具',
     icon: '🔳',
     path: '/media/qr-code-generator',
+  },
+  {
+    id: 'base64',
+    name: 'Base64 编解码',
+    description: 'Base64 编码与解码，支持文本和文件',
+    seoDescription: '在线 Base64 编解码工具，支持文本与文件的 Base64 编码和解码，纯浏览器运算无需上传数据，即时转换。',
+    category: '编码转换',
+    icon: '📄',
+    path: '/encoding/base64',
   },
   {
     id: 'base64-to-image',
