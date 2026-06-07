@@ -271,19 +271,20 @@ parseExpression();
     <section class="mt-6 px-4">
       <div class="max-w-5xl mx-auto">
         <TabGroup
+          class="border border-border rounded-lg bg-card overflow-hidden"
           :selected-index="FIELD_KEYS.indexOf(activeFieldTab)"
           @change="(i: number) => activeFieldTab = FIELD_KEYS[i]"
         >
-          <TabList class="flex gap-1 mb-4 overflow-x-auto pb-1">
+          <TabList class="flex gap-1 overflow-x-auto px-2 pt-2 pb-0 border-b border-border">
             <Tab v-for="config in FIELD_CONFIGS" :key="config.key" v-slot="{ selected }" as="template">
               <button
                 :class="[
-                  'flex flex-col items-center gap-0.5 px-3 py-2 border rounded-md cursor-pointer min-w-[48px]',
+                  'flex flex-col items-center gap-0.5 px-3 py-2 border border-solid rounded-t-md cursor-pointer min-w-[48px] -mb-px relative z-10',
                   'transition-[background-color,border-color] duration-150',
                   'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
                   selected
-                    ? 'border-accent bg-accent/5'
-                    : 'border-border bg-card hover:bg-hover hover:border-accent/50',
+                    ? 'border-accent border-b-card bg-accent/5'
+                    : 'border-transparent bg-transparent hover:bg-hover',
                 ]"
               >
                 <span class="text-[0.8125rem] font-medium" :class="selected ? 'text-accent' : 'text-text'">
@@ -296,7 +297,7 @@ parseExpression();
             </Tab>
           </TabList>
 
-          <TabPanels>
+          <TabPanels class="p-4 max-h-[480px] overflow-y-auto">
             <TabPanel v-for="config in FIELD_CONFIGS" :key="config.key">
               <div class="flex flex-col gap-2">
                 <template v-for="mode in config.modes" :key="mode">
