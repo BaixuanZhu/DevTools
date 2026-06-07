@@ -271,6 +271,7 @@ parseExpression();
     <section class="mt-6 px-4">
       <div class="max-w-5xl mx-auto">
         <TabGroup
+          as="div"
           class="border border-border rounded-lg bg-card overflow-hidden"
           :selected-index="FIELD_KEYS.indexOf(activeFieldTab)"
           @change="(i: number) => activeFieldTab = FIELD_KEYS[i]"
