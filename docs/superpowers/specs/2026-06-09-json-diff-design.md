@@ -205,7 +205,7 @@ function measureMaxDepth(jsonText: string): number;
 | 嵌套深度（解析） | > 256 层 | `JSON.parse` 前 | 红色提示，拒绝解析 |
 | 嵌套深度（对比） | > 128 层 | 递归对比中 | 截断标记 + 摘要警告 |
 | 解析后节点总数 | > 500,000 | `JSON.parse` 后 | 提示"节点数量过多"，拒绝对比 |
-| diff 输出行数 | > 50,000 行 | diff 计算后 | 自动折叠 unchanged，展示差异上下文 3 行 |
+| diff 输出行数 | > 1,000 行 | diff 计算后 | 自动折叠 unchanged，展示差异上下文 3 行，提供"展开全部"按钮 |
 
 ### Web Worker 方案（> 2MB 时启用）
 
