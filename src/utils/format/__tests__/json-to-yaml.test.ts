@@ -51,7 +51,17 @@ describe('convertJsonToYaml', () => {
     const result = convertJsonToYaml(obj);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error).toContain('循环引用');
+      expect(result.error).toContain('重复引用');
+    }
+  });
+
+  it('DAG 重复引用报错（非循环）', () => {
+    const shared = { x: 1 };
+    const root = { a: shared, b: shared };
+    const result = convertJsonToYaml(root);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain('重复引用');
     }
   });
 
