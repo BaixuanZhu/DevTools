@@ -209,6 +209,15 @@ export const tools: ToolMeta[] = [
     icon: '⏰',
     path: '/datetime/cron-parser',
   },
+  {
+    id: 'json-formatter',
+    name: 'JSON 格式化器',
+    description: '在线 JSON 格式化、压缩、验证与查询工具',
+    seoDescription: '在线 JSON 格式化工具，支持美化、压缩、验证与 JSON Path 查询，实时语法高亮与统计信息，纯浏览器端运算。',
+    category: '格式化',
+    icon: '📋',
+    path: '/format/json-formatter',
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
