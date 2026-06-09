@@ -125,6 +125,47 @@ describe('convertJsonToXml', () => {
       expect(result.result).toContain('<items></items>');
     }
   });
+
+  it('空字符串输入返回错误', () => {
+    const result = convertJsonToXml('', 'root');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain('语法错误');
+    }
+  });
+
+  it('纯空白输入返回错误', () => {
+    const result = convertJsonToXml('   ', 'root');
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toContain('语法错误');
+    }
+  });
+
+  it('顶层数组转换', () => {
+    const result = convertJsonToXml('[1, 2, 3]', 'root');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<root>');
+      expect(result.result).toContain('<root_item>1</root_item>');
+      expect(result.result).toContain('<root_item>2</root_item>');
+      expect(result.result).toContain('<root_item>3</root_item>');
+      expect(result.result).toContain('</root>');
+    }
+  });
+
+  it('嵌套数组转换', () => {
+    const result = convertJsonToXml('[[1, 2], [3, 4]]', 'root');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<root>');
+      expect(result.result).toContain('<root_item>');
+      expect(result.result).toContain('<root_item_item>1</root_item_item>');
+      expect(result.result).toContain('<root_item_item>2</root_item_item>');
+      expect(result.result).toContain('</root_item>');
+      expect(result.result).toContain('</root>');
+    }
+  });
 });
 
 describe('validateRootName', () => {
