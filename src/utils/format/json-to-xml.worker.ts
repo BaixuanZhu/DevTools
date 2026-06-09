@@ -15,7 +15,12 @@ self.onmessage = (e: MessageEvent<JsonToXmlWorkerRequest>) => {
 
   try {
     const result = convertJsonToXml(json, rootName);
-    self.postMessage(result);
+    if (!result.ok) {
+      self.postMessage(result);
+      return;
+    }
+    const resp: JsonToXmlWorkerResponse = { ok: true, result: result.result };
+    self.postMessage(resp);
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     const resp: JsonToXmlWorkerResponse = { ok: false, error: `转换过程中发生错误：${msg}` };
