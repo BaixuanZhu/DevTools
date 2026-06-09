@@ -327,16 +327,25 @@ function compareValues(
     return;
   }
 
-  if (left === null && right === null) return;
+  if (left === null && right === null) {
+    summary.unchanged++;
+    return;
+  }
   if (left === null || right === null) {
-    if (left === right) return;
+    if (left === right) {
+      summary.unchanged++;
+      return;
+    }
     items.push({ type: 'modified', path, oldValue: left, newValue: right });
     summary.modified++;
     return;
   }
 
   if (isPrimitive(left) && isPrimitive(right)) {
-    if (left === right) return;
+    if (left === right) {
+      summary.unchanged++;
+      return;
+    }
     items.push({ type: 'modified', path, oldValue: left, newValue: right });
     summary.modified++;
     return;
@@ -451,7 +460,10 @@ function compareArraysUnordered(
     const rightEntry = rightCounts.get(key);
     const leftCount = leftEntry?.count ?? 0;
     const rightCount = rightEntry?.count ?? 0;
-    if (leftCount === rightCount) continue;
+    if (leftCount === rightCount) {
+      summary.unchanged += leftCount;
+      continue;
+    }
 
     const diff = Math.abs(rightCount - leftCount);
     if (rightCount > leftCount) {

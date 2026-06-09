@@ -8,15 +8,12 @@
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import {
   parseJsonSafe,
   semanticDiff,
   strictDiff,
-  checkInputSize,
   measureMaxDepth,
   WORKER_THRESHOLD,
   INPUT_SIZE_LIMIT,
@@ -27,11 +24,37 @@ import {
   type DiffOptions,
   type DiffResult,
   type StrictDiffResult,
-  type DiffItem,
-  type LineDiff,
   type WorkerRequest,
   type WorkerResponse,
 } from '../../utils/format/json-diff';
+
+// ---- 常量 ----
+
+/** 左侧示例 JSON */
+const EXAMPLE_LEFT = `{
+  "name": "DevTools",
+  "version": "1.0.0",
+  "features": ["格式化", "压缩", "验证"],
+  "config": {
+    "indent": 2,
+    "theme": "light"
+  },
+  "active": true,
+  "lastUpdate": null
+}`;
+
+/** 右侧示例 JSON */
+const EXAMPLE_RIGHT = `{
+  "name": "DevTools",
+  "version": "1.1.0",
+  "features": ["格式化", "压缩", "验证", "JSON Path"],
+  "config": {
+    "indent": 2,
+    "theme": "dark"
+  },
+  "active": true,
+  "lastUpdate": "2025-01-15"
+}`;
 
 // ---- 状态 ----
 
@@ -43,9 +66,9 @@ const options = ref<DiffOptions>({
   indentSize: 2,
 });
 /** 左侧输入文本 */
-const leftInput = ref('');
+const leftInput = ref(EXAMPLE_LEFT);
 /** 右侧输入文本 */
-const rightInput = ref('');
+const rightInput = ref(EXAMPLE_RIGHT);
 /** 左侧解析错误 */
 const leftError = ref('');
 /** 右侧解析错误 */
@@ -130,23 +153,6 @@ const summaryText = computed(() => {
   }
 
   return '';
-});
-
-/** 可复制的差异文本 */
-const copyableText = computed(() => {
-  if (!currentResult.value) return '';
-
-  if (diffMode.value === 'strict' && strictResult.value) {
-    return strictResult.value.lines
-      .map((line) => {
-        const prefix = line.type === 'added' ? '+' : line.type === 'removed' ? '-' : ' ';
-        return `${prefix} ${line.content}`;
-      })
-      .join('\n');
-  }
-
-  // 语义模式返回 JSON 格式
-  return JSON.stringify(currentResult.value, null, 2);
 });
 
 // ---- 核心操作 ----
@@ -470,12 +476,16 @@ function syncScroll(source: HTMLElement, target: HTMLElement): void {
   });
 }
 
-// ---- 清空 ----
+// ---- 自动对比 ----
 
-/** 清空所有状态 */
-function handleClear(): void {
-  leftInput.value = '';
-  rightInput.value = '';
+/** 自动对比防抖定时器 */
+let compareTimer: ReturnType<typeof setTimeout> | null = null;
+
+/** 防抖延迟（毫秒） */
+const DEBOUNCE_MS = 300;
+
+/** 重置结果状态 */
+function resetResults(): void {
   leftError.value = '';
   rightError.value = '';
   runtimeError.value = '';
@@ -487,14 +497,27 @@ function handleClear(): void {
   showExpandConfirm.value = false;
 }
 
-// ---- 自动重新对比 ----
-
-/** 监听模式和选项变化，自动重新对比 */
-watch([diffMode, options], () => {
-  if (hasResult.value && leftInput.value && rightInput.value) {
-    handleCompare();
+/** 触发自动对比（带防抖） */
+function scheduleCompare(): void {
+  if (compareTimer !== null) {
+    clearTimeout(compareTimer);
   }
-});
+
+  // 任一侧为空则清除结果
+  if (!leftInput.value.trim() || !rightInput.value.trim()) {
+    resetResults();
+    return;
+  }
+
+  compareTimer = setTimeout(() => {
+    handleCompare();
+  }, DEBOUNCE_MS);
+}
+
+/** 监听输入变化，自动触发对比（immediate: true 确保初始示例也触发） */
+watch([leftInput, rightInput, diffMode, options], () => {
+  scheduleCompare();
+}, { immediate: true });
 
 // ---- 生命周期 ----
 
@@ -512,6 +535,9 @@ onUnmounted(() => {
   }
   if (scrollFrameId !== null) {
     cancelAnimationFrame(scrollFrameId);
+  }
+  if (compareTimer !== null) {
+    clearTimeout(compareTimer);
   }
 });
 </script>
@@ -542,20 +568,24 @@ onUnmounted(() => {
         description="对比时忽略数组元素顺序"
       />
 
-      <div class="ml-auto flex gap-2">
-        <button
-          class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="isLoading"
-          @click="handleCompare"
-        >
-          <span v-if="isLoading" class="inline-block animate-spin mr-1">⟳</span>
-          对比
-        </button>
-
-        <CopyButton :text="copyableText" label="复制结果" />
-        <ClearButton @clear="handleClear" />
-      </div>
+      <!-- 加载指示器 -->
+      <span
+        v-if="isLoading"
+        class="ml-auto text-[0.8125rem] text-muted inline-flex items-center gap-1"
+      >
+        <span class="inline-block animate-spin">⟳</span> 对比中...
+      </span>
     </div>
+
+    <!-- 模式说明 -->
+    <p class="mb-4 text-[0.75rem] text-muted">
+      <template v-if="diffMode === 'strict'">
+        严格模式：格式化后按文本行逐行对比，类似 Git diff，适合检查格式或顺序变化。
+      </template>
+      <template v-else>
+        语义模式：解析为 JSON 对象后按字段路径对比，忽略格式差异，适合比较数据内容。
+      </template>
+    </p>
 
     <!-- 双栏工作区 -->
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
@@ -800,7 +830,7 @@ onUnmounted(() => {
 
     <!-- 空状态提示 -->
     <div v-else class="mt-6 p-8 border border-border rounded-sm bg-card text-center text-muted text-sm">
-      输入两份 JSON 后点击「对比」查看差异
+      输入两份 JSON 后自动对比差异
     </div>
   </div>
 </template>
