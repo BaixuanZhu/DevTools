@@ -227,6 +227,24 @@ export const tools: ToolMeta[] = [
     icon: '🔍',
     path: '/format/json-diff',
   },
+  {
+    id: 'json-to-xml',
+    name: 'JSON 转 XML',
+    description: '将 JSON 数据转换为 XML 格式，支持自定义根元素名',
+    seoDescription: '在线 JSON 转 XML 工具，输入 JSON 即可生成标准 XML，支持自定义根元素名，纯浏览器端运算不上传数据。',
+    category: '格式化',
+    icon: '🌲',
+    path: '/format/json-to-xml',
+  },
+  {
+    id: 'json-to-yaml',
+    name: 'JSON 转 YAML',
+    description: '将 JSON 数据转换为标准 YAML 格式',
+    seoDescription: '在线 JSON 转 YAML 工具，输入 JSON 即可生成标准 YAML 配置格式，纯浏览器端运算不上传数据。',
+    category: '格式化',
+    icon: '📝',
+    path: '/format/json-to-yaml',
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
