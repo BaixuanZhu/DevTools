@@ -37,7 +37,6 @@ function handleChange(index: number) {
           :class="[
             'px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
-            'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
             selected
               ? 'bg-accent text-white border-accent'
               : 'bg-card text-text border-border hover:bg-hover',

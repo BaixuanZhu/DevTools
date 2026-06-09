@@ -55,10 +55,6 @@
   outline: none;
 }
 
-.chip:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-accent);
-}
-
 .chip-default {
   background-color: var(--color-card);
   color: var(--color-muted);
@@ -80,4 +76,13 @@
 .chip-active:hover {
   background-color: #333;
   border-color: #333;
+}
+
+/* Sidebar 滚动条隐藏 */
+.sidebar-nav-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sidebar-nav-scroll::-webkit-scrollbar {
+  display: none;
 }

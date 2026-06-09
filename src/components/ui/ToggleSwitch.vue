@@ -23,7 +23,7 @@ const emit = defineEmits<{
       @update:model-value="emit('update:modelValue', $event)"
       :class="[
         'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-[background-color] duration-150',
-        'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
+        'focus:outline-none',
         modelValue ? 'bg-accent' : 'bg-border',
       ]"
     >
