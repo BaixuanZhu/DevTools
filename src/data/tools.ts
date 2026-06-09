@@ -218,6 +218,15 @@ export const tools: ToolMeta[] = [
     icon: '📋',
     path: '/format/json-formatter',
   },
+  {
+    id: 'json-diff',
+    name: 'JSON Diff',
+    description: '在线 JSON 对比工具，可视化展示两份 JSON 的差异',
+    seoDescription: '在线 JSON 对比工具，支持语义对比与严格文本对比，并排可视化展示差异，纯浏览器端运算。',
+    category: '格式化',
+    icon: '🔍',
+    path: '/format/json-diff',
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
