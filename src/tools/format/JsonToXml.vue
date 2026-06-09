@@ -31,7 +31,7 @@ const EXAMPLE_JSON = `{
 }`;
 
 /** 防抖延迟（毫秒） */
-const DEBOUNCE_MS = 500;
+const DEBOUNCE_MS = 300;
 
 // ---- 状态 ----
 
@@ -244,10 +244,12 @@ onUnmounted(() => {
           class="px-3 py-1.5 w-32 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
           placeholder="root"
           spellcheck="false"
+          aria-label="根元素名"
+          aria-describedby="root-name-error"
         />
       </div>
 
-      <div v-if="rootNameError" class="text-[0.75rem] text-error">
+      <div v-if="rootNameError" id="root-name-error" class="text-[0.75rem] text-error">
         {{ rootNameError }}
       </div>
 
