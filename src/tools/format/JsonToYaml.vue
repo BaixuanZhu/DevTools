@@ -30,7 +30,7 @@ const EXAMPLE_JSON = `{
 }`;
 
 /** 防抖延迟（毫秒） */
-const DEBOUNCE_MS = 300;
+const DEBOUNCE_MS = 500;
 
 // ---- 状态 ----
 
