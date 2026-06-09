@@ -8,19 +8,39 @@ const year = new Date().getFullYear();
 ---
 
 <footer class="px-6 py-4 border-t border-border bg-card">
-  <div class="flex justify-center items-center gap-4 flex-wrap">
-    <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} DevTools. All rights reserved.</p>
-    {icp && (
-      <p class="m-0">
+  <div class="max-w-3xl mx-auto">
+    <!-- 主行：版权 + 链接 -->
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} DevTools. All rights reserved.</p>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150">关于</a>
         <a
-          href="https://beian.miit.gov.cn/"
+          href="#"
           target="_blank"
           rel="noopener noreferrer"
-          class="text-[0.8125rem] text-muted hover:text-accent"
-        >
-          {icp}
-        </a>
-      </p>
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >GitHub</a>
+        <button
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150 cursor-pointer bg-transparent border-none p-0"
+          @click="$store.toast.success('反馈功能开发中，敬请期待')"
+        >反馈</button>
+      </div>
+    </div>
+
+    <!-- ICP 行（如存在）-->
+    {icp && (
+      <div class="mt-1">
+        <p class="m-0">
+          <a
+            href="https://beian.miit.gov.cn/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+          >
+            {icp}
+          </a>
+        </p>
+      </div>
     )}
   </div>
 </footer>
