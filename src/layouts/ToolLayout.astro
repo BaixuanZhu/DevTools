@@ -120,7 +120,7 @@ const breadcrumbItems = toolId && toolMeta
       aria-label="工具导航"
     >
       <!-- Logo 区域 (sticky 顶部) -->
-      <div class="sticky top-0 z-10 bg-card border-b border-border h-[57px] flex items-center px-6 shrink-0">
+      <div class="sticky top-0 z-10 bg-card border-b border-border h-[57px] flex items-center justify-between px-6 shrink-0">
         <a
           href="/"
           class="group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150"
@@ -141,6 +141,17 @@ const breadcrumbItems = toolId && toolMeta
           </svg>
           <span>DevTools</span>
         </a>
+        <!-- 移动端关闭按钮 -->
+        <button
+          class="lg:hidden flex items-center justify-center w-8 h-8 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
+          aria-label="关闭导航菜单"
+          @click="$dispatch('sidebar-close')"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       <!-- 导航内容 (可滚动) -->
@@ -180,7 +191,7 @@ const breadcrumbItems = toolId && toolMeta
     ></div>
 
     <!-- 右侧区域 -->
-    <div class="ml-[240px] max-lg:ml-0 flex flex-col min-h-0">
+    <div class="ml-[240px] max-lg:ml-0 flex flex-col min-h-0 min-h-dvh">
       <!-- Header -->
       <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
         <!-- 左侧：汉堡按钮 + 移动端 Logo -->
