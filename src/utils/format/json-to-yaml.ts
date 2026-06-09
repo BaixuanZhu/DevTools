@@ -11,7 +11,7 @@ import type { ParseOutcome } from './json-diff';
 // ---- 类型定义 ----
 
 /** JSON 转 YAML 成功结果 */
-export interface JsonConvertSuccess {
+export interface JsonToYamlSuccess {
   /** 转换是否成功 */
   ok: true;
   /** 生成的 YAML 字符串 */
@@ -19,7 +19,7 @@ export interface JsonConvertSuccess {
 }
 
 /** JSON 转 YAML 失败结果 */
-export interface JsonConvertError {
+export interface JsonToYamlError {
   /** 转换是否成功 */
   ok: false;
   /** 错误描述 */
@@ -27,7 +27,7 @@ export interface JsonConvertError {
 }
 
 /** JSON 转 YAML 返回类型 */
-export type JsonToYamlResult = JsonConvertSuccess | JsonConvertError;
+export type JsonToYamlResult = JsonToYamlSuccess | JsonToYamlError;
 
 /** Web Worker 请求消息 */
 export interface JsonToYamlWorkerRequest {
@@ -36,7 +36,7 @@ export interface JsonToYamlWorkerRequest {
 }
 
 /** Web Worker 响应类型 */
-export type JsonToYamlWorkerResponse = JsonConvertSuccess | JsonConvertError;
+export type JsonToYamlWorkerResponse = JsonToYamlSuccess | JsonToYamlError;
 
 // ---- 常量 ----
 
