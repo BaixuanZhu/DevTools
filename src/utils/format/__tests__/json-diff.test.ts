@@ -2,7 +2,7 @@
  * JSON Diff 工具函数单元测试。
  */
 import { describe, it, expect } from 'vitest';
-import { measureMaxDepth, parseJsonSafe, countNodes, checkInputSize, semanticDiff } from '../json-diff';
+import { measureMaxDepth, parseJsonSafe, countNodes, checkInputSize, semanticDiff, strictDiff, formatUnifiedDiff, type LineDiff } from '../json-diff';
 
 describe('measureMaxDepth', () => {
   it('空对象深度为 1', () => {
@@ -208,5 +208,73 @@ describe('semanticDiff', () => {
   it('基本类型不同为修改', () => {
     const result = semanticDiff('hello', 'world');
     expect(result.summary.modified).toBe(1);
+  });
+});
+
+describe('strictDiff', () => {
+  it('完全相同的文本无差异', () => {
+    const result = strictDiff('{"a":1}', '{"a":1}');
+    expect(result.summary.added).toBe(0);
+    expect(result.summary.removed).toBe(0);
+  });
+
+  it('检测修改行', () => {
+    const left = '{"name": "Alice"}';
+    const right = '{"name": "Bob"}';
+    const result = strictDiff(left, right);
+    expect(result.summary.removed).toBeGreaterThanOrEqual(1);
+    expect(result.summary.added).toBeGreaterThanOrEqual(1);
+  });
+
+  it('检测新增行', () => {
+    const left = '{"a": 1}';
+    const right = '{"a": 1,\n"b": 2}';
+    const result = strictDiff(left, right);
+    expect(result.summary.added).toBeGreaterThanOrEqual(1);
+  });
+
+  it('检测删除行', () => {
+    const left = '{"a": 1,\n"b": 2}';
+    const right = '{"a": 1}';
+    const result = strictDiff(left, right);
+    expect(result.summary.removed).toBeGreaterThanOrEqual(1);
+  });
+
+  it('行号正确分配', () => {
+    const left = '{\n  "a": 1\n}';
+    const right = '{\n  "a": 2\n}';
+    const result = strictDiff(left, right);
+    const removed = result.lines.filter(l => l.type === 'removed');
+    const added = result.lines.filter(l => l.type === 'added');
+    expect(removed.length).toBeGreaterThan(0);
+    expect(added.length).toBeGreaterThan(0);
+    expect(removed[0].leftLineNo).toBeDefined();
+    expect(added[0].rightLineNo).toBeDefined();
+  });
+
+  it('空内容无差异', () => {
+    const result = strictDiff('', '');
+    expect(result.lines.length).toBe(0);
+  });
+});
+
+describe('formatUnifiedDiff', () => {
+  it('生成标准 unified diff 头部', () => {
+    const lines: LineDiff[] = [
+      { type: 'unchanged', leftLineNo: 1, rightLineNo: 1, content: '{' },
+      { type: 'removed', leftLineNo: 2, content: '  "name": "Alice"' },
+      { type: 'added', rightLineNo: 2, content: '  "name": "Bob"' },
+      { type: 'unchanged', leftLineNo: 3, rightLineNo: 3, content: '}' },
+    ];
+    const result = formatUnifiedDiff(lines);
+    expect(result).toContain('--- left.json');
+    expect(result).toContain('+++ right.json');
+    expect(result).toContain('-  "name": "Alice"');
+    expect(result).toContain('+  "name": "Bob"');
+  });
+
+  it('空差异返回空字符串', () => {
+    const result = formatUnifiedDiff([]);
+    expect(result).toBe('');
   });
 });

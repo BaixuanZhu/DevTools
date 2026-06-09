@@ -486,3 +486,202 @@ function stableStringify(value: unknown): string {
   }
   return '{' + parts.join(',') + '}';
 }
+
+// ---- 严格文本 Diff (LCS) ----
+
+/**
+ * 严格文本 diff：格式化后按行 LCS 对比。
+ */
+export function strictDiff(leftJson: string, rightJson: string, indentSize: 2 | 4 = 2): StrictDiffResult {
+  let leftFormatted: string;
+  let rightFormatted: string;
+  try {
+    leftFormatted = JSON.stringify(JSON.parse(leftJson), null, indentSize);
+  } catch {
+    leftFormatted = leftJson;
+  }
+  try {
+    rightFormatted = JSON.stringify(JSON.parse(rightJson), null, indentSize);
+  } catch {
+    rightFormatted = rightJson;
+  }
+
+  const leftLines = leftFormatted.split('\n');
+  const rightLines = rightFormatted.split('\n');
+
+  // Handle empty input case
+  if (leftFormatted === '' && rightFormatted === '') {
+    return {
+      lines: [],
+      summary: { added: 0, removed: 0, unchanged: 0 },
+    };
+  }
+
+  if (leftFormatted === rightFormatted) {
+    return {
+      lines: leftLines.map((content, i) => ({
+        type: 'unchanged' as const,
+        leftLineNo: i + 1,
+        rightLineNo: i + 1,
+        content,
+      })),
+      summary: { added: 0, removed: 0, unchanged: leftLines.length },
+    };
+  }
+
+  const totalLines = leftLines.length + rightLines.length;
+  const lines: LineDiff[] = [];
+
+  if (totalLines > LCS_GREEDY_THRESHOLD) {
+    greedyDiff(leftLines, rightLines, lines);
+  } else {
+    lcsDiff(leftLines, rightLines, lines);
+  }
+
+  const summary = {
+    added: lines.filter(l => l.type === 'added').length,
+    removed: lines.filter(l => l.type === 'removed').length,
+    unchanged: lines.filter(l => l.type === 'unchanged').length,
+  };
+
+  return { lines, summary };
+}
+
+function lcsDiff(oldLines: string[], newLines: string[], result: LineDiff[]): void {
+  const M = oldLines.length;
+  const N = newLines.length;
+
+  const dp: number[][] = Array.from({ length: M + 1 }, () => new Array(N + 1).fill(0));
+
+  for (let i = 1; i <= M; i++) {
+    for (let j = 1; j <= N; j++) {
+      if (oldLines[i - 1] === newLines[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+
+  const rawLines: LineDiff[] = [];
+  let i = M;
+  let j = N;
+
+  while (i > 0 || j > 0) {
+    if (i > 0 && j > 0 && oldLines[i - 1] === newLines[j - 1]) {
+      rawLines.push({ type: 'unchanged', leftLineNo: i, rightLineNo: j, content: oldLines[i - 1] });
+      i--;
+      j--;
+    } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+      rawLines.push({ type: 'added', rightLineNo: j, content: newLines[j - 1] });
+      j--;
+    } else {
+      rawLines.push({ type: 'removed', leftLineNo: i, content: oldLines[i - 1] });
+      i--;
+    }
+  }
+
+  rawLines.reverse();
+  result.push(...rawLines);
+}
+
+function greedyDiff(oldLines: string[], newLines: string[], result: LineDiff[]): void {
+  const rawLines: LineDiff[] = [];
+  let oi = 0;
+  let ni = 0;
+
+  const newLineMap = new Map<string, number[]>();
+  for (let k = 0; k < newLines.length; k++) {
+    const line = newLines[k];
+    const indices = newLineMap.get(line);
+    if (indices) indices.push(k);
+    else newLineMap.set(line, [k]);
+  }
+
+  const usedNew = new Set<number>();
+
+  while (oi < oldLines.length || ni < newLines.length) {
+    if (oi < oldLines.length) {
+      const oldLine = oldLines[oi];
+      const candidates = newLineMap.get(oldLine);
+      let matchedIdx = -1;
+
+      if (candidates) {
+        for (const idx of candidates) {
+          if (idx >= ni && !usedNew.has(idx)) {
+            matchedIdx = idx;
+            break;
+          }
+        }
+      }
+
+      if (matchedIdx >= 0) {
+        while (ni < matchedIdx) {
+          rawLines.push({ type: 'added', rightLineNo: ni + 1, content: newLines[ni] });
+          ni++;
+        }
+        rawLines.push({ type: 'unchanged', leftLineNo: oi + 1, rightLineNo: ni + 1, content: oldLine });
+        usedNew.add(ni);
+        oi++;
+        ni++;
+      } else {
+        rawLines.push({ type: 'removed', leftLineNo: oi + 1, content: oldLine });
+        oi++;
+      }
+    } else {
+      rawLines.push({ type: 'added', rightLineNo: ni + 1, content: newLines[ni] });
+      ni++;
+    }
+  }
+
+  result.push(...rawLines);
+}
+
+// ---- Unified Diff 格式化 ----
+
+/**
+ * 将 LineDiff 数组格式化为标准 unified diff 文本。
+ */
+export function formatUnifiedDiff(lines: LineDiff[]): string {
+  if (lines.length === 0) return '';
+
+  const parts: string[] = ['--- left.json', '+++ right.json'];
+
+  let i = 0;
+  while (i < lines.length) {
+    while (i < lines.length && lines[i].type === 'unchanged') i++;
+    if (i >= lines.length) break;
+
+    const blockStart = Math.max(0, i - DEFAULT_CONTEXT_LINES);
+    let blockEnd = i;
+    while (blockEnd < lines.length && lines[blockEnd].type !== 'unchanged') blockEnd++;
+    const contextAfter = Math.min(DEFAULT_CONTEXT_LINES, lines.length - blockEnd);
+    blockEnd += contextAfter;
+
+    const oldStart = lines[blockStart]?.leftLineNo ?? 1;
+    const newStart = lines[blockStart]?.rightLineNo ?? 1;
+    let oldCount = 0;
+    let newCount = 0;
+    for (let j = blockStart; j < blockEnd; j++) {
+      if (lines[j].type === 'removed' || lines[j].type === 'unchanged') oldCount++;
+      if (lines[j].type === 'added' || lines[j].type === 'unchanged') newCount++;
+    }
+
+    parts.push(`@@ -${oldStart},${oldCount} +${newStart},${newCount} @@`);
+
+    for (let j = blockStart; j < blockEnd; j++) {
+      const line = lines[j];
+      if (line.type === 'unchanged') {
+        parts.push(` ${line.content}`);
+      } else if (line.type === 'removed') {
+        parts.push(`-${line.content}`);
+      } else {
+        parts.push(`+${line.content}`);
+      }
+    }
+
+    i = blockEnd;
+  }
+
+  return parts.join('\n');
+}
