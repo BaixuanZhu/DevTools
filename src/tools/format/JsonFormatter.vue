@@ -360,6 +360,51 @@ onUnmounted(() => {
       ⚠ 数据量超过 5MB，可能导致浏览器卡顿
     </div>
 
+    <!-- 操作栏（顶部横跨两栏） -->
+    <div class="flex flex-wrap items-center gap-2 mb-4">
+      <button
+        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+        @click="handleFormat"
+      >
+        美化
+      </button>
+      <button
+        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+        @click="handleMinify"
+      >
+        压缩
+      </button>
+      <button
+        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+        @click="handleValidate"
+      >
+        验证
+      </button>
+
+      <div class="flex items-center gap-1.5 ml-2">
+        <span class="text-[0.8125rem] text-muted">缩进:</span>
+        <SelectListbox
+          v-model="indent"
+          :options="INDENT_OPTIONS"
+          class="w-24"
+        />
+      </div>
+
+      <div class="flex items-center gap-2 ml-2">
+        <button
+          class="px-3 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
+          @click="fileInputRef?.click()"
+        >
+          📁 上传文件
+        </button>
+      </div>
+
+      <div class="ml-auto flex gap-2">
+        <CopyButton :text="copyableText" label="复制结果" />
+        <ClearButton @clear="handleClear" />
+      </div>
+    </div>
+
     <!-- 双栏工作区 -->
     <ResponsiveWorkspace mode="horizontal">
       <!-- 输入区 -->
@@ -367,7 +412,7 @@ onUnmounted(() => {
         <div class="relative">
           <textarea
             v-model="inputText"
-            class="w-full h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            class="w-full h-[calc(100vh-380px)] min-h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
             :class="isDragging ? 'border-accent ring-2 ring-accent/20' : ''"
             placeholder="粘贴或输入 JSON 数据，支持拖拽 .json 文件..."
             spellcheck="false"
@@ -384,49 +429,6 @@ onUnmounted(() => {
             @change="handleFileUpload"
           />
         </div>
-
-        <!-- 操作按钮栏 -->
-        <div class="flex flex-wrap items-center gap-2 mt-3">
-          <button
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
-            @click="handleFormat"
-          >
-            美化
-          </button>
-          <button
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
-            @click="handleMinify"
-          >
-            压缩
-          </button>
-          <button
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
-            @click="handleValidate"
-          >
-            验证
-          </button>
-
-          <div class="flex items-center gap-1.5 ml-2">
-            <span class="text-[0.8125rem] text-muted">缩进:</span>
-            <SelectListbox
-              v-model="indent"
-              :options="INDENT_OPTIONS"
-              class="w-24"
-            />
-          </div>
-
-          <div class="ml-auto flex gap-2">
-            <ClearButton @clear="handleClear" />
-          </div>
-        </div>
-
-        <!-- 上传按钮 -->
-        <button
-          class="mt-2 px-4 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-          @click="fileInputRef?.click()"
-        >
-          📁 上传 .json 文件
-        </button>
       </template>
 
       <!-- 输出区 -->
@@ -434,7 +436,7 @@ onUnmounted(() => {
         <!-- 加载中 -->
         <div
           v-if="isLoading"
-          class="w-full h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+          class="w-full h-[calc(100vh-380px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
         >
           正在解析...
         </div>
@@ -442,7 +444,7 @@ onUnmounted(() => {
         <!-- 错误输出 -->
         <div
           v-else-if="isError"
-          class="w-full h-80 p-4 border border-border rounded-sm bg-card overflow-auto"
+          class="w-full h-[calc(100vh-380px)] min-h-80 p-4 border border-border rounded-sm bg-card overflow-auto"
         >
           <pre class="m-0 text-sm text-error whitespace-pre-wrap font-mono">{{ errorMessage }}</pre>
         </div>
@@ -450,7 +452,7 @@ onUnmounted(() => {
         <!-- 正常输出 -->
         <div
           v-else-if="outputText"
-          class="w-full h-80 p-4 border border-border rounded-sm bg-card overflow-auto"
+          class="w-full h-[calc(100vh-380px)] min-h-80 p-4 border border-border rounded-sm bg-card overflow-auto"
         >
           <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed json-highlight" v-html="highlightedHtml"></pre>
         </div>
@@ -458,16 +460,15 @@ onUnmounted(() => {
         <!-- 空状态 -->
         <div
           v-else
-          class="w-full h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+          class="w-full h-[calc(100vh-380px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
         >
           点击"美化"、"压缩"或"验证"按钮查看结果
         </div>
 
-        <!-- 统计信息 + 复制 -->
-        <div class="flex items-center justify-between mt-3">
+        <!-- 统计信息 -->
+        <div class="mt-2">
           <span v-if="stats" class="text-[0.75rem] text-muted">{{ statsText }}</span>
           <span v-else class="text-[0.75rem] text-muted">统计信息将在操作后显示</span>
-          <CopyButton :text="copyableText" label="复制结果" />
         </div>
       </template>
     </ResponsiveWorkspace>
