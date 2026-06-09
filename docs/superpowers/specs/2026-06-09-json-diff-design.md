@@ -61,7 +61,7 @@ import JsonDiff from '../../tools/format/JsonDiff.vue';
 interface DiffItem {
   /** 差异类型 */
   type: 'added' | 'removed' | 'modified' | 'unchanged';
-  /** JSON 路径，如 "root.users[1].name" */
+  /** JSON 路径，JSONPath 格式，如 "$.users[1].name" */
   path: string;
   /** 旧值（removed / modified 时有值） */
   oldValue?: unknown;
@@ -113,9 +113,7 @@ interface StrictDiffResult {
    - 键仅存在于右侧 → `added`
    - 键都存在但类型不同 → `modified`
    - 键都存在且类型相同 → 递归继续对比
-2. **数组对比**：支持两种子模式
-   - **有序模式**：按索引逐个递归对比
-   - **无序模式**：将数组元素序列化为稳定字符串后匹配，未匹配的标记为 added / removed；重复元素使用多重集匹配（计数对比）
+2. **数组对比**："忽略数组顺序"开关关闭时按索引逐个递归对比，开启时将数组元素序列化为稳定字符串后匹配（未匹配的标记为 added / removed），重复元素使用多重集匹配（计数对比）
 3. **基本类型**：直接用 `===` 比较，不等则为 `modified`
 4. **特殊值**：`null` 与其他任何值比较均为 `modified`；`-0` 与 `0` 视为相同；`NaN` / `Infinity` 经 `JSON.stringify` 后均变为 `null`，视为相同
 
@@ -123,7 +121,7 @@ interface StrictDiffResult {
 
 1. 将两份 JSON 用 `JSON.stringify(obj, null, 2)` 格式化为标准缩进文本
 2. 按行拆分为数组
-3. 使用 LCS（最长公共子序列）算法求行级对齐
+3. 使用标准 O(N×M) LCS（最长公共子序列）算法求行级对齐（行数超过 5000 时自动切换为 Myers diff 算法的线性变体）
 4. 输出 `LineDiff[]`，左侧行号 / 右侧行号分别递增
 5. 纯文本 diff，不做语义分析
 
@@ -156,7 +154,7 @@ function measureMaxDepth(jsonText: string): number;
 | 深度 | 行为 |
 |------|------|
 | ≤ 128 | 正常解析和对比 |
-| 129 ~ 256 | 正常解析，递归对比时深度超过 128 的节点标记为 `modified`（保守策略），摘要面板追加警告 |
+| > 128 且 ≤ 256 | 正常解析，递归对比时深度超过 128 的节点标记为 `modified`（保守策略），摘要面板追加警告 |
 | > 256 | 拒绝解析，提示"JSON 嵌套层级过深（{depth} 层），最大支持 256 层" |
 
 扫描算法：逐字符遍历，遇 `{` 或 `[` 深度 +1，遇 `}` 或 `]` 深度 -1，忽略字符串内的括号。
@@ -287,34 +285,39 @@ JsonDiff.vue
 4. **模式切换**：切换后自动重新对比（如果两侧都有输入）
 5. **忽略数组顺序开关**：切换后自动重新对比
 6. **清空**：重置两侧输入、摘要面板、diff 视图
-7. **复制**：将 diff 结果复制为统一 diff 格式文本
+7. **复制**：将 diff 结果复制为标准 unified diff 格式文本（`---` / `+++` / `@@ ... @@` / `-` / `+` 前缀），文件名标记为 `left.json` / `right.json`
 
 ### Diff 视图渲染规则
 
 **语义模式**
-- 两份 JSON 按路径展开为扁平化的键值行
+- 两份 JSON 按路径展开为扁平化的键值行，路径显示为 JSONPath 格式（如 `$.users[1].name`）
 - 左侧显示旧值，右侧显示新值
-- 颜色编码：
-  - `removed`：左侧行背景 `bg-red-50`，红色文字
-  - `added`：右侧行背景 `bg-green-50`，绿色文字
-  - `modified`：左侧 `bg-red-50` + 右侧 `bg-green-50`
-  - `unchanged`：默认背景，默认文字色
+- 颜色编码（使用项目设计令牌）：
+  - `removed`：左侧行背景 `bg-hover`，文字 `text-error`，前缀图标 `-`
+  - `added`：右侧行背景 `bg-hover`，文字 `text-success`，前缀图标 `+`
+  - `modified`：左侧 `bg-hover` + `text-error` + `~` 前缀，右侧 `bg-hover` + `text-success` + `~` 前缀
+  - `unchanged`：默认背景 `bg-card`，默认文字色 `text-text`
 
 **严格模式**
 - 标准并排文本 diff，行号对齐
-- `removed`：左侧红色背景行，右侧空行对齐
-- `added`：左侧空行对齐，右侧绿色背景行
-- `unchanged`：默认样式
+- `removed`：左侧 `bg-hover` + `text-error` 背景，前缀 `-`，右侧空行对齐
+- `added`：左侧空行对齐，右侧 `bg-hover` + `text-success` 背景，前缀 `+`
+- `unchanged`：默认样式 `bg-card` + `text-text`
 
 **同步滚动**
 - 左右面板监听 `scroll` 事件，互相同步 `scrollTop`
 - 用 `requestAnimationFrame` 节流，避免抖动
 - 用户主动滚动一侧时，另一侧跟随
 
+**响应式布局**
+- 桌面端（≥ 1024px）：并排左右视图
+- 移动端（< 1024px）：输入区上下堆叠（由 ResponsiveWorkspace 的 `lg:grid-cols-2` 自动处理），diff 视图改为 Tab 切换左右面板（"原始" / "修改后" 两个 Tab），每个 Tab 内用图标和颜色标识差异行
+
 **虚拟滚动**
-- 行数超过 200 时启用虚拟滚动
-- 每行高度固定（基于 `font-mono text-sm` 计算）
+- 行数超过 200 时启用虚拟滚动（行数 200-1000 之间：仅启用虚拟滚动，不折叠 unchanged；超过 1000 行：同时启用虚拟滚动 + 折叠 unchanged）
+- 实现策略：固定行高（基于 `font-mono text-sm` 计算出像素值），通过容器高度 / 行高计算可见行索引范围，用 `transform: translateY()` 定位渲染行
 - 预渲染上下各 5 行缓冲区
+- "展开全部"按钮在展开超过 5000 行时，显示确认提示"展开后将显示 {n} 行，可能影响流畅度，是否继续？"
 
 ## 错误处理
 
@@ -324,9 +327,17 @@ JsonDiff.vue
 |------|------|
 | 初始（未对比） | diff 视图区域显示占位："输入两份 JSON 后点击「对比」查看差异" |
 | 对比中（同步） | 操作栏按钮显示 loading spinner，不可重复点击 |
-| 对比中（Worker） | diff 视图区域显示"对比中…" + 进度指示，支持取消 |
+| 对比中（Worker） | diff 视图区域显示"对比中…"加载动画，支持取消 |
 | 对比完成 - 有差异 | 摘要面板 + diff 视图正常展示 |
 | 对比完成 - 无差异 | 摘要面板显示"✅ 两份 JSON 完全一致，无差异"，不渲染 diff 视图 |
+
+### 运行时 diff 错误
+
+| 场景 | 处理 |
+|------|------|
+| 递归溢出 / 内存不足 | 捕获异常，显示"对比过程中发生错误，请检查输入或减小数据量" |
+| Worker 通信失败 | 降级为主线程同步处理，显示"异步处理不可用，正在同步处理…" |
+| 用户取消 | 中止 Worker（`terminate`），清空 diff 视图，恢复初始状态 |
 
 ### 文件上传错误
 
@@ -338,8 +349,8 @@ JsonDiff.vue
 
 ## 可访问性
 
-- 两个 textarea 通过 `aria-label` 标识（"原始 JSON"、"修改后 JSON"）
-- 摘要面板使用 `aria-live="polite"`，对比完成后自动播报结果
+- 两个 textarea 通过 `aria-label` 标识：左侧 `aria-label="原始 JSON 输入"`，右侧 `aria-label="修改后 JSON 输入"`
+- 摘要面板使用 `aria-live="polite"`，对比完成后自动播报结果（如"对比完成：3 处新增，2 处删除，1 处修改"）
 - diff 视图中颜色不是唯一区分手段，同时使用图标（`+`/`-`/`~`）标识差异类型
 - 所有按钮支持键盘操作（Tab 聚焦，Enter / Space 触发）
 - 同步滚动区域可通过键盘上下箭头滚动
