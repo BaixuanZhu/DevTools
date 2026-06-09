@@ -314,14 +314,6 @@ function handleClear(): void {
   sizeWarning.value = 'ok';
 }
 
-// ---- 填入示例 ----
-
-/** 填入示例数据 */
-function handleExample(): void {
-  inputText.value = EXAMPLE_JSON;
-  resetOutput();
-}
-
 // ---- 监听输入大小 ----
 
 watch(inputText, () => {
@@ -344,12 +336,12 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div>
+  <div class="mx-auto max-w-[1600px]">
     <!-- 头部 -->
     <ToolHeader
       title="JSON 格式化器"
       description="在线 JSON 格式化、压缩、验证与查询工具"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 大小警告 -->
@@ -474,7 +466,7 @@ onUnmounted(() => {
     </ResponsiveWorkspace>
 
     <!-- JSON Path 查询栏 -->
-    <div class="mx-auto max-w-[1600px] mt-6">
+    <div class="mt-6">
       <div class="flex items-center gap-3">
         <label class="shrink-0 text-[0.8125rem] text-muted font-sans">JSON Path:</label>
         <input
