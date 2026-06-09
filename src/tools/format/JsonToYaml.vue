@@ -230,8 +230,9 @@ onUnmounted(() => {
             placeholder="粘贴或输入 JSON 数据..."
             spellcheck="false"
             aria-label="JSON 输入"
+            aria-describedby="json-input-error"
           />
-          <div v-if="inputError" class="mt-1 text-[0.75rem] text-error">{{ inputError }}</div>
+          <div v-if="inputError" id="json-input-error" class="mt-1 text-[0.75rem] text-error">{{ inputError }}</div>
         </div>
       </template>
 
