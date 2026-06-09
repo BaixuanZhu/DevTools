@@ -538,11 +538,13 @@ export function strictDiff(leftJson: string, rightJson: string, indentSize: 2 | 
     lcsDiff(leftLines, rightLines, lines);
   }
 
-  const summary = {
-    added: lines.filter(l => l.type === 'added').length,
-    removed: lines.filter(l => l.type === 'removed').length,
-    unchanged: lines.filter(l => l.type === 'unchanged').length,
-  };
+  let added = 0, removed = 0, unchanged = 0;
+  for (const line of lines) {
+    if (line.type === 'added') added++;
+    else if (line.type === 'removed') removed++;
+    else unchanged++;
+  }
+  const summary = { added, removed, unchanged };
 
   return { lines, summary };
 }

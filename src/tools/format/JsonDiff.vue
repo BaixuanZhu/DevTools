@@ -82,6 +82,10 @@ let worker: Worker | null = null;
 const leftTextarea = ref<HTMLTextAreaElement | null>(null);
 /** 右侧 textarea ref */
 const rightTextarea = ref<HTMLTextAreaElement | null>(null);
+/** 左侧结果面板 ref（用于同步滚动） */
+const leftResultPanel = ref<HTMLDivElement | null>(null);
+/** 右侧结果面板 ref（用于同步滚动） */
+const rightResultPanel = ref<HTMLDivElement | null>(null);
 
 // ---- 计算属性 ----
 
@@ -440,16 +444,16 @@ function handleRightDragLeave(): void {
 
 /** 左侧滚动处理 */
 function handleLeftScroll(event: Event): void {
-  if (!rightTextarea.value) return;
+  if (!rightResultPanel.value) return;
   const target = event.target as HTMLElement;
-  syncScroll(target, rightTextarea.value);
+  syncScroll(target, rightResultPanel.value);
 }
 
 /** 右侧滚动处理 */
 function handleRightScroll(event: Event): void {
-  if (!leftTextarea.value) return;
+  if (!leftResultPanel.value) return;
   const target = event.target as HTMLElement;
-  syncScroll(target, leftTextarea.value);
+  syncScroll(target, leftResultPanel.value);
 }
 
 /** 同步滚动（带节流） */
@@ -635,16 +639,14 @@ onUnmounted(() => {
       <div v-else-if="diffMode === 'strict' && strictResult" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- 左侧（删除） -->
         <div
-          class="border border-border rounded-sm bg-card overflow-hidden"
-          style="max-height: 600px;"
+          class="border border-border rounded-sm bg-card overflow-hidden max-h-[600px]"
         >
           <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
             原始版本（删除行）
           </div>
           <div
             ref="leftResultPanel"
-            class="overflow-auto p-0"
-            style="max-height: 560px;"
+            class="overflow-auto p-0 max-h-[560px]"
             @scroll="handleLeftScroll"
           >
             <table class="w-full border-collapse font-mono text-sm">
@@ -653,7 +655,7 @@ onUnmounted(() => {
                   v-for="(line, index) in (isExpanded ? strictResult.lines : strictResult.lines.slice(0, AUTO_FOLD_THRESHOLD))"
                   :key="`left-${index}`"
                   :class="{
-                    'bg-red-50/50': line.type === 'removed',
+                    'bg-hover': line.type === 'removed',
                     'text-error': line.type === 'removed',
                     'text-text': line.type === 'unchanged',
                   }"
@@ -673,16 +675,14 @@ onUnmounted(() => {
 
         <!-- 右侧（新增） -->
         <div
-          class="border border-border rounded-sm bg-card overflow-hidden"
-          style="max-height: 600px;"
+          class="border border-border rounded-sm bg-card overflow-hidden max-h-[600px]"
         >
           <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
             修改版本（新增行）
           </div>
           <div
             ref="rightResultPanel"
-            class="overflow-auto p-0"
-            style="max-height: 560px;"
+            class="overflow-auto p-0 max-h-[560px]"
             @scroll="handleRightScroll"
           >
             <table class="w-full border-collapse font-mono text-sm">
@@ -691,7 +691,7 @@ onUnmounted(() => {
                   v-for="(line, index) in (isExpanded ? strictResult.lines : strictResult.lines.slice(0, AUTO_FOLD_THRESHOLD))"
                   :key="`right-${index}`"
                   :class="{
-                    'bg-green-50/50': line.type === 'added',
+                    'bg-hover': line.type === 'added',
                     'text-success': line.type === 'added',
                     'text-text': line.type === 'unchanged',
                   }"
@@ -722,7 +722,7 @@ onUnmounted(() => {
             展开全部（{{ diffLines }} 行）
           </button>
         </div>
-        <div class="overflow-auto" style="max-height: 600px;">
+        <div class="overflow-auto max-h-[600px]">
           <table class="w-full border-collapse font-mono text-sm">
             <thead>
               <tr class="border-b border-border">
@@ -738,9 +738,9 @@ onUnmounted(() => {
                 :key="index"
                 class="border-b border-border/50"
                 :class="{
-                  'bg-green-50/30': item.type === 'added',
-                  'bg-red-50/30': item.type === 'removed',
-                  'bg-yellow-50/30': item.type === 'modified',
+                  'bg-hover': item.type === 'added',
+                  'bg-hover': item.type === 'removed',
+                  'bg-hover': item.type === 'modified',
                 }"
               >
                 <td class="px-3 py-2">
