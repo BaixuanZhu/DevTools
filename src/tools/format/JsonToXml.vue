@@ -8,8 +8,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
+import CodePanel from '../../components/ui/CodePanel.vue';
 import {
   convertJsonToXml,
   validateRootName,
@@ -234,7 +233,7 @@ onUnmounted(() => {
       :show-example="false"
     />
 
-    <!-- 操作栏 -->
+    <!-- 根元素名配置 -->
     <div class="flex flex-wrap items-center gap-3 mb-4">
       <div class="flex items-center gap-2">
         <label class="text-[0.8125rem] text-muted">根元素名:</label>
@@ -252,41 +251,33 @@ onUnmounted(() => {
       <div v-if="rootNameError" id="root-name-error" class="text-[0.75rem] text-error">
         {{ rootNameError }}
       </div>
-
-      <div class="ml-auto flex gap-2">
-        <CopyButton :text="outputText" label="复制结果" />
-        <ClearButton @clear="handleClear" />
-      </div>
     </div>
 
     <!-- 双栏工作区 -->
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
       <!-- 输入区 -->
       <template #input>
-        <div>
-          <label class="block text-[0.8125rem] text-muted mb-1.5">JSON 输入</label>
+        <CodePanel label="JSON 输入" showClear @clear="handleClear">
           <textarea
             ref="inputTextarea"
             v-model="inputText"
-            class="w-full h-[calc(100vh-360px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
             placeholder="粘贴或输入 JSON 数据..."
             spellcheck="false"
             aria-label="JSON 输入"
             aria-describedby="json-input-error"
           />
           <div v-if="inputError" id="json-input-error" class="mt-1 text-[0.75rem] text-error">{{ inputError }}</div>
-        </div>
+        </CodePanel>
       </template>
 
       <!-- 输出区 -->
       <template #output>
-        <div>
-          <label class="block text-[0.8125rem] text-muted mb-1.5">XML 输出</label>
-
+        <CodePanel label="XML 输出" showCopy :copyText="outputText">
           <!-- 加载中 -->
           <div
             v-if="isLoading"
-            class="w-full h-[calc(100vh-360px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
           >
             正在转换...
           </div>
@@ -294,7 +285,7 @@ onUnmounted(() => {
           <!-- 错误输出 -->
           <div
             v-else-if="runtimeError"
-            class="w-full h-[calc(100vh-360px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
+            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
           >
             <pre class="m-0 text-sm text-error whitespace-pre-wrap font-mono">{{ runtimeError }}</pre>
           </div>
@@ -302,7 +293,7 @@ onUnmounted(() => {
           <!-- 正常输出 -->
           <div
             v-else-if="outputText"
-            class="w-full h-[calc(100vh-360px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
+            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
           >
             <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed text-text">{{ outputText }}</pre>
           </div>
@@ -310,11 +301,11 @@ onUnmounted(() => {
           <!-- 空状态 -->
           <div
             v-else
-            class="w-full h-[calc(100vh-360px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
           >
             输入 JSON 数据后将自动转换为 XML
           </div>
-        </div>
+        </CodePanel>
       </template>
     </ResponsiveWorkspace>
   </div>
