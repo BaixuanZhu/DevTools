@@ -7,6 +7,7 @@
  */
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import Prism from 'prismjs';
+import 'prismjs/components/prism-json';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
