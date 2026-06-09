@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * JSON Diff 主组件。
+ * JSON 差异对比主组件。
  *
- * 支持语义 diff 和严格文本 diff 两种模式，
+ * 支持语义模式和严格文本模式两种对比方式，
  * 使用 Web Worker 处理大文件，提供同步滚动、折叠控制等功能。
  */
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
@@ -36,7 +36,7 @@ import {
 // ---- 状态 ----
 
 /** 对比模式 */
-const diffMode = ref<DiffMode>('semantic');
+const diffMode = ref<DiffMode>('strict');
 /** 对比选项 */
 const options = ref<DiffOptions>({
   ignoreArrayOrder: false,
@@ -520,7 +520,7 @@ onUnmounted(() => {
   <div class="mx-auto max-w-[1600px]">
     <!-- 头部 -->
     <ToolHeader
-      title="JSON Diff"
+      title="JSON 差异对比"
       description="对比两份 JSON 的差异，支持语义模式和严格文本模式"
       :show-example="false"
     />

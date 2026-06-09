@@ -220,9 +220,9 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'json-diff',
-    name: 'JSON Diff',
-    description: '在线 JSON 对比工具，可视化展示两份 JSON 的差异',
-    seoDescription: '在线 JSON 对比工具，支持语义对比与严格文本对比，并排可视化展示差异，纯浏览器端运算。',
+    name: 'JSON 差异对比',
+    description: '可视化对比两份 JSON 的差异，支持语义模式与严格文本模式',
+    seoDescription: '在线 JSON 差异对比工具，支持语义对比与严格文本对比，并排可视化展示差异，纯浏览器端运算。',
     category: '格式化',
     icon: '🔍',
     path: '/format/json-diff',
