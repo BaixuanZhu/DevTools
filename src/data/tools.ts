@@ -10,7 +10,8 @@ export type ToolCategory =
   | '日期时间'
   | 'CSS 工具'
   | 'API 工具'
-  | '媒体工具';
+  | '媒体工具'
+  | '编辑器';
 
 /** 分类 slug 映射（中 → 英） */
 export const categorySlugMap: Record<ToolCategory, string> = {
@@ -25,6 +26,7 @@ export const categorySlugMap: Record<ToolCategory, string> = {
   'CSS 工具': 'css',
   'API 工具': 'api',
   '媒体工具': 'media',
+  '编辑器': 'editor',
 };
 
 /** 工具元数据 */
@@ -294,6 +296,17 @@ export const tools: ToolMeta[] = [
     path: '/format/json-to-yaml',
     keywords: ['json 转 yaml', 'json to yaml', 'yaml 转换', '在线 yaml 工具', 'json yaml'],
     relatedToolIds: ['json-formatter', 'json-to-xml'],
+  },
+  {
+    id: 'markdown-editor',
+    name: 'Markdown 编辑器',
+    description: '在线 Markdown 编辑器，支持实时预览、语法高亮和多格式导出',
+    seoDescription: '在线 Markdown 编辑器，支持实时预览、分栏编辑、代码块高亮，可导出为 Markdown、HTML、PDF 格式，纯浏览器端运行。',
+    category: '编辑器',
+    icon: '✏️',
+    path: '/editor/markdown-editor',
+    keywords: ['markdown 编辑器', 'markdown 在线', 'markdown 预览', '在线 md 编辑器', 'markdown 导出', 'markdown 转换'],
+    relatedToolIds: ['json-formatter', 'json-to-yaml'],
   },
 ];
 
