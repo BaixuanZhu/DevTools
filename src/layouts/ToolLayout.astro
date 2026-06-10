@@ -2,7 +2,8 @@
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
 import Breadcrumb from '../components/layout/Breadcrumb.astro';
-import { getToolsByCategory, getCategories, getToolBySlug, slugCategoryMap } from '../data/tools';
+import RelatedTools from '../components/layout/RelatedTools.astro';
+import { getToolsByCategory, getCategories, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
 
 interface Props {
   /** 页面标题 */
@@ -21,8 +22,17 @@ const toolsByCategory = getToolsByCategory();
 /** 通过 toolId 查找工具元数据 */
 const toolMeta = toolId ? getToolBySlug(toolId) : undefined;
 
+/** 确定 title：props.title > toolMeta.title > 自动拼接 "{name} - DevTools" */
+const finalTitle = title || toolMeta?.title || (toolMeta ? `${toolMeta.name} - DevTools` : undefined);
+
 /** 确定最终 description：优先 props → seoDescription → 默认值 */
 const finalDescription = description || toolMeta?.seoDescription || undefined;
+
+/** 提取 keywords */
+const keywords = toolMeta?.keywords;
+
+/** 获取相关工具 ID 列表 */
+const relatedToolIds = toolMeta?.relatedToolIds || [];
 
 /** 站点基础 URL */
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
@@ -106,7 +116,7 @@ const breadcrumbItems = toolId && toolMeta
   : [];
 ---
 
-<Layout title={title} description={finalDescription} jsonLd={jsonLdItems}>
+<Layout title={finalTitle} description={finalDescription} jsonLd={jsonLdItems} keywords={keywords}>
   <div id="app">
     <!-- Sidebar (fixed, full height) -->
     <aside
@@ -328,6 +338,12 @@ const breadcrumbItems = toolId && toolMeta
       <main class="flex-1 p-8 overflow-y-auto overflow-x-hidden max-w-full max-md:p-4">
         {breadcrumbItems.length > 0 && <Breadcrumb items={breadcrumbItems} />}
         <slot />
+        {relatedToolIds.length > 0 && (
+          <section class="mt-12 pt-8 border-t border-border">
+            <h2 class="text-lg font-semibold text-text mb-4">相关工具</h2>
+            <RelatedTools toolIds={relatedToolIds} />
+          </section>
+        )}
       </main>
 
       <!-- Footer -->
