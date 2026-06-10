@@ -240,7 +240,7 @@ onUnmounted(() => {
         <input
           v-model="rootName"
           type="text"
-          class="px-3 py-1.5 w-32 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          class="px-3 py-1.5 w-32 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus:border-accent"
           placeholder="root"
           spellcheck="false"
           aria-label="根元素名"
@@ -261,7 +261,7 @@ onUnmounted(() => {
           <textarea
             ref="inputTextarea"
             v-model="inputText"
-            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
             placeholder="粘贴或输入 JSON 数据..."
             spellcheck="false"
             aria-label="JSON 输入"

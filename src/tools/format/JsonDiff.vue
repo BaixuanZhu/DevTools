@@ -597,7 +597,7 @@ onUnmounted(() => {
             <textarea
               v-model="leftInput"
               ref="leftTextarea"
-              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
               :class="leftDragging ? 'border-accent ring-2 ring-accent/20' : ''"
               placeholder="粘贴或输入原始 JSON..."
               spellcheck="false"
@@ -626,7 +626,7 @@ onUnmounted(() => {
             <textarea
               v-model="rightInput"
               ref="rightTextarea"
-              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
               :class="rightDragging ? 'border-accent ring-2 ring-accent/20' : ''"
               placeholder="粘贴或输入修改后 JSON..."
               spellcheck="false"

@@ -58,6 +58,18 @@
 - 分类前缀 + 工具名，形成 `/category/tool-name` 的二级结构
 - 每个工具页面有独立的 `<title>` 和 meta description，便于 SEO
 
+## SEO Strategy
+
+每个工具页面必须具备完整的 SEO 元数据，由 ToolLayout 和 SeoHead 组件自动渲染：
+
+- **`<title>`**：在 `src/data/tools.ts` 中通过 `title` 字段定义，默认回退为 `{name} - DevTools`
+- **`<meta name="description">`**：在 `src/data/tools.ts` 中通过 `seoDescription` 字段定义，120–160 字符
+- **`<meta name="keywords">`**：在 `src/data/tools.ts` 中通过 `keywords` 数组定义，5–10 个长尾关键词
+- **JSON-LD 结构化数据**：ToolLayout 自动注入 `WebSite`、`BreadcrumbList`、`WebPage`、`SoftwareApplication` schema
+- **FAQ 结构化数据**：有 FAQ 的工具需在 `src/data/tool-faqs.ts` 中维护问答对，渲染为原生 `<details>` 元素
+
+新增工具时必须在 `src/data/tools.ts` 中完整填写上述字段，否则 SeoHead 组件无法生成有效的 meta 标签。
+
 ## Error Handling
 
 - **输入校验错误**：在输入框下方以 `text-error` 内联显示具体中文错误描述，不用弹窗

@@ -119,7 +119,7 @@ Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐
 |------|---------|-------|
 | Default | `bg-accent text-white rounded-sm px-4 py-2` | `bg-card text-text border border-border rounded-sm px-4 py-2` |
 | Hover | 不变色 | `hover:bg-hover` |
-| Focus | `focus:outline-none focus:ring-2 focus:ring-accent/30 focus:ring-offset-1` | 同 Primary |
+| Focus | 无（按钮不显示 focus 样式） | 同 Primary |
 | Active (pressed) | `active:brightness-90` | `active:bg-hover/80` |
 | Disabled | `opacity-50 cursor-not-allowed`（覆盖所有状态） | 同 Primary |
 | Copied | — | Ghost 按钮 `border-success text-success` 持续 1.5s，显示"已复制" |
@@ -142,7 +142,7 @@ Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐
 |------|-------|
 | Default | `bg-card border border-border rounded-lg p-6` |
 | Hover | `hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` |
-| Focus（键盘） | `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30` |
+| Focus | 无（卡片不显示 focus 样式） |
 
 Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.9375rem]`）和 description（`text-[0.8125rem] text-muted`）右。
 

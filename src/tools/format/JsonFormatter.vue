@@ -404,7 +404,7 @@ onUnmounted(() => {
         <div class="relative">
           <textarea
             v-model="inputText"
-            class="w-full h-[calc(100vh-380px)] min-h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+            class="w-full h-[calc(100vh-380px)] min-h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
             :class="isDragging ? 'border-accent ring-2 ring-accent/20' : ''"
             placeholder="粘贴或输入 JSON 数据，支持拖拽 .json 文件..."
             spellcheck="false"
@@ -472,7 +472,7 @@ onUnmounted(() => {
         <input
           v-model="queryPath"
           type="text"
-          class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1"
+          class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus:border-accent"
           placeholder='输入 JSON Path 表达式，如 $.store.book[*].author'
           @keydown.enter="handleQuery"
         />

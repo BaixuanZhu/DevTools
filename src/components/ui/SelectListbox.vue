@@ -34,7 +34,6 @@ const selectedLabel = computed(() => {
       <ListboxButton
         :class="[
           'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer text-left',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
         ]"
       >
         <span class="block truncate">{{ selectedLabel }}</span>
