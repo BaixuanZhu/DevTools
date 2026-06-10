@@ -33,7 +33,7 @@ const selectedLabel = computed(() => {
     <Listbox v-model="model">
       <ListboxButton
         :class="[
-          'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer text-left',
+          'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer flex items-center justify-center',
         ]"
       >
         <span class="block truncate">{{ selectedLabel }}</span>
@@ -55,11 +55,11 @@ const selectedLabel = computed(() => {
           :key="(option as any).key ?? option.value"
           :value="(option as any).key ?? option.value"
           :class="[
-            'relative cursor-pointer select-none py-1.5 pl-7 pr-2',
+            'relative cursor-pointer select-none py-1.5 px-2',
             'ui-active:bg-hover ui-active:text-text',
           ]"
         >
-          <span class="block truncate ui-selected:font-semibold ui-selected:text-accent">{{ option.label }}</span>
+          <span class="flex items-center justify-center gap-1.5 truncate ui-selected:font-semibold ui-selected:text-accent">{{ option.label }}</span>
           <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 ui-selected:text-accent">
             <svg class="h-4 w-4 ui-selected:block hidden" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path

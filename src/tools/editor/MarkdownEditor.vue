@@ -3,12 +3,11 @@
  * Markdown 编辑器主组件。
  *
  * 支持仅编辑 / 仅预览 / 分栏三种视图模式，
- * 提供精简工具栏辅助语法插入，支持导出 .md / .html / .pdf。
+ * 提供图标化工具栏辅助语法插入，支持导出 .md / .html / .pdf。
  */
 import { ref, computed, nextTick, onMounted } from 'vue';
+import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
-import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import { renderMarkdown } from '../../utils/editor/markdown-renderer';
@@ -30,13 +29,6 @@ import {
 } from '../../utils/editor/markdown-export';
 
 // ---- 常量 ----
-
-/** 视图模式选项 */
-const VIEW_OPTIONS = [
-  { key: 'split', label: '分栏' },
-  { key: 'edit', label: '编辑' },
-  { key: 'preview', label: '预览' },
-];
 
 /** 标题级别选项 */
 const HEADING_OPTIONS = [
@@ -89,6 +81,32 @@ function hello() {
 ---
 
 以上是 Markdown 编辑器的功能演示，开始编辑吧！`;
+
+// ---- 图标按钮样式 ----
+
+/** 视图模式按钮基础样式 */
+const viewBtnBase = 'w-8 h-8 flex items-center justify-center rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150';
+
+/** 视图模式 - 选中态 */
+const activeView = 'bg-accent border-accent text-white';
+
+/** 视图模式 - 未选中态 */
+const inactiveView = 'bg-card border-border text-muted hover:bg-hover hover:text-text';
+
+/** 工具按钮样式（无激活态） */
+const toolBtn = 'w-8 h-8 flex items-center justify-center rounded-sm border border-border bg-card text-muted cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text';
+
+/** SVG 图标通用属性 */
+const svgAttrs = {
+  width: 16,
+  height: 16,
+  viewBox: '0 0 24 24',
+  fill: 'none',
+  stroke: 'currentColor',
+  'stroke-width': 2,
+  'stroke-linecap': 'round',
+  'stroke-linejoin': 'round',
+};
 
 // ---- 状态 ----
 
@@ -318,50 +336,94 @@ onMounted(() => {
       :show-example="false"
     />
 
-    <!-- 操作栏（统一一行，参考 JsonFormatter 风格） -->
-    <div class="flex flex-wrap items-center gap-2 mb-4">
-      <!-- 视图模式切换 -->
-      <ModeTabGroup v-model="viewMode" :options="VIEW_OPTIONS" />
+    <!-- 图标化工具栏（统一一行） -->
+    <div class="flex flex-wrap items-center gap-1.5 mb-4">
 
-      <!-- 编辑工具（仅编辑/分栏模式可用） -->
+      <!-- 1. 视图模式组 -->
+      <div class="flex items-center gap-1">
+        <!-- 分栏 -->
+        <button
+          :class="[viewBtnBase, viewMode === 'split' ? activeView : inactiveView]"
+          title="分栏"
+          @click="viewMode = 'split'"
+        >
+          <svg v-bind="svgAttrs">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="12" y1="3" x2="12" y2="21" />
+          </svg>
+        </button>
+        <!-- 编辑 -->
+        <button
+          :class="[viewBtnBase, viewMode === 'edit' ? activeView : inactiveView]"
+          title="编辑"
+          @click="viewMode = 'edit'"
+        >
+          <svg v-bind="svgAttrs">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+        </button>
+        <!-- 预览 -->
+        <button
+          :class="[viewBtnBase, viewMode === 'preview' ? activeView : inactiveView]"
+          title="预览"
+          @click="viewMode = 'preview'"
+        >
+          <svg v-bind="svgAttrs">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- 2. 编辑工具组（仅编辑/分栏模式可用） -->
       <template v-if="viewMode !== 'preview'">
         <span class="w-px h-5 bg-border"></span>
         <div class="flex items-center gap-1">
-          <label class="text-[0.75rem] text-muted select-none">标题</label>
+          <!-- 标题下拉 -->
           <SelectListbox
             :model-value="headingLevel"
             :options="HEADING_OPTIONS"
             class="w-16"
             @update:model-value="handleHeadingChange($event as string)"
           />
-        </div>
-        <button
-          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans font-bold cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-          title="加粗 (Ctrl+B)"
-          @click="handleBold"
-        >B</button>
-        <button
-          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans italic cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-          title="斜体 (Ctrl+I)"
-          @click="handleItalic"
-        >I</button>
-        <button
-          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-          title="行内代码"
-          @click="handleInlineCode"
-        >&lt;/&gt;</button>
-        <button
-          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-          title="链接 (Ctrl+K)"
-          @click="handleLink"
-        >🔗</button>
-        <button
-          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-          title="代码块"
-          @click="handleCodeBlock"
-        >{ }</button>
-        <div class="flex items-center gap-1">
-          <label class="text-[0.75rem] text-muted select-none">列表</label>
+          <!-- 加粗 -->
+          <button :class="toolBtn" title="加粗 (Ctrl+B)" @click="handleBold">
+            <svg v-bind="svgAttrs">
+              <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+              <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
+            </svg>
+          </button>
+          <!-- 斜体 -->
+          <button :class="toolBtn" title="斜体 (Ctrl+I)" @click="handleItalic">
+            <svg v-bind="svgAttrs">
+              <line x1="19" y1="4" x2="10" y2="4" />
+              <line x1="14" y1="20" x2="5" y2="20" />
+              <line x1="15" y1="4" x2="9" y2="20" />
+            </svg>
+          </button>
+          <!-- 行内代码 -->
+          <button :class="toolBtn" title="行内代码" @click="handleInlineCode">
+            <svg v-bind="svgAttrs">
+              <polyline points="16 18 22 12 16 6" />
+              <polyline points="8 6 2 12 8 18" />
+            </svg>
+          </button>
+          <!-- 链接 -->
+          <button :class="toolBtn" title="链接 (Ctrl+K)" @click="handleLink">
+            <svg v-bind="svgAttrs">
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+            </svg>
+          </button>
+          <!-- 代码块 -->
+          <button :class="toolBtn" title="代码块" @click="handleCodeBlock">
+            <svg v-bind="svgAttrs">
+              <polyline points="4 17 10 11 4 5" />
+              <line x1="12" y1="19" x2="20" y2="19" />
+            </svg>
+          </button>
+          <!-- 列表下拉 -->
           <SelectListbox
             :model-value="listType"
             :options="LIST_OPTIONS"
@@ -371,26 +433,59 @@ onMounted(() => {
         </div>
       </template>
 
-      <!-- 右侧导出按钮 -->
-      <div class="ml-auto flex items-center gap-2">
+      <!-- 3. 实用工具组 -->
+      <span class="w-px h-5 bg-border"></span>
+      <div class="flex items-center gap-1.5">
+        <!-- 同步滚动切换（仅分栏模式可见） -->
         <button
-          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
-          @click="handleExportMd"
-        >⬇ .md</button>
-        <button
-          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
-          @click="handleExportHtml"
-        >⬇ .html</button>
-        <button
-          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
-          @click="handleExportPdf"
-        >⬇ .pdf</button>
-      </div>
-    </div>
+          v-show="viewMode === 'split'"
+          :class="[
+            viewBtnBase,
+            syncScroll
+              ? 'bg-accent/10 border-accent/30 text-accent'
+              : inactiveView,
+          ]"
+          title="同步滚动"
+          @click="syncScroll = !syncScroll"
+        >
+          <svg v-bind="svgAttrs">
+            <polyline points="23 4 23 10 17 10" />
+            <polyline points="1 20 1 14 7 14" />
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+          </svg>
+        </button>
 
-    <!-- 同步滚动开关（仅分栏模式显示） -->
-    <div v-if="viewMode === 'split'" class="flex items-center gap-2 mb-3">
-      <ToggleSwitch v-model="syncScroll" label="同步滚动" />
+        <!-- 导出下拉菜单 -->
+        <Menu as="div" class="relative">
+          <MenuButton :class="toolBtn" title="导出">
+            <svg v-bind="svgAttrs">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </MenuButton>
+          <MenuItems class="absolute right-0 z-10 mt-1 w-28 origin-top-right rounded-sm bg-card border border-border py-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                @click="handleExportMd"
+              >Markdown</button>
+            </MenuItem>
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                @click="handleExportHtml"
+              >HTML</button>
+            </MenuItem>
+            <MenuItem v-slot="{ active }">
+              <button
+                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                @click="handleExportPdf"
+              >PDF</button>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
+      </div>
     </div>
 
     <!-- 仅编辑模式 -->
