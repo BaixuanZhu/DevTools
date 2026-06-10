@@ -9,6 +9,7 @@ import { ref, computed, nextTick, onMounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
+import SelectListbox from '../../components/ui/SelectListbox.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import { renderMarkdown } from '../../utils/editor/markdown-renderer';
@@ -273,19 +274,31 @@ function handleClear(): void {
 
 /** 导出 .md */
 function handleExportMd(): void {
-  exportMarkdown(markdownSource.value);
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 Markdown 文件' } }));
+  try {
+    exportMarkdown(markdownSource.value);
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 Markdown 文件' } }));
+  } catch {
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+  }
 }
 
 /** 导出 .html */
 function handleExportHtml(): void {
-  exportHtml(renderedHtml.value);
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 HTML 文件' } }));
+  try {
+    exportHtml(renderedHtml.value);
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 HTML 文件' } }));
+  } catch {
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+  }
 }
 
 /** 导出 .pdf */
 function handleExportPdf(): void {
-  exportPdf();
+  try {
+    exportPdf();
+  } catch {
+    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+  }
 }
 
 // ---- 生命周期 ----
@@ -324,15 +337,14 @@ onMounted(() => {
       :class="viewMode === 'preview' ? 'opacity-50 pointer-events-none' : ''"
     >
       <!-- 标题下拉 -->
-      <div class="flex items-center">
-        <label class="text-[0.75rem] text-muted mr-1 select-none">标题</label>
-        <select
-          :value="headingLevel"
-          class="h-7 px-1.5 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer focus:outline-none focus:border-accent"
-          @change="handleHeadingChange(($event.target as HTMLSelectElement).value)"
-        >
-          <option v-for="opt in HEADING_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+      <div class="flex items-center gap-1">
+        <label class="text-[0.75rem] text-muted select-none">标题</label>
+        <SelectListbox
+          :model-value="headingLevel"
+          :options="HEADING_OPTIONS"
+          class="w-16"
+          @update:model-value="handleHeadingChange($event as string)"
+        />
       </div>
 
       <span class="w-px h-5 bg-border mx-1"></span>
@@ -367,37 +379,36 @@ onMounted(() => {
       <span class="w-px h-5 bg-border mx-1"></span>
 
       <!-- 列表下拉 -->
-      <div class="flex items-center">
-        <label class="text-[0.75rem] text-muted mr-1 select-none">列表</label>
-        <select
-          :value="listType"
-          class="h-7 px-1.5 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer focus:outline-none focus:border-accent"
-          @change="handleListChange(($event.target as HTMLSelectElement).value)"
-        >
-          <option v-for="opt in LIST_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-        </select>
+      <div class="flex items-center gap-1">
+        <label class="text-[0.75rem] text-muted select-none">列表</label>
+        <SelectListbox
+          :model-value="listType"
+          :options="LIST_OPTIONS"
+          class="w-24"
+          @update:model-value="handleListChange($event as string)"
+        />
       </div>
 
       <span class="w-px h-5 bg-border mx-1"></span>
 
       <!-- 同步滚动开关 -->
       <ToggleSwitch v-model="syncScroll" label="同步滚动" />
+    </div>
 
-      <!-- 导出按钮组（右侧） -->
-      <div class="ml-auto flex items-center gap-1">
-        <button
-          class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-          @click="handleExportMd"
-        >导出 .md</button>
-        <button
-          class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-          @click="handleExportHtml"
-        >导出 .html</button>
-        <button
-          class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-          @click="handleExportPdf"
-        >导出 .pdf</button>
-      </div>
+    <!-- 导出按钮组（始终可用，独立于工具栏） -->
+    <div class="flex flex-wrap items-center gap-1 mb-3">
+      <button
+        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
+        @click="handleExportMd"
+      >导出 .md</button>
+      <button
+        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
+        @click="handleExportHtml"
+      >导出 .html</button>
+      <button
+        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
+        @click="handleExportPdf"
+      >导出 .pdf</button>
     </div>
 
     <!-- 仅编辑模式 -->
