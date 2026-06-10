@@ -3,7 +3,7 @@ import { ref, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+
 import { calculateSubnet, type SubnetInfo } from '../../utils/network/cidr';
 import { prefixToMask, formatIPv4 } from '../../utils/network/ipv4';
 
@@ -183,59 +183,65 @@ watch(cidrInput, (val) => {
       </div>
 
       <!-- 二进制表示 -->
-      <DisclosureSection title="二进制表示">
-        <div class="grid grid-cols-1 gap-2">
-          <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">网络地址</span>
-            <code class="text-xs text-text font-mono break-all">{{ subnetInfo.networkBinary }}</code>
-          </div>
-          <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</span>
-            <code class="text-xs text-text font-mono break-all">{{ subnetInfo.maskBinary }}</code>
-          </div>
-          <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">通配符掩码</span>
-            <code class="text-xs text-text font-mono break-all">{{ subnetInfo.wildcardBinary }}</code>
-          </div>
-          <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">广播地址</span>
-            <code class="text-xs text-text font-mono break-all">{{ subnetInfo.broadcastBinary }}</code>
+      <div class="border-t border-border pt-4">
+        <h3 class="text-[0.8125rem] text-muted font-medium">二进制表示</h3>
+        <div class="pt-2">
+          <div class="grid grid-cols-1 gap-2">
+            <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
+              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">网络地址</span>
+              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.networkBinary }}</code>
+            </div>
+            <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
+              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</span>
+              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.maskBinary }}</code>
+            </div>
+            <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
+              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">通配符掩码</span>
+              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.wildcardBinary }}</code>
+            </div>
+            <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
+              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">广播地址</span>
+              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.broadcastBinary }}</code>
+            </div>
           </div>
         </div>
-      </DisclosureSection>
+      </div>
 
       <!-- CIDR 前缀长度参考 -->
-      <DisclosureSection title="CIDR 前缀长度参考">
-        <div class="overflow-x-auto">
-          <table class="w-full text-[0.8125rem]">
-            <thead>
-              <tr class="border-b border-border text-left">
-                <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">前缀</th>
-                <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</th>
-                <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">可用主机</th>
-                <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">总 IP 数</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="row in prefixReference"
-                :key="row.prefix"
-                :class="[
-                  'border-b border-border last:border-b-0 transition-[background-color] duration-150',
-                  subnetInfo && row.prefix === subnetInfo.prefix
-                    ? 'bg-accent/5'
-                    : 'hover:bg-hover',
-                ]"
-              >
-                <td class="px-3 py-1.5 font-mono font-semibold text-accent">/{{ row.prefix }}</td>
-                <td class="px-3 py-1.5 font-mono text-text">{{ row.mask }}</td>
-                <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.hosts) }}</td>
-                <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.total) }}</td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="border-t border-border pt-4">
+        <h3 class="text-[0.8125rem] text-muted font-medium">CIDR 前缀长度参考</h3>
+        <div class="pt-2">
+          <div class="overflow-x-auto">
+            <table class="w-full text-[0.8125rem]">
+              <thead>
+                <tr class="border-b border-border text-left">
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">前缀</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">可用主机</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">总 IP 数</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="row in prefixReference"
+                  :key="row.prefix"
+                  :class="[
+                    'border-b border-border last:border-b-0 transition-[background-color] duration-150',
+                    subnetInfo && row.prefix === subnetInfo.prefix
+                      ? 'bg-accent/5'
+                      : 'hover:bg-hover',
+                  ]"
+                >
+                  <td class="px-3 py-1.5 font-mono font-semibold text-accent">/{{ row.prefix }}</td>
+                  <td class="px-3 py-1.5 font-mono text-text">{{ row.mask }}</td>
+                  <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.hosts) }}</td>
+                  <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.total) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </DisclosureSection>
+      </div>
     </div>
   </div>
 </template>

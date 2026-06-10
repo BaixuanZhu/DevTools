@@ -5,7 +5,7 @@ import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
-import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+
 import {
   generateSM2KeyPair,
   encryptSM2,
@@ -308,20 +308,23 @@ function handleClear() {
     </div>
 
     <!-- 算法说明 -->
-    <DisclosureSection title="算法说明">
-      <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
-        <p class="m-0">
-          <strong>SM2</strong>：中国国密非对称加密算法（GM/T 0003-2012），基于 256 位 SM2 椭圆曲线。
-          支持公钥加密与私钥解密，密钥为原始十六进制格式。
-        </p>
-        <p class="m-0">
-          <strong>密钥格式</strong>：公钥 130 字符（以 "04" 开头的非压缩格式），私钥 64 字符。
-        </p>
-        <p class="m-0">
-          <strong>密文模式</strong>：C1C3C2（默认，国密标准推荐）和 C1C2C3（旧版兼容）。
-          加密和解密须使用相同模式，否则解密会失败。
-        </p>
+    <div class="border-t border-border pt-4">
+      <h3 class="text-[0.8125rem] text-muted font-medium">算法说明</h3>
+      <div class="pt-2">
+        <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
+          <p class="m-0">
+            <strong>SM2</strong>：中国国密非对称加密算法（GM/T 0003-2012），基于 256 位 SM2 椭圆曲线。
+            支持公钥加密与私钥解密，密钥为原始十六进制格式。
+          </p>
+          <p class="m-0">
+            <strong>密钥格式</strong>：公钥 130 字符（以 "04" 开头的非压缩格式），私钥 64 字符。
+          </p>
+          <p class="m-0">
+            <strong>密文模式</strong>：C1C3C2（默认，国密标准推荐）和 C1C2C3（旧版兼容）。
+            加密和解密须使用相同模式，否则解密会失败。
+          </p>
+        </div>
       </div>
-    </DisclosureSection>
+    </div>
   </div>
 </template>

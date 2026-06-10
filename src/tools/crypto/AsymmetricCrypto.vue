@@ -5,7 +5,7 @@ import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
-import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+
 import {
   generateKeyPair,
   exportKeyString,
@@ -537,24 +537,27 @@ function handleClear() {
     </div>
 
     <!-- 算法说明 -->
-    <DisclosureSection title="算法说明">
-      <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
-        <p class="m-0">
-          <strong>RSA-OAEP</strong>：基于 RSA 的加密算法，使用公钥加密、私钥解密。支持 2048/3072/4096 位密钥长度和 SHA-256/384/512 哈希。
-        </p>
-        <p class="m-0">
-          <strong>RSA-PSS</strong>：基于 RSA 的签名算法，使用私钥签名、公钥验签。salt 长度根据哈希算法自动确定。
-        </p>
-        <p class="m-0">
-          <strong>ECDSA</strong>：椭圆曲线数字签名算法，支持 P-256/P-384/P-521 曲线。密钥更短，性能更好。
-        </p>
-        <p class="m-0">
-          <strong>Ed25519</strong>：现代 Edwards 曲线签名算法，安全性高、速度快。需要 Chrome/Edge 132+ 或 Firefox 129+。
-        </p>
-        <p class="m-0">
-          密钥导出格式：<strong>PEM</strong> 为标准文本格式（带 BEGIN/END 标记）；<strong>JWK</strong> 为 JSON Web Key 格式；<strong>Base64/Hex</strong> 为纯二进制编码。
-        </p>
+    <div class="border-t border-border pt-4">
+      <h3 class="text-[0.8125rem] text-muted font-medium">算法说明</h3>
+      <div class="pt-2">
+        <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
+          <p class="m-0">
+            <strong>RSA-OAEP</strong>：基于 RSA 的加密算法，使用公钥加密、私钥解密。支持 2048/3072/4096 位密钥长度和 SHA-256/384/512 哈希。
+          </p>
+          <p class="m-0">
+            <strong>RSA-PSS</strong>：基于 RSA 的签名算法，使用私钥签名、公钥验签。salt 长度根据哈希算法自动确定。
+          </p>
+          <p class="m-0">
+            <strong>ECDSA</strong>：椭圆曲线数字签名算法，支持 P-256/P-384/P-521 曲线。密钥更短，性能更好。
+          </p>
+          <p class="m-0">
+            <strong>Ed25519</strong>：现代 Edwards 曲线签名算法，安全性高、速度快。需要 Chrome/Edge 132+ 或 Firefox 129+。
+          </p>
+          <p class="m-0">
+            密钥导出格式：<strong>PEM</strong> 为标准文本格式（带 BEGIN/END 标记）；<strong>JWK</strong> 为 JSON Web Key 格式；<strong>Base64/Hex</strong> 为纯二进制编码。
+          </p>
+        </div>
       </div>
-    </DisclosureSection>
+    </div>
   </div>
 </template>

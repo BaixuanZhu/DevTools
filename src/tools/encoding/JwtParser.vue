@@ -4,7 +4,7 @@ import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import DisclosureSection from '../../components/ui/DisclosureSection.vue';
+
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import {
   parseJwt,
@@ -426,45 +426,48 @@ watch(mode, (newMode) => {
       </div>
 
       <!-- 验证签名面板 -->
-      <DisclosureSection title="验证签名" class="mt-4">
-        <div class="flex flex-col gap-3">
-          <SelectListbox
-            v-model="verifyAlgorithm"
-            :options="[{value:'HS256',label:'HS256'},{value:'HS384',label:'HS384'},{value:'HS512',label:'HS512'}]"
-            label="算法"
-          />
+      <div class="border-t border-border pt-4 mt-4">
+        <h3 class="text-[0.8125rem] text-muted font-medium">验证签名</h3>
+        <div class="pt-2">
+          <div class="flex flex-col gap-3">
+            <SelectListbox
+              v-model="verifyAlgorithm"
+              :options="[{value:'HS256',label:'HS256'},{value:'HS384',label:'HS384'},{value:'HS512',label:'HS512'}]"
+              label="算法"
+            />
 
-          <div class="flex flex-col gap-1">
-            <label class="block text-[0.8125rem] text-muted font-medium mb-1">密钥</label>
-            <div class="flex gap-2">
-              <input
-                v-model="verifySecret"
-                :type="verifySecretVisible ? 'text' : 'password'"
-                placeholder="输入 HMAC 密钥"
-                class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
-              />
-              <button
-                class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
-                @click="verifySecretVisible = !verifySecretVisible"
-              >
-                {{ verifySecretVisible ? '隐藏' : '显示' }}
-              </button>
+            <div class="flex flex-col gap-1">
+              <label class="block text-[0.8125rem] text-muted font-medium mb-1">密钥</label>
+              <div class="flex gap-2">
+                <input
+                  v-model="verifySecret"
+                  :type="verifySecretVisible ? 'text' : 'password'"
+                  placeholder="输入 HMAC 密钥"
+                  class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+                />
+                <button
+                  class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
+                  @click="verifySecretVisible = !verifySecretVisible"
+                >
+                  {{ verifySecretVisible ? '隐藏' : '显示' }}
+                </button>
+              </div>
             </div>
+
+            <button
+              class="self-start px-4 py-1.5 rounded-sm text-[0.8125rem] font-semibold cursor-pointer border-none text-white"
+              :class="verifySecret && !verifyLoading ? 'bg-accent hover:opacity-90' : 'bg-gray-400 cursor-not-allowed'"
+              :disabled="!verifySecret || verifyLoading"
+              @click="handleVerify"
+            >
+              {{ verifyLoading ? '验证中...' : '验证' }}
+            </button>
+
+            <p v-if="verifyResult === true" class="text-success text-[0.8125rem] m-0">✅ 签名匹配</p>
+            <p v-if="verifyResult === false" class="text-error text-[0.8125rem] m-0">❌ 签名不匹配</p>
           </div>
-
-          <button
-            class="self-start px-4 py-1.5 rounded-sm text-[0.8125rem] font-semibold cursor-pointer border-none text-white"
-            :class="verifySecret && !verifyLoading ? 'bg-accent hover:opacity-90' : 'bg-gray-400 cursor-not-allowed'"
-            :disabled="!verifySecret || verifyLoading"
-            @click="handleVerify"
-          >
-            {{ verifyLoading ? '验证中...' : '验证' }}
-          </button>
-
-          <p v-if="verifyResult === true" class="text-success text-[0.8125rem] m-0">✅ 签名匹配</p>
-          <p v-if="verifyResult === false" class="text-error text-[0.8125rem] m-0">❌ 签名不匹配</p>
         </div>
-      </DisclosureSection>
+      </div>
     </template>
 
     <!-- ==================== Encode Mode ==================== -->
