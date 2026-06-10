@@ -4,6 +4,7 @@ import Footer from '../components/layout/Footer.astro';
 import Breadcrumb from '../components/layout/Breadcrumb.astro';
 import RelatedTools from '../components/layout/RelatedTools.astro';
 import { getToolsByCategory, getCategories, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
+import { getToolFaqs } from '../data/tool-faqs';
 
 interface Props {
   /** 页面标题 */
@@ -33,6 +34,9 @@ const keywords = toolMeta?.keywords;
 
 /** 获取相关工具 ID 列表 */
 const relatedToolIds = toolMeta?.relatedToolIds || [];
+
+/** 获取当前工具的 FAQ 列表 */
+const faqs = getToolFaqs(toolId);
 
 /** 站点基础 URL */
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
@@ -338,6 +342,24 @@ const breadcrumbItems = toolId && toolMeta
       <main class="flex-1 p-8 overflow-y-auto overflow-x-hidden max-w-full max-md:p-4">
         {breadcrumbItems.length > 0 && <Breadcrumb items={breadcrumbItems} />}
         <slot />
+        {faqs.length > 0 && (
+          <section class="mt-12 pt-8 border-t border-border">
+            <h2 class="text-lg font-semibold text-text mb-4">常见问题</h2>
+            <div class="space-y-0 divide-y divide-border">
+              {faqs.map((faq) => (
+                <details class="group py-4">
+                  <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-muted hover:text-text transition-[color] duration-150 list-none focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1">
+                    <span>{faq.question}</span>
+                    <svg class="h-4 w-4 shrink-0 text-muted transition-transform duration-150 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
+                    </svg>
+                  </summary>
+                  <div class="pt-2 text-[0.8125rem] text-muted leading-relaxed" set:html={faq.answer} />
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
         {relatedToolIds.length > 0 && (
           <section class="mt-12 pt-8 border-t border-border">
             <h2 class="text-lg font-semibold text-text mb-4">相关工具</h2>
