@@ -319,96 +319,81 @@ onMounted(() => {
       :show-example="false"
     />
 
-    <!-- 视图模式 + 操作按钮 -->
-    <div class="flex flex-wrap items-center gap-3 mb-4">
+    <!-- 操作栏（统一一行，参考 JsonFormatter 风格） -->
+    <div class="flex flex-wrap items-center gap-2 mb-4">
       <!-- 视图模式切换 -->
       <ModeTabGroup v-model="viewMode" :options="VIEW_OPTIONS" />
 
-      <!-- 右侧操作 -->
+      <!-- 编辑工具（仅编辑/分栏模式可用） -->
+      <template v-if="viewMode !== 'preview'">
+        <span class="w-px h-5 bg-border"></span>
+        <div class="flex items-center gap-1">
+          <label class="text-[0.75rem] text-muted select-none">标题</label>
+          <SelectListbox
+            :model-value="headingLevel"
+            :options="HEADING_OPTIONS"
+            class="w-16"
+            @update:model-value="handleHeadingChange($event as string)"
+          />
+        </div>
+        <button
+          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans font-bold cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+          title="加粗 (Ctrl+B)"
+          @click="handleBold"
+        >B</button>
+        <button
+          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans italic cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+          title="斜体 (Ctrl+I)"
+          @click="handleItalic"
+        >I</button>
+        <button
+          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+          title="行内代码"
+          @click="handleInlineCode"
+        >&lt;/&gt;</button>
+        <button
+          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+          title="链接 (Ctrl+K)"
+          @click="handleLink"
+        >🔗</button>
+        <button
+          class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+          title="代码块"
+          @click="handleCodeBlock"
+        >{ }</button>
+        <div class="flex items-center gap-1">
+          <label class="text-[0.75rem] text-muted select-none">列表</label>
+          <SelectListbox
+            :model-value="listType"
+            :options="LIST_OPTIONS"
+            class="w-24"
+            @update:model-value="handleListChange($event as string)"
+          />
+        </div>
+      </template>
+
+      <!-- 右侧始终可用的操作按钮 -->
       <div class="ml-auto flex items-center gap-2">
+        <button
+          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
+          @click="handleExportMd"
+        >⬇ .md</button>
+        <button
+          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
+          @click="handleExportHtml"
+        >⬇ .html</button>
+        <button
+          class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
+          @click="handleExportPdf"
+        >⬇ .pdf</button>
         <CopyButton :text="markdownSource" label="复制" />
         <ClearButton @clear="handleClear" />
       </div>
     </div>
 
-    <!-- 工具栏 -->
-    <div
-      class="flex flex-wrap items-center gap-1 mb-3 px-2 py-1.5 border border-border rounded-sm bg-card"
-      :class="viewMode === 'preview' ? 'opacity-50 pointer-events-none' : ''"
-    >
-      <!-- 标题下拉 -->
-      <div class="flex items-center gap-1">
-        <label class="text-[0.75rem] text-muted select-none">标题</label>
-        <SelectListbox
-          :model-value="headingLevel"
-          :options="HEADING_OPTIONS"
-          class="w-16"
-          @update:model-value="handleHeadingChange($event as string)"
-        />
-      </div>
-
-      <span class="w-px h-5 bg-border mx-1"></span>
-
-      <!-- 格式按钮 -->
-      <button
-        class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans font-bold cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-        title="加粗 (Ctrl+B)"
-        @click="handleBold"
-      >B</button>
-      <button
-        class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans italic cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-        title="斜体 (Ctrl+I)"
-        @click="handleItalic"
-      >I</button>
-      <button
-        class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-        title="行内代码"
-        @click="handleInlineCode"
-      >&lt;/&gt;</button>
-      <button
-        class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-        title="链接 (Ctrl+K)"
-        @click="handleLink"
-      >🔗</button>
-      <button
-        class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-mono cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
-        title="代码块"
-        @click="handleCodeBlock"
-      >{ }</button>
-
-      <span class="w-px h-5 bg-border mx-1"></span>
-
-      <!-- 列表下拉 -->
-      <div class="flex items-center gap-1">
-        <label class="text-[0.75rem] text-muted select-none">列表</label>
-        <SelectListbox
-          :model-value="listType"
-          :options="LIST_OPTIONS"
-          class="w-24"
-          @update:model-value="handleListChange($event as string)"
-        />
-      </div>
-
-      <span class="w-px h-5 bg-border mx-1"></span>
-
-      <!-- 同步滚动开关 -->
+    <!-- 同步滚动开关（仅分栏模式显示） -->
+    <div v-if="viewMode === 'split'" class="flex items-center gap-2 mb-3">
       <ToggleSwitch v-model="syncScroll" label="同步滚动" />
-    </div>
-
-    <!-- 导出按钮组（始终可用，独立于工具栏） -->
-    <div class="flex flex-wrap items-center gap-1 mb-3">
-      <button
-        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-        @click="handleExportMd"
-      >导出 .md</button>
-      <button
-        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-        @click="handleExportHtml"
-      >导出 .html</button>
-      <button
-        class="px-2.5 py-1 border border-border rounded-sm bg-card text-muted text-[0.75rem] font-sans cursor-pointer transition-[background-color,color] duration-150 hover:bg-hover hover:text-text"
-        @click="handleExportPdf"
-      >导出 .pdf</button>
     </div>
 
     <!-- 仅编辑模式 -->
