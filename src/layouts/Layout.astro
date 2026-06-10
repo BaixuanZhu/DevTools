@@ -6,9 +6,11 @@ interface Props {
   title?: string;
   description?: string;
   jsonLd?: object | object[];
+  /** 页面关键词（透传到 SeoHead） */
+  keywords?: string[];
 }
 
-const { title = 'DevTools - 开发者工具集', description, jsonLd } = Astro.props;
+const { title = 'DevTools - 开发者工具集', description, jsonLd, keywords } = Astro.props;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
 
@@ -32,7 +34,7 @@ if (jsonLd) {
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <SeoHead title={title} description={description} jsonLd={allJsonLd} />
+    <SeoHead title={title} description={description} jsonLd={allJsonLd} keywords={keywords} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <link
