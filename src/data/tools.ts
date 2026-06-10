@@ -61,6 +61,8 @@ export const tools: ToolMeta[] = [
     category: '文本处理',
     icon: '🔑',
     path: '/text/uuid-generator',
+    keywords: ['uuid 生成器', 'uuid 在线生成', 'uuid v4', 'guid 生成', '唯一标识符', 'uuid 解析'],
+    relatedToolIds: ['random-string', 'hash-generator'],
   },
   {
     id: 'hash-generator',
@@ -70,6 +72,8 @@ export const tools: ToolMeta[] = [
     category: '加密哈希',
     icon: '🔒',
     path: '/crypto/hash-generator',
+    keywords: ['哈希生成器', 'md5 在线', 'sha256 计算', 'sha512 在线', 'hash 在线工具', '文本哈希'],
+    relatedToolIds: ['symmetric-crypto', 'jwt-parser', 'base64'],
   },
   {
     id: 'random-string',
@@ -79,6 +83,8 @@ export const tools: ToolMeta[] = [
     category: '文本处理',
     icon: '🎲',
     path: '/text/random-string',
+    keywords: ['随机字符串生成', '随机密码生成', '在线随机数', '密码生成器', '随机文本'],
+    relatedToolIds: ['uuid-generator'],
   },
   {
     id: 'datetime-converter',
@@ -88,6 +94,8 @@ export const tools: ToolMeta[] = [
     category: '日期时间',
     icon: '🕐',
     path: '/datetime/datetime-converter',
+    keywords: ['时间戳转换', '日期转换器', 'unix 时间戳', '时间戳在线', '日期格式转换', '时间戳转日期'],
+    relatedToolIds: ['cron-parser'],
   },
   {
     id: 'url-encode',
@@ -97,6 +105,8 @@ export const tools: ToolMeta[] = [
     category: '编码转换',
     icon: '🔗',
     path: '/encoding/url-encode',
+    keywords: ['url 编码', 'url 解码', 'urlencode 在线', 'urldecode 在线', 'uri 编码', '中文 url 编码'],
+    relatedToolIds: ['base64', 'jwt-parser'],
   },
   {
     id: 'jwt-parser',
@@ -106,6 +116,8 @@ export const tools: ToolMeta[] = [
     category: '编码转换',
     icon: '🎫',
     path: '/encoding/jwt-parser',
+    keywords: ['jwt 解析', 'jwt 解码', 'jwt 在线解析', 'token 解析', 'jwt 验证', 'json web token'],
+    relatedToolIds: ['base64', 'url-encode', 'hash-generator'],
   },
   {
     id: 'device-info',
@@ -115,6 +127,8 @@ export const tools: ToolMeta[] = [
     category: '网络工具',
     icon: '💻',
     path: '/network/device-info',
+    keywords: ['useragent 查看', '设备信息', '浏览器信息', 'ua 在线查看', '屏幕分辨率', '浏览器检测'],
+    relatedToolIds: ['http-status-codes', 'ipv4-cidr'],
   },
   {
     id: 'http-status-codes',
@@ -124,6 +138,8 @@ export const tools: ToolMeta[] = [
     category: '网络工具',
     icon: '📡',
     path: '/network/http-status-codes',
+    keywords: ['http 状态码', '状态码查询', 'http code', '301 重定向', '404 错误', '500 错误'],
+    relatedToolIds: ['device-info', 'ipv4-cidr'],
   },
   {
     id: 'ipv4-cidr',
@@ -133,6 +149,8 @@ export const tools: ToolMeta[] = [
     category: '网络工具',
     icon: '🌐',
     path: '/network/ipv4-cidr',
+    keywords: ['ipv4 子网计算', 'cidr 计算', '子网掩码计算', 'ip 地址计算器', '网段计算', '子网划分'],
+    relatedToolIds: ['ipv4-range-expander', 'device-info'],
   },
   {
     id: 'ipv4-range-expander',
@@ -142,6 +160,8 @@ export const tools: ToolMeta[] = [
     category: '网络工具',
     icon: '📊',
     path: '/network/ipv4-range-expander',
+    keywords: ['ip 范围转换', 'ipv4 cidr 转换', 'ip 地址范围', 'cidr 合并', 'ip 段计算'],
+    relatedToolIds: ['ipv4-cidr'],
   },
   {
     id: 'symmetric-crypto',
@@ -151,6 +171,8 @@ export const tools: ToolMeta[] = [
     category: '加密哈希',
     icon: '🛡️',
     path: '/crypto/symmetric-crypto',
+    keywords: ['aes 加密', '在线加密解密', 'sm4 加密', 'chacha20', '对称加密', 'des 加密'],
+    relatedToolIds: ['asymmetric-crypto', 'sm2-crypto', 'hash-generator'],
   },
   {
     id: 'asymmetric-crypto',
@@ -160,6 +182,8 @@ export const tools: ToolMeta[] = [
     category: '加密哈希',
     icon: '🔐',
     path: '/crypto/asymmetric-crypto',
+    keywords: ['rsa 加密', '非对称加密', 'ecdsa 签名', 'ed25519', '公钥加密', '密钥对生成'],
+    relatedToolIds: ['symmetric-crypto', 'sm2-crypto', 'hash-generator'],
   },
   {
     id: 'sm2-crypto',
@@ -169,6 +193,8 @@ export const tools: ToolMeta[] = [
     category: '加密哈希',
     icon: '🔐',
     path: '/crypto/sm2-crypto',
+    keywords: ['sm2 加密', '国密 sm2', 'sm2 在线', '国密算法', 'sm2 解密', 'sm2 密钥'],
+    relatedToolIds: ['symmetric-crypto', 'asymmetric-crypto'],
   },
   {
     id: 'qr-code-generator',
@@ -178,6 +204,8 @@ export const tools: ToolMeta[] = [
     category: '媒体工具',
     icon: '🔳',
     path: '/media/qr-code-generator',
+    keywords: ['二维码生成', 'qr code 生成', '在线二维码', '二维码制作', '二维码下载', 'svg 二维码'],
+    relatedToolIds: ['base64-to-image'],
   },
   {
     id: 'base64',
@@ -187,6 +215,8 @@ export const tools: ToolMeta[] = [
     category: '编码转换',
     icon: '📄',
     path: '/encoding/base64',
+    keywords: ['base64 编码', 'base64 解码', 'base64 在线', 'base64 转换', '文本 base64', 'base64 编解码'],
+    relatedToolIds: ['url-encode', 'base64-to-image', 'base64-to-file', 'jwt-parser'],
   },
   {
     id: 'base64-to-image',
@@ -196,6 +226,8 @@ export const tools: ToolMeta[] = [
     category: '编码转换',
     icon: '🖼️',
     path: '/encoding/base64-to-image',
+    keywords: ['base64 转图片', 'base64 图片解码', 'base64 image', 'base64 预览', 'data uri 图片'],
+    relatedToolIds: ['base64', 'base64-to-file', 'qr-code-generator'],
   },
   {
     id: 'base64-to-file',
@@ -205,6 +237,8 @@ export const tools: ToolMeta[] = [
     category: '编码转换',
     icon: '📎',
     path: '/encoding/base64-to-file',
+    keywords: ['base64 转文件', 'base64 file', 'base64 下载', 'data uri 转文件', 'base64 还原'],
+    relatedToolIds: ['base64', 'base64-to-image'],
   },
   {
     id: 'cron-parser',
@@ -214,6 +248,8 @@ export const tools: ToolMeta[] = [
     category: '日期时间',
     icon: '⏰',
     path: '/datetime/cron-parser',
+    keywords: ['cron 表达式', 'cron 解析', 'crontab 在线', '定时任务表达式', 'cron 验证', 'cron 可视化'],
+    relatedToolIds: ['datetime-converter'],
   },
   {
     id: 'json-formatter',
@@ -223,6 +259,8 @@ export const tools: ToolMeta[] = [
     category: '格式化',
     icon: '📋',
     path: '/format/json-formatter',
+    keywords: ['json 格式化', 'json 美化', 'json 在线', 'json 压缩', 'json 验证', 'json 编辑器'],
+    relatedToolIds: ['json-diff', 'json-to-yaml', 'json-to-xml'],
   },
   {
     id: 'json-diff',
@@ -232,6 +270,8 @@ export const tools: ToolMeta[] = [
     category: '格式化',
     icon: '🔍',
     path: '/format/json-diff',
+    keywords: ['json 对比', 'json diff', 'json 差异', 'json 比较', '在线 json 对比'],
+    relatedToolIds: ['json-formatter', 'json-to-yaml'],
   },
   {
     id: 'json-to-xml',
@@ -241,6 +281,8 @@ export const tools: ToolMeta[] = [
     category: '格式化',
     icon: '🌲',
     path: '/format/json-to-xml',
+    keywords: ['json 转 xml', 'json to xml', 'json xml 转换', '在线 json 转 xml'],
+    relatedToolIds: ['json-formatter', 'json-to-yaml'],
   },
   {
     id: 'json-to-yaml',
@@ -250,6 +292,8 @@ export const tools: ToolMeta[] = [
     category: '格式化',
     icon: '📝',
     path: '/format/json-to-yaml',
+    keywords: ['json 转 yaml', 'json to yaml', 'yaml 转换', '在线 yaml 工具', 'json yaml'],
+    relatedToolIds: ['json-formatter', 'json-to-xml'],
   },
 ];
 
