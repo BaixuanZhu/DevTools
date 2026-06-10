@@ -10,8 +10,7 @@ import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
+import CodePanel from '../../components/ui/CodePanel.vue';
 import { renderMarkdown } from '../../utils/editor/markdown-renderer';
 import {
   insertBold,
@@ -372,7 +371,7 @@ onMounted(() => {
         </div>
       </template>
 
-      <!-- 右侧始终可用的操作按钮 -->
+      <!-- 右侧导出按钮 -->
       <div class="ml-auto flex items-center gap-2">
         <button
           class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
@@ -386,8 +385,6 @@ onMounted(() => {
           class="px-2.5 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text hover:border-accent"
           @click="handleExportPdf"
         >⬇ .pdf</button>
-        <CopyButton :text="markdownSource" label="复制" />
-        <ClearButton @clear="handleClear" />
       </div>
     </div>
 
@@ -397,59 +394,52 @@ onMounted(() => {
     </div>
 
     <!-- 仅编辑模式 -->
-    <div v-if="viewMode === 'edit'" class="border border-border rounded-sm bg-card">
+    <CodePanel v-if="viewMode === 'edit'" label="Markdown 编辑" showClear showCopy :copyText="markdownSource" @clear="handleClear">
       <textarea
         ref="editorRef"
         v-model="markdownSource"
-        class="w-full h-[calc(100vh-340px)] min-h-96 p-4 bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+        class="w-full h-[calc(100vh-300px)] min-h-96 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
         spellcheck="false"
         aria-label="Markdown 编辑区"
         @keydown="handleKeydown"
       ></textarea>
-    </div>
+    </CodePanel>
 
     <!-- 仅预览模式 -->
-    <div
-      v-else-if="viewMode === 'preview'"
-      class="border border-border rounded-sm bg-card p-6 overflow-auto h-[calc(100vh-340px)] min-h-96"
-    >
-      <div class="md-preview" v-html="renderedHtml"></div>
-    </div>
+    <CodePanel v-else-if="viewMode === 'preview'" label="预览" showCopy :copyText="markdownSource">
+      <div class="w-full h-[calc(100vh-300px)] min-h-96 p-6 border border-border rounded-sm bg-card overflow-auto">
+        <div class="md-preview" v-html="renderedHtml"></div>
+      </div>
+    </CodePanel>
 
     <!-- 分栏模式 -->
     <div
       v-else
-      class="grid grid-cols-1 lg:grid-cols-2 gap-0 border border-border rounded-sm overflow-hidden"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-4"
     >
       <!-- 编辑区 -->
-      <div class="border-r border-border bg-card">
-        <div class="px-3 py-1.5 border-b border-border bg-hover">
-          <span class="text-[0.75rem] text-muted font-sans">编辑</span>
-        </div>
+      <CodePanel label="编辑" showClear @clear="handleClear">
         <textarea
           ref="editorRef"
           v-model="markdownSource"
-          class="w-full h-[calc(100vh-380px)] min-h-80 p-4 bg-card text-text font-mono text-sm resize-none focus:outline-none focus:border-accent"
+          class="w-full h-[calc(100vh-340px)] min-h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-none focus:outline-none focus:border-accent"
           spellcheck="false"
           aria-label="Markdown 编辑区"
           @keydown="handleKeydown"
           @scroll="handleEditorScroll"
         ></textarea>
-      </div>
+      </CodePanel>
 
       <!-- 预览区 -->
-      <div class="bg-card">
-        <div class="px-3 py-1.5 border-b border-border bg-hover">
-          <span class="text-[0.75rem] text-muted font-sans">预览</span>
-        </div>
+      <CodePanel label="预览" showCopy :copyText="markdownSource">
         <div
           ref="previewRef"
-          class="p-6 overflow-auto h-[calc(100vh-380px)] min-h-80"
+          class="w-full h-[calc(100vh-340px)] min-h-80 p-6 border border-border rounded-sm bg-card overflow-auto"
           @scroll="handlePreviewScroll"
         >
           <div class="md-preview" v-html="renderedHtml"></div>
         </div>
-      </div>
+      </CodePanel>
     </div>
   </div>
 </template>
