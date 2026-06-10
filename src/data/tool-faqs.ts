@@ -156,6 +156,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '常见错误包括：日和周同时指定了非 <code>?</code> 的值（互斥）、月份或星期写错（星期 0-7 中 0 和 7 都代表周日）、步长 <code>/</code> 前缺省起始值。本工具会自动检测并提示错误。',
     },
   ],
+  'markdown-editor': [
+    {
+      question: '什么是 Markdown？',
+      answer: 'Markdown 是一种<strong>轻量级标记语言</strong>，用简洁的纯文本语法编写文档，可转换为 HTML 等格式。广泛用于技术文档、README、博客和笔记等场景。',
+    },
+    {
+      question: '支持哪些 Markdown 扩展语法？',
+      answer: '除标准 Markdown 语法外，本工具支持<strong>表格</strong>、<strong>任务列表</strong>（<code>- [ ]</code>）、<strong>删除线</strong>（<code>~~文本~~</code>）和<strong>代码块语法高亮</strong>等 GFM（GitHub Flavored Markdown）扩展。',
+    },
+    {
+      question: '如何导出为 PDF？',
+      answer: '点击"导出 PDF"按钮后会调用浏览器的打印功能。在打印对话框中选择"另存为 PDF"即可。导出内容只包含预览区域，不包含编辑器和工具栏。',
+    },
+    {
+      question: '数据安全吗？',
+      answer: '所有编辑和渲染在<strong>浏览器本地完成</strong>，Markdown 内容不会上传到任何服务器。关闭页面后数据自动清除。',
+    },
+  ],
   'http-status-codes': [
     {
       question: '301 和 302 重定向有什么区别？',
