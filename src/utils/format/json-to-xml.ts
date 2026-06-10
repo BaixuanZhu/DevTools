@@ -84,40 +84,88 @@ function singularize(key: string): string {
 // ---- JSON 值转 XML ----
 
 /**
- * 递归将 JSON 值转换为 XML 字符串片段。
+ * 递归将 JSON 值转换为带缩进的 XML 字符串片段。
+ *
+ * 对象中若包含 `_attributes` 键，且其值为对象，则将 `_attributes` 中的键值对映射为 XML 属性。
+ * 例如 `{ "_attributes": { "id": "1" }, "name": "Alice" }` 转换为：
+ * ```xml
+ * <elem id="1">
+ *   <name>Alice</name>
+ * </elem>
+ * ```
  *
  * @param value - JSON 值
  * @param key - 当前元素名（JSON 键名）
+ * @param depth - 当前缩进层级（默认 0）
+ * @param indent - 缩进字符串（默认两个空格）
  * @returns XML 字符串片段
  */
-function valueToXml(value: unknown, key: string): string {
+function valueToXml(value: unknown, key: string, depth: number = 0, indent: string = '  '): string {
+  const prefix = indent.repeat(depth);
+
   if (value === null) {
-    return `<${key}></${key}>`;
+    return `${prefix}<${key}></${key}>\n`;
   }
 
   if (typeof value === 'boolean' || typeof value === 'number') {
-    return `<${key}>${String(value)}</${key}>`;
+    return `${prefix}<${key}>${String(value)}</${key}>\n`;
   }
 
   if (typeof value === 'string') {
-    return `<${key}>${escapeXml(value)}</${key}>`;
+    return `${prefix}<${key}>${escapeXml(value)}</${key}>\n`;
   }
 
   if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return `${prefix}<${key}></${key}>\n`;
+    }
     const childTag = singularize(key);
-    const children = value.map((item) => valueToXml(item, childTag)).join('');
-    return `<${key}>${children}</${key}>`;
+    const children = value
+      .map((item) => valueToXml(item, childTag, depth + 1, indent))
+      .join('');
+    return `${prefix}<${key}>\n${children}${prefix}</${key}>\n`;
   }
 
   if (typeof value === 'object') {
-    const entries = Object.entries(value as Record<string, unknown>)
-      .map(([k, v]) => valueToXml(v, k))
+    const obj = value as Record<string, unknown>;
+    let attrs = '';
+    let entries: [string, unknown][];
+
+    if (
+      '_attributes' in obj &&
+      typeof obj._attributes === 'object' &&
+      obj._attributes !== null
+    ) {
+      const attrObj = obj._attributes as Record<string, unknown>;
+      const attrParts = Object.entries(attrObj)
+        .filter(([, v]) => v !== null && v !== undefined)
+        .map(([k, v]) => {
+          const attrVal =
+            typeof v === 'boolean' || typeof v === 'number'
+              ? String(v)
+              : escapeXml(String(v));
+          return `${k}="${attrVal}"`;
+        });
+      if (attrParts.length > 0) {
+        attrs = ` ${attrParts.join(' ')}`;
+      }
+      entries = Object.entries(obj).filter(([k]) => k !== '_attributes');
+    } else {
+      entries = Object.entries(obj);
+    }
+
+    if (entries.length === 0) {
+      return `${prefix}<${key}${attrs}></${key}>\n`;
+    }
+
+    const children = entries
+      .map(([k, v]) => valueToXml(v, k, depth + 1, indent))
       .join('');
-    return `<${key}>${entries}</${key}>`;
+    return `${prefix}<${key}${attrs}>\n${children}${prefix}</${key}>\n`;
   }
 
   // 处理 undefined、function 等不常见类型
-  return `<${key}></${key}>`;
+  return `${prefix}<${key}></${key}>\n`;
 }
 
 // ---- 主转换函数 ----
@@ -138,8 +186,8 @@ export function convertJsonToXml(jsonText: string, rootName: string): JsonToXmlR
     return { ok: false, error: parseResult.error };
   }
 
-  const xmlBody = valueToXml(parseResult.data, rootName);
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlBody}`;
+  const xmlBody = valueToXml(parseResult.data, rootName, 0, '  ');
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n${xmlBody.trimEnd()}`;
 
   return { ok: true, result: xml };
 }

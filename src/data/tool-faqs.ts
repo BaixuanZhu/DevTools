@@ -58,6 +58,16 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'JWT Payload 中的 <code>exp</code> 字段表示过期时间，值为 Unix 时间戳（秒）。解码后在 Payload 中查看该字段，对比当前时间即可判断是否过期。常见字段还有 <code>iat</code>（签发时间）和 <code>nbf</code>（生效时间）。',
     },
   ],
+  'json-to-xml': [
+    {
+      question: '如何生成 XML 属性？',
+      answer: '在 JSON 对象中使用 <code>_attributes</code> 键，其值为属性对象。例如 <code>{ "user": { "_attributes": { "id": "123" }, "name": "Alice" } }</code> 会转换为 <code>&lt;user id="123"&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;/user&gt;</code>。属性值支持字符串、数字和布尔值。',
+    },
+    {
+      question: '支持多大的 JSON 文件？',
+      answer: '本工具在浏览器端运行，输入大小限制为 <strong>10MB</strong>。超过 500KB 的文件会通过 Web Worker 异步处理，避免阻塞页面。',
+    },
+  ],
   'json-formatter': [
     {
       question: '支持多大的 JSON 文件？',

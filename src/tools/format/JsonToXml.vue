@@ -22,8 +22,16 @@ import {
 /** 示例 JSON */
 const EXAMPLE_JSON = `{
   "users": [
-    { "name": "Alice", "age": 30, "active": true },
-    { "name": "Bob", "age": null, "active": false }
+    {
+      "_attributes": { "id": "1", "active": "true" },
+      "name": "Alice",
+      "age": 30
+    },
+    {
+      "_attributes": { "id": "2", "active": "false" },
+      "name": "Bob",
+      "age": null
+    }
   ],
   "count": 2,
   "meta": { "version": "1.0" }

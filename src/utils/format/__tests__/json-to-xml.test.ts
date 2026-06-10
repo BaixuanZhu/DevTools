@@ -166,6 +166,106 @@ describe('convertJsonToXml', () => {
       expect(result.result).toContain('</root>');
     }
   });
+
+  it('_attributes 生成单个属性', () => {
+    const result = convertJsonToXml('{"user":{"_attributes":{"id":"123"},"name":"Alice"}}', 'root');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<user id="123">');
+      expect(result.result).toContain('<name>Alice</name>');
+      expect(result.result).toContain('</user>');
+    }
+  });
+
+  it('_attributes 生成多个属性', () => {
+    const result = convertJsonToXml(
+      '{"user":{"_attributes":{"id":"123","active":"true"},"name":"Alice"}}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<user id="123" active="true">');
+      expect(result.result).toContain('<name>Alice</name>');
+    }
+  });
+
+  it('只有 _attributes 没有子元素（空标签）', () => {
+    const result = convertJsonToXml('{"user":{"_attributes":{"id":"123"}}}', 'root');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<user id="123"></user>');
+    }
+  });
+
+  it('嵌套对象中的 _attributes', () => {
+    const result = convertJsonToXml(
+      '{"root":{"_attributes":{"version":"1.0"},"user":{"_attributes":{"id":"123"},"name":"Alice"}}}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<root version="1.0">');
+      expect(result.result).toContain('<user id="123">');
+      expect(result.result).toContain('<name>Alice</name>');
+    }
+  });
+
+  it('数组元素中的 _attributes', () => {
+    const result = convertJsonToXml(
+      '{"users":[{"_attributes":{"id":"1"},"name":"Alice"},{"_attributes":{"id":"2"},"name":"Bob"}]}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<user id="1">');
+      expect(result.result).toContain('<user id="2">');
+      expect(result.result).toContain('<name>Alice</name>');
+      expect(result.result).toContain('<name>Bob</name>');
+    }
+  });
+
+  it('属性值中的 XML 特殊字符转义', () => {
+    const result = convertJsonToXml(
+      '{"elem":{"_attributes":{"title":"a & b < c"},"value":"test"}}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('title="a &amp; b &lt; c"');
+    }
+  });
+
+  it('属性值支持 number 和 boolean', () => {
+    const result = convertJsonToXml(
+      '{"elem":{"_attributes":{"count":42,"active":true},"name":"test"}}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('count="42"');
+      expect(result.result).toContain('active="true"');
+    }
+  });
+
+  it('_attributes 值为非对象时当作普通键（向后兼容）', () => {
+    const result = convertJsonToXml('{"elem":{"_attributes":"foo"}}', 'root');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<_attributes>foo</_attributes>');
+    }
+  });
+
+  it('_attributes 中 null 属性被跳过', () => {
+    const result = convertJsonToXml(
+      '{"elem":{"_attributes":{"id":"123","deleted":null},"name":"test"}}',
+      'root',
+    );
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('<elem id="123">');
+      expect(result.result).not.toContain('deleted');
+    }
+  });
 });
 
 describe('validateRootName', () => {
