@@ -43,6 +43,12 @@ export interface ToolMeta {
   icon: string;
   /** 路由路径（二级路径格式：/category/id） */
   path: string;
+  /** 页面 <title> 覆盖（可选，不传则自动拼接 "{name} - DevTools"） */
+  title?: string;
+  /** 长尾关键词列表，用于 meta keywords 标签及内部选题参考 */
+  keywords: string[];
+  /** 相关工具 ID 列表，页面最多展示前 4 个 */
+  relatedToolIds: string[];
 }
 
 /** 所有已注册的工具列表 */
@@ -294,4 +300,14 @@ export function getCategories(): ToolCategory[] {
     seen.add(t.category);
     return true;
   }).map((t) => t.category);
+}
+
+/** 获取指定工具的相关工具列表（最多 4 个，过滤无效 ID） */
+export function getRelatedTools(toolId: string): ToolMeta[] {
+  const tool = getToolById(toolId);
+  if (!tool || !tool.relatedToolIds.length) return [];
+  return tool.relatedToolIds
+    .map((id) => getToolById(id))
+    .filter((t): t is ToolMeta => t !== undefined)
+    .slice(0, 4);
 }
