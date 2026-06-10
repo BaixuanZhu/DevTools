@@ -406,11 +406,12 @@ onMounted(() => {
     </CodePanel>
 
     <!-- 仅预览模式 -->
-    <CodePanel v-else-if="viewMode === 'preview'" label="预览" showCopy :copyText="markdownSource">
-      <div class="w-full h-[calc(100vh-300px)] min-h-96 p-6 border border-border rounded-sm bg-card overflow-auto">
-        <div class="md-preview" v-html="renderedHtml"></div>
-      </div>
-    </CodePanel>
+    <div
+      v-else-if="viewMode === 'preview'"
+      class="border border-border rounded-sm bg-card p-6 overflow-auto h-[calc(100vh-300px)] min-h-96"
+    >
+      <div class="md-preview" v-html="renderedHtml"></div>
+    </div>
 
     <!-- 分栏模式 -->
     <div
@@ -418,7 +419,7 @@ onMounted(() => {
       class="grid grid-cols-1 lg:grid-cols-2 gap-4"
     >
       <!-- 编辑区 -->
-      <CodePanel label="编辑" showClear @clear="handleClear">
+      <CodePanel label="编辑" showClear showCopy :copyText="markdownSource" @clear="handleClear">
         <textarea
           ref="editorRef"
           v-model="markdownSource"
@@ -431,7 +432,8 @@ onMounted(() => {
       </CodePanel>
 
       <!-- 预览区 -->
-      <CodePanel label="预览" showCopy :copyText="markdownSource">
+      <div>
+        <label class="block text-[0.8125rem] text-muted mb-1.5">预览</label>
         <div
           ref="previewRef"
           class="w-full h-[calc(100vh-340px)] min-h-80 p-6 border border-border rounded-sm bg-card overflow-auto"
@@ -439,7 +441,7 @@ onMounted(() => {
         >
           <div class="md-preview" v-html="renderedHtml"></div>
         </div>
-      </CodePanel>
+      </div>
     </div>
   </div>
 </template>
