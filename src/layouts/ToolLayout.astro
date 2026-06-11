@@ -348,13 +348,13 @@ const breadcrumbItems = toolId && toolMeta
             <div class="space-y-0 divide-y divide-border">
               {faqs.map((faq) => (
                 <details class="group py-4">
-                  <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-muted hover:text-text transition-[color] duration-150 list-none">
-                    <span>{faq.question}</span>
+                  <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-text hover:text-accent transition-[color] duration-150 list-none">
+                    <span class="[&_code]:bg-hover [&_code]:text-text [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-text [&_strong]:font-semibold" set:html={faq.question} />
                     <svg class="h-4 w-4 shrink-0 text-muted transition-transform duration-150 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" clip-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" />
                     </svg>
                   </summary>
-                  <div class="pt-2 text-[0.8125rem] text-muted leading-relaxed" set:html={faq.answer} />
+                  <div class="pt-2 text-[0.8125rem] text-muted leading-relaxed [&_code]:bg-hover [&_code]:text-text [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-text [&_strong]:font-semibold" set:html={faq.answer} />
                 </details>
               ))}
             </div>

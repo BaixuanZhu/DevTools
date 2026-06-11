@@ -1,18 +1,19 @@
 <script setup lang="ts">
 /**
- * 带内嵌操作按钮的代码面板容器。
+ * 一体化代码面板容器。
  *
- * 在内容区右上角提供复制/清空图标按钮，减少页面层级并提升操作直觉。
- * 通过 slot 接收 textarea、pre、div 等任意内容元素。
+ * 为内容区提供带边框的卡片外壳，并在顶部标题栏嵌入复制/清空图标按钮。
+ * 标题栏与内容区共享同一个边框容器，视觉上融为一体；按钮通过 slot 外部渲染，
+ * 不会成为 textarea 等内容的子元素。
  *
  * @example
  * ```vue
  * <CodePanel label="JSON 输入" showClear @clear="handleClear">
- *   <textarea v-model="input" class="..." />
+ *   <textarea v-model="input" class="w-full h-80 p-3 bg-card text-text font-mono text-sm" />
  * </CodePanel>
  *
  * <CodePanel label="输出结果" showCopy :copyText="output">
- *   <pre>{{ output }}</pre>
+ *   <pre class="w-full h-80 p-3 bg-card text-text font-mono text-sm">{{ output }}</pre>
  * </CodePanel>
  * ```
  */
@@ -62,21 +63,22 @@ function handleClear(): void {
 </script>
 
 <template>
-  <div>
-    <label
-      v-if="label"
-      class="block text-[0.8125rem] text-muted mb-1.5"
+  <div class="border border-border rounded-sm overflow-hidden bg-card">
+    <!-- 标题栏：label + 操作按钮 -->
+    <div
+      v-if="label || showCopy || showClear"
+      class="flex items-center justify-between px-4 py-1.5 border-b border-border"
     >
-      {{ label }}
-    </label>
+      <label
+        v-if="label"
+        class="text-[0.8125rem] text-muted"
+      >
+        {{ label }}
+      </label>
 
-    <div class="relative">
-      <slot />
-
-      <!-- 右上角操作按钮组 -->
       <div
         v-if="showCopy || showClear"
-        class="absolute top-2 right-2 flex gap-1"
+        class="flex gap-1"
       >
         <!-- 复制按钮 -->
         <button
@@ -85,8 +87,8 @@ function handleClear(): void {
           class="w-9 h-9 flex items-center justify-center rounded-sm border transition-[background-color,border-color,color] duration-150"
           :class="[
             copied
-              ? 'border-success text-success bg-card/90'
-              : 'border-border text-muted bg-card/90 hover:bg-hover hover:text-text',
+              ? 'border-success text-success bg-card'
+              : 'border-border text-muted bg-card hover:bg-hover hover:text-text',
             (!copyText || disabled) && 'opacity-50 cursor-not-allowed',
           ]"
           :disabled="!copyText || disabled"
@@ -131,7 +133,7 @@ function handleClear(): void {
         <button
           v-if="showClear"
           type="button"
-          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card/90 transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
           :class="disabled && 'opacity-50 cursor-not-allowed'"
           :disabled="disabled"
           title="清空"
@@ -154,5 +156,18 @@ function handleClear(): void {
         </button>
       </div>
     </div>
+
+    <!-- 内容区 -->
+    <slot />
   </div>
 </template>
+
+<style scoped>
+/* 让 slot 中的内容去掉自带边框/圆角，与外层卡片容器融为一体 */
+:slotted(textarea),
+:slotted(pre),
+:slotted(div) {
+  border: none;
+  border-radius: 0;
+}
+</style>
