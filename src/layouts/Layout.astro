@@ -101,13 +101,13 @@ if (jsonLd) {
 
     /** 判断指定路径的工具是否已收藏 */
     isFavorite(path: string): boolean {
-      return this.list.some((f) => f.path === path);
+      return this.list.some((f: FavoriteItem) => f.path === path);
     },
 
     /** 切换收藏状态 */
     toggle(path: string, name: string, icon: string) {
       if (this.isFavorite(path)) {
-        this.list = this.list.filter((f) => f.path !== path);
+        this.list = this.list.filter((f: FavoriteItem) => f.path !== path);
         Alpine.store('toast').success(`已取消收藏 ${name}`);
       } else {
         if (this.list.length >= this.maxCount) {
