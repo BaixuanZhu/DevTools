@@ -11,7 +11,7 @@ export interface DockerRunConfig {
   image: string;
   /** 容器名，对应 --name */
   containerName?: string;
-  /** 容器启动命令（image 之后的位置参数） */
+  /** 容器启动命令及参数（image 之后的位置参数，覆盖镜像 CMD） */
   command?: string[];
   /** 是否后台运行 -d/--detach */
   detach?: boolean;
@@ -31,8 +31,8 @@ export interface DockerRunConfig {
   volumes?: string[];
   /** tmpfs 挂载 --tmpfs */
   tmpfs?: string[];
-  /** 网络 --network */
-  networks?: string[];
+  /** 网络 --network（docker run 仅支持单个） */
+  network?: string;
   /** 工作目录 -w/--workdir */
   workdir?: string;
   /** 用户 -u/--user */
@@ -75,7 +75,7 @@ export interface DockerRunConfig {
   capDrop?: string[];
   /** 安全选项 --security-opt */
   securityOpt?: string[];
-  /** 健康检查 */
+  /** 健康检查配置 */
   healthcheck?: {
     test?: string[];
     interval?: string;
@@ -100,13 +100,13 @@ export interface UnsupportedFlag {
   reason?: string;
 }
 
-/** Shell 分词结果 — token */
+/** Shell 分词结果 — token（value 不包含包裹的引号） */
 export interface Token {
-  /** token 值 */
+  /** token 值（不包含引号） */
   value: string;
-  /** 起始字符索引 */
+  /** 起始字符索引（若被引号包裹，则包含起始引号） */
   start: number;
-  /** 结束字符索引 */
+  /** 结束字符索引（不包含；若被引号包裹，则包含结束引号） */
   end: number;
 }
 
