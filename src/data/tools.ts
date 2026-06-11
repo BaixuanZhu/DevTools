@@ -11,7 +11,8 @@ export type ToolCategory =
   | 'CSS 工具'
   | 'API 工具'
   | '媒体工具'
-  | '编辑器';
+  | '编辑器'
+  | 'DevOps 工具';
 
 /** 分类 slug 映射（中 → 英） */
 export const categorySlugMap: Record<ToolCategory, string> = {
@@ -27,6 +28,7 @@ export const categorySlugMap: Record<ToolCategory, string> = {
   'API 工具': 'api',
   '媒体工具': 'media',
   '编辑器': 'editor',
+  'DevOps 工具': 'devops',
 };
 
 /** 工具元数据 */
@@ -307,6 +309,17 @@ export const tools: ToolMeta[] = [
     path: '/editor/markdown-editor',
     keywords: ['markdown 编辑器', 'markdown 在线', 'markdown 预览', '在线 md 编辑器', 'markdown 导出', 'markdown 转换'],
     relatedToolIds: ['json-formatter', 'json-to-yaml'],
+  },
+  {
+    id: 'docker-converter',
+    name: 'Docker Run ↔ Compose 转换器',
+    description: 'docker run 命令与 docker compose 配置互转，支持端口、环境变量、挂载卷等常用 flag',
+    seoDescription: '在线 Docker Run 命令与 Docker Compose 配置互转工具，支持端口映射、环境变量、挂载卷等常用 flag 双向转换，纯浏览器端运算。',
+    category: 'DevOps 工具',
+    icon: '🐳',
+    path: '/devops/docker-converter',
+    keywords: ['docker run 转 compose', 'docker compose 转 run', 'docker 命令转换', 'compose yaml 生成', 'docker run 转换器', 'docker compose 在线'],
+    relatedToolIds: ['json-to-yaml'],
   },
 ];
 

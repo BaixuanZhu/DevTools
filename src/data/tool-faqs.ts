@@ -184,6 +184,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '<strong>429 Too Many Requests</strong> 表示客户端在给定时间内发送了过多请求（触发限流）。通常需要等待一段时间后重试，或根据响应头中的 <code>Retry-After</code> 字段确定重试时间。',
     },
   ],
+  'docker-converter': [
+    {
+      question: 'docker run 的 `--rm` flag 在 compose 中如何表示？',
+      answer: 'Compose v2 规范中没有直接等价的字段。转换时会以注释形式保留，提醒你 compose 默认使用 <code>docker compose up/down</code> 管理容器生命周期，不需要 <code>--rm</code>。',
+    },
+    {
+      question: '为什么有些 flag 被注释掉了？',
+      answer: '当前工具尚未支持所有 docker run flag，不支持的 flag 会以注释形式保留在输出中，确保信息不丢失。后续版本会逐步扩展支持范围。',
+    },
+    {
+      question: 'compose → run 转换只处理第一个 service 吗？',
+      answer: '是的。<code>docker run</code> 命令只能启动单个容器，所以 compose → run 方向会转换第一个 service。如果有多个 service，其余 service 的配置会以注释形式附加在输出末尾供参考。',
+    },
+    {
+      question: '生成的 compose 文件不写 <code>version</code> 字段吗？',
+      answer: '不写。自 Docker Compose v2 起，<code>version</code> 字段已弃用，当前推荐做法是不指定 version，使用最新的 Compose 规范格式。',
+    },
+  ],
 };
 
 /**
