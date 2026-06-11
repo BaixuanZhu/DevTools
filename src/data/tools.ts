@@ -312,8 +312,8 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'docker-converter',
-    name: 'Docker Run ↔ Compose 转换器',
-    description: 'docker run 命令与 docker compose 配置互转，支持端口、环境变量、挂载卷等常用 flag',
+    name: 'Docker 配置转换',
+    description: 'docker run 命令与 docker compose 配置实时互转，支持端口、环境变量、挂载卷等常用 flag',
     seoDescription: '在线 Docker Run 命令与 Docker Compose 配置互转工具，支持端口映射、环境变量、挂载卷等常用 flag 双向转换，纯浏览器端运算。',
     category: 'DevOps 工具',
     icon: '🐳',
