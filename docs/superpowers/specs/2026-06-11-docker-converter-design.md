@@ -371,20 +371,24 @@ services:
 | `runtime` | `--runtime` | |
 | `pull_policy` | `--pull` | |
 | `labels` | `-l` / `--label` | 可多个 |
-| `cpus` | `--cpus` | deploy.deploy.resources.limits.cpus |
+| `cpus` | `--cpus` | deploy.resources.limits.cpus |
 | `mem_limit` | `-m` / `--memory` | deploy.resources.limits.memory |
 | `memswap_limit` | `--memory-swap` | |
 | GPU | `--gpus` | deploy.resources.reservations.devices |
 | `cap_add` | `--cap-add` | 可多个 |
 | `cap_drop` | `--cap-drop` | 可多个 |
 | `security_opt` | `--security-opt` | 可多个 |
-| `healthcheck` | `--health-cmd` 等 | 一组 flag 组合映射 |
+| `healthcheck` | `--health-cmd`、`--health-interval`、`--health-timeout`、`--health-retries`、`--health-start-period`、`--no-healthcheck` | 一组 flag 组合映射 |
 | `logging` | `--log-driver` / `--log-opt` | |
 
 ### compose → run 特殊处理
 
 - `build`、`depends_on`、`links`、`extends`、`profiles`、`secrets`、`configs` 等 compose 专有字段 → 以注释保留
-- 多 service 时只转换第一个，其余以注释形式附加
+- 多 service 时只转换第一个（`Object.keys(services)[0]`），其余以注释形式附加：
+  ```
+  # 以下 service 未转换（docker run 仅支持单容器）：
+  # - redis: image=redis:7, ports=6379:6379
+  ```
 - `deploy.resources` 下的限制映射回对应的 `--cpus`、`--memory` 等 flag
 
 ---
