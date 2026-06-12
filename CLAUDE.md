@@ -9,7 +9,43 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | 文件 | 职责 | 何时查阅 |
 |------|------|----------|
 | **PRODUCT.md** | 产品定位、用户画像、工具分类、URL 策略、错误处理、浏览器兼容、性能基线、无障碍要求 | 新增工具页、修改产品行为、讨论功能优先级时 |
-| **DESIGN.md** | 设计令牌（颜色/字体/间距/圆角）、组件状态矩阵、布局模板、视觉规则、Do's & Don'ts | 编写 UI、调整样式、创建新组件、审查视觉一致性时 |
+| **DESIGN.md** | 设计令牌、组件状态矩阵、布局模板、视觉规则、UI 组件选型、样式实现规则、工具页面组件模式、Do's & Don'ts | 编写任何 UI 代码前必读 |
+
+## Code Search Rules（强制）
+
+项目已接入两个代码搜索 MCP，**互为补充**，必须按场景选择最优工具。
+
+### 两个 MCP 的能力边界
+
+| | **Codegraph**（`mcp__codegraph__*`） | **IDEA**（`mcp__idea-codebase-mcp__*`） |
+|---|---|---|
+| **索引范围** | `.ts` `.vue` `.js` | 全部文件（含 `.astro`） |
+| **Vue 组件** | ✅ 完美（组件、import、调用关系全跟踪） | ❌ 盲视（Vue 组件符号搜索返回空） |
+| **Astro 文件** | ❌ 不索引 | ✅ 完整索引 |
+| **调用关系图** | ✅ `callers` / `callees` / `impact` | ❌ 无此功能 |
+| **代码理解** | ✅ `explore` 一次调用返回多文件源码+关系 | ❌ 需多次 `search_text` 拼凑 |
+| **全局文本搜索** | ❌ 不提供 | ✅ `search_text` 精确匹配 |
+| **TypeScript 符号** | ✅ 好 | ✅ 更强（含完整源码片段） |
+
+### 按场景选择工具
+
+| 场景 | 首选工具 | 备选/补充 |
+|------|---------|----------|
+| 理解一个功能/模块的工作原理 | **`codegraph_explore`**（主力，一次搞定） | — |
+| 按名称查找 Vue 组件或函数 | **`codegraph_search`** | — |
+| 查看某个符号的完整源码 | **`codegraph_node`**（`includeCode: true`） | IDEA `search_symbol`（仅 TS） |
+| 查找调用关系 / 修改影响 | **`codegraph_callers` / `callees` / `impact`** | — |
+| 搜索 `.astro` 文件内容（布局、页面路由、Alpine 逻辑） | — | **IDEA `search_text`**（Codegraph 不索引 .astro） |
+| 全局文本搜索（字符串、配置值、CSS 类名） | — | **IDEA `search_text`** |
+| 查找 `.astro` 页面文件 | — | **IDEA `search_file`** |
+| 浏览项目文件结构（按语言分组） | **`codegraph_files`** | IDEA `list_directory_tree` |
+
+### 硬性规则
+
+1. **`codegraph_explore` 是代码理解的主力**：一个问题通常只需要一次调用，返回多文件源码 + 调用关系 + blast radius
+2. **涉及 `.astro` 文件的搜索必须用 IDEA**：Codegraph 不索引 .astro，搜索布局、路由、Alpine 逻辑时用 IDEA `search_text`
+3. **禁止 Grep + Read 循环**：不要先用 Grep 找文件再逐个 Read。先用 codegraph 或 IDEA 的专用搜索工具定位
+4. **Grep/Read 仅作为最后补充**：只在两个 MCP 都未覆盖的边缘场景使用
 
 ## Project Overview
 
@@ -82,15 +118,14 @@ public/          # 不经处理的静态文件（favicon 等）
 1. **输入格式检查 + 友好错误提示** — 在运算前验证输入格式，错误信息用中文描述具体问题。错误处理策略见 PRODUCT.md §Error Handling。
 2. **"清空"和"复制结果"按钮** — 清空重置所有输入；复制结果到剪贴板并给出反馈
 3. **合理的默认值** — 如果工具有适合的默认输入值，直接在代码中定义，让用户打开页面即可体验功能。不需要单独的"填入示例"按钮
-4. **SEO 元数据完整** — 新增工具时必须在 `src/data/tools.ts` 中填写 `seoDescription`、`keywords`、`relatedToolIds`。有 FAQ 时同步在 `src/data/tool-faqs.ts` 中添加问答对（原生 `details/summary` 渲染，零 JS），ToolLayout 会自动注入 FAQ 结构化数据。
+4. **SEO 元数据完整** — 新增工具时必须在 `src/data/tools.ts` 中填写完整的 SEO 字段，有 FAQ 时同步在 `src/data/tool-faqs.ts` 中添加问答对
 
 ## Development Conventions
 
 - 页面 title 和布局使用 Layout.astro / ToolLayout.astro，通过 props 传递页面标题
-- 交互型组件使用 Vue 3 `<script setup lang="ts">` + Composition API，通过 Astro `client:` 指令控制水合
+- 交互型工具组件使用 Vue 3，通过 Astro `client:` 指令控制水合
 - **Astro 水合策略**：工具组件默认使用 `client:idle`（页面空闲时水合），对需要立即响应用户输入的工具可用 `client:load`（如 CronParser）。纯展示型组件不使用 `client:` 指令，保持零 JS
 - 纯展示型组件使用 Astro 组件（.astro），保持零 JS 输出
-- 样式统一使用 Tailwind utility class，令牌和组件规范见 DESIGN.md
 - 新增公共组件/工具函数时必须写文档注释（JSDoc / TSDoc 格式）
 
 ### Project Conventions
@@ -99,41 +134,9 @@ public/          # 不经处理的静态文件（favicon 等）
 - **无 ESLint / Prettier 配置**：项目依靠 TypeScript strict 模式和代码审查保证一致性，不额外配置 lint/format 工具
 - **测试文件位置**：单元测试放在被测模块所在目录的 `__tests__/` 子目录中，如 `src/utils/format/__tests__/json-diff.test.ts`
 
-### Tool Page Structure Template
-
-最小工具页面示例（`.astro` 文件）：
-
-```astro
----
-import ToolLayout from '../../layouts/ToolLayout.astro';
-import MyTool from './MyTool.vue';
----
-
-<ToolLayout toolId="category/tool-name">
-  <MyTool client:idle />
-</ToolLayout>
-```
-
-工具 Vue 组件（`.vue` 文件）遵循标准模式：
-- `<script setup lang="ts">` + Composition API
-- 导入 `ToolHeader`、`CopyButton`、`ClearButton` 等布局组件
-- 输入即输出，无需"运行"按钮（耗时操作除外）
-- 使用 `focus:outline-none focus:border-accent` 给 input/textarea 添加焦点样式
-
-## Dependency & Component Rules（强制）
+## Dependency Rules（强制）
 
 ### 库选型原则
 - **优先使用稳定成熟的库**：选择 npm 周下载量高、维护活跃、无已知安全漏洞的库（如 dayjs、@noble/ciphers、uuid）。新增依赖前需确认其社区活跃度和兼容性
 - **禁止引入未经广泛验证的实验性库**：如果功能可用浏览器原生 API（Web Crypto API、TextEncoder、URL 等）实现，优先使用原生方案
 - **同类库不重复引入**：已有 dayjs 处理日期则不再引入 moment/luxon；已有 @noble/ciphers 则不再引入 crypto-js
-
-### UI 组件规则
-- **优先使用 @headlessui/vue 组件**：涉及 Tab 切换、开关、下拉选择、折叠面板、对话框、弹出层等交互模式时，使用 Headless UI 的对应组件（TabGroup/Switch/Listbox/Disclosure/Dialog/Popover 等），不要手写或引入其他 UI 框架
-- **已有封装组件优先复用**：`src/components/ui/` 下已有 ToggleSwitch（开关）、SelectListbox（下拉选择）、ModeTabGroup（Tab 切换）、OptionRadioGroup（单选按钮组）、CopyButton（复制）、ClearButton（清空）、ColorInput（颜色选择器）、CodePanel（代码展示）等封装组件，新功能应先检查是否有可复用的组件
-- **自定义交互组件走 Vue 3 Composition API**：Headless UI 无法覆盖的交互需求，使用 Vue 3 `<script setup lang="ts">` + Composition API 自行实现，保持无障碍（ARIA、键盘导航、focus 管理）
-
-### 样式规则
-- **统一使用 Tailwind utility class**：所有样式通过 Tailwind class 表达，禁止内联 style、禁止引入额外 CSS 框架（如 Bootstrap、Element Plus、Ant Design Vue）
-- **消费设计令牌**：颜色、间距、圆角、字体使用 `global.css` @theme 中定义的令牌（如 `text-surface`、`bg-card`、`border-default`），避免硬编码数值
-- **组件状态完整**：每个可交互元素必须覆盖 hover / focus / active / disabled 状态，状态样式参考 DESIGN.md 组件状态矩阵
-- **Focus 样式约束**：仅 `input`、`textarea` 等文本输入元素使用 `focus:outline-none focus:border-accent` 表示焦点状态。按钮、radio、select、tab、details/summary 等其他交互元素**不添加任何 focus 视觉样式**。
