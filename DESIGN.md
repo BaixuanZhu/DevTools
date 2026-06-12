@@ -1,8 +1,99 @@
+---
+name: DevTools
+description: Browser-based developer tool suite with warm, precise utility-first design
+colors:
+  surface: "#faf9f7"
+  card: "#ffffff"
+  text: "#1a1a1a"
+  muted: "#6b7280"
+  border: "#e5e2dd"
+  accent: "#e8590c"
+  hover: "#f3f1ee"
+  error: "#dc2626"
+  success: "#16a34a"
+typography:
+  display:
+    fontFamily: "'Noto Sans SC', system-ui, -apple-system, sans-serif"
+    fontSize: "1.5rem"
+    fontWeight: 600
+    lineHeight: 1.25
+  title:
+    fontFamily: "'Noto Sans SC', system-ui, -apple-system, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 600
+    lineHeight: 1.25
+  body:
+    fontFamily: "'Noto Sans SC', system-ui, -apple-system, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.5
+  label:
+    fontFamily: "'Noto Sans SC', system-ui, -apple-system, sans-serif"
+    fontSize: "0.8125rem"
+    fontWeight: 500
+    lineHeight: 1.4
+  sidebar-heading:
+    fontFamily: "'Noto Sans SC', system-ui, -apple-system, sans-serif"
+    fontSize: "0.75rem"
+    fontWeight: 600
+    lineHeight: 1
+    letterSpacing: "0.05em"
+  mono:
+    fontFamily: "'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace"
+    fontSize: "0.875rem"
+    fontWeight: 400
+    lineHeight: 1.5
+rounded:
+  sm: "4px"
+  md: "8px"
+  lg: "12px"
+spacing:
+  xs: "4px"
+  sm: "8px"
+  md: "16px"
+  lg: "24px"
+  xl: "32px"
+  "2xl": "48px"
+components:
+  button-primary:
+    backgroundColor: "{colors.accent}"
+    textColor: "#ffffff"
+    rounded: "{rounded.sm}"
+    padding: "8px 16px"
+  button-ghost:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.sm}"
+    padding: "8px 16px"
+  button-ghost-hover:
+    backgroundColor: "{colors.hover}"
+  button-ghost-copied:
+    textColor: "{colors.success}"
+  input-editable:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.sm}"
+    padding: "8px 16px"
+  input-readonly:
+    backgroundColor: "{colors.hover}"
+    textColor: "{colors.text}"
+    rounded: "{rounded.sm}"
+    padding: "8px 16px"
+  chip-default:
+    backgroundColor: "{colors.card}"
+    textColor: "{colors.muted}"
+    rounded: "9999px"
+    padding: "6px 16px"
+  chip-active:
+    backgroundColor: "{colors.text}"
+    textColor: "{colors.surface}"
+    rounded: "9999px"
+    padding: "6px 16px"
+---
+
 # Design System: DevTools
 
 > 本文档定义视觉和交互规范。产品行为原则见 PRODUCT.md。
-
----
 
 ## 1. Overview
 
@@ -10,7 +101,7 @@
 
 Every tool visible, labeled, ready. No drawers to open, no manuals to read. The interface is a well-organized shelf: you see what you need, you grab it, you use it, you put it back. Warm ivory surfaces, forged orange accents used as signals not decoration. The palette feels warm and precise: never clinical, never loud.
 
-Light surfaces with a subtle warm tint carry 90% of the viewport. A single saturated accent (forged orange) appears only on interactive elements in active state: focused inputs, active tabs, selected categories. Its rarity makes it noticeable. Components feel tactile and confident: borders define shape, padding creates breathing room, transitions give feedback without theater.
+Light surfaces with a subtle warm tint carry 90% of the viewport. A single saturated accent (forged orange) appears only on interactive elements in active state: focused inputs, active tabs, selected categories. Its rarity makes it noticeable. Components feel precise and restrained: borders define shape, padding creates breathing room, transitions give feedback without theater.
 
 The system rejects everything PRODUCT.md calls out: login walls, multi-step flows, loading spinners, unnecessary navigation depth. A tool page loads and the cursor is already in the input field.
 
@@ -21,29 +112,85 @@ The system rejects everything PRODUCT.md calls out: login walls, multi-step flow
 - 零摩擦交互：页面加载后输入框自动聚焦，结果实时更新，无需提交按钮
 - 单一无衬线字体（`font-sans`）+ `font-mono` 专用于代码区域
 
+### Layout Principles
+
+工具页面采用**分层宽度策略**：ToolLayout.astro 主容器使用 `max-w-full` 不限制宽度，宽度约束由各工具组件自行控制。布局以 1024px 为 Sidebar 常驻/抽屉的分界线（对应 Tailwind `lg` 断点）。
+
+**宽度分层：**
+
+| 模式 | 最大宽度 | 适用工具 | 特征 |
+|------|---------|---------|------|
+| 标准（Standard） | `max-w-[720px]`（等同于 `max-w-3xl`） | 哈希、UUID、加解密、编解码等单列工具 | 输入输出上下排列，紧凑聚焦 |
+| 宽屏（Wide） | `max-w-[1600px]` | JSON 格式化、JSON Diff、JSON 转换、Markdown 编辑器、Docker 转换 | 左右双栏布局（`grid-cols-2`），代码编辑/对比需要更宽空间 |
+| 过渡（Intermediate） | `max-w-5xl`（1024px）或 `max-w-[760px]` | Cron 解析器、日期时间转换器等特殊工具 | 介于标准和宽屏之间 |
+
+ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 `max-w-[720px]`，`horizontal` 模式使用 `max-w-[1600px]` 并切换为 `grid grid-cols-1 lg:grid-cols-2` 双栏网格。
+
+**响应式断点：**
+
+| 断点 | 布局行为 |
+|------|---------|
+| mobile（< 768px） | 单列布局，Sidebar 隐藏为抽屉，Header 显示汉堡按钮 |
+| tablet（768px – 1023px） | 单列但加宽，Sidebar 仍为抽屉 |
+| desktop（≥ 1024px） | Sidebar 常驻（240px），内容区自适应 |
+
+间距规则：Tool Header 与下方内容 `mb-6`（24px），表单区块之间 `mb-3`~`mb-4`（12~16px），错误消息与输入框 `mt-1`~`mt-3`（4~12px），多个 Ghost 按钮横向排列 `gap-2`（8px）。
+
+### Transitions
+
+可交互元素的状态切换默认使用 `duration-150`（150ms）。装饰性动画（如 Logo 图标旋转）可使用 `duration-300`（300ms）。始终使用具体属性名，如 `transition-[border-color] duration-150`。尽量避免 `transition-colors`——优先使用具体属性（`transition-[border-color]`、`transition-[background-color]`）以避免意外的重绘。尊重 `prefers-reduced-motion`：在该偏好下所有 transition duration 设为 `0ms`。
+
+### Implementation Rules
+
+本节定义如何将设计系统落地到代码。
+
+**组件库选型：**
+- 优先使用 @headlessui/vue 组件（TabGroup / Switch / Listbox / Disclosure / Dialog / Popover 等），不要手写或引入其他 UI 框架
+- `src/components/ui/` 下已有封装组件优先复用：ToggleSwitch、SelectListbox、ModeTabGroup、OptionRadioGroup、CopyButton、ClearButton、ColorInput、CodePanel
+- Headless UI 无法覆盖的交互需求，使用 Vue 3 Composition API 自行实现，保持无障碍（ARIA、键盘导航、focus 管理）
+
+**样式实现：**
+- 统一使用 Tailwind utility class，禁止内联 style、禁止引入额外 CSS 框架
+- 消费设计令牌（`global.css` @theme 中定义的令牌），避免硬编码数值
+- 每个可交互元素必须覆盖 hover / focus / active / disabled 状态
+
+**Focus 样式约束：** `input`、`textarea` 等文本输入元素使用 `focus:outline-none focus:border-accent` 表示焦点状态。其他交互元素（按钮、开关、下拉选择等）使用 `focus:outline-none` 移除默认 outline，通过背景色变化或 Headless UI 的内置 focus 管理处理焦点。不使用 `focus:ring` 或 `focus:border-accent`。
+
+**工具页面组件模式：** 工具 Vue 组件（`.vue` 文件）使用 `<script setup lang="ts">` + Composition API，导入布局组件，输入即输出（无需"运行"按钮，耗时操作除外）。使用 `ResponsiveWorkspace` 组件统一管理宽度约束：单列工具用 `vertical` 模式（720px），双栏工具用 `horizontal` 模式（1600px）。未使用 ResponsiveWorkspace 的工具通过 `<div class="max-w-[720px]">` 或 `<div class="mx-auto max-w-[1600px]">` 自行控制宽度。
+
 ---
 
-## 2. Design Tokens
+## 2. Colors
 
-所有令牌在 `src/styles/global.css` 的 Tailwind v4 `@theme` 块中定义，是样式系统的唯一真相源。本节是令牌的语义文档，不重复定义值。
+**The Shelf Rule.** 中性色承载 90% 的面。accent（#e8590c）仅出现在交互元素的活跃态：聚焦输入框、活跃标签页、选中筛选、悬停 Logo。稀缺即力量。任一屏幕超过 10% 的橙色即为异常。
 
-### Colors
+### Neutral
 
-**The Shelf Rule.** 中性色承载 90% 的面。`accent`（#e8590c）仅出现在交互元素的活跃态：聚焦输入框、活跃标签页、选中筛选、悬停 Logo。稀缺即力量。任一屏幕超过 10% 的橙色即为异常。
+| 语义 | 色值 | Tailwind Utility | 使用范围 |
+|------|------|-----------------|---------|
+| 页面底色 | #faf9f7 | `bg-surface` | 所有页面的 `<body>` 底色 |
+| 卡片/Header 底 | #ffffff | `bg-card` | 卡片、Sidebar、Header、Footer 的背景 |
+| 主文字 | #1a1a1a | `text-text` | 正文、标题、输入内容。从不使用纯黑 |
+| 次要文字/禁用 | #6b7280 | `text-muted` | 辅助说明、placeholder、侧栏分组标题、禁用态文字 |
+| 边框/分割线 | #e5e2dd | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
+| 悬停底色 | #f3f1ee | `bg-hover` | 按钮、卡片、侧栏项的悬停底色，比 surface 深一阶 |
 
-| 设计语义       | 色值       | Tailwind Utility            | 使用范围 |
-|---------------|-----------|----------------------------|---------|
-| 页面底色       | #faf9f7  | `bg-surface`               | 所有页面的 `<body>` 底色 |
-| 卡片/Header 底 | #ffffff  | `bg-card`                  | 卡片、Sidebar、Header、Footer 的背景 |
-| 主文字         | #1a1a1a  | `text-text`                | 正文、标题、输入内容。从不使用纯黑 |
-| 次要文字/禁用   | #6b7280  | `text-muted`               | 辅助说明、placeholder、侧栏分组标题、禁用态文字 |
-| 边框/分割线     | #e5e2dd  | `border-border`            | 输入框、卡片、分割线、侧栏右边框 |
-| 强调色         | #e8590c  | `text-accent` `bg-accent` `border-accent` | 仅交互元素活跃态。从不作为大面积底色 |
-| 悬停底色        | #f3f1ee  | `bg-hover`                 | 按钮、卡片、侧栏项的悬停底色，比 `surface` 深一阶 |
-| 错误文字        | #dc2626  | `text-error`               | 仅文字，不做底色 |
-| 成功文字        | #16a34a  | `text-success`             | 仅文字，不做底色（如复制确认） |
+### Accent
 
-### Typography
+| 语义 | 色值 | Tailwind Utility | 使用范围 |
+|------|------|-----------------|---------|
+| 强调色 | #e8590c | `text-accent` `bg-accent` `border-accent` | 仅交互元素活跃态。从不作为大面积底色 |
+
+### Semantic
+
+| 语义 | 色值 | Tailwind Utility | 使用范围 |
+|------|------|-----------------|---------|
+| 错误 | #dc2626 | `text-error` | 仅文字，不做底色 |
+| 成功 | #16a34a | `text-success` | 仅文字，不做底色（如复制确认） |
+
+---
+
+## 3. Typography
 
 **The One Family Rule.** `font-sans`（Noto Sans SC）覆盖除代码外的所有文字。标题与正文的层级差异由字号和字重产生，不引入第二套无衬线字体。
 
@@ -66,7 +213,7 @@ The system rejects everything PRODUCT.md calls out: login walls, multi-step flow
 
 ### Spacing Scale
 
-令牌值定义于 `global.css`，组件通过 Tailwind 的间距 utility 消费。以下是语义映射：
+令牌值定义于 `global.css`，组件通过 Tailwind 的间距 utility 消费。
 
 | 令牌 | 值 | Tailwind 等价 | 使用场景 |
 |------|-----|-------------|---------|
@@ -77,41 +224,21 @@ The system rejects everything PRODUCT.md calls out: login walls, multi-step flow
 | xl | 32px | `gap-8` | 区块之间的间距 |
 | 2xl | 48px | `gap-12` | 大区块分隔 |
 
-### Responsive Breakpoints
-
-| 名称 | 断点 | 布局行为 |
-|------|------|---------|
-| mobile | < 768px | 单列布局，Sidebar 隐藏为抽屉，Header 显示汉堡按钮 |
-| tablet | 768px – 1023px | 单列但加宽，Sidebar 仍为抽屉 |
-| desktop | ≥ 1024px | Sidebar 常驻（240px），内容区自适应 |
-
-> 当前实现以 `1024px` 为 Sidebar 常驻/抽屉的分界线，对应 Tailwind 的 `lg` 断点。
-
-### Transitions
-
-所有可交互元素的状态切换使用 `duration-150`（150ms），感知为即时反馈但又有可感知的过渡。
-
-**规则：始终使用具体属性名**，如 `transition-[border-color] duration-150`、`transition-shadow duration-150`。
-
-禁止使用 `transition-colors`——它会过渡所有颜色属性（`background-color`、`color`、`border-color`），可能触发意外的重绘或视觉抖动，且无法控制过渡的具体属性。
-
-尊重 `prefers-reduced-motion`：在该偏好下所有 transition duration 设为 `0ms`。
-
 ---
 
-## 3. Elevation
+## 4. Elevation
 
-Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐落在 `bg-surface`（#faf9f7）上，悬停态切换为 `bg-hover`（#f3f1ee）。无投影。唯一的投影是工具卡片的悬停微提：`hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]`。
+Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐落在 `bg-surface`（#faf9f7）上，悬停态切换为 `bg-hover`（#f3f1ee）。投影仅用于需要从背景浮出的功能性浮层。
 
-**The No-Shadow Rule.** 静态元素禁止投影。如需"浮起"感，使用不同的中性色阶（card on surface）。工具卡片 hover shadow 是唯一例外，且必须保持 imperceptible。
+**The Minimal Shadow Rule.** 静态内容区域不使用投影。投影仅用于浮层组件（下拉菜单、Toast 通知、弹出面板）和工具卡片悬停态，且必须保持 imperceptible（`shadow-sm` 或 `shadow-[0_2px_8px_rgba(0,0,0,0.06)]`）。内容卡片、按钮、输入框等常规元素不使用投影。
 
 **Dark Mode: Not Supported.** 当前设计有意只支持暖调浅色主题。warm-ivory 底色是刻意的设计身份标识，不做暗色模式。如未来需要支持，应作为独立项目在 PRODUCT.md 中声明后再启动。
 
 ---
 
-## 4. Components
+## 5. Components
 
-组件触感明确。边框定义形状，padding 留出呼吸空间，状态切换统一 150ms ease。每个可交互元素都有 hover 响应。每个聚焦输入框都获得 `border-accent`。
+组件精确而克制。边框定义形状，padding 留出呼吸空间，状态切换统一 150ms ease。每个可交互元素都有 hover 响应。每个聚焦输入框都获得 `border-accent`。主要操作按钮应覆盖 complete 状态矩阵（default / hover / active / disabled），辅助组件（开关、选择器等）至少覆盖 default / hover。
 
 ### Buttons
 
@@ -135,6 +262,10 @@ Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐
 | Active | `bg-accent text-white rounded-lg px-4 py-1`（border 随 bg 同色） |
 | Hover（inactive） | `hover:bg-hover hover:text-text` |
 | Disabled | `opacity-50 cursor-not-allowed pointer-events-none` |
+
+### Category Chips（全局筛选，CSS 组件）
+
+Pill 形状（`rounded-full`），`border: 1.5px solid transparent`，活跃态 `bg-text text-surface`（反转），过渡 `background-color 0.15s, color 0.15s, border-color 0.15s`。
 
 ### Tool Cards
 
@@ -181,10 +312,13 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 | 元素 | Class |
 |------|-------|
-| Container | `h-[57px] fixed top-0 bg-card border-b border-border` |
-| Layout | Logo 左 + SearchBar 右（`w-[280px]`） |
-| Logo | `font-semibold text-[1.125rem]`，`hover:text-accent transition-[color] duration-150` |
-| Mobile | 汉堡按钮替换 SearchBar，三条 2px 横线，宽 18px |
+| Container | `h-[57px] sticky top-0 z-50 bg-card border-b border-border` |
+| Layout | 左侧（汉堡按钮 mobile-only + 移动端 Logo）+ 右侧（收藏夹 · 暗色模式 · GitHub） |
+| 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，`@click` 触发 `sidebar-toggle` |
+| 移动端 Logo | `lg:hidden`，与 Sidebar Logo 相同样式 |
+| 收藏夹按钮 | `w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover`，下拉面板 `w-[260px]` |
+| 暗色模式按钮 | 同收藏夹按钮样式，当前为 UI 预留（Toast 提示"即将支持"） |
+| GitHub 链接 | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 
 ### Tool Header
 
@@ -212,44 +346,51 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | Error | `border-error text-error` |
 | Animation | `transition-[opacity,transform] duration-150`，入场 `opacity-0 → opacity-100`，1.5s 后自动消失 |
 
----
+### ResponsiveWorkspace
 
-## 5. Composition & Layout
+统一封装工具页面宽度约束和布局模式的容器组件。
 
-组件单独定义后，需要规则约束它们如何组合。
+| 模式 | 最大宽度 | 布局 | 适用场景 |
+|------|---------|------|---------|
+| `vertical`（默认） | `max-w-[720px]` | `flex flex-col` | 单列输入→输出流 |
+| `horizontal` | `max-w-[1600px]` | `grid grid-cols-1 lg:grid-cols-2` | 左右双栏（输入+输出并排） |
 
-### 工具页面布局模板
+组件通过 `mode` prop 控制模式。内容通过默认 slot 传入，`#input` 和 `#output` 具名 slot 可选用于水平模式下的左右分栏。
 
-```
-┌─────────────────────────────────────┐
-│ Header (fixed, h-57px)              │
-├──────────┬──────────────────────────┤
-│ Sidebar  │ Tool Header              │
-│ (240px)  │ ├─ Title + Description   │
-│          │ └─ Example Button        │
-│          │                          │
-│          │ Input Area               │
-│          │ ├─ Label + Input/Textarea│
-│          │ └─ Error Message (mt-1)  │
-│          │                          │
-│          │ Actions (gap-2)          │
-│          │ ├─ Primary Button        │
-│          │ └─ Ghost Buttons         │
-│          │                          │
-│          │ Output Area              │
-│          │ └─ Readonly field        │
-│          │                          │
-│          │ Copy Button              │
-├──────────┴──────────────────────────┤
-│ Footer                              │
-└─────────────────────────────────────┘
-```
+### OptionRadioGroup
 
-- 内容区最大宽度 `max-w-3xl`（720px），居中。
-- Tool Header 与下方内容间距：`mt-6`（24px）。
-- 输入区与操作按钮间距：`mt-4`（16px）。
-- 操作按钮与输出区间距：`mt-4`（16px）。
-- 多个 Ghost 按钮横向排列时使用 `gap-2`（8px）。
+基于 Headless UI 的单选按钮组组件，用于在一组互斥选项中选择一个（如哈希算法选择、输出格式选择）。
+
+| 元素 | 描述 |
+|------|------|
+| 容器 | `flex flex-wrap gap-2` 横向排列 |
+| 选项按钮 | `px-3 py-1.5 rounded-sm border border-border text-sm`，默认 `text-muted bg-card` |
+| 选中态 | `bg-accent text-white border-accent` |
+| Hover | `hover:bg-hover` |
+
+### CodePanel
+
+统一的代码面板组件，用于显示格式化后的代码输出、转换结果等。支持标题栏和操作按钮。
+
+| 元素 | 描述 |
+|------|------|
+| 容器 | `bg-hover border border-border rounded-sm overflow-hidden` |
+| 标题栏 | `flex items-center justify-between px-4 py-2 border-b border-border bg-card` |
+| 代码区域 | `p-4 font-mono text-sm overflow-auto whitespace-pre-wrap break-all` |
+
+### Category Filter Chip（CSS 组件）
+
+首页全局分类筛选芯片，使用原生 CSS 类（非 Vue 组件），定义于 `global.css`。
+
+| 状态 | 类名 | 样式 |
+|------|------|------|
+| 默认 | `.chip-default` | `bg-card border border-border rounded-full px-4 py-1.5 text-muted` |
+| 活跃 | `.chip-active` | `bg-text text-surface border-transparent` |
+| Hover | `.chip-default:hover` | `bg-hover text-text` |
+
+### Sidebar Scroll
+
+侧栏导航区域的滚动条隐藏样式，通过 `.sidebar-nav-scroll` 类名应用。在保持滚动功能的同时隐藏原生滚动条，通过 `scrollbar-width: none` 和 `::-webkit-scrollbar { display: none }` 实现。
 
 ---
 
@@ -262,7 +403,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 - **Do** use `text-accent` / `border-accent`（#e8590c）only on interactive elements in active state. Its rarity is its strength.
 - **Do** cap code field body text at 65 to 75ch for readability.
 - **Do** use 150ms ease transitions for all state changes (`transition-[border-color]` etc.). Fast enough to feel responsive, slow enough to perceive.
-- **Do** keep tool pages self-contained at max-width 720px: input, output, and actions all visible without scrolling on desktop.
+- **Do** keep standard tool pages self-contained at max-width 720px; wide tools (JSON, editors, diffs) may extend to 1600px with dual-column layout for code editing/comparison.
 - **Do** respect prefers-reduced-motion by setting transition durations to 0ms.
 
 ### Don't:
@@ -270,24 +411,9 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 - **Don't** use glassmorphism, gradient text (background-clip: text), or side-stripe borders greater than 1px as colored accents.
 - **Don't** add login walls, onboarding flows, multi-step wizards, or loading spinners. From PRODUCT.md anti-references: forced login, complex flows, and anything that makes the user wait are prohibited.
 - **Don't** use `accent` as a background fill for large areas (`bg-accent` on full-width sections). It is a signal, not a surface.
-- **Don't** add shadows to resting elements. The tool card `hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` is the sole exception.
+- **Don't** add shadows to resting content areas. The tool card `hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` and floating layer components (dropdowns, toasts) are exceptions.
 - **Don't** animate layout properties or add ambient/choreographed animations. Motion serves feedback only.
 - **Don't** use identical card grids with the same-sized cards repeated endlessly without visual differentiation.
 - **Don't** introduce a second sans-serif font family. `font-sans` handles everything except code; `font-mono` handles code.
-- **Don't** use `transition-colors` — always target specific properties (`transition-[border-color]`, `transition-shadow`) to avoid accidental layout jitter.
+- **Don't** use `transition-colors` when a specific property works — prefer `transition-[border-color]`, `transition-[background-color]` for precise control.
 - **Don't** implement a dark theme. The warm-ivory light palette is a deliberate design identity; dark mode is not in scope.
-
----
-
-## Appendix: Tailwind 实现映射
-
-设计令牌通过 `src/styles/global.css` 的 `@theme` 块注入 Tailwind v4 命名空间。组件通过 utility class 消费，不使用 inline style 或独立的 scoped CSS。
-
-### 样式分层
-
-| 层级 | 位置 | 技术 | 职责 |
-|------|------|------|------|
-| 设计令牌 | `src/styles/global.css` | Tailwind v4 `@theme` 块 | 颜色/字体/圆角定义，唯一真相源 |
-| 全局布局 | `src/layouts/` | Astro + Alpine + Tailwind | HTML 骨架、Sidebar、SearchBar、Toast |
-| 工具组件 | `src/tools/` | Vue 3 岛屿 + Tailwind | 工具交互逻辑、输入/输出 UI |
-| 共享组件 | `src/components/` | Astro 或 Vue + Tailwind | Footer、ToolCard、CopyButton 等 |
