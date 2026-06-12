@@ -527,11 +527,10 @@ onMounted(() => {
       </CodePanel>
 
       <!-- 预览区 -->
-      <div>
-        <label class="block text-[0.8125rem] text-muted mb-1.5">预览</label>
+      <div class="border border-border rounded-sm overflow-hidden bg-card">
         <div
           ref="previewRef"
-          class="w-full h-[calc(100vh-340px)] min-h-80 p-6 border border-border rounded-sm bg-card overflow-auto"
+          class="w-full h-[calc(100vh-340px)] min-h-80 p-6 overflow-auto"
           @scroll="handlePreviewScroll"
         >
           <div class="md-preview" v-html="renderedHtml"></div>
