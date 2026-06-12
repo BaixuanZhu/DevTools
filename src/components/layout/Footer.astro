@@ -13,7 +13,7 @@ const year = new Date().getFullYear();
     <div class="flex items-center justify-between flex-wrap gap-2">
       <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} DevTools. All rights reserved.</p>
       <div class="flex items-center gap-4">
-        <a href="/" class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150">关于</a>
+        <a href="/about" class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150">关于</a>
         <a
           href="https://gitee.com/baixuanz"
           target="_blank"
@@ -26,10 +26,10 @@ const year = new Date().getFullYear();
           rel="noopener noreferrer"
           class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
         >GitHub</a>
-        <button
-          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150 cursor-pointer bg-transparent border-none p-0"
-          @click="$store.toast.success('反馈功能开发中，敬请期待')"
-        >反馈</button>
+        <a
+          href="/feedback"
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >反馈</a>
       </div>
     </div>
 

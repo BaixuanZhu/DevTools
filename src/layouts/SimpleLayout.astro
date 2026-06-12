@@ -1,0 +1,98 @@
+---
+/**
+ * SimpleLayout — 非工具页面的轻量级布局
+ *
+ * 提供 Header（Logo + 首页链接）+ 居中内容区 + Footer，
+ * 不包含工具侧边栏。适用于反馈、关于等独立页面。
+ */
+import Layout from './Layout.astro';
+import Footer from '../components/layout/Footer.astro';
+
+interface Props {
+  /** 页面标题 */
+  title?: string;
+  /** 页面描述 */
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="min-h-dvh flex flex-col">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
+      <!-- Logo -->
+      <a
+        href="/"
+        class="group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150"
+        aria-label="DevTools 首页"
+      >
+        <svg
+          class="w-6 h-6 text-text group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="16 18 22 12 16 6"></polyline>
+          <polyline points="8 6 2 12 8 18"></polyline>
+        </svg>
+        <span>DevTools</span>
+      </a>
+
+      <!-- 右侧链接区 -->
+      <div class="flex items-center gap-4">
+        <a
+          href="/about"
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >关于</a>
+        <a
+          href="/feedback"
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >反馈</a>
+        <a
+          href="https://gitee.com/baixuanz"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >Gitee</a>
+        <a
+          href="https://github.com/BaixuanZhu/DevTools"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
+        >GitHub</a>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 p-8 max-w-3xl mx-auto w-full max-md:p-4">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <Footer />
+  </div>
+
+  <!-- Alpine Toast -->
+  <div
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2"
+    x-cloak
+    x-data
+    set:html={`<template x-for="toast in $store.toast.items" :key="toast.id">
+      <div
+        :class="{
+          'bg-card border-border text-success': toast.type === 'success',
+          'bg-red-50 border-error text-error': toast.type === 'error',
+        }"
+        class="px-4 py-2 rounded-md border shadow-sm text-sm font-sans"
+        x-text="toast.message"
+        x-transition
+      ></div>
+    </template>`}
+  ></div>
+</Layout>
