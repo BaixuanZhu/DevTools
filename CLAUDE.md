@@ -13,39 +13,58 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Code Search Rules（强制）
 
-项目已接入两个代码搜索 MCP，**互为补充**，必须按场景选择最优工具。
+⚠️ **此规则优先级高于 Plan Mode 的探索建议。即使在 Plan Mode 中，也必须先走下面的流程，再用 Explore 子代理处理 codegraph/IDEA 无法覆盖的部分。**
 
-### 两个 MCP 的能力边界
+### 执行流程（按顺序，不可跳步）
 
-| | **Codegraph**（`mcp__codegraph__*`） | **IDEA**（`mcp__idea-codebase-mcp__*`） |
-|---|---|---|
-| **索引范围** | `.ts` `.vue` `.js` | 全部文件（含 `.astro`） |
-| **Vue 组件** | ✅ 完美（组件、import、调用关系全跟踪） | ❌ 盲视（Vue 组件符号搜索返回空） |
-| **Astro 文件** | ❌ 不索引 | ✅ 完整索引 |
-| **调用关系图** | ✅ `callers` / `callees` / `impact` | ❌ 无此功能 |
-| **代码理解** | ✅ `explore` 一次调用返回多文件源码+关系 | ❌ 需多次 `search_text` 拼凑 |
-| **全局文本搜索** | ❌ 不提供 | ✅ `search_text` 精确匹配 |
-| **TypeScript 符号** | ✅ 好 | ✅ 更强（含完整源码片段） |
+```
+需要理解代码 / 查找信息
+        │
+        ▼
+  ① codegraph 能覆盖吗？（.ts / .vue / .js）
+     ├─ 是 → codegraph_explore / search / node / callers
+     └─ 否 ↓
+  ② 涉及 .astro 文件吗？
+     ├─ 是 → IDEA search_text / search_file（codegraph 不索引 .astro）
+     └─ 否 ↓
+  ③ 需要全局文本搜索？（字符串、CSS 类名、配置值）
+     ├─ 是 → IDEA search_text
+     └─ 否 ↓
+  ④ 以上都不适用 → 才允许 Grep / Read
+```
 
-### 按场景选择工具
+### 核心规则（3 条，必须记住）
 
-| 场景 | 首选工具 | 备选/补充 |
-|------|---------|----------|
-| 理解一个功能/模块的工作原理 | **`codegraph_explore`**（主力，一次搞定） | — |
-| 按名称查找 Vue 组件或函数 | **`codegraph_search`** | — |
-| 查看某个符号的完整源码 | **`codegraph_node`**（`includeCode: true`） | IDEA `search_symbol`（仅 TS） |
-| 查找调用关系 / 修改影响 | **`codegraph_callers` / `callees` / `impact`** | — |
-| 搜索 `.astro` 文件内容（布局、页面路由、Alpine 逻辑） | — | **IDEA `search_text`**（Codegraph 不索引 .astro） |
-| 全局文本搜索（字符串、配置值、CSS 类名） | — | **IDEA `search_text`** |
-| 查找 `.astro` 页面文件 | — | **IDEA `search_file`** |
-| 浏览项目文件结构（按语言分组） | **`codegraph_files`** | IDEA `list_directory_tree` |
+1. **先 codegraph，后 IDEA，最后才 Read/Grep** — 任何代码理解问题，先尝试 `codegraph_explore`，一次调用返回多文件源码 + 调用关系，不要逐个 Read 拼凑
+2. **.astro 文件 = IDEA** — codegraph 不索引 .astro，所有布局、路由、Alpine 逻辑的搜索用 IDEA `search_text`
+3. **禁止 Grep → Read → Read → Read 循环** — 这是最后的兜底手段，不是默认选项
 
-### 硬性规则
+### 工具速查
 
-1. **`codegraph_explore` 是代码理解的主力**：一个问题通常只需要一次调用，返回多文件源码 + 调用关系 + blast radius
-2. **涉及 `.astro` 文件的搜索必须用 IDEA**：Codegraph 不索引 .astro，搜索布局、路由、Alpine 逻辑时用 IDEA `search_text`
-3. **禁止 Grep + Read 循环**：不要先用 Grep 找文件再逐个 Read。先用 codegraph 或 IDEA 的专用搜索工具定位
-4. **Grep/Read 仅作为最后补充**：只在两个 MCP 都未覆盖的边缘场景使用
+| 要做什么 | 用什么 |
+|---------|--------|
+| 理解功能/模块怎么工作 | `codegraph_explore`（一次搞定） |
+| 按名称找 Vue 组件/函数 | `codegraph_search` |
+| 看某个符号的完整源码 | `codegraph_node`（`includeCode: true`） |
+| 查调用关系 / 修改影响 | `codegraph_callers` / `callees` / `impact` |
+| 搜索 .astro 文件内容 | IDEA `search_text` |
+| 查找 .astro 页面文件 | IDEA `search_file` |
+| 全局文本搜索 | IDEA `search_text` |
+| 浏览项目文件结构 | `codegraph_files` |
+
+### 反面教材（本项目真实案例）
+
+❌ **不要这样做**：
+```
+Read Footer.astro → Read Layout.astro → Read ToolLayout.astro → Read index.astro
+（逐个读文件拼凑理解，4 次 Read 调用）
+```
+
+✅ **应该这样做**：
+```
+codegraph_explore("Layout ToolLayout Footer")  →  一次返回所有相关源码 + 调用关系
+IDEA search_text("反馈")                       →  找到所有 .astro 中的引用
+```
 
 ## Project Overview
 
