@@ -11,7 +11,7 @@ const { tool } = Astro.props;
 <div class="relative flex h-full">
   <a
     href={tool.path}
-    class="flex items-start gap-4 p-5 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
+    class="flex items-start gap-4 p-5 pr-14 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
   >
     <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
     <div class="flex-1 min-w-0">
@@ -23,15 +23,15 @@ const { tool } = Astro.props;
   <!-- 收藏星标按钮（常驻可见） -->
   <button
     x-cloak
-    class="absolute top-3 right-3 z-10 shrink-0 p-1 rounded-sm border-none bg-transparent cursor-pointer text-muted hover:text-accent transition-[color] duration-150"
-    :class={`$store.favorites.isFavorite('${tool.path}') ? 'text-accent' : 'text-muted hover:text-accent'`}
+    class="absolute top-2 right-2 z-10 shrink-0 p-2 rounded-sm border-none bg-transparent cursor-pointer transition-[color] duration-150"
+    :class={`$store.favorites.isFavorite('${tool.path}') ? 'text-amber-500' : 'text-muted hover:text-amber-400'`}
     :aria-label={`$store.favorites.isFavorite('${tool.path}') ? '取消收藏 ${tool.name}' : '收藏 ${tool.name}'`}
     @click.prevent={`$store.favorites.toggle('${tool.path}', '${tool.name}', '${tool.icon}')`}
   >
     <!-- 实心星标（已收藏） -->
     <svg
       x-show={`$store.favorites.isFavorite('${tool.path}')`}
-      class="w-4 h-4"
+      class="w-5 h-5"
       viewBox="0 0 24 24"
       fill="currentColor"
       stroke="currentColor"
@@ -43,7 +43,7 @@ const { tool } = Astro.props;
     <!-- 轮廓星标（未收藏） -->
     <svg
       x-show={`!$store.favorites.isFavorite('${tool.path}')`}
-      class="w-4 h-4"
+      class="w-5 h-5"
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"

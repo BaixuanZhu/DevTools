@@ -10,7 +10,7 @@ interface Props {
   keywords?: string[];
 }
 
-const { title = 'DevTools - 开发者工具集', description, jsonLd, keywords } = Astro.props;
+const { title = 'DevTools - 在线工具箱', description, jsonLd, keywords } = Astro.props;
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
 
@@ -20,7 +20,7 @@ const websiteJsonLd = {
   '@type': 'WebSite',
   name: 'DevTools',
   url: siteUrl,
-  description: '零门槛的浏览器端开发者工具集合，即开即用，纯浏览器端运算',
+  description: '零门槛的浏览器端在线工具集合，即开即用，纯浏览器端运算',
   inLanguage: 'zh-CN',
 };
 
