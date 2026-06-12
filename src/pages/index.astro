@@ -1,9 +1,7 @@
 ---
 import ToolLayout from '../layouts/ToolLayout.astro';
 import ToolCard from '../components/layout/ToolCard.astro';
-import { tools, getCategories } from '../data/tools';
-
-const categories = getCategories();
+import { tools } from '../data/tools';
 
 // 序列化工具数据供客户端搜索使用
 const toolsJson = JSON.stringify(
@@ -17,8 +15,8 @@ const toolsJson = JSON.stringify(
 
 <ToolLayout title="DevTools - 开发者工具集">
   <div
-    class="max-w-[960px] mx-auto"
-    x-data="{ active: 'all', query: '', searchIds: null, tools: [], init() { var el = document.getElementById('tools-data'); this.tools = el ? JSON.parse(el.textContent || '[]') : []; }, applyFilter() { var self = this; this.$refs.grid.querySelectorAll('[data-category]').forEach(function(el) { var cat = el.getAttribute('data-category'); var id = el.getAttribute('data-id'); var matchCategory = self.active === 'all' || cat === self.active; var matchSearch = !self.searchIds || self.searchIds.has(id); el.style.display = matchCategory && matchSearch ? '' : 'none'; }); }, handleSearch() { if (!this.query.trim()) { this.searchIds = null; this.applyFilter(); return; } var q = this.query.toLowerCase(); var results = this.tools.filter(function(t) { return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q); }); this.searchIds = new Set(results.map(function(t) { return t.id; })); this.applyFilter(); }, setActive(cat) { this.active = cat; this.applyFilter(); } }"
+    class="max-w-[1280px] mx-auto"
+    x-data="{ query: '', searchIds: null, tools: [], init() { var el = document.getElementById('tools-data'); this.tools = el ? JSON.parse(el.textContent || '[]') : []; }, applyFilter() { var self = this; this.$refs.grid.querySelectorAll('[data-category]').forEach(function(el) { var id = el.getAttribute('data-id'); var matchSearch = !self.searchIds || self.searchIds.has(id); el.style.display = matchSearch ? '' : 'none'; }); }, handleSearch() { if (!this.query.trim()) { this.searchIds = null; this.applyFilter(); return; } var q = this.query.toLowerCase(); var results = this.tools.filter(function(t) { return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q); }); this.searchIds = new Set(results.map(function(t) { return t.id; })); this.applyFilter(); } }"
   >
     <!-- Hero Section -->
     <div class="text-center mb-10">
@@ -46,28 +44,25 @@ const toolsJson = JSON.stringify(
         </div>
       </div>
 
-      <!-- Category Filter Chips -->
-      <div class="flex gap-2 justify-center flex-wrap" role="tablist" aria-label="工具分类筛选">
-        <button
-          class="chip"
-          :class="active === 'all' ? 'chip-active' : 'chip-default'"
-          @click="setActive('all')"
-          role="tab"
-          :aria-selected="active === 'all'"
-        >
-          全部
-        </button>
-        {categories.map((cat) => (
-          <button
-            class="chip"
-            :class={`active === '${cat}' ? 'chip-active' : 'chip-default'`}
-            @click={`setActive('${cat}')`}
-            role="tab"
-            :aria-selected={`active === '${cat}'`}
-          >
-            {cat}
-          </button>
-        ))}
+      <!-- 收藏工具 -->
+      <div
+        x-show="$store.favorites.list.length > 0"
+        x-cloak
+        class="mb-8"
+        x-transition
+      >
+        <h2 class="text-sm font-semibold text-muted mb-3">⭐ 我的收藏</h2>
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
+          <template x-for="fav in $store.favorites.list" :key="fav.path">
+            <a
+              :href="fav.path"
+              class="flex items-center gap-3 p-3 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+            >
+              <span class="text-2xl leading-none" x-text="fav.icon"></span>
+              <span class="text-[0.9375rem] font-semibold text-text" x-text="fav.name"></span>
+            </a>
+          </template>
+        </div>
       </div>
     </div>
 
