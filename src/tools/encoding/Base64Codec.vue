@@ -17,8 +17,8 @@ const CHARSET_OPTIONS = [
   { value: 'iso-8859-1', label: 'ISO-8859-1（Latin-1）' },
 ];
 
-/** 输入内容，预填示例以便打开即可体验 */
-const input = ref('Hello, 世界！');
+/** 输入内容 */
+const input = ref('');
 /** 输出结果 */
 const output = ref('');
 /** 错误信息（显示在输出面板内） */
@@ -67,6 +67,14 @@ function executeDecode() {
   }
 }
 
+/** 交换输入与输出内容，便于反向编解码；交换后不自动执行，由用户点击编码/解码 */
+function handleSwap(): void {
+  const temp = input.value;
+  input.value = output.value;
+  output.value = temp;
+  errorMsg.value = '';
+}
+
 /** 清空输入、输出与错误信息 */
 function handleClear() {
   input.value = '';
@@ -92,7 +100,7 @@ function handleClear() {
       ></textarea>
     </CodePanel>
 
-    <!-- 操作栏 -->
+    <!-- 操作栏：编码/解码/互换/清空 + 解码选项合并为单一区域 -->
     <div class="flex flex-wrap gap-2 items-center mt-3">
       <button
         class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
@@ -102,17 +110,16 @@ function handleClear() {
         class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
         @click="executeDecode"
       >解码</button>
+      <button
+        class="flex items-center gap-1.5 px-4 py-2 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+        @click="handleSwap"
+      >
+        <span>⇄</span>
+        <span>互换</span>
+      </button>
       <ClearButton @clear="handleClear" />
-    </div>
-
-    <!-- 解码选项（仅对解码生效） -->
-    <div class="flex flex-wrap items-center gap-4 p-3 mt-3 border border-border rounded-sm bg-card">
-      <span class="text-[0.8125rem] text-muted font-medium">解码选项</span>
-      <ToggleSwitch
-        v-model="filterInvalid"
-        label="过滤非 Base64 字符"
-        description="解码前丢弃非法字符"
-      />
+      <div class="w-px h-6 bg-border mx-1 hidden sm:block"></div>
+      <ToggleSwitch v-model="filterInvalid" label="过滤非法字符" />
       <div class="w-44">
         <SelectListbox
           :model-value="charset"
@@ -120,7 +127,6 @@ function handleClear() {
           @update:model-value="charset = String($event)"
         />
       </div>
-      <span class="text-[0.75rem] text-muted">仅对解码生效</span>
     </div>
 
     <!-- 输出面板（错误信息也在此显示） -->
