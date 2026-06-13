@@ -209,7 +209,7 @@ export const tools: ToolMeta[] = [
     icon: '🔳',
     path: '/media/qr-code-generator',
     keywords: ['二维码生成', 'qr code 生成', '在线二维码', '二维码制作', '二维码下载', 'svg 二维码'],
-    relatedToolIds: ['base64-to-image'],
+    relatedToolIds: ['base64-to-image', 'qr-code-reader'],
   },
   {
     id: 'base64',
@@ -331,6 +331,17 @@ export const tools: ToolMeta[] = [
     path: '/devops/docker-converter',
     keywords: ['docker run 转 compose', 'docker compose 转 run', 'docker 命令转换', 'compose yaml 生成', 'docker run 转换器', 'docker compose 在线'],
     relatedToolIds: ['json-to-yaml'],
+  },
+  {
+    id: 'qr-code-reader',
+    name: '二维码识别器',
+    description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',
+    seoDescription: '在线二维码识别工具，支持拖拽上传与 Ctrl+V 粘贴截图识别二维码，纯浏览器端解码数据不上传，识别 URL/邮箱/电话等内容并提供可点击链接。',
+    category: '媒体工具',
+    icon: '📷',
+    path: '/media/qr-code-reader',
+    keywords: ['二维码识别', '二维码解码', 'qr code 识别', '在线扫码', '截图识别二维码', '二维码图片读取'],
+    relatedToolIds: ['qr-code-generator'],
   },
 ];
 
