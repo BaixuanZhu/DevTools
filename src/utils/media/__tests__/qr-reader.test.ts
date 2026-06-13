@@ -46,6 +46,14 @@ describe('detectContentType', () => {
     expect(detectContentType('12345').type).toBe('text');
   });
 
+  it('11 位非手机号数字串降级为 text（避免订单号等误判）', () => {
+    expect(detectContentType('12345678901').type).toBe('text');
+  });
+
+  it('无分隔的座机号串降级为 text', () => {
+    expect(detectContentType('01012345678').type).toBe('text');
+  });
+
   it('普通文本为 text', () => {
     expect(detectContentType('hello world')).toEqual({ type: 'text', value: 'hello world', href: '' });
   });

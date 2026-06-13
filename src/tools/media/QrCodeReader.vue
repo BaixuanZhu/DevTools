@@ -163,7 +163,7 @@ onBeforeUnmount(() => {
 
     <!-- 结果区 -->
     <div
-      v-if="result || previewUrl"
+      v-if="result || (previewUrl && !isProcessing)"
       class="border border-border rounded-md bg-card mt-4"
     >
       <div class="flex items-center justify-between gap-2 px-4 py-2 border-b border-border flex-wrap">
