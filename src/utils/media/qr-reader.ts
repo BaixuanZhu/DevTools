@@ -1,3 +1,5 @@
+import jsQR from 'jsqr';
+
 /** 二维码解码后的内容类型 */
 export type ContentType = 'url' | 'email' | 'tel' | 'text';
 
@@ -60,4 +62,47 @@ export function computeScaledSize(
     width: Math.round(width * scale),
     height: Math.round(height * scale),
   };
+}
+
+/** 解码未识别到二维码时的统一错误提示 */
+export const QR_DECODE_ERROR = '未识别到二维码，请确保图片清晰、二维码完整且占图较大比例';
+
+/** 解码成功结果 */
+export interface DecodeSuccess {
+  ok: true;
+  result: ContentResult;
+}
+
+/** 解码失败结果 */
+export interface DecodeFailure {
+  ok: false;
+  error: string;
+}
+
+/** 解码结果（成功或失败） */
+export type DecodeOutcome = DecodeSuccess | DecodeFailure;
+
+/**
+ * 从图片源解码二维码：createImageBitmap → 等比缩放 → jsQR 识别 → 内容类型判定。
+ * 运行于浏览器环境（依赖 canvas 与 createImageBitmap）。
+ * @param source 图片源（File / Blob 等 ImageBitmapSource）
+ * @returns 成功返回内容识别结果，失败返回中文错误提示
+ */
+export async function decodeQrFromImage(source: ImageBitmapSource): Promise<DecodeOutcome> {
+  try {
+    const bitmap = await createImageBitmap(source);
+    const { width, height } = computeScaledSize(bitmap.width, bitmap.height);
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return { ok: false, error: QR_DECODE_ERROR };
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const decoded = jsQR(imageData.data, imageData.width, imageData.height);
+    if (!decoded?.data) return { ok: false, error: QR_DECODE_ERROR };
+    return { ok: true, result: detectContentType(decoded.data) };
+  } catch {
+    return { ok: false, error: QR_DECODE_ERROR };
+  }
 }
