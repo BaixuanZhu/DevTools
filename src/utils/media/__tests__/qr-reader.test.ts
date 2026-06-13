@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectContentType } from '../qr-reader';
+import { detectContentType, computeScaledSize, QR_MAX_EDGE } from '../qr-reader';
 
 describe('detectContentType', () => {
   it('识别 http/https URL 为 url 类型', () => {
@@ -52,5 +52,35 @@ describe('detectContentType', () => {
 
   it('空字符串为 text 且 value 为空', () => {
     expect(detectContentType('   ')).toEqual({ type: 'text', value: '', href: '' });
+  });
+});
+
+describe('computeScaledSize', () => {
+  it('长边超过上限时按比例缩放', () => {
+    expect(computeScaledSize(2000, 1000)).toEqual({ width: 1024, height: 512 });
+  });
+
+  it('长边等于上限时保持原尺寸', () => {
+    expect(computeScaledSize(1024, 512)).toEqual({ width: 1024, height: 512 });
+  });
+
+  it('小于上限时保持原尺寸', () => {
+    expect(computeScaledSize(100, 100)).toEqual({ width: 100, height: 100 });
+  });
+
+  it('正方形大图缩放到上限', () => {
+    expect(computeScaledSize(3000, 3000)).toEqual({ width: 1024, height: 1024 });
+  });
+
+  it('竖图按长边（高）缩放', () => {
+    expect(computeScaledSize(500, 2000)).toEqual({ width: 256, height: 1024 });
+  });
+
+  it('非法尺寸返回 0', () => {
+    expect(computeScaledSize(0, 0)).toEqual({ width: 0, height: 0 });
+  });
+
+  it('默认上限为 QR_MAX_EDGE 常量', () => {
+    expect(QR_MAX_EDGE).toBe(1024);
   });
 });

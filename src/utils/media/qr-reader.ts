@@ -36,3 +36,28 @@ export function detectContentType(raw: string): ContentResult {
   }
   return { type: 'text', value, href: '' };
 }
+
+/** 解码前图像长边的最大像素，超过则等比缩放 */
+export const QR_MAX_EDGE = 1024;
+
+/**
+ * 计算等比缩放后的图像尺寸：长边超过 maxEdge 时按比例缩小，否则保持原尺寸。
+ * @param width 原始宽度
+ * @param height 原始高度
+ * @param maxEdge 长边上限，默认 QR_MAX_EDGE
+ * @returns 缩放后尺寸；非法输入返回 {0, 0}
+ */
+export function computeScaledSize(
+  width: number,
+  height: number,
+  maxEdge: number = QR_MAX_EDGE,
+): { width: number; height: number } {
+  if (width <= 0 || height <= 0) return { width: 0, height: 0 };
+  const longest = Math.max(width, height);
+  if (longest <= maxEdge) return { width, height };
+  const scale = maxEdge / longest;
+  return {
+    width: Math.round(width * scale),
+    height: Math.round(height * scale),
+  };
+}
