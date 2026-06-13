@@ -21,10 +21,6 @@ const toolFaqs: Record<string, FaqItem[]> = {
       question: 'Base64 支持中文吗？',
       answer: '支持。Base64 可以编码任何二进制数据，包括中文。编码前会先将中文字符转为 UTF-8 字节序列，再将字节序列进行 Base64 编码。',
     },
-    {
-      question: 'Data URI (Base64 图片) 是什么？',
-      answer: 'Data URI 是将文件内容以 Base64 编码后直接嵌入到 HTML/CSS 中的格式，形如 <code>data:image/png;base64,...</code>。适用于小图标等场景，但会增大文件体积，不建议用于大图片。',
-    },
   ],
   'file-to-base64': [
     {
