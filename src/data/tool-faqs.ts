@@ -212,6 +212,16 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '不写。自 Docker Compose v2 起，<code>version</code> 字段已弃用，当前推荐做法是不指定 version，使用最新的 Compose 规范格式。',
     },
   ],
+  'qr-code-reader': [
+    {
+      question: '为什么识别失败？',
+      answer: '常见原因：图片<strong>模糊</strong>、二维码<strong>残缺或被遮挡</strong>、二维码在图中<strong>占比过小</strong>、或是非标准 QR 码（如某些艺术变形码）。建议截取二维码主体区域、放大后重新识别。本工具会在解码前将图片长边缩放至 1024px，过小的二维码反而可能因缩放丢失细节。',
+    },
+    {
+      question: '支持哪些图片格式？',
+      answer: '支持浏览器可解码的所有常见格式：<strong>PNG / JPG / WebP / BMP / GIF（取首帧）</strong>等。可直接拖拽文件、点击选择，或用 <code>Ctrl+V</code> 粘贴截图。单张图片上限 <strong>10MB</strong>。',
+    },
+  ],
 };
 
 /**
