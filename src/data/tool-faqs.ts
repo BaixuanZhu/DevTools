@@ -26,6 +26,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'Data URI 是将文件内容以 Base64 编码后直接嵌入到 HTML/CSS 中的格式，形如 <code>data:image/png;base64,...</code>。适用于小图标等场景，但会增大文件体积，不建议用于大图片。',
     },
   ],
+  'file-to-base64': [
+    {
+      question: '文件转 Base64 后体积会变大多少？',
+      answer: '约增大 <strong>33%</strong>。Base64 按「每 3 字节编码为 4 字符」，因此编码结果比原文件大约三分之一。例如 30MB 的文件编码后约 40MB。',
+    },
+    {
+      question: 'Data URI 前缀什么时候需要开启？',
+      answer: '当你要把文件内容直接嵌入 HTML/CSS/JS 时（如 <code>&lt;img src="data:image/png;base64,..."&gt;</code>），需开启以生成 <code>data:&lt;mime&gt;;base64,...</code> 格式。仅需要纯 Base64 字符串（如 API 传输、存储）时关闭即可。',
+    },
+    {
+      question: '为什么有文件大小限制？',
+      answer: 'Base64 结果需作为字符串常驻内存供复制与下载，过大字符串会占用大量内存并可能导致页面卡顿。本工具采用<strong>异步分块编码</strong>避免阻塞主线程，但仍设上限以保证体验。',
+    },
+  ],
   'url-encode': [
     {
       question: 'encodeURI 和 encodeURIComponent 有什么区别？',

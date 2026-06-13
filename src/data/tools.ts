@@ -220,7 +220,7 @@ export const tools: ToolMeta[] = [
     icon: '📄',
     path: '/encoding/base64',
     keywords: ['base64 编码', 'base64 解码', 'base64 在线', 'base64 转换', '文本 base64', 'base64 编解码', 'base64 字符集', 'base64 gbk 解码', 'base64 乱码'],
-    relatedToolIds: ['url-encode', 'base64-to-image', 'base64-to-file', 'jwt-parser'],
+    relatedToolIds: ['url-encode', 'base64-to-image', 'base64-to-file', 'jwt-parser', 'file-to-base64'],
   },
   {
     id: 'base64-to-image',
@@ -231,7 +231,7 @@ export const tools: ToolMeta[] = [
     icon: '🖼️',
     path: '/encoding/base64-to-image',
     keywords: ['base64 转图片', 'base64 图片解码', 'base64 image', 'base64 预览', 'data uri 图片'],
-    relatedToolIds: ['base64', 'base64-to-file', 'qr-code-generator'],
+    relatedToolIds: ['base64', 'base64-to-file', 'qr-code-generator', 'file-to-base64'],
   },
   {
     id: 'base64-to-file',
@@ -242,7 +242,18 @@ export const tools: ToolMeta[] = [
     icon: '📎',
     path: '/encoding/base64-to-file',
     keywords: ['base64 转文件', 'base64 file', 'base64 下载', 'data uri 转文件', 'base64 还原'],
-    relatedToolIds: ['base64', 'base64-to-image'],
+    relatedToolIds: ['file-to-base64', 'base64', 'base64-to-image'],
+  },
+  {
+    id: 'file-to-base64',
+    name: '文件转 Base64',
+    description: '将任意文件编码为 Base64 字符串，可选附带 Data URI 前缀',
+    seoDescription: '在线文件转 Base64 工具，将图片、文档等任意文件编码为 Base64 字符串或 Data URI，支持拖拽上传与大文件异步分块编码，纯浏览器端运算不上传数据。',
+    category: '编码转换',
+    icon: '📤',
+    path: '/encoding/file-to-base64',
+    keywords: ['文件转 base64', 'file to base64', '图片转 base64', '文件编码', 'data uri 生成', 'base64 编码文件'],
+    relatedToolIds: ['base64', 'base64-to-file', 'base64-to-image'],
   },
   {
     id: 'cron-parser',
