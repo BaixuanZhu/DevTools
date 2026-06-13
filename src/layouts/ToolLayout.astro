@@ -361,7 +361,7 @@ const breadcrumbItems = toolId && toolMeta
             <h2 class="text-lg font-semibold text-text mb-4">常见问题</h2>
             <div class="space-y-0 divide-y divide-border">
               {faqs.map((faq) => (
-                <details class="group py-4">
+                <details class="group py-4" open>
                   <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-text hover:text-accent transition-[color] duration-150 list-none">
                     <span class="[&_code]:bg-hover [&_code]:text-text [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-text [&_strong]:font-semibold" set:html={faq.question} />
                     <svg class="h-4 w-4 shrink-0 text-muted transition-transform duration-150 group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor">
