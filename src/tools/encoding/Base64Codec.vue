@@ -1,51 +1,39 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import ModeTabGroup from '../../components/ui/ModeTabGroup.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
+import CodePanel from '../../components/ui/CodePanel.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
-import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
-import {
-  encodeBase64,
-  decodeBase64,
-  arrayBufferToBase64Async,
-  base64ToArrayBuffer,
-  detectMimeType,
-  formatFileSize,
-} from '../../utils/encoding/base64';
+import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
+import SelectListbox from '../../components/ui/SelectListbox.vue';
+import { encodeBase64, decodeBase64 } from '../../utils/encoding/base64';
 
-const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/svg+xml', 'image/webp', 'image/bmp', 'image/avif', 'image/heic', 'image/heif'];
+/** 解码字符集选项（编码固定 UTF-8，仅解码可选） */
+const CHARSET_OPTIONS = [
+  { value: 'utf-8', label: 'UTF-8' },
+  { value: 'gbk', label: 'GBK（简体中文）' },
+  { value: 'big5', label: 'Big5（繁体中文）' },
+  { value: 'shift_jis', label: 'Shift_JIS（日文）' },
+  { value: 'euc-kr', label: 'EUC-KR（韩文）' },
+  { value: 'iso-8859-1', label: 'ISO-8859-1（Latin-1）' },
+];
 
-/** 文件大小上限：50MB（大结果自动提供下载，无需复制） */
-const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
-/** 大编码结果阈值：5MB 的 Base64 字符数 */
-const LARGE_OUTPUT_THRESHOLD = 5 * 1024 * 1024;
-
-type Mode = 'encode' | 'decode';
-const mode = ref<Mode>('encode');
-const input = ref('');
+/** 输入内容，预填示例以便打开即可体验 */
+const input = ref('Hello, 世界！');
+/** 输出结果 */
 const output = ref('');
+/** 错误信息（显示在输出面板内） */
 const errorMsg = ref('');
-const fileInputRef = ref<HTMLInputElement | null>(null);
-const fileName = ref('');
-const fileMeta = ref<{ mime: string; size: string } | null>(null);
-const isDragging = ref(false);
-const isProcessing = ref(false);
+/** 解码时是否过滤非 Base64 字符 */
+const filterInvalid = ref(false);
+/** 解码目标字符集 */
+const charset = ref('utf-8');
 
-// Decode-specific state
-const decodedImageSrc = ref('');
-const decodedBinaryMeta = ref<{ mime: string; size: string } | null>(null);
-const decodedBinaryBase64 = ref('');
-
-function isDecodeBinaryResult(): boolean {
-  return !!decodedImageSrc.value || !!decodedBinaryMeta.value;
-}
-
+/** 执行编码：将输入文本编码为 Base64（固定 UTF-8） */
 function executeEncode() {
   errorMsg.value = '';
   output.value = '';
 
-  if (!input.value.trim() && !fileName.value) {
+  if (!input.value.trim()) {
     errorMsg.value = '请输入要编码的文本';
     return;
   }
@@ -53,16 +41,15 @@ function executeEncode() {
   try {
     output.value = encodeBase64(input.value);
   } catch (e) {
+    output.value = '';
     errorMsg.value = e instanceof Error ? e.message : '编码时出错';
   }
 }
 
+/** 执行解码：将输入的 Base64 解码为文本，应用所选字符集与过滤选项 */
 function executeDecode() {
   errorMsg.value = '';
   output.value = '';
-  decodedImageSrc.value = '';
-  decodedBinaryMeta.value = null;
-  decodedBinaryBase64.value = '';
 
   if (!input.value.trim()) {
     errorMsg.value = '请输入要解码的 Base64 字符串';
@@ -70,303 +57,86 @@ function executeDecode() {
   }
 
   try {
-    try {
-      output.value = decodeBase64(input.value);
-    } catch {
-      // Text decode failed — treat as binary
-      handleBinaryDecode();
-    }
+    output.value = decodeBase64(input.value, {
+      charset: charset.value,
+      filterInvalid: filterInvalid.value,
+    });
   } catch (e) {
+    output.value = '';
     errorMsg.value = e instanceof Error ? e.message : '解码时出错';
   }
 }
 
-function handleBinaryDecode() {
-  const base64 = input.value.trim();
-  const mime = detectMimeType(base64);
-  const buffer = base64ToArrayBuffer(base64);
-  const size = formatFileSize(buffer.byteLength);
-
-  if (mime && IMAGE_TYPES.includes(mime)) {
-    decodedImageSrc.value = `data:${mime};base64,${base64}`;
-  } else {
-    decodedBinaryMeta.value = { mime: mime ?? '未知类型', size };
-    decodedBinaryBase64.value = base64;
-  }
-}
-
-function execute() {
-  if (mode.value === 'encode') {
-    executeEncode();
-  } else {
-    executeDecode();
-  }
-}
-
-async function handleFile() {
-  const file = fileInputRef.value?.files?.[0];
-  if (!file) return;
-  await processFile(file);
-}
-
-function handleDrop(event: DragEvent) {
-  isDragging.value = false;
-  const file = event.dataTransfer?.files[0];
-  if (!file) return;
-  processFile(file);
-}
-
-/**
- * 处理文件编码：使用 readAsArrayBuffer + arrayBufferToBase64Async
- *
- * 相比 readAsDataURL，此方式在编码过程中每 512KB yield 一次，
- * 避免单次大字符串操作阻塞主线程，UI 保持响应。
- */
-async function processFile(file: File) {
-  errorMsg.value = '';
-  output.value = '';
-  fileName.value = file.name;
-  fileMeta.value = { mime: file.type || '未知类型', size: formatFileSize(file.size) };
-
-  if (file.size > FILE_SIZE_LIMIT) {
-    errorMsg.value = `文件过大（超过 ${formatFileSize(FILE_SIZE_LIMIT)}），请选择较小的文件。如需处理大文件，建议用命令行工具。`;
-    return;
-  }
-
-  isProcessing.value = true;
-  try {
-    const buffer = await readFileAsArrayBuffer(file);
-    const base64Content = await arrayBufferToBase64Async(buffer);
-    output.value = base64Content;
-  } catch {
-    errorMsg.value = '读取文件时出错';
-  } finally {
-    isProcessing.value = false;
-  }
-}
-
-/** 将文件读取为 ArrayBuffer（Promise 包装 FileReader） */
-function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as ArrayBuffer);
-    reader.onerror = () => reject(new Error('读取文件时出错'));
-    reader.readAsArrayBuffer(file);
-  });
-}
-
-watch(mode, () => {
-  input.value = '';
-  output.value = '';
-  errorMsg.value = '';
-  fileName.value = '';
-  fileMeta.value = null;
-  decodedImageSrc.value = '';
-  decodedBinaryMeta.value = null;
-  decodedBinaryBase64.value = '';
-});
-
+/** 清空输入、输出与错误信息 */
 function handleClear() {
   input.value = '';
   output.value = '';
   errorMsg.value = '';
-  fileName.value = '';
-  fileMeta.value = null;
-  decodedImageSrc.value = '';
-  decodedBinaryMeta.value = null;
-  decodedBinaryBase64.value = '';
-}
-
-function handleDownload() {
-  if (!decodedBinaryBase64.value) return;
-  const buffer = base64ToArrayBuffer(decodedBinaryBase64.value);
-  const mime = decodedBinaryMeta.value?.mime;
-  const ext = mimeToExt(mime);
-  const blob = new Blob([buffer], mime ? { type: mime } : undefined);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `decoded${ext}`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/** 将编码结果下载为文本文件，避免大字符串复制卡顿 */
-function handleDownloadOutput() {
-  if (!output.value) return;
-  const blob = new Blob([output.value], { type: 'text/plain' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = fileName.value ? `${fileName.value}.base64.txt` : 'base64.txt';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function mimeToExt(mime: string | undefined): string {
-  if (!mime) return '';
-  const map: Record<string, string> = {
-    'application/pdf': '.pdf',
-    'application/zip': '.zip',
-    'image/png': '.png',
-    'image/jpeg': '.jpg',
-    'image/gif': '.gif',
-    'image/webp': '.webp',
-    'image/bmp': '.bmp',
-    'image/svg+xml': '.svg',
-    'image/avif': '.avif',
-    'image/heic': '.heic',
-    'image/heif': '.heif',
-  };
-  return map[mime] ?? '';
 }
 </script>
 
 <template>
-  <div>
+  <div class="mx-auto w-full max-w-5xl">
     <ToolHeader
       title="Base64 编解码"
-      description="Base64 编码与解码，支持文本和文件"
+      description="Base64 编码与解码，支持多字符集与非法字符过滤"
       :show-example="false"
     />
 
-    <ModeTabGroup v-model="mode" :options="[{ key: 'encode', label: '编码' }, { key: 'decode', label: '解码' }]" />
+    <!-- 输入面板 -->
+    <CodePanel label="输入" show-copy :copy-text="input">
+      <textarea
+        v-model="input"
+        class="w-full h-60 p-4 bg-card text-text font-mono text-sm resize-y box-border focus:outline-none"
+        placeholder="输入要编码的文本或要解码的 Base64 字符串"
+      ></textarea>
+    </CodePanel>
 
-    <ResponsiveWorkspace mode="horizontal">
-      <template #input>
-        <!-- Input area -->
-        <div class="mb-3">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-1">
-            {{ mode === 'encode' ? '输入文本' : '输入 Base64' }}
-          </label>
-          <textarea
-            v-model="input"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-            rows="6"
-            :placeholder="mode === 'encode' ? '输入要编码的文本' : '输入要解码的 Base64 字符串'"
-          ></textarea>
-        </div>
+    <!-- 操作栏 -->
+    <div class="flex flex-wrap gap-2 items-center mt-3">
+      <button
+        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
+        @click="executeEncode"
+      >编码</button>
+      <button
+        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
+        @click="executeDecode"
+      >解码</button>
+      <ClearButton @clear="handleClear" />
+    </div>
 
-        <!-- Encode mode: drag-drop file upload -->
-        <div v-if="mode === 'encode'" class="mb-3">
-          <div
-            class="border-dashed border-2 border-border rounded-md p-5 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
-            :class="{ 'border-accent bg-hover': isDragging }"
-            @dragover.prevent="isDragging = true"
-            @dragleave="isDragging = false"
-            @drop.prevent="handleDrop"
-            @click="fileInputRef?.click()"
-          >
-            <input ref="fileInputRef" type="file" class="hidden" @change="handleFile" />
-            <template v-if="fileMeta && fileName">
-              <span class="text-[0.8125rem] text-text">📄 {{ fileName }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
-            </template>
-            <template v-else>
-              <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
-              <span class="text-muted text-[0.75rem] block mt-1">支持最大 50MB 的文件，大结果自动提供下载</span>
-            </template>
-          </div>
-        </div>
+    <!-- 解码选项（仅对解码生效） -->
+    <div class="flex flex-wrap items-center gap-4 p-3 mt-3 border border-border rounded-sm bg-card">
+      <span class="text-[0.8125rem] text-muted font-medium">解码选项</span>
+      <ToggleSwitch
+        v-model="filterInvalid"
+        label="过滤非 Base64 字符"
+        description="解码前丢弃非法字符"
+      />
+      <div class="w-44">
+        <SelectListbox
+          :model-value="charset"
+          :options="CHARSET_OPTIONS"
+          @update:model-value="charset = String($event)"
+        />
+      </div>
+      <span class="text-[0.75rem] text-muted">仅对解码生效</span>
+    </div>
 
-        <!-- Action buttons -->
-        <div class="flex gap-2 items-center">
-          <button
-            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="isProcessing"
-            @click="execute"
-          >{{ isProcessing ? '处理中...' : (mode === 'encode' ? '编码' : '解码') }}</button>
-          <ClearButton @clear="handleClear" />
-        </div>
-
-        <!-- Error message -->
-        <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mt-3">{{ errorMsg }}</p>
-      </template>
-
-      <template #output>
-        <!-- Encode output (always visible) -->
-        <div v-if="mode === 'encode'" class="mb-3">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-1">编码结果</label>
-
-          <!-- 小结果：正常显示在 textarea -->
-          <template v-if="output && output.length <= LARGE_OUTPUT_THRESHOLD">
-            <textarea
-              v-model="output"
-              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-              rows="6"
-              readonly
-              :placeholder="output ? '' : '点击「编码」查看结果'"
-            ></textarea>
-            <div v-if="output" class="mt-1.5">
-              <CopyButton :text="output" label="复制结果" />
-            </div>
-          </template>
-
-          <!-- 大结果：不渲染进 DOM，显示占位提示并提供下载 -->
-          <template v-else-if="output && output.length > LARGE_OUTPUT_THRESHOLD">
-            <div class="px-4 py-6 border border-border rounded-sm bg-hover text-center">
-              <p class="text-muted text-sm m-0 mb-2">
-                编码完成，结果共 {{ formatFileSize(output.length) }}
-              </p>
-              <p class="text-muted text-[0.75rem] m-0">
-                内容过大已隐藏显示，避免页面卡顿
-              </p>
-            </div>
-            <div class="mt-1.5">
-              <button
-                class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
-                @click="handleDownloadOutput"
-              >下载结果</button>
-            </div>
-          </template>
-
-          <!-- 空状态 -->
-          <textarea
-            v-else
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-            rows="6"
-            readonly
-            placeholder="点击「编码」查看结果"
-          ></textarea>
-        </div>
-
-        <!-- Decode output (always visible) -->
-        <div v-if="mode === 'decode'" class="mb-3">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-1">解码结果</label>
-
-          <!-- Text result -->
-          <template v-if="!isDecodeBinaryResult()">
-            <textarea
-              v-model="output"
-              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-hover resize-y box-border focus:outline-none focus:border-accent"
-              rows="6"
-              readonly
-              :placeholder="output ? '' : '点击「解码」查看结果'"
-            ></textarea>
-            <div v-if="output" class="mt-1.5">
-              <CopyButton :text="output" label="复制结果" />
-            </div>
-          </template>
-
-          <!-- Image preview -->
-          <div v-if="decodedImageSrc" class="p-3 border border-border rounded-sm bg-hover">
-            <img :src="decodedImageSrc" alt="解码图片" class="max-w-full max-h-80 rounded-sm" />
-          </div>
-          <div v-if="decodedImageSrc" class="mt-1.5">
-            <CopyButton :text="input" label="复制原始 Base64" />
-          </div>
-
-          <!-- Binary file card -->
-          <div v-if="decodedBinaryMeta" class="p-3 border border-border rounded-sm bg-hover flex items-center gap-3">
-            <div class="flex-1">
-              <div class="text-[0.8125rem] text-muted">📄 {{ decodedBinaryMeta.mime }} · {{ decodedBinaryMeta.size }}</div>
-            </div>
-            <button
-              class="px-3 py-1.5 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90"
-              @click="handleDownload"
-            >下载文件</button>
-          </div>
-        </div>
-      </template>
-    </ResponsiveWorkspace>
+    <!-- 输出面板（错误信息也在此显示） -->
+    <CodePanel label="输出" show-copy :copy-text="output" class="mt-3">
+      <div
+        v-if="output"
+        class="w-full h-60 p-4 m-0 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+      >{{ output }}</div>
+      <div
+        v-else-if="errorMsg"
+        class="w-full h-60 p-4 m-0 bg-card text-error font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+      >{{ errorMsg }}</div>
+      <div
+        v-else
+        class="w-full h-60 p-4 m-0 bg-card text-muted font-mono text-sm"
+      >点击「编码」或「解码」查看结果</div>
+    </CodePanel>
   </div>
 </template>

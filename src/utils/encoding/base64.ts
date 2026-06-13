@@ -13,18 +13,65 @@ function stripDataUrl(base64: string): string {
   return match ? match[1] : base64;
 }
 
-/** 将 Base64 解码为文本（支持 Unicode） */
-export function decodeBase64(base64: string): string {
+/** decodeBase64 的解码选项 */
+export interface DecodeBase64Options {
+  /** 目标字符集，默认 'utf-8'（如 gbk、big5、shift_jis、euc-kr、iso-8859-1） */
+  charset?: string;
+  /** 是否先移除所有非 Base64 字符再解码，用于容错含杂质的输入 */
+  filterInvalid?: boolean;
+}
+
+/**
+ * 将 Base64 解码为文本
+ *
+ * 默认以 UTF-8 解码。通过 options.charset 可指定其他字符集（如 GBK、Big5、Shift_JIS），
+ * options.filterInvalid 为 true 时会先丢弃所有非 Base64 字符，容错处理含分隔符、注释等杂质的输入。
+ * 输入可包含 data URI 前缀。
+ *
+ * @param base64 Base64 字符串，可含 data URI 前缀
+ * @param options 解码选项
+ * @returns 解码后的文本
+ * @throws {Error} 输入非法或浏览器不支持指定字符集时抛出友好错误
+ */
+export function decodeBase64(
+  base64: string,
+  options?: DecodeBase64Options,
+): string {
   if (!base64.trim()) return '';
-  const pure = stripDataUrl(base64.trim());
+  let pure = stripDataUrl(base64.trim());
+  if (options?.filterInvalid) pure = sanitizeBase64(pure);
   try {
     const binary = atob(pure);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    return new TextDecoder().decode(bytes);
-  } catch {
+    const charset = options?.charset ?? 'utf-8';
+    let decoder: TextDecoder;
+    try {
+      decoder = new TextDecoder(charset);
+    } catch {
+      throw new Error(`当前浏览器不支持「${charset}」字符集`);
+    }
+    return decoder.decode(bytes);
+  } catch (e) {
+    // 字符集不支持的友好错误需原样抛出，其余归为无效输入
+    if (e instanceof Error && e.message.includes('字符集')) throw e;
     throw new Error('无效的 Base64 输入，请检查格式是否正确');
   }
+}
+
+/**
+ * 移除所有非 Base64 字符（仅保留 A-Za-z0-9+/=），用于容错解码
+ *
+ * 与 cleanBase64 不同：cleanBase64 仅清理空白与格式（保留字符内容并修正 URL-safe/padding），
+ * 本函数直接丢弃所有非法字符，适合处理含分隔符、注释等杂质的 Base64。会先剥离 data URI 前缀。
+ *
+ * @param input 可能含杂质的 Base64 字符串，可含 data URI 前缀
+ * @returns 仅含合法 Base64 字符的字符串
+ */
+export function sanitizeBase64(input: string): string {
+  const match = input.match(/^data:[^;]+;base64,(.+)$/s);
+  const raw = match ? match[1] : input;
+  return raw.replace(/[^A-Za-z0-9+/=]/g, '');
 }
 
 /**

@@ -214,12 +214,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'base64',
     name: 'Base64 编解码',
-    description: 'Base64 编码与解码，支持文本和文件',
-    seoDescription: '在线 Base64 编解码工具，支持文本与文件的 Base64 编码和解码，纯浏览器运算无需上传数据，即时转换。',
+    description: 'Base64 编码与解码，支持多字符集与非法字符过滤',
+    seoDescription: '在线 Base64 编解码工具，支持多字符集（UTF-8、GBK、Big5、Shift_JIS 等）解码与非法字符过滤，纯浏览器运算无需上传数据，即时转换。',
     category: '编码转换',
     icon: '📄',
     path: '/encoding/base64',
-    keywords: ['base64 编码', 'base64 解码', 'base64 在线', 'base64 转换', '文本 base64', 'base64 编解码'],
+    keywords: ['base64 编码', 'base64 解码', 'base64 在线', 'base64 转换', '文本 base64', 'base64 编解码', 'base64 字符集', 'base64 gbk 解码', 'base64 乱码'],
     relatedToolIds: ['url-encode', 'base64-to-image', 'base64-to-file', 'jwt-parser'],
   },
   {

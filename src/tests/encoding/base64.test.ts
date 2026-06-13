@@ -8,6 +8,7 @@ import {
   detectMimeType,
   formatFileSize,
   cleanBase64,
+  sanitizeBase64,
 } from '../../utils/encoding/base64';
 
 describe('encodeBase64', () => {
@@ -51,6 +52,65 @@ describe('decodeBase64', () => {
   it('应正确处理往返编码', () => {
     const original = '测试 Test 123 !@#';
     expect(decodeBase64(encodeBase64(original))).toBe(original);
+  });
+});
+
+describe('decodeBase64 with options', () => {
+  it('应使用 GBK 字符集解码', () => {
+    // "中文" 的 GBK 字节 D6 D0 CE C4 → Base64: 1tDOxA==
+    expect(decodeBase64('1tDOxA==', { charset: 'gbk' })).toBe('中文');
+  });
+
+  it('应使用 Big5 字符集解码', () => {
+    // "中文" 的 Big5 字节 A4 A4 A4 E5 → Base64: pKSk5Q==
+    expect(decodeBase64('pKSk5Q==', { charset: 'big5' })).toBe('中文');
+  });
+
+  it('应使用 Shift_JIS 字符集解码', () => {
+    // "あいう" 的 Shift_JIS 字节 → Base64: gqCCooKk
+    expect(decodeBase64('gqCCooKk', { charset: 'shift_jis' })).toBe('あいう');
+  });
+
+  it('应使用 EUC-KR 字符集解码', () => {
+    // "아름" 的 EUC-KR 字节 → Base64: vsa4pw==
+    expect(decodeBase64('vsa4pw==', { charset: 'euc-kr' })).toBe('아름');
+  });
+
+  it('同一 Base64 用不同字符集解码结果应不同', () => {
+    // GBK 编码的 "中文" 用默认 UTF-8 解码为乱码，用 GBK 解码为原文
+    expect(decodeBase64('1tDOxA==')).not.toBe('中文');
+    expect(decodeBase64('1tDOxA==', { charset: 'gbk' })).toBe('中文');
+  });
+
+  it('filterInvalid 为 true 时应过滤非法字符后解码', () => {
+    // 'Hello' = SGVsbG8=，插入 !@# 非法字符
+    expect(decodeBase64('SGVs!@#bG8=', { filterInvalid: true })).toBe('Hello');
+  });
+
+  it('默认（不传 filterInvalid）含非法字符应抛错', () => {
+    expect(() => decodeBase64('SGVs!@#bG8=')).toThrow();
+  });
+
+  it('不支持的字符集应抛出含「字符集」的友好错误', () => {
+    expect(() => decodeBase64('SGVsbG8=', { charset: 'nonexistent-charset' })).toThrow(/字符集/);
+  });
+});
+
+describe('sanitizeBase64', () => {
+  it('应移除所有非 Base64 字符', () => {
+    expect(sanitizeBase64('SGVs!@#bG8=')).toBe('SGVsbG8=');
+  });
+
+  it('应保留合法 Base64 字符不变', () => {
+    expect(sanitizeBase64('SGVsbG8=')).toBe('SGVsbG8=');
+  });
+
+  it('应剥离 data URI 前缀并过滤杂质', () => {
+    expect(sanitizeBase64('data:text/plain;base64,SGVs bG8=')).toBe('SGVsbG8=');
+  });
+
+  it('应处理空输入', () => {
+    expect(sanitizeBase64('')).toBe('');
   });
 });
 
