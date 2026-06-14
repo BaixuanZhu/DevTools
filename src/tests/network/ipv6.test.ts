@@ -5,6 +5,8 @@ import {
   formatIPv6,
   expandIPv6,
   compressIPv6,
+  prefixToMaskV6,
+  parseCIDRv6,
 } from '../../utils/network/ipv6';
 
 describe('parseIPv6', () => {
@@ -108,5 +110,52 @@ describe('expandIPv6 / compressIPv6', () => {
   it('compressIPv6 应规范化输入', () => {
     expect(compressIPv6('2001:0db8:0000:0000:0000:0000:0000:0000')).toBe('2001:db8::');
     expect(compressIPv6('2001:DB8::')).toBe('2001:db8::');
+  });
+});
+
+describe('prefixToMaskV6', () => {
+  it('应正确生成 128 位掩码', () => {
+    expect(prefixToMaskV6(0)).toBe(0n);
+    expect(prefixToMaskV6(128)).toBe((1n << 128n) - 1n);
+    expect(prefixToMaskV6(64)).toBe(((1n << 64n) - 1n) << 64n);
+    expect(prefixToMaskV6(32)).toBe(((1n << 32n) - 1n) << 96n);
+  });
+
+  it('应在越界时抛出', () => {
+    expect(() => prefixToMaskV6(-1)).toThrow('0-128 之间');
+    expect(() => prefixToMaskV6(129)).toThrow('0-128 之间');
+  });
+});
+
+describe('parseCIDRv6', () => {
+  it('应正确解析标准 IPv6 CIDR', () => {
+    const r = parseCIDRv6('2001:db8::/32');
+    expect(r.ip).toBe(parseIPv6('2001:db8::'));
+    expect(r.prefix).toBe(32);
+  });
+
+  it('应正确解析边界前缀', () => {
+    expect(parseCIDRv6('::/0').prefix).toBe(0);
+    expect(parseCIDRv6('2001:db8::1/128').prefix).toBe(128);
+  });
+
+  it('应在缺少斜杠时抛出', () => {
+    expect(() => parseCIDRv6('2001:db8::')).toThrow('缺少前缀长度');
+  });
+
+  it('应在前缀越界时抛出', () => {
+    expect(() => parseCIDRv6('2001:db8::/129')).toThrow('0-128 之间');
+  });
+
+  it('应在前缀非数字时抛出', () => {
+    expect(() => parseCIDRv6('2001:db8::/abc')).toThrow('不是合法');
+  });
+
+  it('应在地址部分非法时抛出', () => {
+    expect(() => parseCIDRv6('not-an-ipv6/64')).toThrow();
+  });
+
+  it('应在输入为空时抛出', () => {
+    expect(() => parseCIDRv6('')).toThrow('输入不能为空');
   });
 });

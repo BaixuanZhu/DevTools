@@ -150,3 +150,46 @@ export function expandIPv6(str: string): string {
 export function compressIPv6(str: string): string {
   return formatIPv6(parseIPv6(str), 'compress');
 }
+
+/**
+ * 根据前缀长度生成 128 位网络掩码（BigInt）
+ * @param prefix - 前缀长度（0-128）
+ * @returns 前 prefix 位为 1、其余为 0 的 128 位掩码
+ * @throws 前缀越界（< 0 或 > 128）时抛出中文错误
+ */
+export function prefixToMaskV6(prefix: number): bigint {
+  if (prefix < 0 || prefix > 128) {
+    throw new Error(`CIDR 前缀长度必须在 0-128 之间，当前值：${prefix}`);
+  }
+  if (prefix === 0) return 0n;
+  const allOnes = (1n << 128n) - 1n;
+  // 前 prefix 位为 1 = 全 1 异或后 (128-prefix) 位为 1 的部分
+  return allOnes ^ ((1n << BigInt(128 - prefix)) - 1n);
+}
+
+/**
+ * 解析 IPv6 CIDR 字符串（如 2001:db8::/32）为地址与前缀长度
+ * @param cidr - CIDR 字符串，必须含 / 分隔的地址与前缀
+ * @returns 地址 BigInt 与前缀长度
+ * @throws 格式无效（缺斜杠、前缀非数值或越界、地址非法）时抛出中文错误
+ */
+export function parseCIDRv6(cidr: string): { ip: bigint; prefix: number } {
+  if (!cidr || typeof cidr !== 'string') {
+    throw new Error('无效的 CIDR 格式：输入不能为空');
+  }
+  const slashIndex = cidr.indexOf('/');
+  if (slashIndex === -1) {
+    throw new Error('无效的 CIDR 格式：缺少前缀长度（如 /64）');
+  }
+  const ipStr = cidr.substring(0, slashIndex);
+  const prefixStr = cidr.substring(slashIndex + 1);
+  if (!/^\d{1,3}$/.test(prefixStr)) {
+    throw new Error(`无效的 CIDR 前缀长度："${prefixStr}" 不是合法的数值`);
+  }
+  const prefix = parseInt(prefixStr, 10);
+  if (prefix < 0 || prefix > 128) {
+    throw new Error(`CIDR 前缀长度必须在 0-128 之间，当前值：${prefix}`);
+  }
+  const ip = parseIPv6(ipStr);
+  return { ip, prefix };
+}
