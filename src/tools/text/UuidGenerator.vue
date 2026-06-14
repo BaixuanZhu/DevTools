@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
+import { useCopy } from '../../composables/useCopy';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
@@ -84,23 +85,16 @@ function generate() {
   }
 }
 
-function showToast(message: string) {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message } }));
-}
+const { copy: copySingleItem } = useCopy();
+const { copy: copyAllItems } = useCopy();
 
 async function copySingle(uuid: string) {
-  try {
-    await navigator.clipboard.writeText(uuid);
-    showToast('已复制');
-  } catch {}
+  await copySingleItem(uuid);
 }
 
 async function copyAll() {
   const text = formattedResults.value.join('\n');
-  try {
-    await navigator.clipboard.writeText(text);
-    showToast('已复制');
-  } catch {}
+  await copyAllItems(text);
 }
 
 // Helper: format timestamp for display
