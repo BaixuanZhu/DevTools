@@ -95,6 +95,7 @@ const customFormatStr = ref('YYYY-MM-DD HH:mm:ss');
 // ─── 统一结果 ───
 const unifiedResult = ref<UnifiedResult | null>(null);
 const lastActiveInput = ref<'timestamp' | 'date' | null>(null);
+const isProgrammaticUpdate = ref(false);
 
 watch([convertTimezone, customFormatStr], () => {
   if (!unifiedResult.value) return;
@@ -108,6 +109,8 @@ const timestampInput = ref('');
 const tsErrorMsg = ref('');
 
 watch(timestampInput, () => {
+  if (isProgrammaticUpdate.value) return;
+
   tsErrorMsg.value = '';
   const input = timestampInput.value.trim();
   if (!input) {
@@ -130,21 +133,22 @@ watch(timestampInput, () => {
   const info = timestampToDateInfo(millis, convertTimezone.value, customFormatStr.value);
   unifiedResult.value = { source: 'timestamp', ...info };
   lastActiveInput.value = 'timestamp';
-  // 同步到日期输入框（使用本地时间格式）
+  isProgrammaticUpdate.value = true;
   dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
+  isProgrammaticUpdate.value = false;
 });
-
-function fillNow() {
-  timestampInput.value = String(Date.now());
-}
 
 function handleQuickTime(type: QuickTimeType) {
   const millis = getQuickTimestamp(type);
+  isProgrammaticUpdate.value = true;
   timestampInput.value = String(millis);
   dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
+  isProgrammaticUpdate.value = false;
+  lastActiveInput.value = 'timestamp';
 }
 
 // ─── 日期输入 ───
+/** 日期输入框的显示格式。 */
 const DATE_DISPLAY_FORMAT = 'YYYY/MM/DD HH:mm:ss';
 const dateInput = ref('');
 const dateErrorMsg = ref('');
@@ -174,22 +178,16 @@ function onPickerInput(event: Event) {
   const iso = (event.target as HTMLInputElement).value;
   if (iso) {
     dateInput.value = isoToDisplay(iso);
+  } else {
+    dateInput.value = '';
   }
 }
 
 watch(dateInput, () => {
+  if (isProgrammaticUpdate.value) return;
+
   const input = dateInput.value.trim();
   dateErrorMsg.value = '';
-
-  // 如果当前变化来自时间戳同步，不反向同步回时间戳框
-  if (lastActiveInput.value === 'timestamp') {
-    if (!input) {
-      pickerValue.value = '';
-    } else {
-      pickerValue.value = displayToIso(input);
-    }
-    return;
-  }
 
   if (!input) {
     if (lastActiveInput.value === 'date') {
@@ -205,8 +203,9 @@ watch(dateInput, () => {
     unifiedResult.value = { source: 'date', ...result };
     lastActiveInput.value = 'date';
     pickerValue.value = displayToIso(input);
-    // 同步到时间戳输入框（毫秒）
+    isProgrammaticUpdate.value = true;
     timestampInput.value = String(result.unixMillis);
+    isProgrammaticUpdate.value = false;
   } else {
     dateErrorMsg.value = '请输入标准格式 yyyy/MM/dd HH:mm:ss';
     pickerValue.value = '';
