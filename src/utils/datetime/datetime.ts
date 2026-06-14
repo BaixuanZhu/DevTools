@@ -76,7 +76,7 @@ export interface DateInfo {
   custom: string;
 }
 
-/** 检测时间戳是秒级还是毫秒级 */
+/** 检测输入字符串是 Unix 秒级还是毫秒级时间戳。 */
 export function detectTimestampUnit(input: string): TimestampUnit {
   const trimmed = input.trim();
   if (!/^\d+$/.test(trimmed)) return null;
@@ -87,6 +87,7 @@ export function detectTimestampUnit(input: string): TimestampUnit {
 }
 
 /** 按指定时区格式化时间戳 */
+/** 按指定时区将时间戳格式化为 `YYYY-MM-DD HH:mm:ss`。 */
 export function formatByTimezone(timestamp: number, tz: string): string {
   if (tz === 'local') {
     return dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss');
@@ -105,6 +106,7 @@ export function formatCustom(timestamp: number, formatStr: string): string {
 }
 
 /** 获取快捷时间的时间戳（毫秒） */
+/** 获取指定快捷时间对应的时间戳（毫秒）。 */
 export function getQuickTimestamp(type: QuickTimeType): number {
   const now = dayjs();
   switch (type) {
@@ -152,6 +154,10 @@ export function timestampToDateInfo(
 /**
  * 解析标准格式日期字符串为多格式信息。
  * 仅支持 `YYYY/MM/DD HH:mm:ss` 格式，其它格式返回 null。
+ * @param dateStr 待解析的日期字符串
+ * @param tz 目标时区，默认为本地时间
+ * @param customFormatStr 自定义输出格式字符串
+ * @returns 解析成功返回完整日期信息，否则返回 null
  */
 export function parseDateInput(
   dateStr: string,

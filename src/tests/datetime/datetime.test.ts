@@ -74,10 +74,22 @@ describe('timestampToDateInfo', () => {
 });
 
 describe('parseDateInput', () => {
-  it('应解析 ISO 日期字符串', () => {
-    const info = parseDateInput('2023-11-14T12:00:00.000Z');
+  it('应解析标准格式日期字符串', () => {
+    const info = parseDateInput('2023/11/14 12:00:00');
     expect(info).not.toBeNull();
     expect(info!.unixSeconds).toBeGreaterThan(0);
+  });
+
+  it('应支持指定时区', () => {
+    const info = parseDateInput('2023/11/14 12:00:00', 'Asia/Tokyo');
+    expect(info).not.toBeNull();
+    expect(info!.tzTime).toBeTruthy();
+  });
+
+  it('应支持自定义格式', () => {
+    const info = parseDateInput('2023/11/14 12:00:00', 'local', 'YYYY/MM/DD');
+    expect(info).not.toBeNull();
+    expect(info!.custom).toMatch(/^\d{4}\/\d{2}\/\d{2}$/);
   });
 
   it('应返回 null 对于无效输入', () => {
