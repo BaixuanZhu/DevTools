@@ -1,39 +1,79 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { copyToClipboard } from '../../utils/shared/clipboard';
+import { useCopy } from '../../composables/useCopy';
 
-const props = defineProps<{
+interface Props {
+  /** 要复制的文本 */
   text: string;
-  label?: string;
-}>();
+  /** 按钮尺寸，默认 md */
+  size?: 'sm' | 'md';
+}
 
-const copied = ref(false);
+const props = withDefaults(defineProps<Props>(), {
+  size: 'md',
+});
+
+const { copied, copy } = useCopy();
+
+const sizeClasses = {
+  md: 'w-9 h-9',
+  sm: 'w-7 h-7',
+};
+
+const iconSize = {
+  md: 16,
+  sm: 14,
+};
 
 async function handleCopy() {
-  const success = await copyToClipboard(props.text);
-  if (success) {
-    copied.value = true;
-    // 触发 Alpine toast
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已复制' } }));
-    setTimeout(() => {
-      copied.value = false;
-    }, 1500);
-  }
+  await copy(props.text);
 }
 </script>
 
 <template>
   <button
+    type="button"
     :class="[
-      'px-4 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150',
-      copied
-        ? 'border-success text-success bg-card'
-        : 'border-border text-text bg-card hover:bg-hover',
-      !text && 'opacity-50 cursor-not-allowed',
+      sizeClasses[size],
+      'flex items-center justify-center',
+      'rounded-sm border',
+      'bg-card text-muted',
+      'transition-[background-color,border-color,color] duration-150',
+      'hover:bg-hover hover:text-text',
+      'disabled:opacity-50 disabled:cursor-not-allowed',
+      copied ? 'border-success text-success' : 'border-border',
     ]"
-    @click="handleCopy"
     :disabled="!text"
+    @click="handleCopy"
   >
-    {{ copied ? '✓ 已复制' : (label || '复制') }}
+    <svg
+      v-if="copied"
+      xmlns="http://www.w3.org/2000/svg"
+      :width="iconSize[size]"
+      :height="iconSize[size]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+
+    <svg
+      v-else
+      xmlns="http://www.w3.org/2000/svg"
+      :width="iconSize[size]"
+      :height="iconSize[size]"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
   </button>
 </template>
