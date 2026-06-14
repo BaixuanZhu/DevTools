@@ -5,7 +5,7 @@ import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import { arrayBufferToBase64Async, formatFileSize } from '../../utils/encoding/base64';
-import { copyToClipboard } from '../../utils/shared/clipboard';
+import { useCopy } from '../../composables/useCopy';
 
 /** 文件大小上限：50MB（Base64 结果约为输入 1.33 倍，需常驻内存供复制/下载） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
@@ -120,14 +120,15 @@ function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   });
 }
 
+const { copy } = useCopy({ errorMessage: '复制失败，请尝试下载 .txt' });
+
 /** 复制完整结果到剪贴板，超大结果先提示优先下载 */
 async function handleCopy() {
   if (!outputText.value) return;
   if (outputText.value.length > COPY_WARN_SIZE) {
     dispatchToast('结果较大，复制可能耗时，建议优先下载 .txt');
   }
-  const ok = await copyToClipboard(outputText.value);
-  dispatchToast(ok ? '已复制' : '复制失败，请尝试下载 .txt');
+  await copy(outputText.value);
 }
 
 /** 将结果下载为 .txt 文件 */
