@@ -75,13 +75,19 @@ onMounted(() => {
   isMounted.value = true;
   updateLiveClock();
   liveTimer = setInterval(updateLiveClock, 1000);
-  // 默认用当前时间预填充两个输入框
-  timestampInput.value = String(Date.now());
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const display = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+  const now = Date.now();
+  const display = dayjs(now).format(DATE_DISPLAY_FORMAT);
+  isProgrammaticUpdate.value = true;
+  timestampInput.value = String(now);
   dateInput.value = display;
   pickerValue.value = displayToIso(display);
+  isProgrammaticUpdate.value = false;
+  lastActiveInput.value = 'timestamp';
+
+  // 手动触发一次结果计算（因为 isProgrammaticUpdate 跳过了 watcher）
+  const info = timestampToDateInfo(now, convertTimezone.value, customFormatStr.value);
+  unifiedResult.value = { source: 'timestamp', ...info };
 });
 
 onUnmounted(() => {
@@ -140,9 +146,11 @@ watch(timestampInput, () => {
 
 function handleQuickTime(type: QuickTimeType) {
   const millis = getQuickTimestamp(type);
+  const display = dayjs(millis).format(DATE_DISPLAY_FORMAT);
   isProgrammaticUpdate.value = true;
   timestampInput.value = String(millis);
-  dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
+  dateInput.value = display;
+  pickerValue.value = displayToIso(display);
   isProgrammaticUpdate.value = false;
   lastActiveInput.value = 'timestamp';
 }
@@ -216,6 +224,7 @@ watch(dateInput, () => {
 });
 
 function clearAll() {
+  isProgrammaticUpdate.value = false;
   timestampInput.value = '';
   dateInput.value = '';
   pickerValue.value = '';
