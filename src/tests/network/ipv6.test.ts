@@ -7,6 +7,7 @@ import {
   compressIPv6,
   prefixToMaskV6,
   parseCIDRv6,
+  getIPv6Type,
 } from '../../utils/network/ipv6';
 
 describe('parseIPv6', () => {
@@ -157,5 +158,39 @@ describe('parseCIDRv6', () => {
 
   it('应在输入为空时抛出', () => {
     expect(() => parseCIDRv6('')).toThrow('输入不能为空');
+  });
+});
+
+describe('getIPv6Type', () => {
+  it('应识别未指定地址', () => {
+    expect(getIPv6Type(parseIPv6('::')).label).toBe('未指定地址');
+  });
+
+  it('应识别环回地址', () => {
+    expect(getIPv6Type(parseIPv6('::1')).label).toBe('环回地址');
+  });
+
+  it('应识别组播地址', () => {
+    expect(getIPv6Type(parseIPv6('ff02::1')).label).toBe('组播地址');
+  });
+
+  it('应识别链路本地地址', () => {
+    expect(getIPv6Type(parseIPv6('fe80::1')).label).toBe('链路本地地址');
+  });
+
+  it('应识别唯一本地地址（ULA）', () => {
+    expect(getIPv6Type(parseIPv6('fd00::1')).label).toBe('唯一本地地址');
+  });
+
+  it('应识别文档地址（先于全球单播）', () => {
+    expect(getIPv6Type(parseIPv6('2001:db8::1')).label).toBe('文档地址');
+  });
+
+  it('应识别全球单播地址', () => {
+    expect(getIPv6Type(parseIPv6('2001:4860:4860::8888')).label).toBe('全球单播地址');
+  });
+
+  it('保留段应返回兜底', () => {
+    expect(getIPv6Type(parseIPv6('4000::1')).label).toBe('保留 / 未分配');
   });
 });

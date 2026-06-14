@@ -193,3 +193,34 @@ export function parseCIDRv6(cidr: string): { ip: bigint; prefix: number } {
   const ip = parseIPv6(ipStr);
   return { ip, prefix };
 }
+
+/** 地址类型判定结果 */
+export interface IPv6Type {
+  /** 类型标签 */
+  label: string;
+  /** 说明 */
+  description: string;
+}
+
+/**
+ * 判定 IPv6 地址类型（按 CIDR 前缀优先级匹配，先命中先返回）
+ * @param num - 128 位地址 BigInt
+ * @returns 类型标签与说明
+ */
+export function getIPv6Type(num: bigint): IPv6Type {
+  if (num === 0n) return { label: '未指定地址', description: 'Unspecified，用作 Source 占位' };
+  if (num === 1n) return { label: '环回地址', description: 'Loopback，本机自测' };
+
+  const matches = (base: string, prefix: number): boolean => {
+    const mask = prefixToMaskV6(prefix);
+    return (num & mask) === (parseIPv6(base) & mask);
+  };
+
+  // 顺序重要：文档地址（/32）必须先于全球单播（/3）判定
+  if (matches('ff00::', 8)) return { label: '组播地址', description: 'Multicast，一对多通信' };
+  if (matches('fe80::', 10)) return { label: '链路本地地址', description: 'Link-Local，仅本网段有效' };
+  if (matches('fc00::', 7)) return { label: '唯一本地地址', description: 'ULA，内网通信' };
+  if (matches('2001:db8::', 32)) return { label: '文档地址', description: 'RFC 3849，示例专用' };
+  if (matches('2000::', 3)) return { label: '全球单播地址', description: 'Global Unicast，公网可路由' };
+  return { label: '保留 / 未分配', description: '尚未分配的特殊用途地址' };
+}
