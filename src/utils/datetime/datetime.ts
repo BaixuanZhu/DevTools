@@ -149,14 +149,17 @@ export function timestampToDateInfo(
   };
 }
 
-/** 解析日期字符串为多格式信息 */
+/**
+ * 解析标准格式日期字符串为多格式信息。
+ * 仅支持 `YYYY/MM/DD HH:mm:ss` 格式，其它格式返回 null。
+ */
 export function parseDateInput(
   dateStr: string,
   tz: string = 'local',
   customFormatStr: string = 'YYYY-MM-DD HH:mm:ss',
 ): DateInfo | null {
   if (!dateStr.trim()) return null;
-  const d = dayjs(dateStr);
+  const d = dayjs(dateStr, 'YYYY/MM/DD HH:mm:ss', true);
   if (!d.isValid()) return null;
   return timestampToDateInfo(d.valueOf(), tz, customFormatStr);
 }

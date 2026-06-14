@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import dayjs from 'dayjs';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import {
@@ -36,20 +36,10 @@ const liveClock = ref<{
   tzTime: '-',
 });
 const liveTimezone = ref('local');
-const isPaused = ref(false);
 let liveTimer: ReturnType<typeof setInterval> | null = null;
 
 function updateLiveClock() {
-  if (!isPaused.value) {
-    liveClock.value = getLiveClockInfo(liveTimezone.value);
-  }
-}
-
-function togglePause() {
-  isPaused.value = !isPaused.value;
-  if (!isPaused.value) {
-    liveClock.value = getLiveClockInfo(liveTimezone.value);
-  }
+  liveClock.value = getLiveClockInfo(liveTimezone.value);
 }
 
 watch(liveTimezone, () => {
@@ -67,7 +57,9 @@ onMounted(() => {
   parseTimestamp();
   const now = new Date();
   const pad = (n: number) => String(n).padStart(2, '0');
-  dateInput.value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  const display = `${now.getFullYear()}/${pad(now.getMonth() + 1)}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  dateInput.value = display;
+  pickerValue.value = displayToIso(display);
 });
 
 onUnmounted(() => {
@@ -109,39 +101,59 @@ function handleQuickTime(type: QuickTimeType) {
   parseTimestamp();
 }
 
-function clearTimestamp() {
-  timestampInput.value = '';
-  tsDateInfo.value = null;
-  tsErrorMsg.value = '';
-}
-
 // ─── 日期 → 时间戳 ───
+const DATE_DISPLAY_FORMAT = 'YYYY/MM/DD HH:mm:ss';
 const dateInput = ref('');
 const dateOutput = ref<{ unixMillis: number; unixSeconds: number } | null>(null);
 const dateErrorMsg = ref('');
+const pickerValue = ref('');
+const datePickerRef = ref<HTMLInputElement | null>(null);
+
+function displayToIso(display: string): string {
+  const d = dayjs(display.trim(), DATE_DISPLAY_FORMAT, true);
+  return d.isValid() ? d.format('YYYY-MM-DDTHH:mm:ss') : '';
+}
+
+function isoToDisplay(iso: string): string {
+  return iso.replace('T', ' ').replace(/-/g, '/');
+}
+
+function openDatePicker() {
+  const input = datePickerRef.value;
+  if (!input) return;
+  if (typeof input.showPicker === 'function') {
+    input.showPicker();
+  } else {
+    input.click();
+  }
+}
+
+function onPickerInput(event: Event) {
+  const iso = (event.target as HTMLInputElement).value;
+  if (iso) {
+    dateInput.value = isoToDisplay(iso);
+  }
+}
 
 watch(dateInput, () => {
   const input = dateInput.value.trim();
   if (!input) {
     dateOutput.value = null;
     dateErrorMsg.value = '';
+    pickerValue.value = '';
     return;
   }
   const result = parseDateInput(input);
   if (result) {
     dateOutput.value = { unixMillis: result.unixMillis, unixSeconds: result.unixSeconds };
     dateErrorMsg.value = '';
+    pickerValue.value = displayToIso(input);
   } else {
     dateOutput.value = null;
-    dateErrorMsg.value = '无法解析日期，请检查格式';
+    dateErrorMsg.value = '请输入标准格式 yyyy/MM/dd HH:mm:ss';
+    pickerValue.value = '';
   }
 });
-
-function clearDateInput() {
-  dateInput.value = '';
-  dateOutput.value = null;
-  dateErrorMsg.value = '';
-}
 
 const liveClockFields = computed(() => [
   { label: 'Unix 秒', value: String(liveClock.value.unixSeconds) },
@@ -155,19 +167,18 @@ const liveClockFields = computed(() => [
 ]);
 
 const tsResultFields = computed(() => {
-  if (!tsDateInfo.value) return [];
   const fields = [
-    { label: 'ISO 8601', value: tsDateInfo.value.iso },
-    { label: '本地时间', value: tsDateInfo.value.local },
-    { label: 'UTC 时间', value: tsDateInfo.value.utc },
+    { label: 'ISO 8601', value: tsDateInfo.value?.iso ?? '' },
+    { label: '本地时间', value: tsDateInfo.value?.local ?? '' },
+    { label: 'UTC 时间', value: tsDateInfo.value?.utc ?? '' },
   ];
   if (convertTimezone.value !== 'local') {
     const tzLabel = TIMEZONES.find(t => t.value === convertTimezone.value)?.label ?? '时区时间';
-    fields.push({ label: tzLabel, value: tsDateInfo.value.tzTime });
+    fields.push({ label: tzLabel, value: tsDateInfo.value?.tzTime ?? '' });
   }
   fields.push(
-    { label: 'RFC 2822', value: tsDateInfo.value.rfc2822 },
-    { label: '相对时间', value: tsDateInfo.value.relative },
+    { label: 'RFC 2822', value: tsDateInfo.value?.rfc2822 ?? '' },
+    { label: '相对时间', value: tsDateInfo.value?.relative ?? '' },
   );
   return fields;
 });
@@ -184,24 +195,15 @@ const customPreview = computed(() => {
 
     <!-- ═══ 实时时钟区（通栏，保持完整垂直列表） ═══ -->
     <section class="mb-6 p-4 border border-border rounded-md bg-card">
-      <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-3 mb-3 flex-wrap">
         <h2 class="text-sm font-semibold m-0 text-text flex items-center gap-2">
           <span class="text-base">⏱</span> 当前时间
         </h2>
-        <div class="flex items-center gap-2">
-          <SelectListbox
-            v-model="liveTimezone"
-            :options="TIMEZONES"
-            class="w-32"
-          />
-          <button
-            class="px-3 py-1 border border-border rounded-sm text-xs font-sans cursor-pointer transition-colors duration-150"
-            :class="isPaused ? 'bg-accent text-white border-accent' : 'bg-card text-text hover:bg-hover'"
-            @click="togglePause"
-          >
-            {{ isPaused ? '▶ 恢复' : '⏸ 暂停' }}
-          </button>
-        </div>
+        <SelectListbox
+          v-model="liveTimezone"
+          :options="TIMEZONES"
+          class="w-32"
+        />
       </div>
 
       <div class="flex flex-col gap-1">
@@ -253,7 +255,6 @@ const customPreview = computed(() => {
             >
               当前时间
             </button>
-            <ClearButton @clear="clearTimestamp" />
           </div>
 
           <div class="flex gap-1.5 mb-4 flex-wrap">
@@ -275,21 +276,31 @@ const customPreview = computed(() => {
           <h2 class="text-sm font-semibold m-0 mb-3 text-text">📅 日期 → 时间戳</h2>
 
           <div class="flex flex-col gap-1 mb-3">
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-[0.8125rem] text-muted font-medium">输入日期时间</label>
-              <ClearButton @clear="clearDateInput" />
+            <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入日期时间</label>
+            <div class="flex items-stretch gap-2">
+              <input
+                v-model="dateInput"
+                class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
+                placeholder="yyyy/MM/dd HH:mm:ss"
+              />
+              <button
+                type="button"
+                class="px-3 py-2 border border-border rounded-sm bg-card text-text hover:bg-hover transition-[background-color] duration-150"
+                aria-label="打开日期选择器"
+                @click="openDatePicker"
+              >
+                📅
+              </button>
+              <input
+                ref="datePickerRef"
+                type="datetime-local"
+                class="sr-only"
+                aria-hidden="true"
+                tabindex="-1"
+                :value="pickerValue"
+                @input="onPickerInput"
+              />
             </div>
-            <input
-              v-model="dateInput"
-              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
-              placeholder="例如：2023-11-14T12:00:00 或 2023/11/14 12:00:00"
-            />
-            <input
-              v-model="dateInput"
-              type="datetime-local"
-              class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
-              step="1"
-            />
           </div>
 
           <p v-if="dateErrorMsg" class="text-error text-[0.8125rem] m-0 mb-4">{{ dateErrorMsg }}</p>
@@ -299,7 +310,7 @@ const customPreview = computed(() => {
       <template #output>
         <!-- 时间戳 → 日期（结果区） -->
         <section class="mb-6">
-          <div v-if="tsResultFields.length" class="flex flex-col gap-1">
+          <div class="flex flex-col gap-1">
             <div class="flex items-center justify-between mb-2">
               <h3 class="text-xs font-semibold text-muted m-0 uppercase tracking-wide">转换结果</h3>
               <SelectListbox
@@ -353,21 +364,21 @@ const customPreview = computed(() => {
 
         <!-- 日期 → 时间戳（结果区） -->
         <section>
-          <div v-if="dateOutput" class="flex flex-col gap-1">
+          <div class="flex flex-col gap-1">
             <div class="flex items-center gap-3 px-4 py-2 border border-border rounded-sm bg-card">
               <span class="text-xs font-semibold text-accent min-w-[80px] shrink-0">Unix 毫秒</span>
-              <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ dateOutput.unixMillis }}</code>
+              <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ dateOutput?.unixMillis ?? '-' }}</code>
               <CopyButton
-                :text="String(dateOutput.unixMillis)"
+                :text="String(dateOutput?.unixMillis ?? '')"
                 label="复制"
                 class="px-2 py-1 text-xs shrink-0"
               />
             </div>
             <div class="flex items-center gap-3 px-4 py-2 border border-border rounded-sm bg-card">
               <span class="text-xs font-semibold text-accent min-w-[80px] shrink-0">Unix 秒</span>
-              <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ dateOutput.unixSeconds }}</code>
+              <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ dateOutput?.unixSeconds ?? '-' }}</code>
               <CopyButton
-                :text="String(dateOutput.unixSeconds)"
+                :text="String(dateOutput?.unixSeconds ?? '')"
                 label="复制"
                 class="px-2 py-1 text-xs shrink-0"
               />
