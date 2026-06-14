@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import { useCopy } from '../../composables/useCopy';
 import {
   CHAR_SETS,
   resolveCharsetFromTypes,
@@ -60,19 +61,16 @@ function generate() {
 }
 
 // === 复制 ===
-function copySingle(str: string) {
-  navigator.clipboard.writeText(str).then(() => {
-    document.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', message: '已复制' } }));
-  });
+const { copy: copyItem } = useCopy();
+const { copy: copyAllItems } = useCopy();
+
+async function copySingle(str: string) {
+  await copyItem(str);
 }
 
-function copyAll() {
+async function copyAll() {
   const text = results.value.join('\n');
-  navigator.clipboard.writeText(text).then(() => {
-    document.dispatchEvent(
-      new CustomEvent('toast', { detail: { type: 'success', message: `已复制 ${results.value.length} 条` } }),
-    );
-  });
+  await copyAllItems(text);
 }
 </script>
 
