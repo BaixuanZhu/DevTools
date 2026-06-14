@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import type { Mock } from 'vitest';
 import { useCopy } from '../useCopy';
 
 describe('useCopy', () => {
@@ -27,7 +28,7 @@ describe('useCopy', () => {
   });
 
   it('复制成功后 copied 为 true，1.5s 后自动恢复', async () => {
-    navigator.clipboard.writeText.mockResolvedValue(undefined);
+    (navigator.clipboard.writeText as Mock).mockResolvedValue(undefined);
     const { copied, copy } = useCopy();
 
     await copy('hello');
@@ -39,7 +40,7 @@ describe('useCopy', () => {
 
   it('复制失败时 copied 保持 false 并 dispatch toast', async () => {
     const dispatchEventSpy = vi.spyOn(document, 'dispatchEvent');
-    navigator.clipboard.writeText.mockRejectedValue(new Error('fail'));
+    (navigator.clipboard.writeText as Mock).mockRejectedValue(new Error('fail'));
 
     const { copied, copy } = useCopy();
     await copy('hello');
@@ -53,7 +54,7 @@ describe('useCopy', () => {
 
   it('支持自定义失败文案', async () => {
     const dispatchEventSpy = vi.spyOn(document, 'dispatchEvent');
-    navigator.clipboard.writeText.mockRejectedValue(new Error('fail'));
+    (navigator.clipboard.writeText as Mock).mockRejectedValue(new Error('fail'));
 
     const { copied, copy } = useCopy({ errorMessage: '自定义失败' });
     await copy('hello');
@@ -66,7 +67,7 @@ describe('useCopy', () => {
   });
 
   it('多次点击重置计时器', async () => {
-    navigator.clipboard.writeText.mockResolvedValue(undefined);
+    (navigator.clipboard.writeText as Mock).mockResolvedValue(undefined);
     const { copied, copy } = useCopy();
 
     await copy('hello');
