@@ -88,3 +88,65 @@ export function isValidIPv6(str: string): boolean {
     return false;
   }
 }
+
+/**
+ * 将 BigInt 格式化为 IPv6 字符串
+ * @param num - 128 位地址 BigInt
+ * @param mode - 'expand' 输出 8 组 4 位十六进制；'compress' 压缩最长连续零段为 ::
+ * @returns IPv6 字符串（小写）
+ */
+export function formatIPv6(num: bigint, mode: 'compress' | 'expand'): string {
+  const groups: number[] = [];
+  for (let k = 0; k < 8; k++) {
+    const shift = BigInt(7 - k) * 16n;
+    groups.push(Number((num >> shift) & 0xFFFFn));
+  }
+
+  if (mode === 'expand') {
+    return groups.map((g) => g.toString(16).padStart(4, '0')).join(':');
+  }
+
+  // compress：先去前导零
+  const hex = groups.map((g) => g.toString(16));
+
+  // 找最长连续全零段（长度 >= 2 才压缩，多段等长取第一处）
+  let bestStart = -1;
+  let bestLen = 0;
+  let curStart = -1;
+  let curLen = 0;
+  for (let i = 0; i < 8; i++) {
+    if (hex[i] === '0') {
+      if (curStart === -1) curStart = i;
+      curLen++;
+      if (curLen > bestLen) {
+        bestLen = curLen;
+        bestStart = curStart;
+      }
+    } else {
+      curStart = -1;
+      curLen = 0;
+    }
+  }
+
+  if (bestLen < 2) {
+    return hex.join(':');
+  }
+
+  const before = hex.slice(0, bestStart).join(':');
+  const after = hex.slice(bestStart + bestLen).join(':');
+
+  if (bestStart === 0 && bestLen === 8) return '::';
+  if (bestStart === 0) return `::${after}`;
+  if (bestStart + bestLen === 8) return `${before}::`;
+  return `${before}::${after}`;
+}
+
+/** 将任意 IPv6 字符串展开为 8 组 4 位十六进制 */
+export function expandIPv6(str: string): string {
+  return formatIPv6(parseIPv6(str), 'expand');
+}
+
+/** 将任意 IPv6 字符串规范化为压缩格式 */
+export function compressIPv6(str: string): string {
+  return formatIPv6(parseIPv6(str), 'compress');
+}

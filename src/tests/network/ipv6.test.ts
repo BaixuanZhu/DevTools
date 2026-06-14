@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseIPv6, isValidIPv6 } from '../../utils/network/ipv6';
+import {
+  parseIPv6,
+  isValidIPv6,
+  formatIPv6,
+  expandIPv6,
+  compressIPv6,
+} from '../../utils/network/ipv6';
 
 describe('parseIPv6', () => {
   it('应正确解析标准 8 组地址', () => {
@@ -60,5 +66,47 @@ describe('isValidIPv6', () => {
     expect(isValidIPv6('2001:db8:1:2:3:4:5')).toBe(false);
     expect(isValidIPv6('2001::db8::1')).toBe(false);
     expect(isValidIPv6('2001:db8::xyzz')).toBe(false);
+  });
+});
+
+describe('formatIPv6', () => {
+  it('expand 应输出 8 组 4 位十六进制（小写）', () => {
+    expect(formatIPv6(0x20010db8000000000000000000000000n, 'expand')).toBe(
+      '2001:0db8:0000:0000:0000:0000:0000:0000',
+    );
+    expect(formatIPv6(1n, 'expand')).toBe(
+      '0000:0000:0000:0000:0000:0000:0000:0001',
+    );
+  });
+
+  it('compress 应压缩最长连续零段', () => {
+    expect(formatIPv6(0x20010db8000000000000000000000000n, 'compress')).toBe('2001:db8::');
+    expect(formatIPv6(1n, 'compress')).toBe('::1');
+    expect(formatIPv6(0n, 'compress')).toBe('::');
+  });
+
+  it('compress 不压缩单零段', () => {
+    // 2001:db8:0:1:2:3:4:5 —— 仅 1 个连续零段，不压缩
+    expect(formatIPv6(0x20010db8000000010002000300040005n, 'compress')).toBe('2001:db8:0:1:2:3:4:5');
+  });
+
+  it('compress 取第一个最长零段', () => {
+    // 2001:0:0:1:0:0:0:1 —— 零段 [1-2](长2) 与 [4-6](长3)，压缩更长的一处
+    expect(formatIPv6(0x20010000000000010000000000000001n, 'compress')).toBe('2001:0:0:1::1');
+  });
+});
+
+describe('expandIPv6 / compressIPv6', () => {
+  it('应形成往返：compress 后 expand 还原展开形式', () => {
+    const cases = ['2001:db8::1', '::1', '::', 'fe80::1', '2001:0db8:0000:0000:0000:0000:0000:0001'];
+    for (const c of cases) {
+      const expanded = expandIPv6(c);
+      expect(compressIPv6(expanded)).toBe(compressIPv6(c));
+    }
+  });
+
+  it('compressIPv6 应规范化输入', () => {
+    expect(compressIPv6('2001:0db8:0000:0000:0000:0000:0000:0000')).toBe('2001:db8::');
+    expect(compressIPv6('2001:DB8::')).toBe('2001:db8::');
   });
 });
