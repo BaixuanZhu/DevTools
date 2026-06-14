@@ -125,7 +125,7 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'device-info',
-    name: '设备信息与 UserAgent',
+    name: '设备信息与UA',
     description: '查看浏览器、操作系统、屏幕等设备信息',
     seoDescription: '在线设备信息查看工具，一键获取浏览器 UserAgent、操作系统、屏幕分辨率、网络连接等设备信息，纯浏览器端检测。',
     category: '网络工具',

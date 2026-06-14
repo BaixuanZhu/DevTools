@@ -132,7 +132,7 @@ onMounted(() => { collectDeviceInfo(); });
 
 <template>
   <div class="w-full">
-    <ToolHeader title="设备信息与 UserAgent" description="查看设备信息、解析与生成 UserAgent" :show-example="false" />
+    <ToolHeader title="设备信息与UA" description="查看设备信息、解析与生成 UserAgent" :show-example="false" />
 
     <!-- 主体：左右分栏 -->
     <div class="flex gap-6 max-lg:flex-col">

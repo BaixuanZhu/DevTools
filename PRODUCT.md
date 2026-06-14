@@ -42,7 +42,7 @@
 | 加密哈希 | `/crypto/` | 哈希生成器、对称加解密、非对称加解密、SM2 国密加解密 |
 | 日期时间 | `/datetime/` | 日期时间转换器、Cron 表达式解析器 |
 | 文本处理 | `/text/` | UUID 生成器、随机字符串生成 |
-| 网络工具 | `/network/` | 设备信息与 UserAgent、HTTP 状态码查询、IPv4 子网计算器、IPv4 范围展开 |
+| 网络工具 | `/network/` | 设备信息与UA、HTTP 状态码查询、IPv4 子网计算器、IPv4 范围展开 |
 | 格式化 | `/format/` | JSON 格式化器、JSON 差异对比、JSON 转 XML、JSON 转 YAML |
 | 正则工具 | `/regex/` | — |
 | 颜色工具 | `/color/` | — |
