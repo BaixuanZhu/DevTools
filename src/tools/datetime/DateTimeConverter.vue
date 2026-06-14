@@ -299,7 +299,7 @@ const unifiedResultFields = computed(() => {
         <SelectListbox
           v-model="liveTimezone"
           :options="TIMEZONES"
-          class="w-32"
+          class="w-40"
         />
       </div>
 
@@ -360,7 +360,6 @@ const unifiedResultFields = computed(() => {
                 />
               </div>
               <div class="px-3 py-2 border-t border-border bg-card flex gap-2">
-                <CopyButton :text="timestampInput" label="复制" class="text-xs px-0 py-0" />
               </div>
             </div>
 
@@ -389,7 +388,6 @@ const unifiedResultFields = computed(() => {
                 >
                   📅 选择
                 </button>
-                <CopyButton :text="dateInput" label="复制" class="text-xs px-0 py-0" />
               </div>
             </div>
           </div>
@@ -436,7 +434,7 @@ const unifiedResultFields = computed(() => {
               <SelectListbox
                 v-model="convertTimezone"
                 :options="TIMEZONES"
-                class="w-32"
+                class="w-40"
               />
             </div>
 
