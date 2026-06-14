@@ -9,7 +9,6 @@
  */
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import { decodeQrFromImage, type ContentResult } from '../../utils/media/qr-reader';
 
@@ -198,14 +197,6 @@ onBeforeUnmount(() => {
               class="font-mono text-sm text-text break-all whitespace-pre-wrap"
             >{{ result.value }}</span>
             <span v-else class="text-sm text-muted">（未识别到内容）</span>
-            <CopyButton v-if="result?.value" :text="result.value" />
-            <a
-              v-if="result?.type === 'url'"
-              :href="result.href"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent no-underline"
-            >打开</a>
           </div>
         </div>
       </div>
