@@ -6,7 +6,7 @@
 
 1. `CopyButton.vue` 是文字按钮，显示「复制」→ 点击后变成「✓ 已复制」，同时触发全局 Toast。
 2. `CodePanel.vue` 内部已是图标按钮，但同样会触发 Toast。
-3. `UuidGenerator`、`RandomStringGenerator`、`FileToBase64` 等工具各自维护复制逻辑。
+3. `UuidGenerator`、`RandomStringGenerator` 等工具各自维护复制逻辑；`FileToBase64` 因有大文件前置提示和自定义失败文案，保持独立复制逻辑。
 
 这种分散实现导致：
 
@@ -36,15 +36,13 @@
 export interface UseCopyOptions {
   /** 复制成功后状态保持时长，默认 1500ms */
   duration?: number;
-  /** 失败时是否自动 dispatch Toast，默认 true */
-  showErrorToast?: boolean;
 }
 
 export interface UseCopyResult {
   /** 是否处于"已复制"确认态 */
   copied: Ref<boolean>;
-  /** 触发复制，返回是否成功 */
-  copy: (text: string) => Promise<boolean>;
+  /** 触发复制 */
+  copy: (text: string) => Promise<void>;
 }
 
 export function useCopy(options?: UseCopyOptions): UseCopyResult;
@@ -52,10 +50,10 @@ export function useCopy(options?: UseCopyOptions): UseCopyResult;
 
 行为：
 
-- 空字符串直接返回 `false`，不触发任何反馈。
+- 空字符串直接返回，不触发任何反馈。
 - 调用现有 `copyToClipboard(text)`。
 - 成功时 `copied.value = true`，持续 `duration` 后自动复位；每次调用都重置计时器，避免多次点击导致提前恢复。
-- 失败时 `copied` 保持 `false`；若 `showErrorToast` 为 `true`（默认），则 dispatch `toast` event，message 为 `'复制失败，请重试'`。
+- 失败时 `copied` 保持 `false`，dispatch `toast` event，message 为 `'复制失败，请重试'`。
 - 返回 `Promise<boolean>` 供调用方在需要时覆盖默认失败反馈（如 `FileToBase64` 大文件场景可提示"建议下载 .txt"）。
 
 ### 3.2 `CopyButton.vue`
@@ -156,13 +154,12 @@ border-success text-success bg-card
 
 ### 6.3 自定义复制逻辑收敛
 
-这些文件直接调用 `navigator.clipboard.writeText` 并自己触发 Toast，需要改用 `useCopy` 或 `<CopyButton>`：
+这些文件直接调用 `navigator.clipboard.writeText` 并自己触发 Toast，需要改用 `useCopy` 或 `CopyButton`：
 
 - `src/tools/text/UuidGenerator.vue`（`copySingle`、`copyAll`）
 - `src/tools/text/RandomStringGenerator.vue`（单条复制、复制全部）
-- `src/tools/encoding/FileToBase64.vue`（`handleCopy`）
 
-`FileToBase64` 中"结果较大，建议优先下载"的前置提示保留，复制动作交给 `useCopy`，失败提示覆盖为 `'复制失败，请尝试下载 .txt'`。
+`FileToBase64.vue` 因有大文件前置提示和自定义失败文案，保持现有独立复制逻辑，不纳入本次统一。
 
 ## 7. 已知副作用与注意事项
 
@@ -176,5 +173,5 @@ border-success text-success bg-card
 - [ ] 点击复制成功后图标变为 ✓，1.5s 后恢复，不触发 Toast。
 - [ ] 复制失败时图标不变，触发 Toast 错误提示。
 - [ ] `CopyButton.vue` 和 `CodePanel.vue` 共用同一套 `useCopy` 逻辑。
-- [ ] `UuidGenerator`、`RandomStringGenerator`、`FileToBase64` 不再直接调用 `navigator.clipboard.writeText`。
+- [ ] `UuidGenerator`、`RandomStringGenerator` 不再直接调用 `navigator.clipboard.writeText`。
 - [ ] 构建通过，无 TypeScript 错误。
