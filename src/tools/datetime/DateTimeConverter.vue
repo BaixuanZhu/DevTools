@@ -100,6 +100,7 @@ const customFormatStr = ref('YYYY-MM-DD HH:mm:ss');
 // ─── 统一结果 ───
 const unifiedResult = ref<UnifiedResult | null>(null);
 const lastActiveInput = ref<'timestamp' | 'date' | null>(null);
+/** 标志当前是否正在进行程序化更新，用于防止双向同步形成循环。 */
 const isProgrammaticUpdate = ref(false);
 
 /**
@@ -201,6 +202,7 @@ function onPickerInput(event: Event) {
   const iso = (event.target as HTMLInputElement).value;
   if (iso) {
     dateInput.value = isoToDisplay(iso);
+    lastActiveInput.value = 'date';
   } else {
     dateInput.value = '';
   }
