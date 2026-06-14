@@ -314,8 +314,7 @@ const unifiedResultFields = computed(() => {
           <CopyButton
             v-if="isMounted"
             :text="field.value"
-            label="复制"
-            class="px-2 py-1 text-xs shrink-0"
+            size="sm"
           />
           <span v-else class="shrink-0 text-xs text-muted w-[24px] text-center">📋</span>
         </div>
@@ -457,8 +456,7 @@ const unifiedResultFields = computed(() => {
                 <code class="flex-1 font-mono text-[0.8125rem] text-text select-all break-all">{{ field.value }}</code>
                 <CopyButton
                   :text="field.value"
-                  label="复制"
-                  class="px-2 py-1 text-xs shrink-0"
+                  size="sm"
                 />
               </div>
             </template>

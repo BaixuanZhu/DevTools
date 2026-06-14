@@ -241,7 +241,6 @@ function handleDownload() {
             <CopyButton
               v-if="(decodeSource || input.trim()) && (decodeSource || input.trim()).length <= COPY_THRESHOLD"
               :text="decodeSource || input.trim()"
-              label="复制 Base64"
             />
           </div>
         </div>

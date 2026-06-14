@@ -235,7 +235,7 @@ onMounted(() => { collectDeviceInfo(); });
 
           <!-- 操作按钮 -->
           <div class="flex items-center gap-3">
-            <CopyButton :text="selectedTemplate.ua" label="复制 UA" />
+            <CopyButton :text="selectedTemplate.ua" />
             <button
               class="px-3 py-1.5 text-xs font-medium rounded-sm border border-border bg-card text-text hover:bg-hover transition-colors cursor-pointer"
               @click="fillToCustom"
@@ -262,7 +262,7 @@ onMounted(() => { collectDeviceInfo(); });
           ></textarea>
           <div class="flex items-center gap-3 mb-4">
             <ClearButton v-if="customUA" @clear="clearCustomUA" />
-            <CopyButton v-if="customUA" :text="customUA" label="复制 UA" />
+            <CopyButton v-if="customUA" :text="customUA" />
           </div>
           <div v-if="customItems.length" class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
             <div
@@ -307,7 +307,7 @@ onMounted(() => { collectDeviceInfo(); });
             <span :class="['text-sm text-text break-all', item.label === 'UserAgent' && 'font-mono text-xs']">{{ item.value }}</span>
           </div>
         </div>
-        <CopyButton :text="allInfoJson" label="复制 JSON" />
+        <CopyButton :text="allInfoJson" />
       </div>
     </div>
   </div>

@@ -216,7 +216,7 @@ watch(
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">计算结果</span>
         <div class="flex gap-2">
-          <CopyButton v-if="hasResults" :text="allResultsText" label="复制全部" />
+          <CopyButton v-if="hasResults" :text="allResultsText" />
           <ClearButton @clear="handleClear" />
         </div>
       </div>
@@ -249,7 +249,7 @@ watch(
         >
           <span class="text-xs font-semibold text-accent min-w-[60px]">{{ algo }}</span>
           <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ hash }}</code>
-          <CopyButton :text="hash" label="复制" />
+          <CopyButton :text="hash" />
         </div>
       </div>
     </div>

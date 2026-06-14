@@ -133,7 +133,6 @@ function getCategoryColor(category: StatusCategory): string {
       <CopyButton
         v-if="filteredStatuses.length > 0"
         :text="allStatusText"
-        label="复制全部"
       />
     </div>
 
@@ -172,7 +171,6 @@ function getCategoryColor(category: StatusCategory): string {
         <!-- 复制按钮 -->
         <CopyButton
           :text="String(status.code)"
-          label="复制"
           class="shrink-0"
         />
       </div>

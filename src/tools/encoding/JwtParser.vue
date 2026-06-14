@@ -357,7 +357,7 @@ watch(mode, (newMode) => {
             <!-- Header Tab -->
             <div v-if="parseResultTab === 'header'">
               <pre class="m-0 mb-3 px-4 py-2 bg-hover rounded-sm font-mono text-[0.8125rem] whitespace-pre-wrap break-all">{{ segmentJson(parsed.header) }}</pre>
-              <CopyButton :text="segmentJson(parsed.header)" label="复制 JSON" />
+              <CopyButton :text="segmentJson(parsed.header)" />
             </div>
 
             <!-- Payload Tab -->
@@ -409,13 +409,13 @@ watch(mode, (newMode) => {
                 </div>
               </template>
 
-              <CopyButton :text="segmentJson(parsed.payload)" label="复制 JSON" />
+              <CopyButton :text="segmentJson(parsed.payload)" />
             </div>
 
             <!-- Signature Tab -->
             <div v-else-if="parseResultTab === 'signature'">
               <code class="block font-mono text-[0.8125rem] break-all text-text mb-3">{{ parsed.signature }}</code>
-              <CopyButton :text="parsed.signature" label="复制" />
+              <CopyButton :text="parsed.signature" />
             </div>
           </template>
 
@@ -563,7 +563,7 @@ watch(mode, (newMode) => {
       <div v-if="encodedToken" class="mb-3">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium">生成的 JWT Token</span>
-          <CopyButton :text="encodedToken" label="复制 Token" />
+          <CopyButton :text="encodedToken" />
         </div>
         <div class="border border-border rounded-md p-4 bg-card">
           <code class="font-mono text-[0.8125rem] break-all text-text">{{ encodedToken }}</code>

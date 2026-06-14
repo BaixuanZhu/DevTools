@@ -232,22 +232,22 @@ const diffResult = computed(() => {
             <div class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">协议</span>
               <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.protocol }}</code>
-              <CopyButton :text="urlParsed.protocol" label="复制" />
+              <CopyButton :text="urlParsed.protocol" />
             </div>
             <div class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">主机</span>
               <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.host }}</code>
-              <CopyButton :text="urlParsed.host" label="复制" />
+              <CopyButton :text="urlParsed.host" />
             </div>
             <div v-if="urlParsed.port" class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">端口</span>
               <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.port }}</code>
-              <CopyButton :text="urlParsed.port" label="复制" />
+              <CopyButton :text="urlParsed.port" />
             </div>
             <div class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">路径</span>
               <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.pathname }}</code>
-              <CopyButton :text="urlParsed.pathname" label="复制" />
+              <CopyButton :text="urlParsed.pathname" />
             </div>
             <div v-if="urlParsed.searchParams.length > 0" class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">查询参数</span>
@@ -256,14 +256,14 @@ const diffResult = computed(() => {
                   <code class="font-mono text-[0.8125rem] text-accent">{{ param.key }}</code>
                   <span class="text-muted text-[0.8125rem]">=</span>
                   <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ param.value }}</code>
-                  <CopyButton :text="`${param.key}=${param.value}`" label="复制" />
+                  <CopyButton :text="`${param.key}=${param.value}`" />
                 </div>
               </div>
             </div>
             <div v-if="urlParsed.hash" class="flex items-start gap-2">
               <span class="text-[0.8125rem] text-muted shrink-0 w-20">哈希</span>
               <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ urlParsed.hash }}</code>
-              <CopyButton :text="urlParsed.hash" label="复制" />
+              <CopyButton :text="urlParsed.hash" />
             </div>
           </div>
         </div>
@@ -282,7 +282,7 @@ const diffResult = computed(() => {
               </div>
               <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
                 <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ encodeComponentResult || '—' }}</code>
-                <CopyButton v-if="encodeComponentResult" :text="encodeComponentResult" label="复制" class="shrink-0" />
+                <CopyButton v-if="encodeComponentResult" :text="encodeComponentResult" class="shrink-0" />
               </div>
             </div>
 
@@ -293,7 +293,7 @@ const diffResult = computed(() => {
               </div>
               <div class="grid grid-cols-[1fr_auto] gap-2 items-start">
                 <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ encodeFullResult || '—' }}</code>
-                <CopyButton v-if="encodeFullResult" :text="encodeFullResult" label="复制" class="shrink-0" />
+                <CopyButton v-if="encodeFullResult" :text="encodeFullResult" class="shrink-0" />
               </div>
             </div>
 
@@ -329,7 +329,7 @@ const diffResult = computed(() => {
               <div v-if="decodeComponentError" class="text-error text-[0.8125rem]">{{ decodeComponentError }}</div>
               <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
                 <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ decodeComponentResult || '—' }}</code>
-                <CopyButton v-if="decodeComponentResult" :text="decodeComponentResult" label="复制" class="shrink-0" />
+                <CopyButton v-if="decodeComponentResult" :text="decodeComponentResult" class="shrink-0" />
               </div>
             </div>
 
@@ -341,7 +341,7 @@ const diffResult = computed(() => {
               <div v-if="decodeFullError" class="text-error text-[0.8125rem]">{{ decodeFullError }}</div>
               <div v-else class="grid grid-cols-[1fr_auto] gap-2 items-start">
                 <code class="font-mono text-[0.8125rem] break-all text-text min-w-0 bg-hover p-2 rounded-sm">{{ decodeFullResult || '—' }}</code>
-                <CopyButton v-if="decodeFullResult" :text="decodeFullResult" label="复制" class="shrink-0" />
+                <CopyButton v-if="decodeFullResult" :text="decodeFullResult" class="shrink-0" />
               </div>
             </div>
           </div>
