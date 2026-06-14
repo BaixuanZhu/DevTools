@@ -222,6 +222,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '支持浏览器可解码的所有常见格式：<strong>PNG / JPG / WebP / BMP / GIF（取首帧）</strong>等。可直接拖拽文件、点击选择，或用 <code>Ctrl+V</code> 粘贴截图。单张图片上限 <strong>10MB</strong>。',
     },
   ],
+  'ipv6-cidr': [
+    {
+      question: 'IPv6 为什么没有广播地址？',
+      answer: 'IPv6 用<strong>组播（Multicast）</strong>替代了 IPv4 的广播机制，不再需要专门的广播地址字段。需要一对多通信时使用组播地址（<code>ff00::/8</code>），因此 IPv6 子网里没有「广播地址」这一概念。',
+    },
+    {
+      question: 'IPv6 的 /64 是什么意思？',
+      answer: '<code>/64</code> 是 IPv6 最常见的子网前缀长度：前 64 位为网络前缀，后 64 位为接口标识符，是终端网段的标准长度。一个 /64 子网包含 <strong>2⁶⁴（约 1.8×10¹⁹）</strong>个地址，远超 IPv4 全部地址空间。',
+    },
+    {
+      question: '为什么同时显示压缩和展开两种格式？',
+      answer: '<strong>压缩格式</strong>（如 <code>2001:db8::</code>）省略连续零段，便于阅读和书写；<strong>展开格式</strong>（8 组 4 位十六进制，如 <code>2001:0db8:0000:...</code>）便于程序处理和逐段定位。两者各有用途，工具同时展示并可分别复制。',
+    },
+    {
+      question: 'IPv6 地址有哪些类型？',
+      answer: '常见类型：<strong>全球单播</strong>（<code>2000::/3</code>，公网可路由）、<strong>链路本地</strong>（<code>fe80::/10</code>，仅本网段）、<strong>唯一本地 ULA</strong>（<code>fc00::/7</code>，内网）、<strong>组播</strong>（<code>ff00::/8</code>）、<strong>环回</strong>（<code>::1</code>）。输入地址后工具会自动识别类型。',
+    },
+  ],
 };
 
 /**
