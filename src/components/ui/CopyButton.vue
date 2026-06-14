@@ -32,6 +32,7 @@ async function handleCopy() {
 <template>
   <button
     type="button"
+    aria-label="复制"
     :class="[
       sizeClasses[size],
       'flex items-center justify-center',

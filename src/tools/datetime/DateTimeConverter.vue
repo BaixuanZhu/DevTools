@@ -66,9 +66,7 @@ function updateLiveClock() {
 }
 
 watch(liveTimezone, () => {
-  if (isMounted.value) {
-    updateLiveClock();
-  }
+  updateLiveClock();
 });
 
 onMounted(() => {
@@ -312,11 +310,9 @@ const unifiedResultFields = computed(() => {
           <span class="text-xs font-semibold text-accent min-w-[72px] shrink-0">{{ field.label }}</span>
           <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ isMounted ? field.value : '-' }}</code>
           <CopyButton
-            v-if="isMounted"
             :text="field.value"
             size="sm"
           />
-          <span v-else class="shrink-0 text-xs text-muted w-[24px] text-center">📋</span>
         </div>
       </div>
     </section>
