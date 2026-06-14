@@ -32,7 +32,7 @@ export const uaCategories: UACategory[] = [
   {
     label: '移动端',
     platform: 'mobile',
-    browsers: ['Safari', 'Chrome', '微信', 'QQ'],
+    browsers: ['Safari', 'Chrome', 'Edge', 'Firefox', '微信', '微信小程序', '企业微信', 'QQ', '抖音', '微博', '百度', '支付宝', '支付宝小程序', '钉钉', '飞书'],
   },
 ];
 
@@ -177,6 +177,34 @@ export const uaTemplates: UATemplate[] = [
     ua: 'Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36',
   },
 
+  // === 移动端 - Edge ===
+  {
+    id: 'edge-iphone',
+    name: 'Edge / iPhone',
+    platform: 'mobile',
+    browser: 'Edge',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 EdgiOS/126.0.2592.79 Mobile/15E148 Safari/604.1',
+  },
+  {
+    id: 'edge-android',
+    name: 'Edge / Pixel 8',
+    platform: 'mobile',
+    browser: 'Edge',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.122 Mobile Safari/537.36 EdgA/126.0.2592.79',
+  },
+
+  // === 移动端 - Firefox ===
+  {
+    id: 'firefox-android',
+    name: 'Firefox / Pixel 8',
+    platform: 'mobile',
+    browser: 'Firefox',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Android 14; Mobile; rv:127.0) Gecko/127.0 Firefox/127.0',
+  },
+
   // === 移动端 - 微信 ===
   {
     id: 'wechat-iphone',
@@ -195,6 +223,42 @@ export const uaTemplates: UATemplate[] = [
     ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 MicroMessenger/8.0.49.2580(0x2800315B) NetType/WIFI Language/zh_CN',
   },
 
+  // === 移动端 - 微信小程序 ===
+  {
+    id: 'wechat-miniprogram-iphone',
+    name: '微信小程序 / iPhone',
+    platform: 'mobile',
+    browser: '微信小程序',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.49(0x18003133) NetType/WIFI Language/zh_CN miniProgram/wxab8b9c3d2e1f0a1b/2',
+  },
+  {
+    id: 'wechat-miniprogram-android',
+    name: '微信小程序 / Android',
+    platform: 'mobile',
+    browser: '微信小程序',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 MMWEBID/2345 MicroMessenger/8.0.49.2580(0x2800315B) WeChat/arm64 WeixinGPVersion/0303002b NetType/wifi Language/zh_CN ABI/arm64 miniProgram/wxab8b9c3d2e1f0a1b/2',
+  },
+
+  // === 移动端 - 企业微信 ===
+  {
+    id: 'wxwork-iphone',
+    name: '企业微信 / iPhone',
+    platform: 'mobile',
+    browser: '企业微信',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 wxwork/4.1.30 MicroMessenger/7.0.1 Language/zh',
+  },
+  {
+    id: 'wxwork-android',
+    name: '企业微信 / Android',
+    platform: 'mobile',
+    browser: '企业微信',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 wxwork/4.1.30 MicroMessenger/7.0.1',
+  },
+
   // === 移动端 - QQ ===
   {
     id: 'qq-iphone',
@@ -211,6 +275,100 @@ export const uaTemplates: UATemplate[] = [
     browser: 'QQ',
     os: 'Android 14',
     ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 V1_AND_SQ_9.0.20_4346_YYB_D A_80620_1 QQ/9.0.20.605 NetType/WIFI WebP/0.3.0 AppId/0',
+  },
+
+  // === 移动端 - 抖音 ===
+  {
+    id: 'douyin-iphone',
+    name: '抖音 / iPhone',
+    platform: 'mobile',
+    browser: '抖音',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 AwemeByte/29.5.0 Channel/App Store ByteLocale/zh-Hans Region/CN',
+  },
+  {
+    id: 'douyin-android',
+    name: '抖音 / Android',
+    platform: 'mobile',
+    browser: '抖音',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 aweme/290500 SnssdAppVersionCode/29.5.0 JSAppVersion/2 Channel/App Store aid/1128',
+  },
+
+  // === 移动端 - 微博 ===
+  {
+    id: 'weibo-iphone',
+    name: '微博 / iPhone',
+    platform: 'mobile',
+    browser: '微博',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Weibo (iPhone15,2,iOS17.5.1,Weibo14.5.0,1)',
+  },
+  {
+    id: 'weibo-android',
+    name: '微博 / Android',
+    platform: 'mobile',
+    browser: '微博',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 Weibo/___weibo__14.5.0__android',
+  },
+
+  // === 移动端 - 百度 ===
+  {
+    id: 'baidu-android',
+    name: '百度App / Android',
+    platform: 'mobile',
+    browser: '百度',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 SP-engine/3.2.0 baiduboxapp/13.50.0.10 NABar/1.0',
+  },
+
+  // === 移动端 - 支付宝 ===
+  {
+    id: 'alipay-iphone',
+    name: '支付宝 / iPhone',
+    platform: 'mobile',
+    browser: '支付宝',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Ariver/1.0.0 AliApp(AP/10.5.96.1000) AlipayClient/10.5.96.1000 AlipayLanguage/zh-Hans AlipayClientLanguage/zh',
+  },
+  {
+    id: 'alipay-android',
+    name: '支付宝 / Android',
+    platform: 'mobile',
+    browser: '支付宝',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; U; Android 14; zh-CN; Pixel 8 Build/UQ1A.240205.004) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/100.0.4896.127 Mobile Safari/537.36 AliApp(AP/10.5.96.1000) AlipayClient/10.5.96.1000 AlipayLanguage/zh-Hans',
+  },
+
+  // === 移动端 - 支付宝小程序 ===
+  {
+    id: 'alipay-miniprogram-iphone',
+    name: '支付宝小程序 / iPhone',
+    platform: 'mobile',
+    browser: '支付宝小程序',
+    os: 'iOS 17',
+    ua: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Ariver/1.0.0 AliApp(AP/10.5.96.1000) AlipayClient/10.5.96.1000 AlipayLanguage/zh-Hans AlipayClientLanguage/zh TinyApp/3.9.0',
+  },
+
+  // === 移动端 - 钉钉 ===
+  {
+    id: 'dingtalk-android',
+    name: '钉钉 / Android',
+    platform: 'mobile',
+    browser: '钉钉',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 AliApp(DingTalk/7.6.0) DingTalk/7.6.0',
+  },
+
+  // === 移动端 - 飞书 ===
+  {
+    id: 'lark-android',
+    name: '飞书 / Android',
+    platform: 'mobile',
+    browser: '飞书',
+    os: 'Android 14',
+    ua: 'Mozilla/5.0 (Linux; Android 14; Pixel 8 Build/UQ1A.240205.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/126.0.6478.122 Mobile Safari/537.36 Lark/7.6.0',
   },
 ];
 
