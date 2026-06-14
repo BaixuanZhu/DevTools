@@ -130,6 +130,8 @@ watch(timestampInput, () => {
   const info = timestampToDateInfo(millis, convertTimezone.value, customFormatStr.value);
   unifiedResult.value = { source: 'timestamp', ...info };
   lastActiveInput.value = 'timestamp';
+  // 同步到日期输入框（使用本地时间格式）
+  dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
 });
 
 function fillNow() {
@@ -137,7 +139,9 @@ function fillNow() {
 }
 
 function handleQuickTime(type: QuickTimeType) {
-  timestampInput.value = String(getQuickTimestamp(type));
+  const millis = getQuickTimestamp(type);
+  timestampInput.value = String(millis);
+  dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
 }
 
 // ─── 日期输入 ───
@@ -176,6 +180,17 @@ function onPickerInput(event: Event) {
 watch(dateInput, () => {
   const input = dateInput.value.trim();
   dateErrorMsg.value = '';
+
+  // 如果当前变化来自时间戳同步，不反向同步回时间戳框
+  if (lastActiveInput.value === 'timestamp') {
+    if (!input) {
+      pickerValue.value = '';
+    } else {
+      pickerValue.value = displayToIso(input);
+    }
+    return;
+  }
+
   if (!input) {
     if (lastActiveInput.value === 'date') {
       unifiedResult.value = null;
@@ -184,11 +199,14 @@ watch(dateInput, () => {
     pickerValue.value = '';
     return;
   }
+
   const result = parseDateInput(input, convertTimezone.value, customFormatStr.value);
   if (result) {
     unifiedResult.value = { source: 'date', ...result };
     lastActiveInput.value = 'date';
     pickerValue.value = displayToIso(input);
+    // 同步到时间戳输入框（毫秒）
+    timestampInput.value = String(result.unixMillis);
   } else {
     dateErrorMsg.value = '请输入标准格式 yyyy/MM/dd HH:mm:ss';
     pickerValue.value = '';
