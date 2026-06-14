@@ -202,7 +202,7 @@ function handleClear() {
       <div v-if="output" class="mb-4">
         <div class="flex items-center justify-between mb-2">
           <span class="text-sm font-medium">{{ mode === 'encrypt' ? '密文' : '明文' }}</span>
-          <CopyButton :text="output" label="复制结果"/>
+          <CopyButton :text="output" />
         </div>
         <div class="border border-border rounded-md p-4 bg-card">
           <code class="font-mono text-[0.8125rem] break-all text-text">{{ output }}</code>

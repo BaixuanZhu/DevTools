@@ -245,7 +245,7 @@ function handleClear() {
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
           <label class="block text-[0.8125rem] text-muted font-medium">公钥</label>
-          <CopyButton v-if="publicKeyText" :text="publicKeyText" label="复制公钥" />
+          <CopyButton v-if="publicKeyText" :text="publicKeyText" />
         </div>
         <textarea
           v-model="publicKeyText"
@@ -257,7 +257,7 @@ function handleClear() {
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
           <label class="block text-[0.8125rem] text-muted font-medium">私钥</label>
-          <CopyButton v-if="privateKeyText" :text="privateKeyText" label="复制私钥" />
+          <CopyButton v-if="privateKeyText" :text="privateKeyText" />
         </div>
         <textarea
           v-model="privateKeyText"
@@ -300,7 +300,7 @@ function handleClear() {
     <div v-if="outputText" class="mb-4">
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">{{ outputLabel }}</span>
-        <CopyButton :text="outputText" label="复制结果" />
+        <CopyButton :text="outputText" />
       </div>
       <div class="border border-border rounded-md p-4 bg-card">
         <code class="font-mono text-[0.8125rem] break-all text-text">{{ outputText }}</code>

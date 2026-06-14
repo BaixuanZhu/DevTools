@@ -392,7 +392,7 @@ onUnmounted(() => {
       </div>
 
       <div class="ml-auto flex gap-2">
-        <CopyButton :text="copyableText" label="复制结果" />
+        <CopyButton :text="copyableText" />
         <ClearButton @clear="handleClear" />
       </div>
     </div>

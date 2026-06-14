@@ -9,6 +9,7 @@
  * - 颜色对比度过低时给出警告
  */
 import { ref, computed, watch, onMounted } from 'vue';
+import { useCopy } from '../../composables/useCopy';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import ColorInput from '../../components/ui/ColorInput.vue';
@@ -45,6 +46,8 @@ const errorMsg = ref('');
 const isGenerating = ref(false);
 
 const textInputRef = ref<HTMLTextAreaElement | null>(null);
+
+const { copied: svgCopied, copy: copySvgText } = useCopy();
 
 // 容错级别选项（供 OptionRadioGroup 消费）
 const errorLevelOptions = QR_ERROR_LEVELS.map((o) => ({ value: o.value, label: o.label }));
@@ -158,10 +161,9 @@ async function copySvg() {
       foreground: foreground.value,
       background: background.value,
     });
-    await navigator.clipboard.writeText(svg);
-    showToast('success', '已复制 SVG');
+    await copySvgText(svg);
   } catch (e: unknown) {
-    showToast('error', e instanceof Error ? e.message : '复制失败');
+    // useCopy 已在失败时 dispatch toast，这里不再额外处理
   }
 }
 
@@ -315,10 +317,45 @@ onMounted(() => {
           <button
             v-if="text.trim()"
             type="button"
-            class="px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            :class="[
+              'w-9 h-9 flex items-center justify-center rounded-sm border',
+              'bg-card text-muted',
+              'transition-[background-color,border-color,color] duration-150',
+              'hover:bg-hover hover:text-text',
+              svgCopied ? 'border-success text-success' : 'border-border',
+            ]"
+            :disabled="!text.trim()"
             @click="copySvg"
           >
-            复制 SVG
+            <svg
+              v-if="svgCopied"
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <svg
+              v-else
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
           </button>
           <button
             v-if="text.trim()"

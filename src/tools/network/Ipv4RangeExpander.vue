@@ -150,7 +150,7 @@ watch([startIP, endIP], () => {
         <!-- 列表头 -->
         <div class="flex items-center justify-between px-4 py-2 border-b border-border">
           <span class="text-[0.8125rem] font-semibold text-text">CIDR 块列表</span>
-          <CopyButton :text="allCidrsText" label="复制全部" />
+          <CopyButton :text="allCidrsText" />
         </div>
 
         <!-- 列表表头 -->
