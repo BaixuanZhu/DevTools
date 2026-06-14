@@ -78,14 +78,13 @@ onMounted(() => {
 
   const now = Date.now();
   const display = dayjs(now).format(DATE_DISPLAY_FORMAT);
-  isProgrammaticUpdate.value = true;
-  timestampInput.value = String(now);
-  dateInput.value = display;
-  pickerValue.value = displayToIso(display);
-  isProgrammaticUpdate.value = false;
+  runProgrammatically(() => {
+    timestampInput.value = String(now);
+    dateInput.value = display;
+    pickerValue.value = displayToIso(display);
+  });
   lastActiveInput.value = 'timestamp';
 
-  // 手动触发一次结果计算（因为 isProgrammaticUpdate 跳过了 watcher）
   const info = timestampToDateInfo(now, convertTimezone.value, customFormatStr.value);
   unifiedResult.value = { source: 'timestamp', ...info };
 });
@@ -102,6 +101,19 @@ const customFormatStr = ref('YYYY-MM-DD HH:mm:ss');
 const unifiedResult = ref<UnifiedResult | null>(null);
 const lastActiveInput = ref<'timestamp' | 'date' | null>(null);
 const isProgrammaticUpdate = ref(false);
+
+/**
+ * 在程序化更新多个响应式引用时包装 isProgrammaticUpdate 标志。
+ * 使用 try-finally 确保标志总是被重置，防止异常路径导致状态 stale。
+ */
+function runProgrammatically(fn: () => void) {
+  isProgrammaticUpdate.value = true;
+  try {
+    fn();
+  } finally {
+    isProgrammaticUpdate.value = false;
+  }
+}
 
 watch([convertTimezone, customFormatStr], () => {
   if (!unifiedResult.value) return;
@@ -139,20 +151,23 @@ watch(timestampInput, () => {
   const info = timestampToDateInfo(millis, convertTimezone.value, customFormatStr.value);
   unifiedResult.value = { source: 'timestamp', ...info };
   lastActiveInput.value = 'timestamp';
-  isProgrammaticUpdate.value = true;
-  dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
-  isProgrammaticUpdate.value = false;
+  runProgrammatically(() => {
+    dateInput.value = dayjs(millis).format(DATE_DISPLAY_FORMAT);
+  });
 });
 
 function handleQuickTime(type: QuickTimeType) {
   const millis = getQuickTimestamp(type);
   const display = dayjs(millis).format(DATE_DISPLAY_FORMAT);
-  isProgrammaticUpdate.value = true;
-  timestampInput.value = String(millis);
-  dateInput.value = display;
-  pickerValue.value = displayToIso(display);
-  isProgrammaticUpdate.value = false;
+  runProgrammatically(() => {
+    timestampInput.value = String(millis);
+    dateInput.value = display;
+    pickerValue.value = displayToIso(display);
+  });
   lastActiveInput.value = 'timestamp';
+
+  const info = timestampToDateInfo(millis, convertTimezone.value, customFormatStr.value);
+  unifiedResult.value = { source: 'timestamp', ...info };
 }
 
 // ─── 日期输入 ───
@@ -211,9 +226,9 @@ watch(dateInput, () => {
     unifiedResult.value = { source: 'date', ...result };
     lastActiveInput.value = 'date';
     pickerValue.value = displayToIso(input);
-    isProgrammaticUpdate.value = true;
-    timestampInput.value = String(result.unixMillis);
-    isProgrammaticUpdate.value = false;
+    runProgrammatically(() => {
+      timestampInput.value = String(result.unixMillis);
+    });
   } else {
     dateErrorMsg.value = '请输入标准格式 yyyy/MM/dd HH:mm:ss';
     pickerValue.value = '';
@@ -224,14 +239,15 @@ watch(dateInput, () => {
 });
 
 function clearAll() {
-  isProgrammaticUpdate.value = false;
-  timestampInput.value = '';
-  dateInput.value = '';
-  pickerValue.value = '';
-  tsErrorMsg.value = '';
-  dateErrorMsg.value = '';
   unifiedResult.value = null;
   lastActiveInput.value = null;
+  tsErrorMsg.value = '';
+  dateErrorMsg.value = '';
+  runProgrammatically(() => {
+    timestampInput.value = '';
+    dateInput.value = '';
+    pickerValue.value = '';
+  });
 }
 
 const liveClockFields = computed(() => [
