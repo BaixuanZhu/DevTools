@@ -281,93 +281,106 @@ const unifiedResultFields = computed(() => {
     <!-- ═══ 双栏工作区：输入左 / 输出右 ═══ -->
     <ResponsiveWorkspace mode="horizontal">
       <template #input>
-        <section class="mb-6">
+        <section class="p-4 border border-border rounded-md bg-card">
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-semibold m-0 text-text">日期，时间戳</h2>
+            <h2 class="text-sm font-semibold m-0 text-text">转换源</h2>
             <ClearButton @clear="clearAll" />
           </div>
 
           <!-- 快捷按钮 -->
-          <div class="flex gap-1.5 mb-2 flex-wrap">
+          <div class="flex gap-1.5 mb-4 flex-wrap">
             <button
               v-for="opt in QUICK_TIME_OPTIONS"
               :key="opt.key"
               type="button"
-              class="px-2.5 py-1 border border-border rounded-sm bg-surface text-muted text-xs font-sans cursor-pointer transition-colors duration-100 hover:bg-hover hover:text-text"
+              class="px-2.5 py-1 border border-border rounded-sm bg-surface text-muted text-xs font-sans cursor-pointer transition-colors duration-100 focus:outline-none focus:text-accent focus:border-accent"
               @click="handleQuickTime(opt.key)"
             >
               {{ opt.label }}
             </button>
           </div>
 
-          <!-- 时间戳输入 -->
-          <div class="flex flex-col gap-1 mb-3">
-            <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入时间戳</label>
-            <div class="relative">
-              <input
-                v-model="timestampInput"
-                class="w-full px-4 py-2 pr-20 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
-                placeholder="例如：1700000000000（毫秒）或 1700000000（秒）"
-                :aria-describedby="tsErrorMsg ? 'ts-error' : undefined"
-              />
-              <button
-                type="button"
-                class="absolute right-1 top-1/2 -translate-y-1/2 flex items-center gap-1 px-2 py-1 text-xs font-sans text-muted rounded-sm transition-colors duration-150 focus:outline-none focus:text-accent"
-                title="填入当前时间戳"
-                @click="fillNow"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <polyline points="12 6 12 12 16 14" />
-                </svg>
-                <span>当前</span>
-              </button>
+          <!-- 双源卡片区 -->
+          <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
+            <!-- Unix 时间戳卡片 -->
+            <div class="bg-surface border border-border rounded-sm overflow-hidden">
+              <div class="px-3 py-2 border-b border-border bg-card">
+                <label class="block text-[0.8125rem] text-muted font-medium">Unix 时间戳</label>
+              </div>
+              <div class="px-3 py-3">
+                <input
+                  v-model="timestampInput"
+                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+                  placeholder="秒或毫秒"
+                  :aria-describedby="tsErrorMsg ? 'ts-error' : undefined"
+                />
+              </div>
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2">
+                <CopyButton :text="timestampInput" label="复制" class="text-xs px-0 py-0" />
+              </div>
             </div>
-          </div>
-          <p
-            v-if="tsErrorMsg"
-            id="ts-error"
-            class="text-error text-[0.8125rem] m-0 mb-4"
-          >
-            {{ tsErrorMsg }}
-          </p>
 
-          <!-- 日期输入 -->
-          <div class="flex flex-col gap-1 mb-3">
-            <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入日期时间</label>
-            <div class="flex items-stretch gap-2">
-              <input
-                v-model="dateInput"
-                class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
-                placeholder="yyyy/MM/dd HH:mm:ss"
-                :aria-describedby="dateErrorMsg ? 'date-error' : undefined"
-              />
-              <button
-                type="button"
-                class="px-3 py-2 border border-border rounded-sm bg-card text-text hover:bg-hover transition-[background-color] duration-150 focus:outline-none focus:text-accent"
-                aria-label="打开日期选择器"
-                @click="openDatePicker"
-              >
-                📅
-              </button>
-              <input
-                ref="datePickerRef"
-                type="datetime-local"
-                class="sr-only"
-                aria-hidden="true"
-                tabindex="-1"
-                :value="pickerValue"
-                @input="onPickerInput"
-              />
+            <!-- 中间占位/同步指示 -->
+            <div class="justify-self-center text-muted text-xs font-sans select-none hidden md:block">⇄</div>
+
+            <!-- 日期时间卡片 -->
+            <div class="bg-surface border border-border rounded-sm overflow-hidden">
+              <div class="px-3 py-2 border-b border-border bg-card">
+                <label class="block text-[0.8125rem] text-muted font-medium">日期时间</label>
+              </div>
+              <div class="px-3 py-3">
+                <input
+                  v-model="dateInput"
+                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+                  placeholder="yyyy/MM/dd HH:mm:ss"
+                  :aria-describedby="dateErrorMsg ? 'date-error' : undefined"
+                />
+              </div>
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2">
+                <button
+                  type="button"
+                  class="text-xs text-muted bg-transparent focus:outline-none focus:text-accent"
+                  aria-label="打开日期选择器"
+                  @click="openDatePicker"
+                >
+                  📅 选择
+                </button>
+                <CopyButton :text="dateInput" label="复制" class="text-xs px-0 py-0" />
+              </div>
             </div>
           </div>
-          <p
-            v-if="dateErrorMsg"
-            id="date-error"
-            class="text-error text-[0.8125rem] m-0 mb-4"
-          >
-            {{ dateErrorMsg }}
-          </p>
+
+          <!-- 错误占位 -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+            <div class="min-h-[20px]">
+              <p
+                v-if="tsErrorMsg"
+                id="ts-error"
+                class="text-error text-[0.8125rem] m-0"
+              >
+                {{ tsErrorMsg }}
+              </p>
+            </div>
+            <div class="min-h-[20px]">
+              <p
+                v-if="dateErrorMsg"
+                id="date-error"
+                class="text-error text-[0.8125rem] m-0"
+              >
+                {{ dateErrorMsg }}
+              </p>
+            </div>
+          </div>
+
+          <input
+            ref="datePickerRef"
+            type="datetime-local"
+            class="sr-only"
+            aria-hidden="true"
+            tabindex="-1"
+            :value="pickerValue"
+            @input="onPickerInput"
+          />
         </section>
       </template>
 
