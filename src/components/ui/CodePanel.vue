@@ -17,8 +17,7 @@
  * </CodePanel>
  * ```
  */
-import { ref } from 'vue';
-import { copyToClipboard } from '../../utils/shared/clipboard';
+import { useCopy } from '../../composables/useCopy';
 
 interface Props {
   /** 面板标签文字 */
@@ -39,21 +38,12 @@ const emit = defineEmits<{
   (e: 'clear'): void;
 }>();
 
-/** 复制成功状态 */
-const copied = ref(false);
+const { copied, copy } = useCopy();
 
 /** 处理复制 */
 async function handleCopy(): Promise<void> {
   if (!props.copyText) return;
-
-  const success = await copyToClipboard(props.copyText);
-  if (success) {
-    copied.value = true;
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已复制' } }));
-    setTimeout(() => {
-      copied.value = false;
-    }, 1500);
-  }
+  await copy(props.copyText);
 }
 
 /** 处理清空 */
