@@ -359,7 +359,7 @@ const unifiedResultFields = computed(() => {
                   :aria-describedby="tsErrorMsg ? 'ts-error' : undefined"
                 />
               </div>
-              <div class="px-3 py-2 border-t border-border bg-card flex gap-2">
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-[32px]">
               </div>
             </div>
 
@@ -379,7 +379,7 @@ const unifiedResultFields = computed(() => {
                   :aria-describedby="dateErrorMsg ? 'date-error' : undefined"
                 />
               </div>
-              <div class="px-3 py-2 border-t border-border bg-card flex gap-2">
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-[32px]">
                 <button
                   type="button"
                   class="text-xs text-muted bg-transparent focus:outline-none focus:text-accent"
