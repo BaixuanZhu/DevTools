@@ -109,6 +109,18 @@ const toolFaqs: Record<string, FaqItem[]> = {
       question: '哈希和加密有什么区别？',
       answer: '哈希是<strong>单向</strong>的，无法从结果还原原文，常用于数据完整性校验。加密是<strong>双向</strong>的，使用密钥可以还原原文，常用于数据保密传输。',
     },
+    {
+      question: 'HMAC 和普通哈希有什么区别？',
+      answer: '普通哈希（如 SHA-256）<strong>不需要密钥</strong>，任何人都能对相同输入算出相同结果，仅用于完整性校验。HMAC 是<strong>带密钥</strong>的哈希，只有持有密钥的一方才能生成或验证签名，常用于 API 签名（如 AWS SigV4）和 Webhook 校验（如 GitHub / Stripe），既能校验完整性又能确认来源。',
+    },
+    {
+      question: '为什么我的 Webhook 签名验证不通过？',
+      answer: '常见三大坑：①<strong>密钥编码选错</strong>——若密钥本身是 Hex 或 Base64 字节串，需在「密钥编码」处选对应编码，不能当文本输入；②<strong>消息不是原文</strong>——Webhook 签名是对原始请求体字节算的，复制粘贴时若被格式化、加空格或转码就会对不上，建议从抓包工具取原始 body；③<strong>签名带了前缀</strong>——如 GitHub 的 <code>sha256=</code>，本工具会自动剥离 <code>sha***=</code> 前缀与首尾空白、容忍大小写，无需手动处理。',
+    },
+    {
+      question: '为什么不支持 HMAC-MD5？',
+      answer: 'MD5 本身已不安全，HMAC-MD5 在实际工程中几乎不再使用，主流 Webhook 与 API 签名均采用 HMAC-SHA256 及以上。本工具仅支持 HMAC-SHA-1 / SHA-256 / SHA-384 / SHA-512，与 Web Crypto 原生能力一致。',
+    },
   ],
   'uuid-generator': [
     {
