@@ -5,7 +5,7 @@ import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import { computeHash, computeFileHash, HASH_ALGORITHMS, type HashAlgorithm } from '../../utils/crypto/hash';
-import { computeHmac, HMAC_ALGORITHMS, type HmacAlgorithm, type KeyEncoding, type HashResult } from '../../utils/crypto/hash';
+import { computeHmac, verifyHmac, HMAC_ALGORITHMS, type HmacAlgorithm, type KeyEncoding, type HashResult } from '../../utils/crypto/hash';
 import { formatFileSize } from '../../utils/encoding/base64';
 
 const inputText = ref('Hello, DevTools!');
@@ -35,6 +35,14 @@ const hmacOutputFormat = ref<'hex' | 'hexUpper' | 'base64'>('hex');
 const hmacResult = ref<HashResult | null>(null);
 /** HMAC 计算错误 */
 const hmacError = ref('');
+/** 待验签名 */
+const verifySignature = ref('');
+/** 待验签名编码 */
+const verifySignatureEncoding = ref<KeyEncoding>('hex');
+/** 验证结果：match / mismatch / null（未填签名） */
+const verifyMatch = ref<'match' | 'mismatch' | null>(null);
+/** 验证错误（签名解码非法） */
+const verifyError = ref('');
 
 /** 密钥编码选项（密钥与待验签名共用） */
 const KEY_ENCODING_OPTIONS = [
@@ -203,6 +211,57 @@ async function computeHmacValue(): Promise<void> {
 watch([hmacMessage, hmacKey, hmacKeyEncoding, hmacAlgorithm], () => {
   computeHmacValue();
 }, { immediate: true });
+
+// ---- HMAC 验证 ----
+
+/**
+ * 比对待验签名与当前 HMAC 结果。
+ * 待验签名为空则清空验证状态；无生成结果时不清空（等待生成完成）。
+ * 签名解码非法时设置中文错误。
+ */
+async function verifySignatureValue(): Promise<void> {
+  if (!verifySignature.value.trim()) {
+    verifyMatch.value = null;
+    verifyError.value = '';
+    return;
+  }
+  if (!hmacResult.value) {
+    verifyMatch.value = null;
+    verifyError.value = '';
+    return;
+  }
+  try {
+    const ok = await verifyHmac(
+      hmacMessage.value,
+      hmacKey.value,
+      hmacKeyEncoding.value,
+      hmacAlgorithm.value,
+      verifySignature.value,
+      verifySignatureEncoding.value,
+    );
+    verifyMatch.value = ok ? 'match' : 'mismatch';
+    verifyError.value = '';
+  } catch {
+    verifyMatch.value = null;
+    verifyError.value = '待验签名格式无法识别，请检查签名编码';
+  }
+}
+
+/** 清空整个 HMAC 区（保留编码/算法选择，清输入与结果） */
+function handleHmacClear(): void {
+  hmacMessage.value = '';
+  hmacKey.value = '';
+  verifySignature.value = '';
+  hmacResult.value = null;
+  hmacError.value = '';
+  verifyMatch.value = null;
+  verifyError.value = '';
+}
+
+// 监听验证相关输入与生成结果，自动重新比对
+watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
+  verifySignatureValue();
+});
 </script>
 
 <template>
@@ -392,6 +451,36 @@ watch([hmacMessage, hmacKey, hmacKeyEncoding, hmacAlgorithm], () => {
         >
           输入密钥和消息后自动计算 HMAC 值
         </div>
+      </div>
+
+      <!-- 验证签名 -->
+      <div class="mb-4">
+        <label class="block text-[0.8125rem] text-muted font-medium mb-1">验证签名（可选）</label>
+        <div class="flex gap-2 items-start mb-2">
+          <input
+            v-model="verifySignature"
+            class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
+            placeholder="粘贴待验证的签名"
+          />
+          <SelectListbox
+            v-model="verifySignatureEncoding"
+            label="签名编码"
+            :options="KEY_ENCODING_OPTIONS"
+          />
+        </div>
+        <p v-if="verifyError" class="text-error text-[0.8125rem] m-0">{{ verifyError }}</p>
+        <p
+          v-else-if="verifyMatch === 'match'"
+          class="text-success text-[0.8125rem] m-0 font-medium"
+        >✓ 签名匹配</p>
+        <p
+          v-else-if="verifyMatch === 'mismatch'"
+          class="text-error text-[0.8125rem] m-0 font-medium"
+        >✗ 签名不匹配</p>
+      </div>
+
+      <div class="flex justify-end">
+        <ClearButton label="清空 HMAC 区" @clear="handleHmacClear" />
       </div>
     </div>
   </div>
