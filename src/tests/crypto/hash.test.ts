@@ -113,6 +113,18 @@ describe('computeHmac', () => {
     expect(result.hex).toBe('effcdf6ae5eb2fa2d27416d5f184df9c259a7c79');
   });
 
+  // RFC 4231 Test Case 2：key="Jefe", data="what do ya want for nothing?"
+  it('应按 RFC 4231 计算 HMAC-SHA-384（text 密钥）', async () => {
+    const result = await computeHmac('what do ya want for nothing?', 'Jefe', 'text', 'SHA-384');
+    expect(result.hex).toBe('af45d2e376484031617f78d2b58a6b1b9c7ef464f5a01b47e42ec3736322445e8e2240ca5e69e2c78b3239ecfab21649');
+  });
+
+  // RFC 4231 Test Case 2：key="Jefe", data="what do ya want for nothing?"
+  it('应按 RFC 4231 计算 HMAC-SHA-512（text 密钥）', async () => {
+    const result = await computeHmac('what do ya want for nothing?', 'Jefe', 'text', 'SHA-512');
+    expect(result.hex).toBe('164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737');
+  });
+
   // RFC 4231 Test Case 1：key=0x0b×20, data="Hi There"
   it('应支持 hex 编码密钥', async () => {
     const result = await computeHmac('Hi There', '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b', 'hex', 'SHA-256');
