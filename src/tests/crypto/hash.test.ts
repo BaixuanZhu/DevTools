@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeHash, computeFileHash, HASH_ALGORITHMS, decodeToBytes, computeHmac } from '../../utils/crypto/hash';
+import { computeHash, computeFileHash, HASH_ALGORITHMS, decodeToBytes, computeHmac, verifyHmac } from '../../utils/crypto/hash';
 
 describe('computeHash', () => {
   it('应正确计算 MD5 哈希', async () => {
@@ -126,5 +126,36 @@ describe('computeHmac', () => {
     const b64Bytes = Uint8Array.from(atob(result.base64), (c) => c.charCodeAt(0));
     const hexBytes = new Uint8Array(decodeToBytes(result.hex, 'hex'));
     expect(Array.from(b64Bytes)).toEqual(Array.from(hexBytes));
+  });
+});
+
+describe('verifyHmac', () => {
+  const message = 'what do ya want for nothing?';
+  const key = 'Jefe';
+  // 对应 HMAC-SHA-256
+  const validHex = '5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843';
+
+  it('正确签名应返回 true', async () => {
+    expect(await verifyHmac(message, key, 'text', 'SHA-256', validHex, 'hex')).toBe(true);
+  });
+
+  it('错误签名应返回 false', async () => {
+    expect(await verifyHmac(message, key, 'text', 'SHA-256', '0'.repeat(64), 'hex')).toBe(false);
+  });
+
+  it('应容忍 sha256= 前缀', async () => {
+    expect(await verifyHmac(message, key, 'text', 'SHA-256', `sha256=${validHex}`, 'hex')).toBe(true);
+  });
+
+  it('应容忍大小写差异', async () => {
+    expect(await verifyHmac(message, key, 'text', 'SHA-256', validHex.toUpperCase(), 'hex')).toBe(true);
+  });
+
+  it('应容忍首尾空白', async () => {
+    expect(await verifyHmac(message, key, 'text', 'SHA-256', ` ${validHex} `, 'hex')).toBe(true);
+  });
+
+  it('密钥格式非法应抛错（交由调用方提示）', async () => {
+    await expect(verifyHmac(message, 'zz', 'hex', 'SHA-256', validHex, 'hex')).rejects.toThrow();
   });
 });

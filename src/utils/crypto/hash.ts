@@ -118,3 +118,51 @@ export async function computeHmac(
     base64: arrayBufferToBase64(raw),
   };
 }
+
+/**
+ * 常量时间字节比较，避免通过响应耗时推断内容（时序攻击）。
+ * 即使长度不等也遍历到较短长度，仅最终判定时把长度差异计入。
+ * @param a - 期望字节
+ * @param b - 待比较字节
+ */
+function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
+  let diff = a.length ^ b.length;
+  const len = Math.min(a.length, b.length);
+  for (let i = 0; i < len; i++) {
+    diff |= a[i] ^ b[i];
+  }
+  return diff === 0;
+}
+
+/** 待验签名需要剥离的厂商前缀（大小写不敏感），如 GitHub 的 sha256= */
+const SIGNATURE_PREFIX_RE = /^sha(?:1|224|256|384|512)=/i;
+
+/**
+ * 对消息计算 HMAC 并与待验签名做常量时间比较。
+ * 待验签名先 trim 并去除 sha1=/sha256= 等前缀（大小写不敏感）后，再按 signatureEncoding 解码。
+ * 密钥或签名格式非法时会抛错，由调用方转为中文提示。
+ * @param message - 原始消息
+ * @param key - 密钥
+ * @param keyEncoding - 密钥编码
+ * @param algorithm - HMAC 算法
+ * @param signature - 待验签名（可能带前缀/首尾空白）
+ * @param signatureEncoding - 签名编码
+ * @returns 是否匹配
+ */
+export async function verifyHmac(
+  message: string,
+  key: string,
+  keyEncoding: KeyEncoding,
+  algorithm: HmacAlgorithm,
+  signature: string,
+  signatureEncoding: KeyEncoding,
+): Promise<boolean> {
+  const cryptoKey = await importHmacKey(key, keyEncoding, algorithm);
+  const data = toArrayBuffer(new TextEncoder().encode(message));
+  const expected = new Uint8Array(await crypto.subtle.sign('HMAC', cryptoKey, data));
+
+  const normalized = signature.trim().replace(SIGNATURE_PREFIX_RE, '');
+  const provided = new Uint8Array(decodeToBytes(normalized, signatureEncoding));
+
+  return timingSafeEqual(expected, provided);
+}
