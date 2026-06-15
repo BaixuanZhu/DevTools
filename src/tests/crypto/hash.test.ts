@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeHash, computeFileHash, HASH_ALGORITHMS, decodeToBytes } from '../../utils/crypto/hash';
+import { computeHash, computeFileHash, HASH_ALGORITHMS, decodeToBytes, computeHmac } from '../../utils/crypto/hash';
 
 describe('computeHash', () => {
   it('应正确计算 MD5 哈希', async () => {
@@ -97,5 +97,34 @@ describe('decodeToBytes', () => {
 
   it('非法 hex 应抛错', () => {
     expect(() => decodeToBytes('zz', 'hex')).toThrow();
+  });
+});
+
+describe('computeHmac', () => {
+  // RFC 4231 Test Case 2：key="Jefe", data="what do ya want for nothing?"
+  it('应按 RFC 4231 计算 HMAC-SHA-256（text 密钥）', async () => {
+    const result = await computeHmac('what do ya want for nothing?', 'Jefe', 'text', 'SHA-256');
+    expect(result.hex).toBe('5bdcc146bf60754e6a042426089575c75a003f089d2739839dec58b964ec3843');
+  });
+
+  // RFC 2202 Test Case 2：key="Jefe", data="what do ya want for nothing?"
+  it('应按 RFC 2202 计算 HMAC-SHA-1（text 密钥）', async () => {
+    const result = await computeHmac('what do ya want for nothing?', 'Jefe', 'text', 'SHA-1');
+    expect(result.hex).toBe('effcdf6ae5eb2fa2d27416d5f184df9c259a7c79');
+  });
+
+  // RFC 4231 Test Case 1：key=0x0b×20, data="Hi There"
+  it('应支持 hex 编码密钥', async () => {
+    const result = await computeHmac('Hi There', '0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b', 'hex', 'SHA-256');
+    expect(result.hex).toBe('b0344c61d8db38535ca8afceaf0bf12b881dc200c9833da726e9376c2e32cff7');
+  });
+
+  it('应返回 hexUpper 与 base64 三态（三态来自同一原始缓冲）', async () => {
+    const result = await computeHmac('what do ya want for nothing?', 'Jefe', 'text', 'SHA-256');
+    expect(result.hexUpper).toBe('5BDCC146BF60754E6A042426089575C75A003F089D2739839DEC58B964EC3843');
+    // base64 解码后应与 hex 解码的字节一致，确保三态编码同一原始缓冲
+    const b64Bytes = Uint8Array.from(atob(result.base64), (c) => c.charCodeAt(0));
+    const hexBytes = new Uint8Array(decodeToBytes(result.hex, 'hex'));
+    expect(Array.from(b64Bytes)).toEqual(Array.from(hexBytes));
   });
 });

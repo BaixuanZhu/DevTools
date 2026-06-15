@@ -68,3 +68,53 @@ export async function computeFileHash(
     base64: arrayBufferToBase64(raw),
   };
 }
+
+/** 支持的 HMAC 算法（SHA 系列，不含 MD5） */
+export const HMAC_ALGORITHMS = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'] as const;
+
+/** HMAC 算法类型 */
+export type HmacAlgorithm = (typeof HMAC_ALGORITHMS)[number];
+
+/**
+ * 导入 HMAC 密钥。computeHmac 与 verifyHmac 共用，避免重复 importKey 逻辑。
+ * @param key - 密钥字符串
+ * @param keyEncoding - 密钥编码
+ * @param algorithm - HMAC 使用的哈希算法
+ */
+async function importHmacKey(
+  key: string,
+  keyEncoding: KeyEncoding,
+  algorithm: HmacAlgorithm,
+): Promise<CryptoKey> {
+  return crypto.subtle.importKey(
+    'raw',
+    decodeToBytes(key, keyEncoding),
+    { name: 'HMAC', hash: algorithm },
+    false,
+    ['sign'],
+  );
+}
+
+/**
+ * 对文本消息计算 HMAC，返回 hex/hexUpper/base64 三态结果。
+ * @param message - 待签名消息（按 UTF-8 编码）
+ * @param key - 密钥字符串
+ * @param keyEncoding - 密钥编码
+ * @param algorithm - HMAC 算法
+ */
+export async function computeHmac(
+  message: string,
+  key: string,
+  keyEncoding: KeyEncoding,
+  algorithm: HmacAlgorithm,
+): Promise<HashResult> {
+  const cryptoKey = await importHmacKey(key, keyEncoding, algorithm);
+  const data = toArrayBuffer(new TextEncoder().encode(message));
+  const raw = await crypto.subtle.sign('HMAC', cryptoKey, data);
+  const hex = arrayBufferToHex(raw);
+  return {
+    hex,
+    hexUpper: hex.toUpperCase(),
+    base64: arrayBufferToBase64(raw),
+  };
+}
