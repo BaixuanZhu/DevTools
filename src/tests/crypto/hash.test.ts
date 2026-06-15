@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { computeHash, computeFileHash, HASH_ALGORITHMS } from '../../utils/crypto/hash';
+import { computeHash, computeFileHash, HASH_ALGORITHMS, decodeToBytes } from '../../utils/crypto/hash';
 
 describe('computeHash', () => {
   it('应正确计算 MD5 哈希', async () => {
@@ -71,5 +71,31 @@ describe('computeFileHash', () => {
 describe('HASH_ALGORITHMS', () => {
   it('应包含 5 种算法', () => {
     expect(HASH_ALGORITHMS).toEqual(['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512']);
+  });
+});
+
+describe('decodeToBytes', () => {
+  it('应按 text 编码解码 ASCII 文本', () => {
+    const buf = decodeToBytes('AB', 'text');
+    expect(Array.from(new Uint8Array(buf))).toEqual([0x41, 0x42]);
+  });
+
+  it('应按 text 编码解码中文（UTF-8）', () => {
+    const buf = decodeToBytes('你', 'text');
+    expect(Array.from(new Uint8Array(buf))).toEqual([0xe4, 0xbd, 0xa0]);
+  });
+
+  it('应按 hex 编码解码', () => {
+    const buf = decodeToBytes('4142', 'hex');
+    expect(Array.from(new Uint8Array(buf))).toEqual([0x41, 0x42]);
+  });
+
+  it('应按 base64 编码解码', () => {
+    const buf = decodeToBytes('QUI=', 'base64');
+    expect(Array.from(new Uint8Array(buf))).toEqual([0x41, 0x42]);
+  });
+
+  it('非法 hex 应抛错', () => {
+    expect(() => decodeToBytes('zz', 'hex')).toThrow();
   });
 });
