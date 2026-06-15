@@ -71,12 +71,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'hash-generator',
     name: '哈希生成器',
-    description: '支持 MD5、SHA-1、SHA-256 等多种哈希算法，结果可转换为不同进制',
-    seoDescription: '在线哈希生成工具，支持 MD5、SHA-1、SHA-256、SHA-512 等多种算法，支持文本与文件哈希、多格式输出，纯浏览器端运算。',
+    description: '支持 MD5、SHA-1、SHA-256 等哈希算法与 HMAC 带密钥签名，结果可转换为不同进制',
+    seoDescription: '在线哈希生成与 HMAC 工具，支持 MD5、SHA-1/256/384/512 哈希及 HMAC-SHA 带密钥签名生成与验证，适用于 API 签名与 Webhook 校验，纯浏览器端运算。',
     category: '加密哈希',
     icon: '🔒',
     path: '/crypto/hash-generator',
-    keywords: ['哈希生成器', 'md5 在线', 'sha256 计算', 'sha512 在线', 'hash 在线工具', '文本哈希'],
+    keywords: ['哈希生成器', 'md5 在线', 'sha256 计算', 'sha512 在线', 'hash 在线工具', '文本哈希', 'hmac 在线', 'hmac sha256', 'webhook 签名验证', 'api 签名'],
     relatedToolIds: ['symmetric-crypto', 'jwt-parser', 'base64'],
   },
   {
