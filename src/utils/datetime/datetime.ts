@@ -204,3 +204,52 @@ export function parseFlexibleTimeInput(input: string): number | null {
   const info = parseDateInput(trimmed);
   return info ? info.unixMillis : null;
 }
+
+/** 两个时间点的差值拆解结果。 */
+export interface Duration {
+  /** a 相对 b 的先后：1 = a 晚于 b，-1 = a 早于 b，0 = 相同 */
+  sign: 1 | -1 | 0;
+  /** 整天数（按 86400 秒计，不足一天的余量计入 hours） */
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  /** 差值绝对值换算的总秒数（毫秒部分向下取整） */
+  totalSeconds: number;
+}
+
+/**
+ * 计算两个毫秒时间戳的差值并拆解为天/时/分/秒。
+ *
+ * 拆解值（days/hours/...）始终为差值绝对值，方向由 sign 单独给出，
+ * 便于倒计时（取绝对剩余）与时间差（附带方向）共用同一函数。
+ *
+ * @param a 第一个时间点（毫秒）
+ * @param b 第二个时间点（毫秒）
+ * @returns 差值拆解结果
+ */
+export function computeDuration(a: number, b: number): Duration {
+  const diffMs = a - b;
+  const totalSeconds = Math.floor(Math.abs(diffMs) / 1000);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const sign: 1 | -1 | 0 = diffMs > 0 ? 1 : diffMs < 0 ? -1 : 0;
+  return { sign, days, hours, minutes, seconds, totalSeconds };
+}
+
+/**
+ * 把 Duration 格式化为中文时长字符串，如「1天 2时 3分 4秒」。
+ * 省略为 0 的单位；全为 0 时返回「0秒」。
+ * @param d 时长拆解结果
+ * @returns 格式化后的字符串
+ */
+export function formatDurationParts(d: Duration): string {
+  const parts: string[] = [];
+  if (d.days > 0) parts.push(`${d.days}天`);
+  if (d.hours > 0) parts.push(`${d.hours}时`);
+  if (d.minutes > 0) parts.push(`${d.minutes}分`);
+  if (d.seconds > 0 || parts.length === 0) parts.push(`${d.seconds}秒`);
+  return parts.join(' ');
+}
