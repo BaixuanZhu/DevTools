@@ -154,3 +154,4 @@ export function formatDurationParts(d: Duration): string;
 
 - 增强档（总天数/周数/工作日、进度条、自定义提醒文案）—— YAGNI，待用户反馈再评估
 - 多时区切换 —— 复用本地时间，与时间差/倒计时核心需求无关
+- 日期选择器（`<input type="datetime-local">` + 「📅 选择」按钮）—— 设计初稿曾规划沿用 DateTimeConverter 的 `showPicker()` 方案；实现时为保持工具简洁，仅保留「现在」快捷按钮 + 文本输入（支持 Unix 时间戳与 `yyyy/MM/dd HH:mm:ss`，已覆盖核心需求），待用户反馈再评估补回
