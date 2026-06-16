@@ -72,6 +72,16 @@ describe('computeDuration', () => {
     expect(d.days).toBe(1);
     expect(d.hours).toBe(2);
   });
+
+  it('跨年大跨度正确拆解', () => {
+    // 2025/01/01 → 2027/01/01，跨两个非闰年整年 = 730 天
+    const a = dayjs('2027/01/01 00:00:00', 'YYYY/MM/DD HH:mm:ss').valueOf();
+    const b = dayjs('2025/01/01 00:00:00', 'YYYY/MM/DD HH:mm:ss').valueOf();
+    const d = computeDuration(a, b);
+    expect(d.sign).toBe(1);
+    expect(d).toMatchObject({ days: 730, hours: 0, minutes: 0, seconds: 0 });
+    expect(d.totalSeconds).toBe(730 * 86400);
+  });
 });
 
 describe('formatDurationParts', () => {
