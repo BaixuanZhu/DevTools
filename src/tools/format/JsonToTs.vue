@@ -90,6 +90,11 @@ function checkRootName(): boolean {
 
 /** 执行转换 */
 async function doConvert(): Promise<void> {
+  // 新一轮转换：在任何提前返回（空输入 / 超限 / 根类型名非法）之前使
+  // 所有在途（过期）Worker 响应失效，避免清空或校验失败后被晚到的
+  // Worker 结果污染输出
+  convertSeq++;
+
   // 输入为空时清空输出
   if (!inputText.value.trim()) {
     resetOutput();
@@ -108,9 +113,6 @@ async function doConvert(): Promise<void> {
     resetOutput();
     return;
   }
-
-  // 新一轮转换：使所有在途的（过期）Worker 响应失效
-  convertSeq++;
 
   const size = new TextEncoder().encode(inputText.value).length;
 
@@ -211,6 +213,8 @@ function handleClear(): void {
   resetOutput();
   inputError.value = '';
   rootNameError.value = '';
+  // 清空时若有在途 Worker 请求，立即取消加载态（响应到达后会被 seq 丢弃）
+  isLoading.value = false;
 }
 
 // ---- 监听 ----

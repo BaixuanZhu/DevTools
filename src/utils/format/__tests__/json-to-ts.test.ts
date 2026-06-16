@@ -70,6 +70,24 @@ describe('jsonToTs', () => {
     }
   });
 
+  it('对象与基本类型混合数组生成并集（基本类型在前，对象类型在后）', () => {
+    const result = jsonToTs('{"items":["x",{"a":1}]}', 'RootObject');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('items: (string | RootObjectItemsItem)[];');
+      expect(result.result).toContain('interface RootObjectItemsItem {');
+      expect(result.result).toContain('a: number;');
+    }
+  });
+
+  it('数组含 null 生成并集（null 排在末尾）', () => {
+    const result = jsonToTs('{"vals":[1,"a",null]}', 'RootObject');
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.result).toContain('vals: (string | number | null)[];');
+    }
+  });
+
   it('空数组推断为 unknown[]', () => {
     const result = jsonToTs('{"empty":[]}', 'RootObject');
     expect(result.ok).toBe(true);
