@@ -278,6 +278,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['datetime-converter'],
   },
   {
+    id: 'time-calculator',
+    name: '时间差与倒计时',
+    description: '计算两个时间点的时间差，以及对未来时刻实时倒计时',
+    seoDescription: '在线时间差与倒计时工具，输入时间戳或日期即可计算两个时间点的天时分秒差值，并对未来时刻实时倒计时，过期自动转正计时，纯浏览器端运算。',
+    category: '日期时间',
+    icon: '⏳',
+    path: '/datetime/time-calculator',
+    keywords: ['时间差计算', '倒计时', '时间间隔计算', '两个时间差', '实时倒计时', '日期差值'],
+    relatedToolIds: ['datetime-converter', 'cron-parser'],
+  },
+  {
     id: 'json-formatter',
     name: 'JSON 格式化器',
     description: '在线 JSON 格式化、压缩、验证与查询工具',
