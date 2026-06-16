@@ -201,8 +201,36 @@ export function parseFlexibleTimeInput(input: string): number | null {
     const num = Number(trimmed);
     return unit === 's' ? num * 1000 : num;
   }
+  // 优先匹配含秒格式 yyyy/MM/dd HH:mm:ss，再退回无秒 yyyy/MM/dd HH:mm
   const info = parseDateInput(trimmed);
-  return info ? info.unixMillis : null;
+  if (info) return info.unixMillis;
+  const noSeconds = dayjs(trimmed, 'YYYY/MM/DD HH:mm', true);
+  return noSeconds.isValid() ? noSeconds.valueOf() : null;
+}
+
+/** 日期显示格式，日期时间转换器与时间差计算器共用。 */
+export const DATE_DISPLAY_FORMAT = 'YYYY/MM/DD HH:mm:ss';
+
+/** datetime-local 控件取值用的 ISO 格式（`YYYY-MM-DDTHH:mm:ss`，无时区后缀）。 */
+const PICKER_VALUE_FORMAT = 'YYYY-MM-DDTHH:mm:ss';
+
+/**
+ * 将显示格式（`YYYY/MM/DD HH:mm:ss`）转为 datetime-local 控件的取值。
+ * @param display 显示格式日期字符串
+ * @returns 控件可识别的 ISO 值，无法解析时返回空串
+ */
+export function displayToIso(display: string): string {
+  const d = dayjs(display.trim(), DATE_DISPLAY_FORMAT, true);
+  return d.isValid() ? d.format(PICKER_VALUE_FORMAT) : '';
+}
+
+/**
+ * 将 datetime-local 控件的 ISO 取值转为显示格式（`YYYY/MM/DD HH:mm:ss`）。
+ * @param iso 控件返回的 ISO 值
+ * @returns 显示格式日期字符串
+ */
+export function isoToDisplay(iso: string): string {
+  return iso.replace('T', ' ').replace(/-/g, '/');
 }
 
 /** 两个时间点的差值拆解结果。 */

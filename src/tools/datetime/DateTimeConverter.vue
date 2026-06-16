@@ -12,6 +12,9 @@ import {
   parseDateInput,
   getLiveClockInfo,
   getQuickTimestamp,
+  displayToIso,
+  isoToDisplay,
+  DATE_DISPLAY_FORMAT,
   TIMEZONES,
   QUICK_TIME_OPTIONS,
   type QuickTimeType,
@@ -170,21 +173,10 @@ function handleQuickTime(type: QuickTimeType) {
 }
 
 // ─── 日期输入 ───
-/** 日期输入框的显示格式。 */
-const DATE_DISPLAY_FORMAT = 'YYYY/MM/DD HH:mm:ss';
 const dateInput = ref('');
 const dateErrorMsg = ref('');
 const pickerValue = ref('');
 const datePickerRef = ref<HTMLInputElement | null>(null);
-
-function displayToIso(display: string): string {
-  const d = dayjs(display.trim(), DATE_DISPLAY_FORMAT, true);
-  return d.isValid() ? d.format('YYYY-MM-DDTHH:mm:ss') : '';
-}
-
-function isoToDisplay(iso: string): string {
-  return iso.replace('T', ' ').replace(/-/g, '/');
-}
 
 function openDatePicker() {
   const input = datePickerRef.value;

@@ -23,6 +23,11 @@ describe('parseFlexibleTimeInput', () => {
     expect(parseFlexibleTimeInput('2026/06/16 12:00:00')).toBe(expected);
   });
 
+  it('解析无秒日期 yyyy/MM/dd HH:mm', () => {
+    const expected = dayjs('2026/06/16 12:00', 'YYYY/MM/DD HH:mm').valueOf();
+    expect(parseFlexibleTimeInput('2026/06/16 12:00')).toBe(expected);
+  });
+
   it('容忍首尾空白', () => {
     expect(parseFlexibleTimeInput('  1700000000  ')).toBe(1700000000000);
   });
