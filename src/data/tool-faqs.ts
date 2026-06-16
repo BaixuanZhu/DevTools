@@ -252,6 +252,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '常见类型：<strong>全球单播</strong>（<code>2000::/3</code>，公网可路由）、<strong>链路本地</strong>（<code>fe80::/10</code>，仅本网段）、<strong>唯一本地 ULA</strong>（<code>fc00::/7</code>，内网）、<strong>组播</strong>（<code>ff00::/8</code>）、<strong>环回</strong>（<code>::1</code>）。输入地址后工具会自动识别类型。',
     },
   ],
+  'time-calculator': [
+    {
+      question: '支持哪些时间输入格式？',
+      answer: '每个输入框都支持两种格式：<strong>Unix 时间戳</strong>（10 位秒或 13 位毫秒，自动识别）与<strong>标准日期</strong>（<code>yyyy/MM/dd HH:mm:ss</code>，如 <code>2026/06/16 12:00:00</code>）。两者可混用，例如计算时间差时 A 填时间戳、B 填日期。',
+    },
+    {
+      question: '时间差是如何计算的？',
+      answer: '工具取两个时间点的差值绝对值，按 <strong>天 / 时 / 分 / 秒</strong> 逐级拆解（1 天 = 86400 秒），并额外给出总秒数，同时标注方向（A 比 B 早还是晚）。注意这里按<strong>物理时长</strong>计算，与日历「自然日」跨度不一定相同。',
+    },
+    {
+      question: '倒计时过期后会怎样？',
+      answer: '目标时间到达时页面会弹出一次「时间到了」提示。此后倒计时会<strong>自动转为正计时</strong>，显示「已过期，距今 X天 Y时…」并继续每秒刷新，方便你了解已经过去了多久。',
+    },
+  ],
 };
 
 /**
