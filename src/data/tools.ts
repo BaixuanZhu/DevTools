@@ -336,7 +336,7 @@ export const tools: ToolMeta[] = [
     id: 'json-to-ts',
     name: 'JSON 转 TypeScript',
     description: '将 JSON 数据智能推断为 TypeScript interface，自动合并数组字段并标注可选类型',
-    seoDescription: '在线 JSON 转 TypeScript 工具，粘贴 JSON 自动生成 TS interface 定义，智能合并数组字段并标注可选类型，输出可通过 tsc strict 检查，纯浏览器端运算。',
+    seoDescription: '免费的在线 JSON 转 TypeScript 工具，粘贴 JSON 即可自动生成 TS interface 类型定义，智能合并数组元素字段并标注可选类型，支持嵌套对象与多类型并集，输出可通过 tsc strict 严格检查，纯浏览器端运算，数据不上传服务器。',
     category: '格式化',
     icon: '🔷',
     path: '/format/json-to-ts',
