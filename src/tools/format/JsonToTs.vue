@@ -109,6 +109,9 @@ async function doConvert(): Promise<void> {
     return;
   }
 
+  // 新一轮转换：使所有在途的（过期）Worker 响应失效
+  convertSeq++;
+
   const size = new TextEncoder().encode(inputText.value).length;
 
   if (size > WORKER_THRESHOLD) {
@@ -137,7 +140,7 @@ async function convertWithWorker(): Promise<void> {
   }
 
   isLoading.value = true;
-  const seq = ++convertSeq;
+  const seq = convertSeq;
 
   await new Promise<void>((resolve, reject) => {
     if (!worker) {
@@ -146,8 +149,8 @@ async function convertWithWorker(): Promise<void> {
     }
 
     worker.onmessage = (e: MessageEvent<JsonToTsWorkerResponse>) => {
-      // 过期请求（已被更新的输入取代）：忽略，不更新 UI
-      if (seq !== convertSeq) return;
+      // 过期响应（输入已变更、被更新的请求取代）：丢弃，不更新 UI
+      if (e.data.seq !== convertSeq) return;
 
       isLoading.value = false;
       const response = e.data;
@@ -165,7 +168,7 @@ async function convertWithWorker(): Promise<void> {
     };
 
     worker.onerror = () => {
-      // 过期请求：忽略
+      // onerror 不携带 seq，用闭包 seq 近似过滤过期请求
       if (seq !== convertSeq) return;
 
       isLoading.value = false;
@@ -177,6 +180,7 @@ async function convertWithWorker(): Promise<void> {
     worker.postMessage({
       json: inputText.value,
       rootName: rootName.value.trim(),
+      seq,
     });
   });
 }

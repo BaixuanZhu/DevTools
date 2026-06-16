@@ -35,10 +35,12 @@ export interface JsonToTsWorkerRequest {
   json: string;
   /** 顶层类型名 */
   rootName: string;
+  /** 请求序号（主线程自增），响应原样回显，用于丢弃过期响应、避免快速连续输入时 UI 错配 */
+  seq: number;
 }
 
-/** Web Worker 响应类型 */
-export type JsonToTsWorkerResponse = JsonToTsSuccess | JsonToTsError;
+/** Web Worker 响应类型（含回显的请求序号） */
+export type JsonToTsWorkerResponse = (JsonToTsSuccess | JsonToTsError) & { seq: number };
 
 // ---- 常量 ----
 
