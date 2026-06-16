@@ -53,6 +53,8 @@ const isLoading = ref(false);
 let worker: Worker | null = null;
 /** 自动转换防抖定时器 */
 let convertTimer: ReturnType<typeof setTimeout> | null = null;
+/** 转换请求序列号（丢弃过期 Worker 响应，避免快速连续输入时 UI 错配） */
+let convertSeq = 0;
 /** 输入框 ref（用于自动聚焦） */
 const inputTextarea = ref<HTMLTextAreaElement | null>(null);
 
@@ -135,6 +137,7 @@ async function convertWithWorker(): Promise<void> {
   }
 
   isLoading.value = true;
+  const seq = ++convertSeq;
 
   await new Promise<void>((resolve, reject) => {
     if (!worker) {
@@ -143,6 +146,9 @@ async function convertWithWorker(): Promise<void> {
     }
 
     worker.onmessage = (e: MessageEvent<JsonToTsWorkerResponse>) => {
+      // 过期请求（已被更新的输入取代）：忽略，不更新 UI
+      if (seq !== convertSeq) return;
+
       isLoading.value = false;
       const response = e.data;
 
@@ -159,6 +165,9 @@ async function convertWithWorker(): Promise<void> {
     };
 
     worker.onerror = () => {
+      // 过期请求：忽略
+      if (seq !== convertSeq) return;
+
       isLoading.value = false;
       runtimeError.value = 'Worker 执行出错，请重试';
       outputText.value = '';
