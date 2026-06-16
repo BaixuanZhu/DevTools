@@ -183,3 +183,24 @@ export function getLiveClockInfo(tz: string = 'local') {
     tzTime: formatByTimezone(now, tz),
   };
 }
+
+/**
+ * 灵活解析时间输入：接受 Unix 时间戳（秒/毫秒）或 `yyyy/MM/dd HH:mm:ss` 日期。
+ *
+ * 解析顺序：先按纯数字判定时间戳（复用 detectTimestampUnit），再尝试标准日期格式
+ * （复用 parseDateInput）。两者互斥，无需额外分支。
+ *
+ * @param input 用户输入字符串
+ * @returns 解析成功返回毫秒时间戳，空串或无法识别返回 null
+ */
+export function parseFlexibleTimeInput(input: string): number | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const unit = detectTimestampUnit(trimmed);
+  if (unit) {
+    const num = Number(trimmed);
+    return unit === 's' ? num * 1000 : num;
+  }
+  const info = parseDateInput(trimmed);
+  return info ? info.unixMillis : null;
+}
