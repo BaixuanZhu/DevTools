@@ -279,13 +279,13 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'time-calculator',
-    name: '时间差与倒计时',
-    description: '计算两个时间点的时间差，以及对未来时刻实时倒计时',
-    seoDescription: '在线时间差与倒计时工具，输入时间戳或日期即可计算两个时间点的天时分秒差值，并对未来时刻实时倒计时，过期自动转正计时，纯浏览器端运算。',
+    name: '时间差计算器',
+    description: '计算两个时间点的时间差（天/时/分/秒 + 总秒数）',
+    seoDescription: '在线时间差计算工具，输入 Unix 时间戳或日期即可计算两个时间点相差的天、时、分、秒与总秒数，并标注方向（A 比 B 早或晚），支持时间戳与日期混用，纯浏览器端运算。',
     category: '日期时间',
-    icon: '⏳',
+    icon: '📏',
     path: '/datetime/time-calculator',
-    keywords: ['时间差计算', '倒计时', '时间间隔计算', '两个时间差', '实时倒计时', '日期差值'],
+    keywords: ['时间差计算', '时间间隔计算', '两个时间差', '时间戳差值', '日期差值'],
     relatedToolIds: ['datetime-converter', 'cron-parser'],
   },
   {
