@@ -333,6 +333,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['json-formatter', 'json-to-xml'],
   },
   {
+    id: 'json-to-ts',
+    name: 'JSON 转 TypeScript',
+    description: '将 JSON 数据智能推断为 TypeScript interface，自动合并数组字段并标注可选类型',
+    seoDescription: '在线 JSON 转 TypeScript 工具，粘贴 JSON 自动生成 TS interface 定义，智能合并数组字段并标注可选类型，输出可通过 tsc strict 检查，纯浏览器端运算。',
+    category: '格式化',
+    icon: '🔷',
+    path: '/format/json-to-ts',
+    keywords: ['json 转 typescript', 'json to interface', 'json 生成类型', 'json to ts', 'ts 类型生成', 'json 接口生成', 'json 转 ts'],
+    relatedToolIds: ['json-formatter', 'json-to-yaml', 'json-to-xml'],
+  },
+  {
     id: 'markdown-editor',
     name: 'Markdown 编辑器',
     description: '在线 Markdown 编辑器，支持实时预览、语法高亮和多格式导出',

@@ -262,6 +262,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '工具取两个时间点的差值绝对值，按 <strong>天 / 时 / 分 / 秒</strong> 逐级拆解（1 天 = 86400 秒），并额外给出总秒数，同时标注方向（A 比 B 早还是晚）。注意这里按<strong>物理时长</strong>计算，与日历「自然日」跨度不一定相同。',
     },
   ],
+  'json-to-ts': [
+    {
+      question: '可选字段（带 ?）是怎么来的？',
+      answer: '当数组里的对象<strong>只有部分</strong>包含某字段时，工具会把它标记为可选。例如数组中一个对象有 <code>name</code>、另一个没有，合并后输出 <code>name?: string</code>，表示「该字段可能不存在」，让类型更宽松以兼容字段缺失的真实数据。',
+    },
+    {
+      question: '为什么生成的类型里有 null？',
+      answer: 'JSON 的 <code>null</code> 在 TypeScript 中对应 <code>null</code> 类型（与 <code>undefined</code> 不同）。若某字段在数组中<strong>有时是值、有时是 null</strong>，工具会合并为 <code>类型 | null</code>（如 <code>string | null</code>），比一律当成 string 更贴近真实数据。',
+    },
+    {
+      question: '为什么有些字段名带引号？',
+      answer: 'TypeScript 要求对象字段名是合法标识符（字母 / 下划线 / <code>$</code> 开头，不含空格和 <code>-</code>）。当 JSON 的键不满足时（如 <code>"a-b"</code>、<code>"with space"</code>、<code>"123"</code>），必须加引号写成字符串字面量键才能通过类型检查，工具会自动处理。',
+    },
+  ],
 };
 
 /**
