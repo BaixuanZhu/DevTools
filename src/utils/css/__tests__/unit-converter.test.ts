@@ -119,6 +119,10 @@ describe('formatNumber', () => {
     expect(formatNumber(NaN)).toBe('—');
     expect(formatNumber(Infinity)).toBe('—');
   });
+
+  it('负零归一化为 0', () => {
+    expect(formatNumber(-0)).toBe('0');
+  });
 });
 
 describe('isValidNumberInput', () => {

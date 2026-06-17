@@ -133,7 +133,9 @@ export function convertAll(
  */
 export function formatNumber(n: number): string {
   if (!Number.isFinite(n)) return '—';
-  return parseFloat(n.toFixed(4)).toString();
+  // 将 -0 归一化为 0，避免 UI 显示 "-0"
+  const normalized = Object.is(n, -0) ? 0 : n;
+  return parseFloat(normalized.toFixed(4)).toString();
 }
 
 /**
