@@ -102,8 +102,8 @@ export function convertAll(
 export function formatNumber(n: number): string {
   if (!Number.isFinite(n)) return '—';
   const s = n.toPrecision(4);
-  // 去掉末尾多余的 0 和小数点
-  return s.replace(/\.?0+$/, '');
+  // parseFloat 会自动把科学计数法转为普通数字字符串并去掉末尾 0
+  return parseFloat(s).toString();
 }
 
 /** 校验输入字符串是否为有效正数 */
