@@ -86,3 +86,82 @@ export function rgbToHex({ r, g, b }: RGB): string {
   const toHex = (n: number) => clamp255(n).toString(16).padStart(2, '0');
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
+
+/** 将 0–1 范围外的浮点钳制到 [0,1] */
+function clampUnit(n: number): number {
+  return Math.max(0, Math.min(1, n));
+}
+
+/**
+ * RGB → HSL。
+ * @param rgb - RGB 对象
+ * @returns HSL 对象（h:0–360, s/l:0–100）
+ */
+export function rgbToHsl({ r, g, b }: RGB): HSL {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const delta = max - min;
+  const l = (max + min) / 2;
+
+  let h = 0;
+  let s = 0;
+
+  if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1));
+    if (max === rn) {
+      h = (((gn - bn) / delta) % 6) * 60;
+    } else if (max === gn) {
+      h = ((bn - rn) / delta + 2) * 60;
+    } else {
+      h = ((rn - gn) / delta + 4) * 60;
+    }
+    if (h < 0) h += 360;
+  }
+
+  return {
+    h: Math.round(h),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100),
+  };
+}
+
+/**
+ * HSL → RGB。输入越界（h/s/l 超范围）自动钳制。
+ * @param hsl - HSL 对象（h:0–360, s/l:0–100）
+ * @returns RGB 对象
+ */
+export function hslToRgb({ h, s, l }: HSL): RGB {
+  const hn = (((h % 360) + 360) % 360); // 归一化到 0–360
+  const sn = clampUnit(s / 100);
+  const ln = clampUnit(l / 100);
+
+  const c = (1 - Math.abs(2 * ln - 1)) * sn;
+  const x = c * (1 - Math.abs(((hn / 60) % 2) - 1));
+  const m = ln - c / 2;
+
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+  if (hn < 60) {
+    r1 = c; g1 = x;
+  } else if (hn < 120) {
+    r1 = x; g1 = c;
+  } else if (hn < 180) {
+    g1 = c; b1 = x;
+  } else if (hn < 240) {
+    g1 = x; b1 = c;
+  } else if (hn < 300) {
+    r1 = x; b1 = c;
+  } else {
+    r1 = c; b1 = x;
+  }
+
+  return {
+    r: clamp255((r1 + m) * 255),
+    g: clamp255((g1 + m) * 255),
+    b: clamp255((b1 + m) * 255),
+  };
+}
