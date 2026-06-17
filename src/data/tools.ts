@@ -376,6 +376,17 @@ export const tools: ToolMeta[] = [
     keywords: ['二维码识别', '二维码解码', 'qr code 识别', '在线扫码', '截图识别二维码', '二维码图片读取'],
     relatedToolIds: ['qr-code-generator'],
   },
+  {
+    id: 'tester',
+    name: '正则表达式',
+    description: '实时高亮匹配、查看捕获组，内置邮箱 / 手机号 / URL 等常用正则速查表',
+    seoDescription: '免费的在线正则表达式测试工具，支持 g/i/m/s/u/y 六大标志位与命名捕获组，输入即实时高亮全部匹配、显示每个匹配的区间与捕获组内容，内置邮箱 / 手机号 / URL / IPv4 / 身份证号等常用正则速查表一键填入，大文本通过 Web Worker 异步匹配避免 ReDoS，纯浏览器端运算数据不上传。',
+    category: '正则工具',
+    icon: '🔬',
+    path: '/regex/tester',
+    keywords: ['正则表达式', '正则表达式测试', '正则在线测试', 'regex 在线', '正则匹配', '正则高亮', '捕获组', '命名捕获组', '正则速查表', 'regex tester', '正则调试', '贪婪匹配', '零宽断言'],
+    relatedToolIds: ['json-formatter', 'json-to-ts', 'url-encode', 'base64'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */

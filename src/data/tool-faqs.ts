@@ -276,6 +276,36 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'TypeScript 要求对象字段名是合法标识符（字母 / 下划线 / <code>$</code> 开头，不含空格和 <code>-</code>）。当 JSON 的键不满足时（如 <code>"a-b"</code>、<code>"with space"</code>、<code>"123"</code>），必须加引号写成字符串字面量键才能通过类型检查，工具会自动处理。',
     },
   ],
+  'tester': [
+    {
+      question: '为什么我的正则不匹配？',
+      answer: '常见三大原因：①<strong>没勾选 g 标志</strong>——不带 g 只返回第一个匹配，看起来像「只匹配了一处」；②<strong>默认正则大小写敏感</strong>——匹配大小写不一致的文本要勾选 <code>i</code>；③<strong>多行文本的 ^ $ 行为变了</strong>——不勾 <code>m</code> 时 <code>^</code> / <code>$</code> 只匹配整个文本的首尾，要匹配每行边界需勾选 <code>m</code>。本工具会在编辑时实时显示当前生效的正则字面量，方便核对。',
+    },
+    {
+      question: 'g 和 y 标志有什么区别？',
+      answer: '<strong>g（global）</strong>从当前位置向后查找<strong>任意位置</strong>的匹配，找到后把 <code>lastIndex</code> 推进到匹配末尾继续。<strong>y（sticky / 粘滞）</strong>要求匹配<strong>必须从 <code>lastIndex</code> 精确开头</strong>，否则立即失败。通俗说：g 是「往下找」，y 是「就在这里找」。y 常用于词法分析器按位置精确切分 token。',
+    },
+    {
+      question: '如何匹配中文？',
+      answer: '简单匹配单个中文字符用 <code>[\\u4e00-\\u9fa5]</code>；匹配一段中文用 <code>[\\u4e00-\\u9fa5]+</code>。如果要用 Unicode 属性（如匹配所有汉字、所有字母），需要勾选 <code>u</code> 标志并写成 <code>\\p{Script=Han}+</code>。注意：JavaScript 字符串中的反斜杠需要再转义一次（写 <code>\\\\u</code>），本工具直接在输入框写 <code>\\u</code> 即可。',
+    },
+    {
+      question: '命名捕获组（?&lt;name&gt;...）和编号捕获组有什么区别？',
+      answer: '<strong>编号捕获组</strong> <code>(...)</code> 按左括号出现顺序编号（$1、$2、$3...），改动正则顺序会让编号错位，可读性差。<strong>命名捕获组</strong> <code>(?&lt;name&gt;...)</code> 给每组起名字，通过 <code>match.groups.name</code> 取值，与顺序解耦、自文档化，是现代正则的推荐写法。本工具在「匹配详情」里会同时显示编号组（$1、$2）和命名组（按名字列出）。',
+    },
+    {
+      question: '贪婪匹配和非贪婪匹配有什么区别？',
+      answer: '量词默认是<strong>贪婪</strong>的，会尽可能多地匹配字符。例如对 <code>"&lt;div&gt;a&lt;/div&gt;&lt;div&gt;b&lt;/div&gt;"</code> 用 <code>&lt;.*&gt;</code> 会一次性匹配整串（从首个 <code>&lt;</code> 贪到末个 <code>&gt;</code>）。在量词后加 <code>?</code> 即变为<strong>非贪婪（懒惰）</strong>模式，尽可能少地匹配：<code>&lt;.*?&gt;</code> 会分别匹配两个标签。适用于 <code>*</code> <code>+</code> <code>?</code> <code>{n,m}</code> 等所有量词。',
+    },
+    {
+      question: '什么是先行断言和后行断言（零宽断言）？',
+      answer: '断言用于「检查某个位置是否满足条件」，<strong>本身不消耗字符</strong>（故称「零宽」）。四种形式：<code>(?=pattern)</code> <strong>先行肯定</strong>（右侧必须匹配）、<code>(?!pattern)</code> <strong>先行否定</strong>（右侧不能匹配）、<code>(?&lt;=pattern)</code> <strong>后行肯定</strong>（左侧必须匹配）、<code>(?&lt;!pattern)</code> <strong>后行否定</strong>（左侧不能匹配）。例如 <code>\\d+(?=元)</code> 只匹配其后紧跟「元」的数字，但「元」不计入匹配结果。',
+    },
+    {
+      question: '为什么大文本匹配会单独异步处理？',
+      answer: '某些正则在特定输入下会引发<strong>灾难性回溯（ReDoS）</strong>，匹配耗时随输入长度指数增长，瞬间卡死页面。典型如 <code>(a+)+b</code> 匹配不以 <code>b</code> 结尾的 <code>"aaaa...!"</code>。本工具对超过 <strong>50KB</strong> 的测试文本自动转入 Web Worker 异步匹配，并设 <strong>3 秒超时</strong>——超时即判定为 ReDoS 嫌疑并强制中断、给出提示，避免拖垮浏览器。日常小文本仍在主线程即时响应。',
+    },
+  ],
 };
 
 /**
