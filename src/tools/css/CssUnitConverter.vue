@@ -150,10 +150,12 @@ onMounted(() => {
             v-model.number="rootFontSize"
             type="number"
             min="1"
+            aria-invalid="!!baseErrors.rootFontSize"
+            :aria-describedby="baseErrors.rootFontSize ? 'root-font-size-error' : undefined"
             class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
             @input="handleBaseInput"
           />
-          <p v-if="baseErrors.rootFontSize" class="mt-1.5 text-xs text-error">{{ baseErrors.rootFontSize }}</p>
+          <p v-if="baseErrors.rootFontSize" id="root-font-size-error" class="mt-1.5 text-xs text-error">{{ baseErrors.rootFontSize }}</p>
         </div>
         <div>
           <label class="block text-xs text-muted mb-1.5">设计稿宽度（px）</label>
@@ -161,10 +163,12 @@ onMounted(() => {
             v-model.number="designWidth"
             type="number"
             min="1"
+            aria-invalid="!!baseErrors.designWidth"
+            :aria-describedby="baseErrors.designWidth ? 'design-width-error' : undefined"
             class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
             @input="handleBaseInput"
           />
-          <p v-if="baseErrors.designWidth" class="mt-1.5 text-xs text-error">{{ baseErrors.designWidth }}</p>
+          <p v-if="baseErrors.designWidth" id="design-width-error" class="mt-1.5 text-xs text-error">{{ baseErrors.designWidth }}</p>
         </div>
         <div>
           <label class="block text-xs text-muted mb-1.5">视口高度（px）</label>
@@ -172,10 +176,12 @@ onMounted(() => {
             v-model.number="viewportHeight"
             type="number"
             min="1"
+            aria-invalid="!!baseErrors.viewportHeight"
+            :aria-describedby="baseErrors.viewportHeight ? 'viewport-height-error' : undefined"
             class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
             @input="handleBaseInput"
           />
-          <p v-if="baseErrors.viewportHeight" class="mt-1.5 text-xs text-error">{{ baseErrors.viewportHeight }}</p>
+          <p v-if="baseErrors.viewportHeight" id="viewport-height-error" class="mt-1.5 text-xs text-error">{{ baseErrors.viewportHeight }}</p>
         </div>
       </div>
     </section>
@@ -195,11 +201,13 @@ onMounted(() => {
             :value="values[unit]"
             type="text"
             inputmode="decimal"
+            :aria-invalid="!!errors[unit]"
+            :aria-describedby="errors[unit] ? `${unit}-error` : undefined"
             class="w-full px-3 py-2 border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
             :class="errors[unit] ? 'border-error' : 'border-border'"
             @input="handleInput(unit, $event)"
           />
-          <p v-if="errors[unit]" class="mt-1.5 text-xs text-error">{{ errors[unit] }}</p>
+          <p v-if="errors[unit]" :id="`${unit}-error`" class="mt-1.5 text-xs text-error">{{ errors[unit] }}</p>
         </div>
       </div>
     </section>
