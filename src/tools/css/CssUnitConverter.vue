@@ -88,15 +88,11 @@ function handleInput(unit: UnitKey, event: Event): void {
 }
 
 function validateBase(): boolean {
-  let ok = true;
-  baseErrors.rootFontSize =
-    rootFontSize.value > 0 ? '' : '根字号必须大于 0';
-  baseErrors.designWidth =
-    designWidth.value > 0 ? '' : '设计稿宽度必须大于 0';
-  baseErrors.viewportHeight =
-    viewportHeight.value > 0 ? '' : '视口高度必须大于 0';
-  ok = !baseErrors.rootFontSize && !baseErrors.designWidth && !baseErrors.viewportHeight;
-  return ok;
+  const baseError = '基准值必须大于 0';
+  baseErrors.rootFontSize = rootFontSize.value > 0 ? '' : baseError;
+  baseErrors.designWidth = designWidth.value > 0 ? '' : baseError;
+  baseErrors.viewportHeight = viewportHeight.value > 0 ? '' : baseError;
+  return !baseErrors.rootFontSize && !baseErrors.designWidth && !baseErrors.viewportHeight;
 }
 
 function handleBaseInput(): void {
