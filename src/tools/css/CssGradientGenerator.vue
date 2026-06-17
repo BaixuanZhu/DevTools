@@ -72,11 +72,28 @@ const activeStop = computed(() =>
 // ---- 操作 ----
 
 function handleTrackClick(event: MouseEvent): void {
-  if (isDragging.value) return;
   const position = getPositionFromEvent(event);
-  const newStops = insertStop(stops.value, position);
-  stops.value = newStops;
-  activeStopId.value = newStops.find((s) => s.position === position)?.id || activeStopId.value;
+  const newId = generateId();
+  const newStop: ColorStop = {
+    id: newId,
+    color: '#808080',
+    position: clampPosition(position),
+  };
+
+  const sorted = [...stops.value].sort((a, b) => a.position - b.position);
+  let insertIndex = sorted.length;
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].position > newStop.position) {
+      insertIndex = i;
+      break;
+    }
+  }
+  stops.value = [
+    ...sorted.slice(0, insertIndex),
+    newStop,
+    ...sorted.slice(insertIndex),
+  ];
+  activeStopId.value = newId;
 }
 
 function handleStopMouseDown(stopId: string, event: MouseEvent): void {
@@ -91,10 +108,9 @@ function handleStopMouseDown(stopId: string, event: MouseEvent): void {
 function handleMouseMove(event: MouseEvent): void {
   if (!isDragging.value || !draggedStopId.value) return;
   const position = getPositionFromEvent(event);
-  const stop = stops.value.find((s) => s.id === draggedStopId.value);
-  if (stop) {
-    stop.position = position;
-  }
+  stops.value = stops.value.map((s) =>
+    s.id === draggedStopId.value ? { ...s, position } : s
+  );
 }
 
 function handleMouseUp(): void {
