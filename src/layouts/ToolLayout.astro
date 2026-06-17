@@ -104,6 +104,24 @@ if (toolId && toolMeta) {
       price: '0',
     },
   });
+
+  // 4. FAQPage — 常见问题结构化数据（仅当工具配置了 FAQ 时输出）。
+  // answer 含白名单 HTML（<code>/<strong> 等）直接原样提交，由搜索引擎解析。
+  // 注：Google 已于 2026/05 废除 FAQ 富结果，此 schema 仍服务于 AI 检索（GEO）及其他搜索引擎。
+  if (faqs.length > 0) {
+    jsonLdItems.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map((faq) => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    });
+  }
 }
 
 /** 构建面包屑导航项 */
