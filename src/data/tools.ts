@@ -402,7 +402,7 @@ export const tools: ToolMeta[] = [
     id: 'unit-converter',
     name: 'CSS 单位转换器',
     description: 'px / rem / em / vw / vh / % / pt 等 CSS 长度单位实时互转',
-    seoDescription: '在线 CSS 单位转换工具，支持 px、rem、em、vw、vh、百分比、pt 实时互转，可自定义根字号与设计稿宽度，前端开发常用换算助手。',
+    seoDescription: '在线 CSS 单位转换工具，支持 px、rem、em、vw、vh、百分比、pt 七种前端长度单位实时互转，可自定义根字号、设计稿宽度与视口高度，前端开发必备换算助手，纯浏览器端运算。',
     category: 'CSS 工具',
     icon: '📐',
     path: '/css/unit-converter',
