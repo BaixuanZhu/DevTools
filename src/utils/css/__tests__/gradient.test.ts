@@ -12,6 +12,7 @@ import {
   removeStop,
   type GradientOptions,
   type ColorStop,
+  type GradientType,
 } from '../gradient';
 
 describe('clampPosition', () => {
@@ -27,6 +28,11 @@ describe('normalizeAngle', () => {
     expect(normalizeAngle(90)).toBe(90);
     expect(normalizeAngle(450)).toBe(90);
     expect(normalizeAngle(-90)).toBe(270);
+  });
+
+  it('非有限值按 0 处理', () => {
+    expect(normalizeAngle(NaN)).toBe(0);
+    expect(normalizeAngle(Infinity)).toBe(0);
   });
 });
 
@@ -126,6 +132,21 @@ describe('buildGradientCss', () => {
       ],
     };
     expect(buildGradientCss(options)).toBe('linear-gradient(90deg, #000000 0.0%, #0000ff 100.0%)');
+  });
+
+  it('未知类型回落到线性渐变', () => {
+    const options = {
+      type: 'unknown' as GradientType,
+      angle: 90,
+      centerX: 50,
+      centerY: 50,
+      shape: 'ellipse' as const,
+      stops: [
+        { id: '1', color: '#ff0000', position: 0 },
+        { id: '2', color: '#0000ff', position: 100 },
+      ],
+    };
+    expect(buildGradientCss(options)).toBe('linear-gradient(90deg, #ff0000 0.0%, #0000ff 100.0%)');
   });
 });
 
