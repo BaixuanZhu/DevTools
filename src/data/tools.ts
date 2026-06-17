@@ -398,6 +398,17 @@ export const tools: ToolMeta[] = [
     keywords: ['颜色转换', 'hex rgb 转换', 'hsl hsv', '颜色对照表', 'wcag 对比度', '无障碍颜色检查', '配色方案', '互补色', '调色板', '颜色搭配', 'color picker'],
     relatedToolIds: ['qr-code-generator'],
   },
+  {
+    id: 'unit-converter',
+    name: 'CSS 单位转换器',
+    description: 'px / rem / em / vw / vh / % / pt 等 CSS 长度单位实时互转',
+    seoDescription: '在线 CSS 单位转换工具，支持 px、rem、em、vw、vh、百分比、pt 实时互转，可自定义根字号与设计稿宽度，前端开发常用换算助手。',
+    category: 'CSS 工具',
+    icon: '📐',
+    path: '/css/unit-converter',
+    keywords: ['px转rem', 'rem转px', 'vw换算', 'vh换算', 'css单位转换', 'em换算', 'pt换算', '前端单位转换'],
+    relatedToolIds: ['gradient'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */

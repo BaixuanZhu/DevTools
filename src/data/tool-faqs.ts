@@ -324,6 +324,16 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '都基于色相轮旋转：<strong>互补色</strong> = 对角 180°（最强对比）；<strong>类似色</strong> = ±30°（柔和协调）；<strong>三角配色</strong> = 120° 三等分（活泼均衡）；<strong>分裂互补</strong> = 互补色两侧 ±150°/210°（对比中带协调）。点击任一色块可将其设为当前色继续调整。',
     },
   ],
+  'unit-converter': [
+    {
+      question: 'em 和 rem 有什么区别？',
+      answer: '本工具按根 em 语义处理（<code>em === rem</code>）。实际项目中 <code>em</code> 可能相对于父元素字体大小，而 <code>rem</code> 始终相对于根元素（html）字体大小。',
+    },
+    {
+      question: 'vw 和 vh 基于什么尺寸计算？',
+      answer: '基于页面顶部填写的「设计稿宽度」和「视口高度」，默认分别为 375px 和 812px。例如 16px 在 375px 宽度下约为 4.267vw。',
+    },
+  ],
 };
 
 /**
