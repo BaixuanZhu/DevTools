@@ -246,7 +246,7 @@ onUnmounted(() => {
   <div class="mx-auto max-w-[1600px]">
     <!-- 头部 -->
     <ToolHeader
-      title="JSON 转 TypeScript"
+      title="JSON 转 TS"
       description="将 JSON 智能推断为 TypeScript interface，自动合并数组字段并标注可选类型"
       :show-example="false"
     />

@@ -263,7 +263,7 @@ parseExpression();
 <template>
   <div>
     <ToolHeader
-        title="Cron 表达式解析器"
+        title="Cron 表达式"
         description="解析 Cron 表达式，预览执行时间，可视化构建"
         :show-example="false"
     />

@@ -268,7 +268,7 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'cron-parser',
-    name: 'Cron 表达式解析器',
+    name: 'Cron 表达式',
     description: '解析 Cron 表达式，预览执行时间，可视化构建',
     seoDescription: '在线 Cron 表达式解析器，支持可视化构建、执行时间预览和常用模板，帮助开发者快速编写和验证定时任务表达式。',
     category: '日期时间',
@@ -297,7 +297,7 @@ export const tools: ToolMeta[] = [
     icon: '📋',
     path: '/format/json-formatter',
     keywords: ['json 格式化', 'json 美化', 'json 在线', 'json 压缩', 'json 验证', 'json 编辑器'],
-    relatedToolIds: ['json-diff', 'json-to-yaml', 'json-to-xml'],
+    relatedToolIds: ['json-diff', 'json-to-yaml', 'json-to-xml', 'json-to-ts'],
   },
   {
     id: 'json-diff',
@@ -319,7 +319,7 @@ export const tools: ToolMeta[] = [
     icon: '🌲',
     path: '/format/json-to-xml',
     keywords: ['json 转 xml', 'json to xml', 'json xml 转换', '在线 json 转 xml'],
-    relatedToolIds: ['json-formatter', 'json-to-yaml'],
+    relatedToolIds: ['json-formatter', 'json-to-yaml', 'json-to-ts'],
   },
   {
     id: 'json-to-yaml',
@@ -330,11 +330,11 @@ export const tools: ToolMeta[] = [
     icon: '📝',
     path: '/format/json-to-yaml',
     keywords: ['json 转 yaml', 'json to yaml', 'yaml 转换', '在线 yaml 工具', 'json yaml'],
-    relatedToolIds: ['json-formatter', 'json-to-xml'],
+    relatedToolIds: ['json-formatter', 'json-to-xml', 'json-to-ts'],
   },
   {
     id: 'json-to-ts',
-    name: 'JSON 转 TypeScript',
+    name: 'JSON 转 TS',
     description: '将 JSON 数据智能推断为 TypeScript interface，自动合并数组字段并标注可选类型',
     seoDescription: '免费的在线 JSON 转 TypeScript 工具，粘贴 JSON 即可自动生成 TS interface 类型定义，智能合并数组元素字段并标注可选类型，支持嵌套对象与多类型并集，输出可通过 tsc strict 严格检查，纯浏览器端运算，数据不上传服务器。',
     category: '格式化',
