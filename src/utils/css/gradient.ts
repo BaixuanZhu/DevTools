@@ -82,9 +82,6 @@ export function sortStops(stops: ColorStop[]): ColorStop[] {
 /** 生成色标 CSS 片段 */
 export function buildStopString(stop: ColorStop): string {
   const color = normalizeColor(stop.color);
-  if (stop.position === 0 || stop.position === 100) {
-    return color;
-  }
   return `${color} ${stop.position.toFixed(1)}%`;
 }
 

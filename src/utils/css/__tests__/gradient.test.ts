@@ -55,6 +55,16 @@ describe('sortStops', () => {
     expect(sorted[0].id).toBe('1');
     expect(sorted[1].id).toBe('2');
   });
+
+  it('相同位置保持原顺序', () => {
+    const stops: ColorStop[] = [
+      { id: 'first', color: '#f00', position: 50 },
+      { id: 'second', color: '#00f', position: 50 },
+    ];
+    const sorted = sortStops(stops);
+    expect(sorted[0].id).toBe('first');
+    expect(sorted[1].id).toBe('second');
+  });
 });
 
 describe('buildGradientCss', () => {
@@ -70,7 +80,7 @@ describe('buildGradientCss', () => {
         { id: '2', color: '#0000ff', position: 100 },
       ],
     };
-    expect(buildGradientCss(options)).toBe('linear-gradient(90deg, #ff0000, #0000ff)');
+    expect(buildGradientCss(options)).toBe('linear-gradient(90deg, #ff0000 0.0%, #0000ff 100.0%)');
   });
 
   it('径向渐变', () => {
@@ -85,7 +95,7 @@ describe('buildGradientCss', () => {
         { id: '2', color: '#0000ff', position: 100 },
       ],
     };
-    expect(buildGradientCss(options)).toBe('radial-gradient(circle at 50.0% 50.0%, #ff0000, #0000ff)');
+    expect(buildGradientCss(options)).toBe('radial-gradient(circle at 50.0% 50.0%, #ff0000 0.0%, #0000ff 100.0%)');
   });
 
   it('圆锥渐变', () => {
@@ -100,7 +110,22 @@ describe('buildGradientCss', () => {
         { id: '2', color: '#0000ff', position: 100 },
       ],
     };
-    expect(buildGradientCss(options)).toBe('conic-gradient(from 0deg at 50.0% 50.0%, #ff0000, #0000ff)');
+    expect(buildGradientCss(options)).toBe('conic-gradient(from 0deg at 50.0% 50.0%, #ff0000 0.0%, #0000ff 100.0%)');
+  });
+
+  it('无效颜色回落到兜底色', () => {
+    const options: GradientOptions = {
+      type: 'linear',
+      angle: 90,
+      centerX: 50,
+      centerY: 50,
+      shape: 'ellipse',
+      stops: [
+        { id: '1', color: 'invalid', position: 0 },
+        { id: '2', color: '#0000ff', position: 100 },
+      ],
+    };
+    expect(buildGradientCss(options)).toBe('linear-gradient(90deg, #000000 0.0%, #0000ff 100.0%)');
   });
 });
 
