@@ -334,6 +334,16 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '基于页面顶部填写的「设计稿宽度」和「视口高度」，默认分别为 375px 和 812px。例如 16px 在 375px 宽度下约为 4.267vw。',
     },
   ],
+  gradient: [
+    {
+      question: '支持重复渐变吗？',
+      answer: '当前版本不支持 <code>repeating-*</code> 重复渐变。可以通过添加多个色标、缩小色标间距来模拟类似效果。',
+    },
+    {
+      question: '圆锥渐变的浏览器兼容性如何？',
+      answer: '圆锥渐变（<code>conic-gradient</code>）支持所有现代浏览器，包括 Chrome/Edge/Firefox/Safari，但不支持 Internet Explorer。',
+    },
+  ],
 };
 
 /**
