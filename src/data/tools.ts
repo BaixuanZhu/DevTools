@@ -387,6 +387,17 @@ export const tools: ToolMeta[] = [
     keywords: ['正则表达式', '正则表达式测试', '正则在线测试', 'regex 在线', '正则匹配', '正则高亮', '捕获组', '命名捕获组', '正则速查表', 'regex tester', '正则调试', '贪婪匹配', '零宽断言'],
     relatedToolIds: ['json-formatter', 'json-to-ts', 'url-encode', 'base64'],
   },
+  {
+    id: 'panel',
+    name: '颜色面板',
+    description: 'HEX/RGB/HSL/HSV 实时互转、WCAG 对比度检查、互补/类似/三角配色板',
+    seoDescription: '在线颜色面板工具，支持 HEX/RGB/HSL/HSV 多色彩空间实时互转、WCAG 无障碍对比度检查（AA/AAA 达标判定）与互补/类似/三角配色方案生成，纯浏览器端运算数据不上传。',
+    category: '颜色工具',
+    icon: '🎨',
+    path: '/color/panel',
+    keywords: ['颜色转换', 'hex rgb 转换', 'hsl hsv', '颜色对照表', 'wcag 对比度', '无障碍颜色检查', '配色方案', '互补色', '调色板', '颜色搭配', 'color picker'],
+    relatedToolIds: ['qr-code-generator'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */

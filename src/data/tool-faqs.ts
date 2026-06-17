@@ -306,6 +306,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '某些正则在特定输入下会引发<strong>灾难性回溯（ReDoS）</strong>，匹配耗时随输入长度指数增长，瞬间卡死页面。典型如 <code>(a+)+b</code> 匹配不以 <code>b</code> 结尾的 <code>"aaaa...!"</code>。本工具对超过 <strong>50KB</strong> 的测试文本自动转入 Web Worker 异步匹配，并设 <strong>3 秒超时</strong>——超时即判定为 ReDoS 嫌疑并强制中断、给出提示，避免拖垮浏览器。日常小文本仍在主线程即时响应。',
     },
   ],
+  panel: [
+    {
+      question: 'HEX 的 3 位和 6 位写法有什么区别？',
+      answer: '3 位 <code>#RGB</code> 是简写，每个字符重复一次展开为 6 位 <code>#RRGGBB</code>（如 <code>#3B8</code> = <code>#33BB88</code>）；6 位为标准写法，每两位表示一个通道。本工具两种写法都支持，大小写不敏感。',
+    },
+    {
+      question: 'HSL 和 HSV 有什么区别？',
+      answer: '两者都是基于色相（H）的直观色彩模型，区别在第三维：<strong>HSL</strong> 的 L 是「亮度」，100% 为纯白；<strong>HSV</strong> 的 V 是「明度」，100% 为纯色（饱和度足时最鲜艳）。设计师软件（PS、Figma）多用 HSV，CSS 的 <code>hsl()</code> 函数用的是 HSL。',
+    },
+    {
+      question: 'WCAG 对比度是怎么算的？AA 和 AAA 有什么区别？',
+      answer: '先把颜色经 gamma 校正线性化得到「相对亮度」，对比度 = (较亮色 + 0.05) / (较暗色 + 0.05)，范围 1–21（黑白为 21:1）。达标阈值：<strong>AA</strong> 普通文字 ≥ 4.5、大字 ≥ 3.0；<strong>AAA</strong> 更严，普通 ≥ 7.0、大字 ≥ 4.5。「大字」指 ≥ 18pt 或 ≥ 14pt 加粗。',
+    },
+    {
+      question: '配色板的几种和谐配色是什么原理？',
+      answer: '都基于色相轮旋转：<strong>互补色</strong> = 对角 180°（最强对比）；<strong>类似色</strong> = ±30°（柔和协调）；<strong>三角配色</strong> = 120° 三等分（活泼均衡）；<strong>分裂互补</strong> = 互补色两侧 ±150°/210°（对比中带协调）。点击任一色块可将其设为当前色继续调整。',
+    },
+  ],
 };
 
 /**
