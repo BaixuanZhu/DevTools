@@ -165,7 +165,7 @@
 ### P1 · 核心空分类补全
 
 - [x] 正则工具：正则表达式 — 已完成（2026-06-17）。新建 `/regex/tester`，自研正则引擎（`compileRegex` + `runMatch` + `buildSegments`，原生 `RegExp` + `matchAll`，**未引入第三方库**），6 标志位（g/i/m/s/u/y）+ 命名捕获组 + 8 项常用正则速查表；>50KB 测试文本走 Web Worker 并带 3 秒超时 ReDoS 保护；配套 7 条 FAQ
-- [ ] 颜色工具：颜色转换器
+- [x] 颜色工具：颜色面板 — 已完成（2026-06-17）。新建 `/color/panel`，自研颜色转换层（`utils/color/`：color-space 以 RGB 为枢纽的 hex↔rgb↔hsl↔hsv、wcag 相对亮度与 AA/AAA 判定、color-harmony 色相旋转配色板，**未引入第三方库**），单列竖向布局含可编辑四空间联动 + WCAG 对比度检查 + 互补/类似/三角/分裂互补配色板；配套 4 条 FAQ。P1 收尾，空分类减至 2 个
 
 ### P2 · 前端高频补全
 
