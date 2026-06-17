@@ -2,7 +2,7 @@
  * 颜色空间转换单元测试。
  */
 import { describe, it, expect } from 'vitest';
-import { hexToRgb, rgbToHex, rgbToHsl, hslToRgb } from '../color-space';
+import { hexToRgb, rgbToHex, rgbToHsl, hslToRgb, rgbToHsv, hsvToRgb } from '../color-space';
 
 describe('hexToRgb', () => {
   it('解析 6 位 HEX（带 #）', () => {
@@ -79,5 +79,35 @@ describe('hslToRgb 往返一致性', () => {
   it('纯色还原', () => {
     expect(hslToRgb({ h: 0, s: 100, l: 50 })).toEqual({ r: 255, g: 0, b: 0 });
     expect(hslToRgb({ h: 120, s: 100, l: 50 })).toEqual({ r: 0, g: 255, b: 0 });
+  });
+});
+
+describe('rgbToHsv', () => {
+  it('纯红 / 蓝', () => {
+    expect(rgbToHsv({ r: 255, g: 0, b: 0 })).toEqual({ h: 0, s: 100, v: 100 });
+    expect(rgbToHsv({ r: 0, g: 0, b: 255 })).toEqual({ h: 240, s: 100, v: 100 });
+  });
+
+  it('纯黑（饱和度与明度均为 0）', () => {
+    expect(rgbToHsv({ r: 0, g: 0, b: 0 })).toEqual({ h: 0, s: 0, v: 0 });
+  });
+
+  it('#3B82F6 → HSV(217, 76, 96)', () => {
+    expect(rgbToHsv({ r: 59, g: 130, b: 246 })).toEqual({ h: 217, s: 76, v: 96 });
+  });
+});
+
+describe('hsvToRgb 往返一致性', () => {
+  it('hsvToRgb(rgbToHsv(x)) 通道差 ≤ 1', () => {
+    const samples: Array<{ r: number; g: number; b: number }> = [
+      { r: 59, g: 130, b: 246 },
+      { r: 200, g: 50, b: 150 },
+    ];
+    for (const rgb of samples) {
+      const back = hsvToRgb(rgbToHsv(rgb));
+      expect(Math.abs(back.r - rgb.r)).toBeLessThanOrEqual(1);
+      expect(Math.abs(back.g - rgb.g)).toBeLessThanOrEqual(1);
+      expect(Math.abs(back.b - rgb.b)).toBeLessThanOrEqual(1);
+    }
   });
 });

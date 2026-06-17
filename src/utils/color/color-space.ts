@@ -165,3 +165,76 @@ export function hslToRgb({ h, s, l }: HSL): RGB {
     b: clamp255((b1 + m) * 255),
   };
 }
+
+/**
+ * RGB → HSV（HSB）。
+ * @param rgb - RGB 对象
+ * @returns HSV 对象（h:0–360, s/v:0–100）
+ */
+export function rgbToHsv({ r, g, b }: RGB): HSV {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const delta = max - min;
+
+  let h = 0;
+  const s = max === 0 ? 0 : delta / max;
+  const v = max;
+
+  if (delta !== 0) {
+    if (max === rn) {
+      h = (((gn - bn) / delta) % 6) * 60;
+    } else if (max === gn) {
+      h = ((bn - rn) / delta + 2) * 60;
+    } else {
+      h = ((rn - gn) / delta + 4) * 60;
+    }
+    if (h < 0) h += 360;
+  }
+
+  return {
+    h: Math.round(h),
+    s: Math.round(s * 100),
+    v: Math.round(v * 100),
+  };
+}
+
+/**
+ * HSV → RGB。输入越界自动钳制。
+ * @param hsv - HSV 对象（h:0–360, s/v:0–100）
+ * @returns RGB 对象
+ */
+export function hsvToRgb({ h, s, v }: HSV): RGB {
+  const hn = (((h % 360) + 360) % 360);
+  const sn = clampUnit(s / 100);
+  const vn = clampUnit(v / 100);
+
+  const c = vn * sn;
+  const x = c * (1 - Math.abs(((hn / 60) % 2) - 1));
+  const m = vn - c;
+
+  let r1 = 0;
+  let g1 = 0;
+  let b1 = 0;
+  if (hn < 60) {
+    r1 = c; g1 = x;
+  } else if (hn < 120) {
+    r1 = x; g1 = c;
+  } else if (hn < 180) {
+    g1 = c; b1 = x;
+  } else if (hn < 240) {
+    g1 = x; b1 = c;
+  } else if (hn < 300) {
+    r1 = x; b1 = c;
+  } else {
+    r1 = c; b1 = x;
+  }
+
+  return {
+    r: clamp255((r1 + m) * 255),
+    g: clamp255((g1 + m) * 255),
+    b: clamp255((b1 + m) * 255),
+  };
+}
