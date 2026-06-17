@@ -83,14 +83,36 @@ describe('convertAll', () => {
     expect(result.px).toBe(16);
     expect(result.rem).toBe(1);
   });
+
+  it('以 rem 为源且值为 0 时全部单位为 0', () => {
+    const result = convertAll(0, 'rem', DEFAULT_CONTEXT);
+    expect(result.px).toBe(0);
+    expect(result.rem).toBe(0);
+    expect(result.em).toBe(0);
+    expect(result.vw).toBe(0);
+    expect(result.vh).toBe(0);
+    expect(result.pct).toBe(0);
+    expect(result.pt).toBe(0);
+  });
+
+  it('以 vw 为源计算全部单位', () => {
+    const result = convertAll(4.2667, 'vw', DEFAULT_CONTEXT);
+    expect(result.px).toBeCloseTo(16, 3);
+    expect(result.vw).toBeCloseTo(4.2667, 3);
+    expect(result.rem).toBeCloseTo(1, 3);
+  });
 });
 
 describe('formatNumber', () => {
-  it('保留最多 4 位有效数字并去 0', () => {
+  it('保留最多 4 位小数并去 0', () => {
     expect(formatNumber(1)).toBe('1');
-    expect(formatNumber(1.23456)).toBe('1.235');
-    expect(formatNumber(4.266666)).toBe('4.267');
+    expect(formatNumber(1.23456)).toBe('1.2346');
+    expect(formatNumber(4.266666)).toBe('4.2667');
     expect(formatNumber(0)).toBe('0');
+  });
+
+  it('大整数不损失精度', () => {
+    expect(formatNumber(12345)).toBe('12345');
   });
 
   it('非有限值返回 —', () => {
