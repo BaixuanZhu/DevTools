@@ -6,7 +6,7 @@
  */
 import { ref, computed, watch } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import SelectListbox from '../../components/ui/SelectListbox.vue';
+import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import { useCopy } from '../../composables/useCopy';
 import {
   type Base,
@@ -144,7 +144,7 @@ watch(sourceBase, handleBaseChange);
 
     <!-- 输入区 -->
     <div class="border border-border rounded-md p-6 bg-card flex flex-col gap-4">
-      <SelectListbox
+      <OptionRadioGroup
         v-model="sourceBase"
         label="输入进制"
         :options="BASE_OPTIONS"

@@ -355,7 +355,7 @@ const toolFaqs: Record<string, FaqItem[]> = {
     },
     {
       question: '输入十六进制时需要写 0x 前缀吗？',
-      answer: '不需要。本工具在输入框上方已通过下拉菜单指定了进制，直接输入数字即可，例如 <code>1A3F</code>。输出也默认不带 <code>0x</code> 前缀，方便直接复制使用。',
+      answer: '不需要。本工具在输入框上方已通过选项按钮指定了进制，直接输入数字即可，例如 <code>1A3F</code>。输出也默认不带 <code>0x</code> 前缀，方便直接复制使用。',
     },
     {
       question: '二进制位图中的中括号是什么意思？',

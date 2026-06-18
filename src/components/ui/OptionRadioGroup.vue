@@ -1,22 +1,37 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends string | number">
 import { RadioGroup, RadioGroupOption } from '@headlessui/vue';
 
-export interface RadioOption {
-  value: string;
+/**
+ * 单选按钮组选项。
+ *
+ * @template T - 选项值类型，限定为 string | number
+ */
+export interface RadioOption<T extends string | number = string> {
+  /** 选项值 */
+  value: T;
+  /** 显示文本 */
   label: string;
 }
 
-const props = withDefaults(
-  defineProps<{
-    modelValue: string;
-    options: RadioOption[];
-    label?: string;
-  }>(),
-  { label: undefined },
-);
+/**
+ * 组件 props。
+ *
+ * @template T - 选中值类型，限定为 string | number
+ */
+interface Props<T extends string | number> {
+  /** 当前选中的值 */
+  modelValue: T;
+  /** 选项列表 */
+  options: RadioOption<T>[];
+  /** 标签文本 */
+  label?: string;
+}
+
+const props = withDefaults(defineProps<Props<T>>(), { label: undefined });
 
 const emit = defineEmits<{
-  'update:modelValue': [value: string];
+  /** 选中值变化时触发 */
+  'update:modelValue': [value: T];
 }>();
 </script>
 
