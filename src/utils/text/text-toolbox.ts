@@ -116,3 +116,21 @@ export function collapseWhitespace(input: string): string {
     .map((line) => line.replace(/\s+/g, ' ').trim())
     .join('\n');
 }
+
+/**
+ * 按行排序。
+ *
+ * 使用默认码点序（大写 ASCII 排在小写之前），区分大小写；
+ * 空行与纯空白行不参与排序，统一移到结果末尾并以空串输出。
+ * @param input - 原始文本
+ * @param order - 排序方向，默认升序 `'asc'`
+ * @returns 排序后的文本
+ */
+export function sortLines(input: string, order: 'asc' | 'desc' = 'asc'): string {
+  const lines = input.split('\n');
+  const nonBlank = lines.filter((line) => line.trim() !== '');
+  const blankCount = lines.length - nonBlank.length;
+  nonBlank.sort();
+  if (order === 'desc') nonBlank.reverse();
+  return [...nonBlank, ...Array<string>(blankCount).fill('')].join('\n');
+}

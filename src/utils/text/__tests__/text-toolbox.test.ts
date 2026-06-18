@@ -86,3 +86,23 @@ describe('collapseWhitespace', () => {
     expect(collapseWhitespace('a\n  b  c')).toBe('a\nb c');
   });
 });
+
+import { sortLines } from '../text-toolbox';
+
+describe('sortLines', () => {
+  it('sorts lines ascending by code point', () => {
+    expect(sortLines('c\na\nb')).toBe('a\nb\nc');
+  });
+
+  it('sorts lines descending', () => {
+    expect(sortLines('c\na\nb', 'desc')).toBe('c\nb\na');
+  });
+
+  it('places uppercase before lowercase (code point order)', () => {
+    expect(sortLines('b\nA\nc')).toBe('A\nb\nc');
+  });
+
+  it('moves blank/whitespace-only lines to the end', () => {
+    expect(sortLines('b\n\na')).toBe('a\nb\n');
+  });
+});
