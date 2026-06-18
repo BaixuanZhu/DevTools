@@ -106,3 +106,27 @@ describe('sortLines', () => {
     expect(sortLines('b\n\na')).toBe('a\nb\n');
   });
 });
+
+import { computeStats } from '../text-toolbox';
+
+describe('computeStats', () => {
+  it('returns zeros for empty string', () => {
+    expect(computeStats('')).toEqual({ chars: 0, charsNoSpace: 0, bytes: 0, lines: 0 });
+  });
+
+  it('counts chars, bytes and lines for plain ascii', () => {
+    expect(computeStats('a\nb')).toEqual({ chars: 3, charsNoSpace: 2, bytes: 3, lines: 2 });
+  });
+
+  it('counts UTF-8 bytes correctly for Chinese (3 bytes per char)', () => {
+    const s = computeStats('你好');
+    expect(s.chars).toBe(2);
+    expect(s.bytes).toBe(6);
+  });
+
+  it('counts emoji surrogate pair length and bytes', () => {
+    const s = computeStats('🎉');
+    expect(s.chars).toBe(2);
+    expect(s.bytes).toBe(4);
+  });
+});

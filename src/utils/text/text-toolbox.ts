@@ -134,3 +134,32 @@ export function sortLines(input: string, order: 'asc' | 'desc' = 'asc'): string 
   if (order === 'desc') nonBlank.reverse();
   return [...nonBlank, ...Array<string>(blankCount).fill('')].join('\n');
 }
+
+/** 文本统计结果。 */
+export interface TextStats {
+  /** 全部字符数（含空白与换行） */
+  chars: number;
+  /** 去除所有空白后的字符数 */
+  charsNoSpace: number;
+  /** UTF-8 编码字节数 */
+  bytes: number;
+  /** 行数 */
+  lines: number;
+}
+
+/** 复用的 UTF-8 编码器（计算字节数）。 */
+const encoder = new TextEncoder();
+
+/**
+ * 计算文本的字符数、去空白字符数、UTF-8 字节数与行数。
+ * @param input - 原始文本
+ * @returns 统计结果
+ */
+export function computeStats(input: string): TextStats {
+  return {
+    chars: input.length,
+    charsNoSpace: input.replace(/\s/g, '').length,
+    bytes: encoder.encode(input).length,
+    lines: input === '' ? 0 : input.split('\n').length,
+  };
+}
