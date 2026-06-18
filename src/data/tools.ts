@@ -69,6 +69,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['random-string', 'uuid-generator'],
   },
   {
+    id: 'text-toolbox',
+    name: '文本处理工具箱',
+    description: '大小写与全半角转换、去重去空行、排序、字数字节统计、查找替换，一站式文本处理',
+    seoDescription: '免费的在线文本处理工具箱，一站式完成大小写与全半角转换、按行去重去空行、文本排序、字数与字节统计、正则查找替换等高频文本操作，纯浏览器端本地运算，数据绝不上传，即开即用。',
+    category: '文本处理',
+    icon: '🧰',
+    path: '/text/text-toolbox',
+    keywords: ['文本处理', '大小写转换', '全角半角', '去重', '去空行', '文本排序', '字数统计', '查找替换'],
+    relatedToolIds: ['number-base-converter', 'uuid-generator', 'random-string'],
+  },
+  {
     id: 'uuid-generator',
     name: 'UUID 生成器',
     description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
