@@ -193,8 +193,7 @@ onMounted(() => {
         <div
           v-for="unit in UNIT_ORDER"
           :key="unit"
-          class="p-3 border rounded-sm transition-colors duration-150"
-          :class="lastEditedUnit === unit ? 'border-accent bg-accent/5' : 'border-border bg-card'"
+          class="p-3 border border-border bg-card rounded-sm"
         >
           <label class="block text-xs text-muted mb-1.5">{{ UNIT_LABELS[unit] }}</label>
           <input
