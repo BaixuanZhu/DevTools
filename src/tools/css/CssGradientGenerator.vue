@@ -12,11 +12,9 @@ import {
   generateId,
   clampPosition,
   normalizeAngle,
-  normalizeColor,
   isValidColor,
   buildGradientCss,
   createDefaultStops,
-  insertStop,
   removeStop,
   type GradientType,
   type RadialShape,
@@ -135,18 +133,18 @@ function handleColorInput(event: Event): void {
     return;
   }
   colorError.value = '';
-  const stop = activeStop.value;
-  if (stop) {
-    stop.color = color;
-  }
+  stops.value = stops.value.map((s) =>
+    s.id === activeStopId.value ? { ...s, color } : s
+  );
 }
 
 function handlePositionInput(event: Event): void {
   const target = event.target as HTMLInputElement;
   const value = Number(target.value);
-  const stop = activeStop.value;
-  if (stop && Number.isFinite(value)) {
-    stop.position = clampPosition(value);
+  if (Number.isFinite(value)) {
+    stops.value = stops.value.map((s) =>
+      s.id === activeStopId.value ? { ...s, position: clampPosition(value) } : s
+    );
   }
 }
 
@@ -363,7 +361,6 @@ onUnmounted(() => {
       <button
         type="button"
         class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
-        :disabled="!generatedCss"
         @click="handleCopyCss"
       >
         复制 CSS

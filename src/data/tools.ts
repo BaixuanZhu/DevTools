@@ -413,7 +413,7 @@ export const tools: ToolMeta[] = [
     id: 'gradient',
     name: 'CSS 渐变生成器',
     description: '可视化创建线性/径向/圆锥渐变并复制 CSS 代码',
-    seoDescription: '免费在线 CSS 渐变生成器，支持线性、径向、圆锥三种渐变类型可视化调色与色标拖动编辑，实时预览并一键复制标准 CSS 代码，提供多组精美预设渐变，前端开发必备辅助工具，纯浏览器端运算数据绝不上传服务器。',
+    seoDescription: '免费在线 CSS 渐变生成器，支持线性、径向、圆锥三种渐变类型可视化调色与色标拖动编辑，实时预览并一键复制标准 CSS 代码，提供日落、海洋、霓虹等多组精美预设渐变，前端开发与设计稿还原必备辅助工具，纯浏览器端运算数据绝不上传服务器。',
     category: 'CSS 工具',
     icon: '🌈',
     path: '/css/gradient',
