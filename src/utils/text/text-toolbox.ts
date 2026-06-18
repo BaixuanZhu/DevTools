@@ -62,3 +62,57 @@ export function toFullWidth(input: string): string {
     return String.fromCharCode(code + 0xfee0);
   });
 }
+
+/**
+ * 删除纯空白行（仅含空格/制表符等空白的行），保留有内容的行。
+ * @param input - 原始文本
+ * @returns 去除空白行后的文本
+ */
+export function removeBlankLines(input: string): string {
+  return input
+    .split('\n')
+    .filter((line) => line.trim() !== '')
+    .join('\n');
+}
+
+/**
+ * 按行去重，保留首次出现顺序。
+ * @param input - 原始文本
+ * @returns 去重后的文本
+ */
+export function dedupeLines(input: string): string {
+  const seen = new Set<string>();
+  return input
+    .split('\n')
+    .filter((line) => {
+      if (seen.has(line)) return false;
+      seen.add(line);
+      return true;
+    })
+    .join('\n');
+}
+
+/**
+ * 去除每一行的首尾空白，不改动行内中间空白。
+ * @param input - 原始文本
+ * @returns 每行首尾去空白后的文本
+ */
+export function trimLines(input: string): string {
+  return input
+    .split('\n')
+    .map((line) => line.trim())
+    .join('\n');
+}
+
+/**
+ * 将每行内部连续空白（空格/制表符）合并为单个空格，并去除该行首尾空白。
+ * 不跨行合并、不删除换行。
+ * @param input - 原始文本
+ * @returns 合并空白后的文本
+ */
+export function collapseWhitespace(input: string): string {
+  return input
+    .split('\n')
+    .map((line) => line.replace(/\s+/g, ' ').trim())
+    .join('\n');
+}

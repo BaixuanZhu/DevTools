@@ -56,3 +56,33 @@ describe('toFullWidth', () => {
     expect(toFullWidth('a b')).toBe('ａ　ｂ');
   });
 });
+
+import { removeBlankLines, dedupeLines, trimLines, collapseWhitespace } from '../text-toolbox';
+
+describe('removeBlankLines', () => {
+  it('removes empty and whitespace-only lines', () => {
+    expect(removeBlankLines('a\n\n  \nb')).toBe('a\nb');
+  });
+});
+
+describe('dedupeLines', () => {
+  it('removes duplicate lines keeping first occurrence order', () => {
+    expect(dedupeLines('a\nb\na')).toBe('a\nb');
+  });
+});
+
+describe('trimLines', () => {
+  it('trims leading/trailing whitespace of each line only', () => {
+    expect(trimLines('  a  b  \n  c')).toBe('a  b\nc');
+  });
+});
+
+describe('collapseWhitespace', () => {
+  it('collapses consecutive whitespace within a line to single space', () => {
+    expect(collapseWhitespace('a   b\t\tc')).toBe('a b c');
+  });
+
+  it('does not merge across lines', () => {
+    expect(collapseWhitespace('a\n  b  c')).toBe('a\nb c');
+  });
+});
