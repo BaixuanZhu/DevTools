@@ -6,6 +6,7 @@ import {
   genName, genEmail, genPassword, genLoremWord, genLoremSentence,
   genLoremParagraph, genUrl,
   genDate, genTimestamp, generateRecords,
+  toJson, toCsv, validateFields,
 } from '../fake-data';
 import type { FieldConfig } from '../fake-data';
 
@@ -276,5 +277,74 @@ describe('generateRecords', () => {
 
   it('returns empty array for count 0', () => {
     expect(generateRecords(fields, 0, NOW)).toEqual([]);
+  });
+});
+
+const FIELDS: FieldConfig[] = [
+  { rowId: 'r1', name: 'id', type: 'auto-id', params: { start: 1 } },
+  { rowId: 'r2', name: 'name', type: 'name', params: { locale: 'zh' } },
+];
+const RECS = [{ id: '1', name: '张三, Jr.' }, { id: '2', name: '李"四' }];
+
+describe('toJson', () => {
+  it('serializes to a parseable JSON array', () => {
+    const out = toJson(RECS);
+    expect(JSON.parse(out)).toEqual(RECS);
+    expect(out.startsWith('[')).toBe(true);
+  });
+
+  it('pretty-prints with 2-space indent', () => {
+    // 数组元素为对象时，JSON.stringify(records, null, 2) 会让对象本身的缩进为 2 空格，
+    // 其内部 key 再缩进一级（共 4 空格）。此处断言数组元素的起始 2 空格缩进。
+    expect(toJson([{ a: 1 }])).toContain('\n  {');
+  });
+});
+
+describe('toCsv', () => {
+  it('emits header row then data rows with CRLF', () => {
+    const csv = toCsv(RECS, FIELDS);
+    expect(csv.startsWith('id,name\r\n')).toBe(true);
+    expect(csv.split('\r\n')).toHaveLength(3); // header + 2 rows
+  });
+
+  it('quotes values containing comma, quote, or newline (RFC4180)', () => {
+    const csv = toCsv(RECS, FIELDS);
+    // 张三, Jr. → 含逗号需加引号
+    expect(csv).toContain('"张三, Jr."');
+    // 李"四 → 含引号，整体加引号包裹、内部引号双写
+    expect(csv).toContain('"李""四"');
+  });
+});
+
+describe('validateFields', () => {
+  it('rejects empty field list', () => {
+    expect(validateFields([]).valid).toBe(false);
+  });
+
+  it('rejects empty column name', () => {
+    const r = validateFields([{ rowId: 'r1', name: ' ', type: 'uuid', params: {} }]);
+    expect(r.valid).toBe(false);
+  });
+
+  it('rejects duplicate names', () => {
+    const r = validateFields([
+      { rowId: 'r1', name: 'id', type: 'uuid', params: {} },
+      { rowId: 'r2', name: 'id', type: 'uuid', params: {} },
+    ]);
+    expect(r.valid).toBe(false);
+    expect(r.error).toContain('重复');
+  });
+
+  it('rejects illegal column name (starts with digit)', () => {
+    const r = validateFields([{ rowId: 'r1', name: '1bad', type: 'uuid', params: {} }]);
+    expect(r.valid).toBe(false);
+  });
+
+  it('accepts valid english, underscore, and chinese names', () => {
+    const r = validateFields([
+      { rowId: 'r1', name: 'user_id', type: 'uuid', params: {} },
+      { rowId: 'r2', name: '姓名', type: 'name', params: {} },
+    ]);
+    expect(r.valid).toBe(true);
   });
 });

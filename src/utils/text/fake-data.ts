@@ -394,3 +394,62 @@ export function generateRecords(fields: FieldConfig[], count: number, now: numbe
   }
   return records;
 }
+
+/** 字段校验结果。 */
+export interface ValidationResult {
+  /** 是否通过 */
+  valid: boolean;
+  /** 失败时的中文错误信息 */
+  error: string;
+}
+
+/** 合法列名：字母/下划线/中文开头，后接字母/数字/下划线/中文。 */
+const COLUMN_NAME_RE = /^[A-Za-z_一-龥][A-Za-z0-9_一-龥]*$/;
+
+/**
+ * 校验字段配置：非空、列名非空、列名合法、列名不重复。
+ * @param fields - 字段配置列表
+ * @returns 校验结果
+ */
+export function validateFields(fields: FieldConfig[]): ValidationResult {
+  if (!fields.length) return { valid: false, error: '请至少添加一个字段' };
+  const seen = new Set<string>();
+  for (const f of fields) {
+    const name = f.name.trim();
+    if (!name) return { valid: false, error: '存在未填写列名的字段' };
+    if (!COLUMN_NAME_RE.test(name)) {
+      return { valid: false, error: `列名「${name}」不合法：只能包含字母、数字、下划线或中文，且不能以数字开头` };
+    }
+    if (seen.has(name)) return { valid: false, error: `列名「${name}」重复，请修改` };
+    seen.add(name);
+  }
+  return { valid: true, error: '' };
+}
+
+/**
+ * 将记录序列化为 JSON 数组字符串（2 空格缩进）。
+ * @param records - 记录数组
+ */
+export function toJson(records: Record<string, unknown>[]): string {
+  return JSON.stringify(records, null, 2);
+}
+
+/**
+ * 按 RFC4180 将记录序列化为 CSV：首行列名 + 数据行，行尾 CRLF；
+ * 含逗号、双引号或换行的值用双引号包裹，内部引号双写。
+ * @param records - 记录数组
+ * @param fields - 字段配置（决定列名与列顺序）
+ */
+export function toCsv(records: Record<string, unknown>[], fields: FieldConfig[]): string {
+  const headers = fields.map((f) => f.name);
+  const escape = (value: unknown): string => {
+    const s = value == null ? '' : String(value);
+    if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+    return s;
+  };
+  const lines = [headers.map(escape).join(',')];
+  for (const rec of records) {
+    lines.push(headers.map((h) => escape(rec[h])).join(','));
+  }
+  return lines.join('\r\n');
+}
