@@ -175,6 +175,7 @@ function handleReplace(): void {
         rows="10"
         class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent resize-y box-border"
         placeholder="粘贴或输入文本..."
+        aria-label="文本内容"
       ></textarea>
       <p class="mt-1.5 text-xs text-muted">
         字数 {{ stats.charsNoSpace }} · 字符 {{ stats.chars }} · 字节 {{ stats.bytes }} · 行 {{ stats.lines }}
@@ -190,12 +191,14 @@ function handleReplace(): void {
           type="text"
           class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent box-border"
           placeholder="查找内容"
+          aria-label="查找内容"
         />
         <input
           v-model="replace"
           type="text"
           class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent box-border"
           placeholder="替换为"
+          aria-label="替换内容"
         />
       </div>
       <div class="flex flex-wrap items-center gap-4">

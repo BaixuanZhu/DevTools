@@ -105,7 +105,7 @@ export function trimLines(input: string): string {
 }
 
 /**
- * 将每行内部连续空白（空格/制表符）合并为单个空格，并去除该行首尾空白。
+ * 将每行内部连续空白（空白字符）合并为单个空格，并去除该行首尾空白。
  * 不跨行合并、不删除换行。
  * @param input - 原始文本
  * @returns 合并空白后的文本
@@ -120,7 +120,7 @@ export function collapseWhitespace(input: string): string {
 /**
  * 按行排序。
  *
- * 使用默认码点序（大写 ASCII 排在小写之前），区分大小写；
+ * 使用默认 UTF-16 码元序（默认排序序）（大写 ASCII 排在小写之前），区分大小写；
  * 空行与纯空白行不参与排序，统一移到结果末尾并以空串输出。
  * @param input - 原始文本
  * @param order - 排序方向，默认升序 `'asc'`
