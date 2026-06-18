@@ -151,6 +151,7 @@ export function shuffle<T>(arr: readonly T[]): T[] {
 }
 
 import { generateRandomString } from './random-string';
+import { CN_SURNAMES, CN_GIVEN, EN_FIRST, EN_LAST, LOREM_WORDS } from './fake-data-dict';
 
 /** 生成 v4 UUID 字符串。 */
 export function genUuid(): string {
@@ -220,4 +221,97 @@ export function genDecimal(params: DecimalParams): string {
  */
 export function genAutoId(params: AutoIdParams, rowIndex: number): string {
   return String((params.start ?? 1) + rowIndex);
+}
+
+/** 姓名生成参数。 */
+export interface NameParams { locale?: 'zh' | 'en'; }
+/** 邮箱生成参数。 */
+export interface EmailParams { domain?: string; }
+/** 密码生成参数。 */
+export interface PasswordParams { length?: number; }
+/** Lorem 生成参数。 */
+export interface LoremParams { count?: number; }
+
+/**
+ * 生成姓名。
+ * @param params - locale 缺省 'zh'；中文为「姓 + 1~2 个名用字」，英文为「first + ' ' + last」
+ */
+export function genName(params: NameParams): string {
+  if (params.locale === 'en') {
+    return `${pick(EN_FIRST)} ${pick(EN_LAST)}`;
+  }
+  const surname = pick(CN_SURNAMES);
+  const givenLen = randomInt(1, 2);
+  const given = Array.from({ length: givenLen }, () => pick(CN_GIVEN)).join('');
+  return surname + given;
+}
+
+/**
+ * 生成邮箱：随机小写用户名 + 域名。
+ * @param params - domain 缺省 '@example.com'
+ */
+export function genEmail(params: EmailParams): string {
+  const user = generateRandomString(randomInt(6, 10), 'abcdefghijklmnopqrstuvwxyz');
+  return `${user}${params.domain ?? '@example.com'}`;
+}
+
+/**
+ * 生成密码：保证含大写、小写、数字三类，长度不足时补齐随机字符。
+ * @param params - length 缺省 12，钳制到 [4, 128]
+ */
+export function genPassword(params: PasswordParams): string {
+  const len = Math.max(4, Math.min(params.length ?? 12, 128));
+  const UPPER = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const LOWER = 'abcdefghijklmnopqrstuvwxyz';
+  const DIGIT = '0123456789';
+  const SYM = '!@#$%^&*';
+  const chars = [pick([...UPPER]), pick([...LOWER]), pick([...DIGIT])];
+  const all = UPPER + LOWER + DIGIT + SYM;
+  while (chars.length < len) chars.push(generateRandomString(1, all));
+  return shuffle(chars).join('');
+}
+
+/**
+ * 生成 Lorem 词组。
+ * @param params - count 词数，缺省 3
+ */
+export function genLoremWord(params: LoremParams): string {
+  const count = Math.max(1, params.count ?? 3);
+  return Array.from({ length: count }, () => pick(LOREM_WORDS)).join(' ');
+}
+
+/**
+ * 生成 Lorem 句子：每句 4–12 词，首字母大写、句末加句点。
+ * @param params - count 句数，缺省 1
+ */
+export function genLoremSentence(params: LoremParams): string {
+  const count = Math.max(1, params.count ?? 1);
+  const sentences = Array.from({ length: count }, () => {
+    const wlen = randomInt(4, 12);
+    const words = Array.from({ length: wlen }, () => pick(LOREM_WORDS));
+    const s = words.join(' ');
+    return s.charAt(0).toUpperCase() + s.slice(1) + '.';
+  });
+  return sentences.join(' ');
+}
+
+/**
+ * 生成 Lorem 段落：每段 3–6 句，段间换行。
+ * @param params - count 段数，缺省 1
+ */
+export function genLoremParagraph(params: LoremParams): string {
+  const count = Math.max(1, params.count ?? 1);
+  const paras = Array.from({ length: count }, () => {
+    const slen = randomInt(3, 6);
+    return genLoremSentence({ count: slen });
+  });
+  return paras.join('\n');
+}
+
+/** 生成随机 URL：https://www.<词>.com/<路径>。 */
+export function genUrl(): string {
+  const domain = pick(LOREM_WORDS);
+  const pathLen = randomInt(1, 3);
+  const path = Array.from({ length: pathLen }, () => pick(LOREM_WORDS)).join('/');
+  return `https://www.${domain}.com/${path}`;
 }

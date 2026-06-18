@@ -3,6 +3,8 @@ import {
   randomInt, pick, shuffle,
   genUuid, genUsername, genPhone, genIp, genBoolean,
   genInteger, genDecimal, genAutoId,
+  genName, genEmail, genPassword, genLoremWord, genLoremSentence,
+  genLoremParagraph, genUrl,
 } from '../fake-data';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
@@ -138,5 +140,84 @@ describe('genAutoId', () => {
     expect(genAutoId({ start: 1 }, 0)).toBe('1');
     expect(genAutoId({ start: 1 }, 4)).toBe('5');
     expect(genAutoId({ start: 100 }, 0)).toBe('100');
+  });
+});
+
+describe('genName', () => {
+  it('chinese name contains a surname and given chars', () => {
+    const CN_SURNAMES_PLACEHOLDER = '王李张'; // 仅断言含中文
+    for (let i = 0; i < 100; i++) {
+      const n = genName({ locale: 'zh' });
+      expect(/[一-龥]{2,4}/.test(n)).toBe(true);
+      expect(n.length).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('english name has two parts separated by space', () => {
+    for (let i = 0; i < 100; i++) {
+      const n = genName({ locale: 'en' });
+      expect(n.split(' ')).toHaveLength(2);
+      expect(/^[A-Z][a-z]+$/.test(n.split(' ')[0])).toBe(true);
+    }
+  });
+});
+
+describe('genEmail', () => {
+  it('contains @ and given domain', () => {
+    const e = genEmail({ domain: '@test.com' });
+    expect(e.endsWith('@test.com')).toBe(true);
+    expect(e.indexOf('@')).toBeGreaterThan(0);
+  });
+});
+
+describe('genPassword', () => {
+  it('has requested length and covers upper/lower/digit', () => {
+    for (let i = 0; i < 100; i++) {
+      const p = genPassword({ length: 12 });
+      expect(p).toHaveLength(12);
+      expect(/[A-Z]/.test(p)).toBe(true);
+      expect(/[a-z]/.test(p)).toBe(true);
+      expect(/[0-9]/.test(p)).toBe(true);
+    }
+  });
+
+  it('clamps length to minimum 4', () => {
+    const p = genPassword({ length: 2 });
+    expect(p).toHaveLength(4);
+  });
+});
+
+describe('genLoremWord', () => {
+  it('returns the requested number of words', () => {
+    const s = genLoremWord({ count: 5 });
+    expect(s.split(' ')).toHaveLength(5);
+  });
+});
+
+describe('genLoremSentence', () => {
+  it('ends with a period and starts uppercase', () => {
+    const s = genLoremSentence({ count: 1 });
+    expect(s.endsWith('.')).toBe(true);
+    expect(/^[A-Z]/.test(s)).toBe(true);
+  });
+
+  it('joins multiple sentences', () => {
+    const s = genLoremSentence({ count: 3 });
+    expect(s.split('.').filter(Boolean)).toHaveLength(3);
+  });
+});
+
+describe('genLoremParagraph', () => {
+  it('returns the requested number of paragraphs', () => {
+    const s = genLoremParagraph({ count: 2 });
+    expect(s.split('\n')).toHaveLength(2);
+  });
+});
+
+describe('genUrl', () => {
+  it('starts with https://', () => {
+    for (let i = 0; i < 50; i++) {
+      expect(genUrl().startsWith('https://')).toBe(true);
+    }
   });
 });
