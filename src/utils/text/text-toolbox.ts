@@ -31,3 +31,34 @@ export function toTitleCase(input: string): string {
     })
     .join('\n');
 }
+
+/**
+ * 全角转半角。
+ *
+ * 将 U+FF01–FF5E 映射为 U+0021–007E（偏移 0xFEE0），全角空格 U+3000 转为普通空格 U+0020。
+ * 仅作用于 ASCII 范围，中文字符不受影响。
+ * @param input - 原始文本
+ * @returns 半角化后的文本
+ */
+export function toHalfWidth(input: string): string {
+  return input.replace(/[！-～　]/g, (ch) => {
+    const code = ch.charCodeAt(0);
+    if (code === 0x3000) return ' ';
+    return String.fromCharCode(code - 0xfee0);
+  });
+}
+
+/**
+ * 半角转全角。
+ *
+ * 将 U+0021–007E 映射为 U+FF01–FF5E，普通空格 U+0020 转为全角空格 U+3000。
+ * @param input - 原始文本
+ * @returns 全角化后的文本
+ */
+export function toFullWidth(input: string): string {
+  return input.replace(/[!-~ ]/g, (ch) => {
+    const code = ch.charCodeAt(0);
+    if (code === 0x0020) return String.fromCharCode(0x3000);
+    return String.fromCharCode(code + 0xfee0);
+  });
+}

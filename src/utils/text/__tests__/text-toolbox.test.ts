@@ -30,3 +30,29 @@ describe('toTitleCase', () => {
     expect(toTitleCase('a\n\nb')).toBe('A\n\nB');
   });
 });
+
+import { toHalfWidth, toFullWidth } from '../text-toolbox';
+
+describe('toHalfWidth', () => {
+  it('converts fullwidth ASCII letters and digits', () => {
+    expect(toHalfWidth('ＡＢＣ１２３')).toBe('ABC123');
+  });
+
+  it('converts fullwidth space (U+3000) to regular space', () => {
+    expect(toHalfWidth('Ａ　Ｂ')).toBe('A B');
+  });
+
+  it('leaves Chinese characters unchanged', () => {
+    expect(toHalfWidth('你好')).toBe('你好');
+  });
+});
+
+describe('toFullWidth', () => {
+  it('converts ASCII letters and digits to fullwidth', () => {
+    expect(toFullWidth('ABC123')).toBe('ＡＢＣ１２３');
+  });
+
+  it('converts regular space to fullwidth space', () => {
+    expect(toFullWidth('a b')).toBe('ａ　ｂ');
+  });
+});
