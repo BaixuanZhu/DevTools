@@ -30,14 +30,6 @@ export const BASE_OPTIONS: BaseOption[] = [
   { value: 16, label: '十六进制' },
 ];
 
-/** 进制前缀提示（仅用于展示） */
-export const BASE_PREFIX: Record<Base, string> = {
-  2: '0b',
-  8: '0o',
-  10: '',
-  16: '0x',
-};
-
 /** 各进制允许字符集 */
 const BASE_DIGITS: Record<Base, string> = {
   2: '01',
@@ -118,18 +110,18 @@ export function convertNumber(value: bigint, base: Base): string {
  * @returns 位宽
  */
 export function getBitWidth(value: bigint, negative: boolean): number {
-  if (!negative) {
-    if (value <= 0n) return 1;
-    const bits = value.toString(2).length;
-    return bits;
+  if (negative) {
+    const absValue = -value;
+    let n = 8;
+    while (absValue > 2n ** BigInt(n - 1)) {
+      n += 8;
+    }
+    return n;
   }
 
-  const absValue = -value;
-  let n = 8;
-  while (absValue > 2n ** BigInt(n - 1)) {
-    n += 8;
-  }
-  return n;
+  if (value <= 0n) return 1;
+  const bits = value.toString(2).length;
+  return bits;
 }
 
 /**

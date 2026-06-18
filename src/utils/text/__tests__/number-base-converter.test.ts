@@ -6,6 +6,7 @@ import {
   getPreviewBitWidth,
   toBinaryString,
   formatBinaryPreview,
+  isValidDigit,
   BASE_OPTIONS,
 } from '../number-base-converter';
 
@@ -65,9 +66,31 @@ describe('convertNumber', () => {
   });
 });
 
+describe('isValidDigit', () => {
+  it('accepts valid digits for each base', () => {
+    expect(isValidDigit('0', 2)).toBe(true);
+    expect(isValidDigit('1', 2)).toBe(true);
+    expect(isValidDigit('7', 8)).toBe(true);
+    expect(isValidDigit('9', 10)).toBe(true);
+    expect(isValidDigit('a', 16)).toBe(true);
+    expect(isValidDigit('F', 16)).toBe(true);
+  });
+
+  it('rejects invalid digits for each base', () => {
+    expect(isValidDigit('2', 2)).toBe(false);
+    expect(isValidDigit('8', 8)).toBe(false);
+    expect(isValidDigit('a', 10)).toBe(false);
+    expect(isValidDigit('g', 16)).toBe(false);
+  });
+});
+
 describe('getBitWidth', () => {
   it('returns 1 for zero', () => {
     expect(getBitWidth(0n, false)).toBe(1);
+  });
+
+  it('returns 8 for zero with negative flag', () => {
+    expect(getBitWidth(0n, true)).toBe(8);
   });
 
   it('returns minimum bits for positives', () => {

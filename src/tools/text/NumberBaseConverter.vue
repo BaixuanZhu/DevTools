@@ -14,9 +14,7 @@ import {
   BASE_OPTIONS,
   parseNumber,
   convertNumber,
-  getBitWidth,
   getPreviewBitWidth,
-  toBinaryString,
   formatBinaryPreview,
 } from '../../utils/text/number-base-converter';
 
@@ -26,6 +24,13 @@ interface LineResult {
   raw: string;
   parsed: ParseResult | null;
   error: string;
+  /** 预计算的目标进制显示值 */
+  converted?: {
+    binary: string;
+    octal: string;
+    decimal: string;
+    hex: string;
+  };
 }
 
 // ---- 状态 ----
@@ -44,6 +49,16 @@ const lineResults = computed<LineResult[]>(() => {
     const trimmed = raw.trim();
     if (!trimmed) return;
 
+    if (trimmed.length > 10000) {
+      results.push({
+        lineNumber: index + 1,
+        raw: trimmed,
+        parsed: null,
+        error: `第 ${index + 1} 行过长，已跳过`,
+      });
+      return;
+    }
+
     const parsed = parseNumber(trimmed, sourceBase.value);
     const error = parsed === null ? '包含无效字符，请检查当前进制' : '';
 
@@ -52,6 +67,14 @@ const lineResults = computed<LineResult[]>(() => {
       raw: trimmed,
       parsed,
       error,
+      converted: parsed
+        ? {
+            binary: convertNumber(parsed.value, 2),
+            octal: convertNumber(parsed.value, 8),
+            decimal: convertNumber(parsed.value, 10),
+            hex: convertNumber(parsed.value, 16),
+          }
+        : undefined,
     });
   });
 
@@ -83,8 +106,8 @@ function selectLine(lineNumber: number): void {
 function buildCopyText(): string {
   return validResults.value
     .map((r) => {
-      const v = r.parsed!.value;
-      return `${r.raw} = 二进制 ${convertNumber(v, 2)} / 八进制 ${convertNumber(v, 8)} / 十进制 ${convertNumber(v, 10)} / 十六进制 ${convertNumber(v, 16)}`;
+      const c = r.converted!;
+      return `${r.raw} = 二进制 ${c.binary} / 八进制 ${c.octal} / 十进制 ${c.decimal} / 十六进制 ${c.hex}`;
     })
     .join('\n');
 }
@@ -96,17 +119,17 @@ async function handleCopyAll(): Promise<void> {
 }
 
 // ---- 二进制显示 ----
-function binaryColumnValue(value: bigint, negative: boolean): string {
-  return toBinaryString(value, getBitWidth(value, negative));
-}
-
 function binaryPreviewValue(value: bigint, negative: boolean): string {
   return formatBinaryPreview(value, getPreviewBitWidth(value, negative));
 }
 
 // ---- 监听 ----
+let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 watch(inputText, () => {
-  selectedLine.value = null;
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    selectedLine.value = null;
+  }, 150);
 });
 watch(sourceBase, handleBaseChange);
 </script>
@@ -189,15 +212,15 @@ watch(sourceBase, handleBaseChange);
               v-if="result.parsed"
               class="px-4 py-2 font-mono text-text break-all"
             >
-              {{ binaryColumnValue(result.parsed.value, result.parsed.negative) }}
+              {{ result.converted!.binary }}
             </td>
             <td v-else colspan="4" class="px-4 py-2 text-error text-xs">
               {{ result.error }}
             </td>
             <template v-if="result.parsed">
-              <td class="px-4 py-2 font-mono text-text break-all">{{ convertNumber(result.parsed.value, 8) }}</td>
-              <td class="px-4 py-2 font-mono text-text break-all">{{ convertNumber(result.parsed.value, 10) }}</td>
-              <td class="px-4 py-2 font-mono text-text break-all">{{ convertNumber(result.parsed.value, 16) }}</td>
+              <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.octal }}</td>
+              <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.decimal }}</td>
+              <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.hex }}</td>
             </template>
           </tr>
         </tbody>
