@@ -149,3 +149,75 @@ export function shuffle<T>(arr: readonly T[]): T[] {
   }
   return result;
 }
+
+import { generateRandomString } from './random-string';
+
+/** 生成 v4 UUID 字符串。 */
+export function genUuid(): string {
+  return crypto.randomUUID();
+}
+
+/** 生成 6–12 位小写字母用户名，半数概率追加数字后缀。 */
+export function genUsername(): string {
+  const base = generateRandomString(randomInt(6, 10), 'abcdefghijklmnopqrstuvwxyz');
+  return randomInt(0, 1) === 1 ? `${base}${randomInt(0, 999)}` : base;
+}
+
+/** 手机号合法第二位号段。 */
+const PHONE_SECOND_DIGITS = ['3', '4', '5', '7', '8', '9'];
+
+/** 生成 11 位手机号：1 + 合法号段 + 9 位数字。 */
+export function genPhone(): string {
+  const second = pick(PHONE_SECOND_DIGITS);
+  const rest = generateRandomString(9, '0123456789');
+  return `1${second}${rest}`;
+}
+
+/** 生成 IPv4 地址。 */
+export function genIp(): string {
+  return Array.from({ length: 4 }, () => String(randomInt(0, 255))).join('.');
+}
+
+/** 生成布尔字符串 "true" / "false"。 */
+export function genBoolean(): string {
+  return randomInt(0, 1) === 1 ? 'true' : 'false';
+}
+
+/** 整数生成参数。 */
+export interface IntegerParams { min?: number; max?: number; }
+/** 小数生成参数。 */
+export interface DecimalParams { min?: number; max?: number; precision?: number; }
+/** 自增 ID 生成参数。 */
+export interface AutoIdParams { start?: number; }
+
+/**
+ * 生成闭区间随机整数字符串。
+ * @param params - min/max，缺省 0/100
+ */
+export function genInteger(params: IntegerParams): string {
+  return String(randomInt(params.min ?? 0, params.max ?? 100));
+}
+
+/**
+ * 生成指定小数位的随机小数字符串（缩放法避免 modulo bias）。
+ * @param params - min/max/precision，precision 缺省 2，上限 10
+ */
+export function genDecimal(params: DecimalParams): string {
+  const lo = Math.min(params.min ?? 0, params.max ?? 100);
+  const hi = Math.max(params.min ?? 0, params.max ?? 100);
+  const precision = Math.max(0, Math.min(params.precision ?? 2, 10));
+  const scale = 10 ** precision;
+  const loScaled = Math.ceil(lo * scale);
+  const hiScaled = Math.floor(hi * scale);
+  const value = randomInt(Math.min(loScaled, hiScaled), Math.max(loScaled, hiScaled)) / scale;
+  return value.toFixed(precision);
+}
+
+/**
+ * 生成自增 ID 字符串：start + rowIndex。
+ * @param params - start 起始值，缺省 1
+ * @param rowIndex - 当前行索引（从 0 起）
+ */
+export function genAutoId(params: AutoIdParams, rowIndex: number): string {
+  return String((params.start ?? 1) + rowIndex);
+}
