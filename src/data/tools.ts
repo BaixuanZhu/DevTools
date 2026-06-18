@@ -442,6 +442,17 @@ export const tools: ToolMeta[] = [
     keywords: ['css渐变生成器', 'linear-gradient', 'radial-gradient', 'conic-gradient', '渐变代码', 'css渐变工具'],
     relatedToolIds: ['unit-converter'],
   },
+  {
+    id: 'fake-data-generator',
+    name: '假数据生成器',
+    description: '按字段配置批量生成姓名、邮箱、手机号、UUID、Lorem 占位文等结构化假数据，输出 JSON 或 CSV',
+    seoDescription: '在线假数据生成器，可自定义字段类型与列名，批量生成中文英文姓名、邮箱、手机号、UUID、Lorem 占位文、日期、IP 等 15 类结构化测试数据，一键导出 JSON 或 CSV，纯浏览器端生成数据绝不上传，前后端测试与数据库灌库必备。',
+    category: '文本处理',
+    icon: '🧪',
+    path: '/text/fake-data-generator',
+    keywords: ['假数据生成', '测试数据生成', 'mock 数据', '随机姓名生成', '随机邮箱', 'faker', '生成 JSON 测试数据', '生成 CSV 测试数据', 'Lorem ipsum', '造数据'],
+    relatedToolIds: ['random-string', 'uuid-generator', 'text-toolbox'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
