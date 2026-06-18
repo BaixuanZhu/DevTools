@@ -32,6 +32,7 @@ async function handleCopy() {
 <template>
   <button
     type="button"
+    :title="copied ? '已复制' : '复制'"
     aria-label="复制"
     :class="[
       sizeClasses[size],
