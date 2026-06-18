@@ -164,3 +164,47 @@ describe('replaceAll', () => {
     expect(replaceAll('abc', '', 'x', { caseSensitive: true, regex: false }).error).toBeTruthy();
   });
 });
+
+import { createHistory } from '../text-toolbox';
+
+describe('createHistory', () => {
+  it('initial state is not undoable after reset', () => {
+    const h = createHistory();
+    h.reset('a');
+    expect(h.canUndo()).toBe(false);
+    expect(h.canRedo()).toBe(false);
+    expect(h.current()).toBe('a');
+  });
+
+  it('push makes previous state undoable', () => {
+    const h = createHistory();
+    h.reset('a');
+    h.push('b');
+    expect(h.canUndo()).toBe(true);
+    expect(h.undo()).toBe('a');
+    expect(h.canRedo()).toBe(true);
+    expect(h.redo()).toBe('b');
+  });
+
+  it('truncates redo branch when pushing after undo', () => {
+    const h = createHistory();
+    h.reset('a');
+    h.push('b');
+    h.push('c');
+    expect(h.undo()).toBe('b'); // 当前 'b'，'c' 仍在 redo 分支
+    h.push('d'); // 截断 'c'
+    expect(h.canRedo()).toBe(false);
+    expect(h.current()).toBe('d');
+    expect(h.undo()).toBe('b');
+    expect(h.redo()).toBe('d'); // 'c' 已被丢弃
+  });
+
+  it('drops oldest beyond limit', () => {
+    const h = createHistory(2);
+    h.reset('a');
+    h.push('b');
+    h.push('c'); // 'a' 被丢弃
+    expect(h.undo()).toBe('b');
+    expect(h.canUndo()).toBe(false); // 无法再撤到 'a'
+  });
+});

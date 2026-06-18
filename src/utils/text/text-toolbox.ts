@@ -227,3 +227,66 @@ export function replaceAll(
   const re = new RegExp(escapeRegExp(find), flags);
   return { result: input.replace(re, () => replace) };
 }
+
+/** 撤销/重做历史栈接口。 */
+export interface History {
+  /** 当前状态值。 */
+  current(): string;
+  /** 推入新状态；若处于已撤销的中段，先截断后续 redo 分支。 */
+  push(value: string): void;
+  /** 撤销一步，返回上一状态；无可撤销时返回 null。 */
+  undo(): string | null;
+  /** 重做一步，返回下一状态；无可重做时返回 null。 */
+  redo(): string | null;
+  /** 是否可撤销。 */
+  canUndo(): boolean;
+  /** 是否可重做。 */
+  canRedo(): boolean;
+  /** 重置为给定初值并清空历史（仅该初值，不可撤销）。 */
+  reset(value: string): void;
+}
+
+/**
+ * 创建一个有上限的撤销/重做历史栈。
+ *
+ * 采用标准 undo 语义：在中段（已 undo）插入新状态时截断后续分支；
+ * 超过 `limit` 时丢弃最早记录。
+ * @param limit - 历史记录上限，默认 50
+ * @returns 历史栈实例
+ */
+export function createHistory(limit = 50): History {
+  let stack: string[] = [];
+  let pointer = -1;
+
+  return {
+    current() {
+      return pointer >= 0 ? stack[pointer] : '';
+    },
+    push(value: string) {
+      stack = stack.slice(0, pointer + 1);
+      stack.push(value);
+      if (stack.length > limit) stack.shift();
+      pointer = stack.length - 1;
+    },
+    undo() {
+      if (pointer <= 0) return null;
+      pointer--;
+      return stack[pointer];
+    },
+    redo() {
+      if (pointer >= stack.length - 1) return null;
+      pointer++;
+      return stack[pointer];
+    },
+    canUndo() {
+      return pointer > 0;
+    },
+    canRedo() {
+      return pointer < stack.length - 1;
+    },
+    reset(value: string) {
+      stack = [value];
+      pointer = 0;
+    },
+  };
+}
