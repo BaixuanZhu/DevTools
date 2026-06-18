@@ -58,6 +58,17 @@ export interface ToolMeta {
 /** 所有已注册的工具列表 */
 export const tools: ToolMeta[] = [
   {
+    id: 'number-base-converter',
+    name: '进制转换器',
+    description: '二进制、八进制、十进制、十六进制批量互转，支持大整数与补码二进制预览',
+    seoDescription: '免费在线进制转换工具，支持二进制、八进制、十进制、十六进制批量互转，基于 BigInt 处理任意大整数与负数补码，并提供逐位二进制位图预览，前端开发与协议调试必备，纯浏览器端运算数据绝不上传。',
+    category: '文本处理',
+    icon: '🔢',
+    path: '/text/number-base-converter',
+    keywords: ['进制转换', '二进制转十六进制', '八进制转十进制', '十进制转二进制', 'BigInt', '补码', 'hex转binary', '进制互转'],
+    relatedToolIds: ['random-string', 'uuid-generator'],
+  },
+  {
     id: 'uuid-generator',
     name: 'UUID 生成器',
     description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
