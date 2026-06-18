@@ -344,6 +344,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '圆锥渐变（<code>conic-gradient</code>）支持所有现代浏览器，包括 Chrome/Edge/Firefox/Safari，但不支持 Internet Explorer。',
     },
   ],
+  'number-base-converter': [
+    {
+      question: '为什么能支持非常大的数字？',
+      answer: '本工具使用 JavaScript 原生的 <code>BigInt</code> 类型进行计算，不受 <code>Number.MAX_SAFE_INTEGER</code>（约 9 × 10<sup>15</sup>）限制，可处理上百位的大整数转换。',
+    },
+    {
+      question: '负数的二进制是怎么显示的？',
+      answer: '负数的二进制按<strong>补码</strong>展示。自动位宽规则为：找到能容纳该负数的最小 8 位倍数位宽。例如 <code>-1</code> 显示为 8 位 <code>11111111</code>，<code>-255</code> 需要 16 位 <code>1111111100000001</code>。',
+    },
+    {
+      question: '输入十六进制时需要写 0x 前缀吗？',
+      answer: '不需要。本工具在输入框上方已通过下拉菜单指定了进制，直接输入数字即可，例如 <code>1A3F</code>。输出也默认不带 <code>0x</code> 前缀，方便直接复制使用。',
+    },
+    {
+      question: '二进制位图中的中括号是什么意思？',
+      answer: '中括号表示一个字节（8 位），内部按 4 位（一个 nibble）用空格分隔。这样便于把二进制与十六进制逐字节对照，例如 <code>[0001 1010][0011 1111]</code> 对应 <code>0x1A3F</code>。',
+    },
+  ],
 };
 
 /**
