@@ -315,3 +315,82 @@ export function genUrl(): string {
   const path = Array.from({ length: pathLen }, () => pick(LOREM_WORDS)).join('/');
   return `https://www.${domain}.com/${path}`;
 }
+
+/** 日期 / 时间戳生成参数。 */
+export interface DateParams { years?: number; }
+
+/**
+ * 生成日期字符串（YYYY-MM-DD），落在 [now - N 年, now] 区间。
+ * @param params - years 缺省 10
+ * @param now - 基准时间戳（毫秒），传入以保证可测
+ */
+export function genDate(params: DateParams, now: number): string {
+  const years = Math.max(1, params.years ?? 10);
+  const past = now - years * 365 * 86400000;
+  const t = randomInt(past, now);
+  const d = new Date(t);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/**
+ * 生成 Unix 时间戳（秒），落在 [now - N 年, now] 区间。
+ * @param params - years 缺省 10
+ * @param now - 基准时间戳（毫秒）
+ */
+export function genTimestamp(params: DateParams, now: number): string {
+  const years = Math.max(1, params.years ?? 10);
+  const past = now - years * 365 * 86400000;
+  const t = randomInt(past, now);
+  return String(Math.floor(t / 1000));
+}
+
+/**
+ * 根据字段类型分发，生成单个字段值。
+ * @param field - 字段配置
+ * @param rowIndex - 当前行索引
+ * @param now - 基准时间戳（毫秒）
+ */
+function generateFieldValue(field: FieldConfig, rowIndex: number, now: number): unknown {
+  const p = field.params;
+  switch (field.type) {
+    case 'uuid': return genUuid();
+    case 'username': return genUsername();
+    case 'phone': return genPhone();
+    case 'ip': return genIp();
+    case 'boolean': return genBoolean();
+    case 'url': return genUrl();
+    case 'integer': return genInteger({ min: Number(p.min ?? 0), max: Number(p.max ?? 100) });
+    case 'decimal': return genDecimal({ min: Number(p.min ?? 0), max: Number(p.max ?? 100), precision: Number(p.precision ?? 2) });
+    case 'auto-id': return genAutoId({ start: Number(p.start ?? 1) }, rowIndex);
+    case 'name': return genName({ locale: (p.locale as 'zh' | 'en') ?? 'zh' });
+    case 'email': return genEmail({ domain: String(p.domain ?? '@example.com') });
+    case 'password': return genPassword({ length: Number(p.length ?? 12) });
+    case 'lorem-word': return genLoremWord({ count: Number(p.count ?? 3) });
+    case 'lorem-sentence': return genLoremSentence({ count: Number(p.count ?? 1) });
+    case 'lorem-paragraph': return genLoremParagraph({ count: Number(p.count ?? 1) });
+    case 'date': return genDate({ years: Number(p.years ?? 10) }, now);
+    case 'timestamp': return genTimestamp({ years: Number(p.years ?? 10) }, now);
+  }
+}
+
+/**
+ * 按字段配置生成 count 条记录。
+ * @param fields - 字段配置（顺序即列顺序）
+ * @param count - 记录条数
+ * @param now - 基准时间戳（毫秒），缺省 Date.now()
+ * @returns 记录数组，每条为「列名 → 值」对象
+ */
+export function generateRecords(fields: FieldConfig[], count: number, now: number = Date.now()): Record<string, unknown>[] {
+  const records: Record<string, unknown>[] = [];
+  for (let i = 0; i < count; i++) {
+    const rec: Record<string, unknown> = {};
+    for (const f of fields) {
+      rec[f.name] = generateFieldValue(f, i, now);
+    }
+    records.push(rec);
+  }
+  return records;
+}

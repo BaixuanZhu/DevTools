@@ -5,7 +5,9 @@ import {
   genInteger, genDecimal, genAutoId,
   genName, genEmail, genPassword, genLoremWord, genLoremSentence,
   genLoremParagraph, genUrl,
+  genDate, genTimestamp, generateRecords,
 } from '../fake-data';
+import type { FieldConfig } from '../fake-data';
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -219,5 +221,60 @@ describe('genUrl', () => {
     for (let i = 0; i < 50; i++) {
       expect(genUrl().startsWith('https://')).toBe(true);
     }
+  });
+});
+
+describe('genDate', () => {
+  const NOW = Date.UTC(2026, 0, 1); // 2026-01-01 固定基准
+  it('matches YYYY-MM-DD format', () => {
+    for (let i = 0; i < 100; i++) {
+      expect(/^\d{4}-\d{2}-\d{2}$/.test(genDate({ years: 10 }, NOW))).toBe(true);
+    }
+  });
+
+  it('falls within the past N years', () => {
+    for (let i = 0; i < 100; i++) {
+      const t = Date.parse(genDate({ years: 5 }, NOW));
+      expect(t).toBeLessThanOrEqual(NOW);
+      expect(t).toBeGreaterThan(NOW - 5 * 366 * 86400000);
+    }
+  });
+});
+
+describe('genTimestamp', () => {
+  const NOW = Date.UTC(2026, 0, 1);
+  it('is a positive integer in seconds', () => {
+    for (let i = 0; i < 100; i++) {
+      const s = Number(genTimestamp({ years: 1 }, NOW));
+      expect(Number.isInteger(s)).toBe(true);
+      expect(s).toBeGreaterThan(0);
+      expect(s).toBeLessThanOrEqual(Math.floor(NOW / 1000));
+    }
+  });
+});
+
+describe('generateRecords', () => {
+  const NOW = Date.UTC(2026, 0, 1);
+  const fields: FieldConfig[] = [
+    { rowId: 'r1', name: 'id', type: 'auto-id', params: { start: 1 } },
+    { rowId: 'r2', name: 'name', type: 'name', params: { locale: 'zh' } },
+  ];
+
+  it('produces the requested number of records', () => {
+    expect(generateRecords(fields, 5, NOW)).toHaveLength(5);
+  });
+
+  it('uses field names as keys in order', () => {
+    const recs = generateRecords(fields, 1, NOW);
+    expect(Object.keys(recs[0])).toEqual(['id', 'name']);
+  });
+
+  it('increments auto-id across rows', () => {
+    const recs = generateRecords(fields, 3, NOW);
+    expect(recs.map((r) => r.id)).toEqual(['1', '2', '3']);
+  });
+
+  it('returns empty array for count 0', () => {
+    expect(generateRecords(fields, 0, NOW)).toEqual([]);
   });
 });
