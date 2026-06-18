@@ -163,3 +163,67 @@ export function computeStats(input: string): TextStats {
     lines: input === '' ? 0 : input.split('\n').length,
   };
 }
+
+/** 查找替换选项。 */
+export interface ReplaceOptions {
+  /** 是否区分大小写 */
+  caseSensitive: boolean;
+  /** 是否将查找内容作为正则表达式 */
+  regex: boolean;
+}
+
+/** 查找替换结果。 */
+export interface ReplaceResult {
+  /** 替换后的文本；出错时为原文。 */
+  result: string;
+  /** 错误信息；成功时为 undefined。 */
+  error?: string;
+}
+
+/** 转义字符串中的正则元字符，用于字面量匹配。 */
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * 全局查找替换。
+ *
+ * - 普通模式：按字面量匹配，替换串原样输出（不解释 `$`）。
+ * - 正则模式：`new RegExp(find, flags)`，遵循 JS 标准 `replace` 语义（支持 `$1`/`$&` 反向引用）。
+ *
+ * 正则编译失败或查找内容为空时返回 `error`，不改动原文。
+ * @param input - 原始文本
+ * @param find - 查找内容
+ * @param replace - 替换内容
+ * @param options - 替换选项
+ * @returns 替换结果（含可能错误）
+ */
+export function replaceAll(
+  input: string,
+  find: string,
+  replace: string,
+  options: ReplaceOptions,
+): ReplaceResult {
+  if (find === '') {
+    return { result: input, error: '查找内容不能为空' };
+  }
+
+  const flags = 'g' + (options.caseSensitive ? '' : 'i');
+
+  if (options.regex) {
+    let re: RegExp;
+    try {
+      re = new RegExp(find, flags);
+    } catch (e) {
+      return {
+        result: input,
+        error: e instanceof Error ? `正则表达式语法错误：${e.message}` : '正则表达式语法错误',
+      };
+    }
+    return { result: input.replace(re, replace) };
+  }
+
+  // 字面量模式：用函数替换避免替换串中的 $ 被解释
+  const re = new RegExp(escapeRegExp(find), flags);
+  return { result: input.replace(re, () => replace) };
+}

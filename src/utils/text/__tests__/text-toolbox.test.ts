@@ -130,3 +130,37 @@ describe('computeStats', () => {
     expect(s.bytes).toBe(4);
   });
 });
+
+import { replaceAll } from '../text-toolbox';
+
+describe('replaceAll', () => {
+  it('replaces all literal occurrences', () => {
+    expect(replaceAll('a-b-c', '-', '_', { caseSensitive: true, regex: false }).result).toBe('a_b_c');
+  });
+
+  it('keeps replacement string literally (no $ interpretation) in literal mode', () => {
+    expect(replaceAll('abc', 'b', '$&x', { caseSensitive: true, regex: false }).result).toBe('a$&xc');
+  });
+
+  it('is case-insensitive when caseSensitive=false', () => {
+    expect(replaceAll('AaA', 'a', 'b', { caseSensitive: false, regex: false }).result).toBe('bbb');
+  });
+
+  it('supports regex pattern', () => {
+    expect(replaceAll('a1b2', '\\d', 'X', { caseSensitive: true, regex: true }).result).toBe('aXbX');
+  });
+
+  it('supports backreference in regex mode', () => {
+    expect(replaceAll('hello', '(l)', '[$1]', { caseSensitive: true, regex: true }).result).toBe('he[l][l]o');
+  });
+
+  it('returns error for invalid regex', () => {
+    const r = replaceAll('abc', '(', '_', { caseSensitive: true, regex: true });
+    expect(r.error).toBeTruthy();
+    expect(r.result).toBe('abc');
+  });
+
+  it('returns error when find is empty', () => {
+    expect(replaceAll('abc', '', 'x', { caseSensitive: true, regex: false }).error).toBeTruthy();
+  });
+});
