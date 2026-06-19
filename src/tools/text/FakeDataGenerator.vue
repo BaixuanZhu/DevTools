@@ -122,7 +122,7 @@ const { copy } = useCopy();
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div class="max-w-5xl mx-auto w-full">
     <ToolHeader
       title="假数据生成器"
       description="按字段配置批量生成姓名、邮箱、手机号、UUID、Lorem 等结构化假数据，输出 JSON 或 CSV。"
