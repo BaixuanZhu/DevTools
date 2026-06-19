@@ -35,6 +35,16 @@ describe('parseUrl', () => {
     expect(parseUrl('not a url')).toBeNull();
     expect(parseUrl('')).toBeNull();
   });
+
+  it('保留重复 query key', () => {
+    const result = parseUrl('https://example.com/path?a=1&a=2&b=3');
+    expect(result).not.toBeNull();
+    expect(result?.params).toEqual([
+      { key: 'a', value: '1' },
+      { key: 'a', value: '2' },
+      { key: 'b', value: '3' },
+    ]);
+  });
 });
 
 describe('buildUrlFromParams', () => {
@@ -59,6 +69,15 @@ describe('buildUrlFromParams', () => {
       { key: 'x', value: 'y' },
     ]);
     expect(result).toBe('https://example.com/path?x=y#section');
+  });
+
+  it('保留重复 query key', () => {
+    const result = buildUrlFromParams('https://example.com/path', [
+      { key: 'a', value: '1' },
+      { key: 'a', value: '2' },
+      { key: 'b', value: '3' },
+    ]);
+    expect(result).toBe('https://example.com/path?a=1&a=2&b=3');
   });
 
   it('非法 baseUrl 原样返回', () => {
@@ -98,5 +117,11 @@ describe('decodeUrl', () => {
     const result = decodeUrl('%E0%A4%A');
     expect(result.component.value).toBe('');
     expect(result.component.error).toContain('URIComponent 解码失败');
+  });
+
+  it('full 解码失败时返回错误', () => {
+    const result = decodeUrl('%E0%A4%A');
+    expect(result.full.value).toBe('');
+    expect(result.full.error).toContain('URI 解码失败');
   });
 });

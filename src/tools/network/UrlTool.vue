@@ -33,6 +33,8 @@ const decodeResult = ref<UrlDecodeResult | null>(null);
 
 // 输入变化时自动解析
 watch(input, (val) => {
+  encodeResult.value = null;
+  decodeResult.value = null;
   const trimmed = val.trim();
   if (!trimmed) {
     parsed.value = null;
