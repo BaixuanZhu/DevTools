@@ -1,8 +1,16 @@
 ---
-import ToolLayout from '../../layouts/ToolLayout.astro';
-import UrlEncodeCodec from '../../tools/encoding/UrlEncodeCodec.vue';
+const destination = '/network/url';
 ---
 
-<ToolLayout toolId="encoding/url-encode">
-  <UrlEncodeCodec client:idle />
-</ToolLayout>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="refresh" content={`0;url=${destination}`} />
+    <link rel="canonical" href={destination} />
+    <title>URL 解析器 - DevTools</title>
+  </head>
+  <body>
+    <p>此页面已迁移至 <a href={destination}>{destination}</a></p>
+  </body>
+</html>
