@@ -169,3 +169,58 @@ export function checkCanvasLimits(
   }
   return { ok: true };
 }
+
+// ==================== 浏览器 API（组件层验证，不做单测） ====================
+
+/**
+ * 加载图片文件为位图，自动纠正手机拍照的 EXIF 方向。
+ *
+ * @param file 用户上传的图片文件
+ * @throws 当浏览器无法解码该文件时抛出，由调用方捕获并提示
+ */
+export async function loadImage(file: File): Promise<LoadedImage> {
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  return { bitmap, width: bitmap.width, height: bitmap.height };
+}
+
+/**
+ * 转换图片：按百分比缩放尺寸，再以指定格式/质量编码。
+ *
+ * - 无损格式（png）忽略 quality；
+ * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）。
+ *
+ * @param opts 转换选项
+ * @returns 转换结果（含 object URL，调用方负责释放）
+ * @throws 当无法创建 2D 上下文或编码失败时抛出
+ */
+export async function convertImage(opts: ConvertOptions): Promise<ConvertResult> {
+  const { bitmap, format, quality, scale, fillBackground } = opts;
+  const { width, height } = computeScaledSize(bitmap.width, bitmap.height, scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('无法创建 Canvas 2D 上下文');
+
+  if (fillBackground) {
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+  }
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  const mime = getOutputMime(format);
+  const qualityArg = isLossless(format) ? undefined : quality / 100;
+  const blob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob(resolve, mime, qualityArg);
+  });
+  if (!blob) throw new Error('图片编码失败，请尝试其他格式或尺寸');
+
+  return {
+    blob,
+    url: URL.createObjectURL(blob),
+    width,
+    height,
+    size: blob.size,
+  };
+}
