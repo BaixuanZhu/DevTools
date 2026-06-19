@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
+import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import {
@@ -234,127 +235,138 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <ResponsiveWorkspace mode="horizontal">
-    <!-- 原图 -->
-    <template #input>
-      <div class="flex flex-col gap-3">
-        <div class="text-[0.8125rem] font-medium text-muted">原始图片</div>
+  <div>
+    <ToolHeader
+      title="图片转换与压缩"
+      description="PNG / JPG / WebP 格式互转、质量压缩与尺寸缩放，纯浏览器端 Canvas 本地处理"
+      :show-example="false"
+    />
 
-        <div
-          v-if="!originalUrl"
-          class="border-2 border-dashed rounded-lg p-10 text-center cursor-pointer transition-[border-color] duration-150"
-          :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
-          @click="handlePick"
-          @drop="handleDrop"
-          @dragover="handleDragOver"
-          @dragleave="handleDragLeave"
-        >
-          <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
-          <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / GIF / BMP 等，上限 50MB</div>
-        </div>
+    <ResponsiveWorkspace mode="horizontal">
+      <!-- 原图 -->
+      <template #input>
+        <div class="flex flex-col gap-3">
+          <div class="text-[0.8125rem] font-medium text-muted">原始图片</div>
 
-        <div v-else class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
-          <img
-            :src="originalUrl"
-            alt="原始图片"
-            class="max-h-[360px] w-full object-contain rounded-sm bg-white"
-          />
-          <div class="text-xs text-muted font-mono">
-            {{ loaded?.width }}×{{ loaded?.height }} · {{ formatBytes(originalSize) }}
+          <div
+            v-if="!originalUrl"
+            class="border-2 border-dashed rounded-lg p-10 min-h-[360px] flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
+            :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
+            @click="handlePick"
+            @drop="handleDrop"
+            @dragover="handleDragOver"
+            @dragleave="handleDragLeave"
+          >
+            <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
+            <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / GIF / BMP 等，上限 50MB</div>
           </div>
-        </div>
 
-        <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleChange" />
-        <p v-if="errorMsg" class="text-[0.8125rem] text-error">{{ errorMsg }}</p>
-      </div>
-    </template>
-
-    <!-- 结果 -->
-    <template #output>
-      <div class="flex flex-col gap-3">
-        <div class="text-[0.8125rem] font-medium text-muted">压缩结果</div>
-
-        <div v-if="result" class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
-          <img
-            :src="result.url"
-            alt="压缩结果"
-            class="max-h-[360px] w-full object-contain rounded-sm bg-white"
-          />
-          <div class="flex items-center justify-between text-xs font-mono">
-            <span class="text-muted">{{ result.width }}×{{ result.height }} · {{ formatBytes(result.size) }}</span>
-            <span v-if="savings" :class="savings.pct >= 0 ? 'text-success' : 'text-error'">
-              {{ savings.pct >= 0 ? `节省 ${savings.pct}%` : `增大 ${Math.abs(savings.pct)}%` }}
-            </span>
-          </div>
-          <p v-if="savings && savings.pct < 0" class="text-[0.8125rem] text-muted">
-            当前设置下体积未减小，可降低质量或更换为 WebP
-          </p>
-        </div>
-
-        <div v-else-if="loaded" class="bg-hover border border-border rounded-sm p-10 text-center text-muted text-sm">
-          正在生成预览…
-        </div>
-
-        <div v-else class="bg-hover border border-border rounded-sm p-10 text-center text-muted text-sm">
-          上传图片后预览压缩结果
-        </div>
-      </div>
-    </template>
-
-    <!-- 控件栏（横跨两栏） -->
-    <template #actions>
-      <div class="w-full flex flex-col gap-4 border-t border-border pt-4">
-        <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-          <OptionRadioGroup v-model="format" :options="OUTPUT_FORMATS" label="输出格式" />
-
-          <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
-            <span class="text-[0.8125rem] text-muted">质量</span>
-            <input
-              v-model.number="quality"
-              type="range"
-              min="10"
-              max="100"
-              step="1"
-              aria-label="质量"
-              :disabled="qualityDisabled"
-              class="w-32 accent-accent"
+          <div v-else class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
+            <img
+              :src="originalUrl"
+              alt="原始图片"
+              class="max-h-[360px] w-full object-contain rounded-sm bg-white"
             />
-            <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+            <div class="text-xs text-muted font-mono">
+              {{ loaded?.width }}×{{ loaded?.height }} · {{ formatBytes(originalSize) }}
+            </div>
+          </div>
+
+          <input ref="fileInputRef" type="file" accept="image/*" class="hidden" @change="handleChange" />
+          <p v-if="errorMsg" class="text-[0.8125rem] text-error">{{ errorMsg }}</p>
+        </div>
+      </template>
+
+      <!-- 结果 -->
+      <template #output>
+        <div class="flex flex-col gap-3">
+          <div class="text-[0.8125rem] font-medium text-muted">压缩结果</div>
+
+          <div v-if="result" class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
+            <img
+              :src="result.url"
+              alt="压缩结果"
+              class="max-h-[360px] w-full object-contain rounded-sm bg-white"
+            />
+            <div class="flex items-center justify-between text-xs font-mono">
+              <span class="text-muted">{{ result.width }}×{{ result.height }} · {{ formatBytes(result.size) }}</span>
+              <span v-if="savings" :class="savings.pct >= 0 ? 'text-success' : 'text-error'">
+                {{ savings.pct >= 0 ? `节省 ${savings.pct}%` : `增大 ${Math.abs(savings.pct)}%` }}
+              </span>
+            </div>
+            <p v-if="savings && savings.pct < 0" class="text-[0.8125rem] text-muted">
+              当前设置下体积未减小，可降低质量或更换为 WebP
+            </p>
+          </div>
+
+          <div v-else-if="loaded" class="bg-hover border border-border rounded-sm p-10 min-h-[360px] flex flex-col items-center justify-center text-center text-muted text-sm">
+            正在生成预览…
+          </div>
+
+          <div v-else class="bg-hover border border-border rounded-sm p-10 min-h-[360px] flex flex-col items-center justify-center text-center text-muted text-sm">
+            上传图片后预览压缩结果
+          </div>
+        </div>
+      </template>
+
+      <!-- 控件栏（横跨两栏） -->
+      <template #actions>
+        <div class="w-full flex flex-col gap-4 border-t border-border pt-4">
+          <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+            <OptionRadioGroup v-model="format" :options="OUTPUT_FORMATS" label="输出格式" />
+
+            <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
+              <span class="text-[0.8125rem] text-muted">质量</span>
+              <input
+                v-model.number="quality"
+                type="range"
+                min="10"
+                max="100"
+                step="1"
+                aria-label="质量"
+                :disabled="qualityDisabled"
+                class="w-32 accent-accent"
+              />
+              <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[0.8125rem] text-muted">尺寸</span>
+              <input
+                v-model.number="scale"
+                type="range"
+                min="1"
+                max="100"
+                step="1"
+                aria-label="尺寸"
+                class="w-32 accent-accent"
+              />
+              <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
+              <span v-if="targetSize" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
+            </div>
+          </div>
+
+          <!-- 预留一行高度，避免切换 PNG/JPEG/WebP 时提示文本出现/消失导致页面跳动 -->
+          <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
+            <p v-if="qualityDisabled" class="m-0">PNG 为无损格式，不支持质量调节</p>
+            <p v-else-if="loaded && needsFillBackground(format)" class="m-0">
+              JPEG 不支持透明背景，透明区域将填充白色
+            </p>
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-[0.8125rem] text-muted">尺寸</span>
-            <input
-              v-model.number="scale"
-              type="range"
-              min="1"
-              max="100"
-              step="1"
-              aria-label="尺寸"
-              class="w-32 accent-accent"
-            />
-            <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
-            <span v-if="targetSize" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
+            <ClearButton @clear="handleClear" />
+            <button
+              type="button"
+              :disabled="!result"
+              class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="handleDownload"
+            >
+              下载结果
+            </button>
           </div>
         </div>
-
-        <p v-if="qualityDisabled" class="text-[0.8125rem] text-muted">PNG 为无损格式，不支持质量调节</p>
-        <p v-if="loaded && needsFillBackground(format)" class="text-[0.8125rem] text-muted">
-          JPEG 不支持透明背景，透明区域将填充白色
-        </p>
-
-        <div class="flex items-center gap-2">
-          <ClearButton @clear="handleClear" />
-          <button
-            type="button"
-            :disabled="!result"
-            class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            @click="handleDownload"
-          >
-            下载结果
-          </button>
-        </div>
-      </div>
-    </template>
-  </ResponsiveWorkspace>
+      </template>
+    </ResponsiveWorkspace>
+  </div>
 </template>
