@@ -6,6 +6,13 @@
  * 支持 JSON 数组与 CSV 两种输出格式，快速模板一键填充常见字段组合。
  */
 import { ref, computed } from 'vue';
+import {
+  Dialog,
+  DialogPanel,
+  DialogTitle,
+  TransitionRoot,
+  TransitionChild,
+} from '@headlessui/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
@@ -73,11 +80,6 @@ function onTypeChange(field: FieldConfig, type: FieldType): void {
   field.params = params;
 }
 
-/** 打开字段配置对话框（将在后续任务中实现）。 */
-function openFieldDialog(_field: FieldConfig): void {
-  // TODO: 将在 Task 3/4 中实现 Dialog 逻辑
-}
-
 /** 添加一个默认字段行。 */
 function addField(): void {
   fields.value.push(makeField('name', `field${fields.value.length + 1}`));
@@ -119,6 +121,45 @@ function clearResult(): void {
 }
 
 const { copy } = useCopy();
+
+/** Dialog 开关状态。 */
+const dialogOpen = ref(false);
+/** 当前正在编辑的字段配置副本。 */
+const editingField = ref<FieldConfig>(makeField('name'));
+
+/** 打开字段配置 Dialog，复制当前字段到编辑副本。 */
+function openFieldDialog(field: FieldConfig): void {
+  editingField.value = {
+    rowId: field.rowId,
+    name: field.name,
+    type: field.type,
+    params: { ...field.params },
+  };
+  dialogOpen.value = true;
+}
+
+/** 保存 Dialog 中的字段配置，更新 fields 数组对应项。 */
+function saveFieldConfig(): void {
+  const updated = editingField.value;
+  const idx = fields.value.findIndex((f) => f.rowId === updated.rowId);
+  if (idx === -1) return;
+  fields.value[idx] = { ...updated };
+  dialogOpen.value = false;
+}
+
+/** Dialog 中切换类型时重置参数默认值。 */
+function onDialogTypeChange(type: FieldType): void {
+  editingField.value.type = type;
+  const meta = FIELD_TYPE_OPTIONS.find((m) => m.value === type) as FieldTypeMeta;
+  const params: Record<string, string | number> = {};
+  for (const p of meta.params) params[p.key] = p.default;
+  editingField.value.params = params;
+}
+
+/** Dialog 中当前类型的参数元数据。 */
+const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
+  return (FIELD_TYPE_OPTIONS.find((m) => m.value === editingField.value.type) as FieldTypeMeta).params;
+});
 </script>
 
 <template>
