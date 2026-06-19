@@ -56,14 +56,22 @@ watch(input, (val) => {
 function handleEncode() {
   if (!input.value.trim()) return;
   decodeResult.value = null;
-  encodeResult.value = encodeUrl(input.value);
+  try {
+    encodeResult.value = encodeUrl(input.value);
+  } catch {
+    encodeResult.value = null;
+  }
 }
 
 /** 解码当前输入 */
 function handleDecode() {
   if (!input.value.trim()) return;
   encodeResult.value = null;
-  decodeResult.value = decodeUrl(input.value);
+  try {
+    decodeResult.value = decodeUrl(input.value);
+  } catch {
+    decodeResult.value = null;
+  }
 }
 
 /** 清空所有状态 */
