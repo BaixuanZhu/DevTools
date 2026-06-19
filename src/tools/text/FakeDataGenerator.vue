@@ -122,7 +122,7 @@ const { copy } = useCopy();
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div class="max-w-5xl mx-auto w-full">
     <ToolHeader
       title="假数据生成器"
       description="按字段配置批量生成姓名、邮箱、手机号、UUID、Lorem 等结构化假数据，输出 JSON 或 CSV。"
@@ -144,7 +144,7 @@ const { copy } = useCopy();
     </div>
 
     <!-- 字段配置区 -->
-    <div class="mt-4 border border-border rounded-md bg-card overflow-hidden">
+    <div class="mt-4 border border-border rounded-md bg-card">
       <div class="flex items-center justify-between px-4 py-2 border-b border-border">
         <span class="text-[0.8125rem] text-muted">字段配置</span>
         <button
@@ -156,56 +156,62 @@ const { copy } = useCopy();
         </button>
       </div>
 
-      <div class="p-3 flex flex-col gap-2">
-        <div
-          v-for="field in fields"
-          :key="field.rowId"
-          class="flex items-center gap-2 flex-wrap"
-        >
-          <input
-            v-model="field.name"
-            type="text"
-            class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[120px]"
-            placeholder="列名"
-            aria-label="列名"
-          />
-          <div class="w-[120px]">
-            <SelectListbox
-              :model-value="field.type"
-              :options="typeOptions"
-              @update:model-value="(v) => onTypeChange(field, v as FieldType)"
+      <div class="divide-y divide-border">
+        <div v-for="field in fields" :key="field.rowId" class="px-3 py-2.5">
+          <!-- 第一行：列名 + 类型 + 删除 -->
+          <div class="flex items-center gap-2">
+            <input
+              v-model="field.name"
+              type="text"
+              class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150 w-[140px]"
+              placeholder="列名"
+              aria-label="列名"
             />
+            <div class="flex-1 min-w-[120px]">
+              <SelectListbox
+                :model-value="field.type"
+                :options="typeOptions"
+                @update:model-value="(v) => onTypeChange(field, v as FieldType)"
+              />
+            </div>
+            <button
+              type="button"
+              class="flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              title="删除字段"
+              aria-label="删除字段"
+              @click="removeField(field.rowId)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
-          <template v-for="def in paramDefs(field)" :key="def.key">
-            <label v-if="def.type === 'select'" class="flex items-center gap-1 text-[0.75rem] text-muted">
+          <!-- 第二行：参数（仅有参数时渲染） -->
+          <div
+            v-if="paramDefs(field).length"
+            class="flex items-center flex-wrap gap-x-4 gap-y-2 pl-1 pt-2.5"
+          >
+            <label
+              v-for="def in paramDefs(field)"
+              :key="def.key"
+              class="flex items-center gap-1 text-[0.75rem] text-muted"
+            >
               {{ def.label }}
-              <select
-                v-model="field.params[def.key]"
-                class="px-1 py-1 border border-border rounded-sm bg-background text-text text-[0.75rem] outline-none focus:border-accent"
-              >
-                <option v-for="opt in def.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-              </select>
-            </label>
-            <label v-else class="flex items-center gap-1 text-[0.75rem] text-muted">
-              {{ def.label }}
+              <div v-if="def.type === 'select'" class="w-[96px]">
+                <SelectListbox
+                  :model-value="String(field.params[def.key])"
+                  :options="def.options ?? []"
+                  @update:model-value="(v) => (field.params[def.key] = v)"
+                />
+              </div>
               <input
+                v-else
                 v-model="field.params[def.key]"
                 :type="def.type"
-                class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.75rem] font-mono outline-none focus:border-accent w-[80px]"
+                class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.75rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150 w-[72px]"
               />
             </label>
-          </template>
-          <button
-            type="button"
-            class="ml-auto flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
-            title="删除字段"
-            aria-label="删除字段"
-            @click="removeField(field.rowId)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+          </div>
         </div>
       </div>
     </div>
