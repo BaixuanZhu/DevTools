@@ -234,6 +234,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '支持浏览器可解码的所有常见格式：<strong>PNG / JPG / WebP / BMP / GIF（取首帧）</strong>等。可直接拖拽文件、点击选择，或用 <code>Ctrl+V</code> 粘贴截图。单张图片上限 <strong>10MB</strong>。',
     },
   ],
+  'image-converter': [
+    {
+      question: 'WebP 和 JPEG 该怎么选？',
+      answer: '<strong>WebP</strong> 压缩率更高且支持透明通道，现代浏览器通用，优先选 WebP；<strong>JPEG</strong> 兼容性最广但不支持透明，适合无透明需求的照片。',
+    },
+    {
+      question: '为什么选 PNG 时质量滑块不能用？',
+      answer: 'PNG 是<strong>无损格式</strong>，浏览器在编码 PNG 时会忽略质量参数，因此质量调节仅对 JPEG / WebP 有效。',
+    },
+    {
+      question: '带透明背景的图片转格式会怎样？',
+      answer: '转 <strong>PNG / WebP</strong> 保留透明；转 <strong>JPEG</strong> 时透明区域会自动填充白色背景（JPEG 不支持透明通道），工具会给出提示。',
+    },
+  ],
   'ipv6-cidr': [
     {
       question: 'IPv6 为什么没有广播地址？',

@@ -399,6 +399,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['qr-code-generator'],
   },
   {
+    id: 'image-converter',
+    name: '图片转换与压缩',
+    description: 'PNG / JPG / WebP 格式互转、质量压缩与尺寸缩放，纯浏览器端 Canvas 本地处理',
+    seoDescription: '免费在线图片转换与压缩工具，支持 PNG、JPG、WebP 格式互转、自定义质量压缩与按比例尺寸缩放，纯浏览器端 Canvas 本地处理图片绝不上传，前端开发与博客配图优化必备，即开即用。',
+    category: '媒体工具',
+    icon: '🗜️',
+    path: '/media/image-converter',
+    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩'],
+    relatedToolIds: ['base64-to-image', 'qr-code-generator'],
+  },
+  {
     id: 'tester',
     name: '正则表达式',
     description: '实时高亮匹配、查看捕获组，内置邮箱 / 手机号 / URL 等常用正则速查表',
