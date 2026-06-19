@@ -94,3 +94,78 @@ export function computeScaledSize(
     height: Math.max(1, Math.round((height * scalePercent) / 100)),
   };
 }
+
+// ==================== 格式映射 ====================
+
+/**
+ * 输出格式映射到 MIME 类型。
+ * @param format 输出格式
+ */
+export function getOutputMime(format: OutputFormat): string {
+  if (format === 'png') return 'image/png';
+  if (format === 'jpeg') return 'image/jpeg';
+  return 'image/webp';
+}
+
+/**
+ * 输出格式映射到文件扩展名（jpeg 用 .jpg）。
+ * @param format 输出格式
+ */
+export function getOutputExtension(format: OutputFormat): string {
+  if (format === 'png') return '.png';
+  if (format === 'jpeg') return '.jpg';
+  return '.webp';
+}
+
+/**
+ * 判断格式是否为无损（不支持质量调节）。
+ * @param format 输出格式
+ */
+export function isLossless(format: OutputFormat): boolean {
+  return LOSSLESS_FORMATS.includes(format);
+}
+
+/**
+ * 判断该格式是否需要填充白底（jpeg 不支持透明通道）。
+ * @param format 输出格式
+ */
+export function needsFillBackground(format: OutputFormat): boolean {
+  return format === 'jpeg';
+}
+
+/**
+ * 根据输入图片的 MIME 推荐默认输出格式。
+ *
+ * PNG/JPEG/WebP 保持原格式，其余（GIF/BMP/AVIF 等）默认 WebP。
+ * @param mime 输入图片 MIME 类型
+ */
+export function defaultFormatForInput(mime: string): OutputFormat {
+  if (mime === 'image/png') return 'png';
+  if (mime === 'image/jpeg') return 'jpeg';
+  if (mime === 'image/webp') return 'webp';
+  return 'webp';
+}
+
+// ==================== 尺寸校验 ====================
+
+/**
+ * 校验目标尺寸是否超过浏览器 canvas 单边处理上限。
+ *
+ * 注：原设计含总面积上限，因「两边 ≤ 16384 ⇒ 面积 ≤ 16384²」被单边上限蕴含，
+ * 属冗余检查，按 YAGNI 省略。
+ * @param width 目标宽度
+ * @param height 目标高度
+ * @returns 校验通过返回 { ok: true }，否则返回含中文错误信息的 { ok: false, error }
+ */
+export function checkCanvasLimits(
+  width: number,
+  height: number,
+): { ok: boolean; error?: string } {
+  if (width > CANVAS_MAX_DIMENSION || height > CANVAS_MAX_DIMENSION) {
+    return {
+      ok: false,
+      error: `图片尺寸过大（${width}×${height}），单边超过 ${CANVAS_MAX_DIMENSION}px 浏览器处理上限，请缩小后重试`,
+    };
+  }
+  return { ok: true };
+}
