@@ -45,12 +45,17 @@ function getTypeMeta(type: FieldType): FieldTypeMeta {
   return meta;
 }
 
+/** 深拷贝字段配置。使用手动拷贝避免 Vue 响应式 Proxy 无法被 structuredClone 序列化。 */
+function cloneFieldConfig(field: FieldConfig): FieldConfig {
+  return { rowId: field.rowId, name: field.name, type: field.type, params: { ...field.params } };
+}
+
 /** 按类型构造默认字段配置（列名取默认值、参数取默认值）。 */
 function makeField(type: FieldType, name?: string): FieldConfig {
   const meta = getTypeMeta(type);
   const params: Record<string, string | number> = {};
   for (const p of meta.params) params[p.key] = p.default;
-  return { rowId: nextRowId(), name: name ?? meta.defaultName, type, params };
+  return cloneFieldConfig({ rowId: nextRowId(), name: name ?? meta.defaultName, type, params });
 }
 
 /** 当前字段配置（默认预填 id / name / email）。 */
@@ -127,7 +132,7 @@ const editingField = ref<FieldConfig>(makeField('name'));
 
 /** 打开字段配置 Dialog，复制当前字段到编辑副本。 */
 function openFieldDialog(field: FieldConfig): void {
-  editingField.value = structuredClone(field);
+  editingField.value = cloneFieldConfig(field);
   dialogOpen.value = true;
 }
 
@@ -136,7 +141,7 @@ function saveFieldConfig(): void {
   const updated = editingField.value;
   const idx = fields.value.findIndex((f) => f.rowId === updated.rowId);
   if (idx === -1) return;
-  fields.value[idx] = structuredClone(updated);
+  fields.value[idx] = cloneFieldConfig(updated);
   dialogOpen.value = false;
 }
 
@@ -196,21 +201,30 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
           :key="field.rowId"
           class="px-4 py-3"
         >
-          <!-- 第一行：列名 + 类型标签 + 删除 -->
-          <div class="flex items-center gap-3">
+          <!-- 字段行：列名（自适应）+ 生成器 + 删除 -->
+          <div class="flex items-center gap-2">
             <input
               v-model="field.name"
               type="text"
-              class="flex-1 min-w-[160px] px-3 py-1.5 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+              class="flex-1 min-w-[120px] px-3 h-8 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
               placeholder="列名"
               aria-label="列名"
             />
-            <span class="shrink-0 px-2 py-0.5 bg-hover text-text border border-border rounded-sm text-[0.8125rem]">
-              {{ getTypeMeta(field.type).label }}
-            </span>
             <button
               type="button"
-              class="shrink-0 flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 flex items-center gap-1 px-2 h-8 w-28 border border-border rounded-sm bg-surface text-muted text-[0.8125rem] cursor-pointer hover:bg-hover hover:text-text hover:border-accent transition-[background-color,border-color,color] duration-150"
+              :title="`配置 ${getTypeMeta(field.type).label} 生成器`"
+              @click="openFieldDialog(field)"
+            >
+              <span class="flex-1 min-w-0 truncate text-left">{{ getTypeMeta(field.type).label }}</span>
+              <svg class="shrink-0" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
               title="删除字段"
               aria-label="删除字段"
               @click="removeField(field.rowId)"
@@ -218,16 +232,6 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
-            </button>
-          </div>
-          <!-- 第二行：配置生成器 -->
-          <div class="flex items-center gap-2 mt-2">
-            <button
-              type="button"
-              class="px-3 py-1 border border-border rounded-sm bg-surface text-muted text-[0.8125rem] cursor-pointer hover:bg-hover hover:text-text hover:border-accent transition-[background-color,border-color,color] duration-150"
-              @click="openFieldDialog(field)"
-            >
-              配置生成器
             </button>
           </div>
         </div>
