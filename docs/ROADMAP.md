@@ -180,7 +180,7 @@
 - [ ] ~~格式化：SQL 格式化器~~ — **已取消**。属低频「看 SQL」场景，非开发者日常刚需；引入第三方格式化库约 50KB+，会吃满单工具 JS 预算，性价比低
 - [ ] ~~格式化：代码格式化与压缩~~ — **已取消**。HTML/CSS/JS 格式化/压缩需求已被编辑器、构建工具和在线 Playground 充分覆盖，作为独立工具差异化不足
 - [x] 网络工具：URL 解析器 — 已完成（2026-06-19）。原 `/encoding/url-encode` 迁移至 `/network/url`，新增结构化解析（protocol/host/path/query/hash 拆解）、query 参数表格化编辑与一键重建 URL，保留 URL 编解码能力
-- [ ] 媒体工具：图片转换与压缩
+- [x] 媒体工具：图片转换与压缩 — 已完成（2026-06-19）。新建 `/media/image-converter`，单图模式，PNG/JPEG/WebP 互转 + 质量滑块 + 尺寸缩放，纯 Canvas + createImageBitmap 零依赖；自研 `utils/media/image-convert.ts` 纯函数（格式映射/尺寸校验/字节格式化，含单测），处理 PNG 无损禁用质量、透明→JPEG 白底、canvas 尺寸预检；配套 3 条 FAQ
 - [ ] DevOps 工具：环境变量转换器
 
 > URL 解析能力已并入 `/network/url` 工具，不作为独立页面规划。
