@@ -73,9 +73,9 @@ function onTypeChange(field: FieldConfig, type: FieldType): void {
   field.params = params;
 }
 
-/** 返回某字段当前类型的参数元数据。 */
-function paramDefs(field: FieldConfig): FieldTypeMeta['params'] {
-  return (FIELD_TYPE_OPTIONS.find((m) => m.value === field.type) as FieldTypeMeta).params;
+/** 打开字段配置对话框（将在后续任务中实现）。 */
+function openFieldDialog(_field: FieldConfig): void {
+  // TODO: 将在 Task 3/4 中实现 Dialog 逻辑
 }
 
 /** 添加一个默认字段行。 */
@@ -156,56 +156,46 @@ const { copy } = useCopy();
         </button>
       </div>
 
-      <div class="p-3 flex flex-col gap-2">
+      <div class="divide-y divide-border">
         <div
           v-for="field in fields"
           :key="field.rowId"
-          class="flex items-center gap-2 flex-wrap"
+          class="px-4 py-3"
         >
-          <input
-            v-model="field.name"
-            type="text"
-            class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[120px]"
-            placeholder="列名"
-            aria-label="列名"
-          />
-          <div class="w-[120px]">
-            <SelectListbox
-              :model-value="field.type"
-              :options="typeOptions"
-              @update:model-value="(v) => onTypeChange(field, v as FieldType)"
+          <!-- 第一行：列名 + 类型标签 + 删除 -->
+          <div class="flex items-center gap-3">
+            <input
+              v-model="field.name"
+              type="text"
+              class="flex-1 min-w-[160px] px-3 py-1.5 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+              placeholder="列名"
+              aria-label="列名"
             />
+            <span class="shrink-0 px-2 py-0.5 bg-hover text-text border border-border rounded-sm text-[0.8125rem]">
+              {{ (FIELD_TYPE_OPTIONS.find((m) => m.value === field.type) as FieldTypeMeta).label }}
+            </span>
+            <button
+              type="button"
+              class="shrink-0 flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              title="删除字段"
+              aria-label="删除字段"
+              @click="removeField(field.rowId)"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
-          <template v-for="def in paramDefs(field)" :key="def.key">
-            <label v-if="def.type === 'select'" class="flex items-center gap-1 text-[0.75rem] text-muted">
-              {{ def.label }}
-              <select
-                v-model="field.params[def.key]"
-                class="px-1 py-1 border border-border rounded-sm bg-background text-text text-[0.75rem] outline-none focus:border-accent"
-              >
-                <option v-for="opt in def.options" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
-              </select>
-            </label>
-            <label v-else class="flex items-center gap-1 text-[0.75rem] text-muted">
-              {{ def.label }}
-              <input
-                v-model="field.params[def.key]"
-                :type="def.type"
-                class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.75rem] font-mono outline-none focus:border-accent w-[80px]"
-              />
-            </label>
-          </template>
-          <button
-            type="button"
-            class="ml-auto flex items-center justify-center w-7 h-7 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
-            title="删除字段"
-            aria-label="删除字段"
-            @click="removeField(field.rowId)"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
+          <!-- 第二行：配置生成器 -->
+          <div class="flex items-center gap-2 mt-2">
+            <button
+              type="button"
+              class="px-3 py-1 border border-border rounded-sm bg-surface text-muted text-[0.8125rem] cursor-pointer hover:bg-hover hover:text-text hover:border-accent transition-[background-color,border-color,color] duration-150"
+              @click="openFieldDialog(field)"
+            >
+              配置生成器
+            </button>
+          </div>
         </div>
       </div>
     </div>
