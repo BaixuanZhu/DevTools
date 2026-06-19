@@ -124,17 +124,6 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['cron-parser'],
   },
   {
-    id: 'url-encode',
-    name: 'URL 编解码',
-    description: 'URL 编码与解码，支持组件级和完整 URL 编码',
-    seoDescription: '在线 URL 编解码工具，支持 encodeURI 与 encodeURIComponent 两种模式，批量处理 URL 编码与解码，纯浏览器端运算。',
-    category: '编码转换',
-    icon: '🔗',
-    path: '/encoding/url-encode',
-    keywords: ['url 编码', 'url 解码', 'urlencode 在线', 'urldecode 在线', 'uri 编码', '中文 url 编码'],
-    relatedToolIds: ['base64', 'jwt-parser'],
-  },
-  {
     id: 'jwt-parser',
     name: 'JWT 编解码',
     description: '解析和生成 JSON Web Token，支持 HMAC 签名验证与编码',
@@ -143,7 +132,7 @@ export const tools: ToolMeta[] = [
     icon: '🎫',
     path: '/encoding/jwt-parser',
     keywords: ['jwt 解析', 'jwt 解码', 'jwt 在线解析', 'token 解析', 'jwt 验证', 'json web token'],
-    relatedToolIds: ['base64', 'url-encode', 'hash-generator'],
+    relatedToolIds: ['base64', 'url', 'hash-generator'],
   },
   {
     id: 'device-info',
@@ -201,6 +190,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['ipv4-cidr'],
   },
   {
+    id: 'url',
+    name: 'URL 解析器',
+    description: 'URL 编解码与结构化解析，支持 query 参数表格化编辑与一键重建 URL',
+    seoDescription: '免费在线 URL 解析器，支持 URL 编码/解码、结构化拆解 protocol/host/path/query/hash，以及 query 参数表格化编辑与一键重建 URL，纯浏览器端运算数据不上传。',
+    category: '网络工具',
+    icon: '🔗',
+    path: '/network/url',
+    keywords: ['url 解析', 'url 编码', 'url 解码', 'query 参数编辑', 'url 参数解析', 'urlencode', 'urldecode', 'uri 解析'],
+    relatedToolIds: ['ipv4-cidr', 'ipv6-cidr', 'http-status-codes', 'device-info'],
+  },
+  {
     id: 'symmetric-crypto',
     name: '对称加解密',
     description: '支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密',
@@ -253,7 +253,7 @@ export const tools: ToolMeta[] = [
     icon: '📄',
     path: '/encoding/base64',
     keywords: ['base64 编码', 'base64 解码', 'base64 在线', 'base64 转换', '文本 base64', 'base64 编解码', 'base64 字符集', 'base64 gbk 解码', 'base64 乱码'],
-    relatedToolIds: ['url-encode', 'base64-to-image', 'base64-to-file', 'jwt-parser', 'file-to-base64'],
+    relatedToolIds: ['url', 'base64-to-image', 'base64-to-file', 'jwt-parser', 'file-to-base64'],
   },
   {
     id: 'base64-to-image',
@@ -407,7 +407,7 @@ export const tools: ToolMeta[] = [
     icon: '🔬',
     path: '/regex/tester',
     keywords: ['正则表达式', '正则表达式测试', '正则在线测试', 'regex 在线', '正则匹配', '正则高亮', '捕获组', '命名捕获组', '正则速查表', 'regex tester', '正则调试', '贪婪匹配', '零宽断言'],
-    relatedToolIds: ['json-formatter', 'json-to-ts', 'url-encode', 'base64'],
+    relatedToolIds: ['json-formatter', 'json-to-ts', 'url', 'base64'],
   },
   {
     id: 'panel',

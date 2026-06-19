@@ -36,18 +36,18 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'Base64 结果需作为字符串常驻内存供复制与下载，过大字符串会占用大量内存并可能导致页面卡顿。本工具采用<strong>异步分块编码</strong>避免阻塞主线程，但仍设上限以保证体验。',
     },
   ],
-  'url-encode': [
+  url: [
     {
       question: 'encodeURI 和 encodeURIComponent 有什么区别？',
       answer: '<code>encodeURI</code> 用于编码完整 URL，不会编码 <code>:/?#[]@!$&\'()*+,;=</code> 等 URL 保留字符。<code>encodeURIComponent</code> 用于编码 URL 参数值，会编码所有特殊字符。一般规则：编码整体 URL 用前者，编码参数值用后者。',
     },
     {
-      question: 'URL 编码是如何处理中文的？',
-      answer: '中文字符会先被转换为 UTF-8 字节序列，然后每个字节以 <code>%XX</code> 的形式表示。例如"你好"编码后变为 <code>%E4%BD%A0%E5%A5%BD</code>。',
+      question: 'URL 解析器如何编辑 query 参数？',
+      answer: '在「结构化解析」区域的 Query 参数表格中，可直接修改已有参数的 key/value，或点击「+ 添加」新增参数、点击「删除」移除参数。修改完成后点击「应用至 URL」，工具会按当前表格重新拼装 query 并更新输入框中的 URL。',
     },
     {
-      question: 'URL 编码和解码有什么用？',
-      answer: 'URL 编码确保特殊字符（中文、空格、& 等）在 URL 中安全传输。解码则将 <code>%XX</code> 格式还原为原始字符。常用于处理 URL 参数中的特殊字符。',
+      question: '为什么访问 /encoding/url-encode 会跳转到新页面？',
+      answer: 'URL 工具已从「编码转换」分类迁移到更合适的「网络工具」分类，新地址为 <code>/network/url</code>。旧地址保留自动跳转，以便收藏夹和外部链接仍可正常访问。',
     },
   ],
   'jwt-parser': [
