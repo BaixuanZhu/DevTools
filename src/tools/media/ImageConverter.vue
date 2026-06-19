@@ -57,9 +57,8 @@ const qualityDisabled = computed(() => isLossless(format.value));
 /** 体积节省比（负数表示增大） */
 const savings = computed(() => {
   if (!result.value || originalSize.value === 0) return null;
-  const diff = originalSize.value - result.value.size;
-  const pct = Math.round((diff / originalSize.value) * 100);
-  return { diff, pct };
+  const pct = Math.round(((originalSize.value - result.value.size) / originalSize.value) * 100);
+  return { pct };
 });
 
 /** 触发全局 Toast 通知 */
@@ -230,12 +229,12 @@ onUnmounted(() => {
   window.removeEventListener('paste', handlePaste);
   if (debounceTimer) clearTimeout(debounceTimer);
   clearResult();
-  if (originalUrl.value) URL.revokeObjectURL(originalUrl.value);
+  resetOriginal();
 });
 </script>
 
 <template>
-  <ResponsiveWorkspace mode="horizontal" gap="gap-6">
+  <ResponsiveWorkspace mode="horizontal">
     <!-- 原图 -->
     <template #input>
       <div class="flex flex-col gap-3">
@@ -316,6 +315,7 @@ onUnmounted(() => {
               min="10"
               max="100"
               step="1"
+              aria-label="质量"
               :disabled="qualityDisabled"
               class="w-32 accent-accent"
             />
@@ -324,7 +324,15 @@ onUnmounted(() => {
 
           <div class="flex items-center gap-2">
             <span class="text-[0.8125rem] text-muted">尺寸</span>
-            <input v-model.number="scale" type="range" min="1" max="100" step="1" class="w-32 accent-accent" />
+            <input
+              v-model.number="scale"
+              type="range"
+              min="1"
+              max="100"
+              step="1"
+              aria-label="尺寸"
+              class="w-32 accent-accent"
+            />
             <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
             <span v-if="targetSize" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
           </div>
