@@ -38,9 +38,16 @@ function nextRowId(): string {
   return `row-${rowSeq}`;
 }
 
+/** 按类型查找元数据，找不到时抛错（避免非空断言）。 */
+function getTypeMeta(type: FieldType): FieldTypeMeta {
+  const meta = FIELD_TYPE_OPTIONS.find((m) => m.value === type);
+  if (!meta) throw new Error(`Unknown field type: ${type}`);
+  return meta;
+}
+
 /** 按类型构造默认字段配置（列名取默认值、参数取默认值）。 */
 function makeField(type: FieldType, name?: string): FieldConfig {
-  const meta = FIELD_TYPE_OPTIONS.find((m) => m.value === type) as FieldTypeMeta;
+  const meta = getTypeMeta(type);
   const params: Record<string, string | number> = {};
   for (const p of meta.params) params[p.key] = p.default;
   return { rowId: nextRowId(), name: name ?? meta.defaultName, type, params };
@@ -120,12 +127,7 @@ const editingField = ref<FieldConfig>(makeField('name'));
 
 /** 打开字段配置 Dialog，复制当前字段到编辑副本。 */
 function openFieldDialog(field: FieldConfig): void {
-  editingField.value = {
-    rowId: field.rowId,
-    name: field.name,
-    type: field.type,
-    params: { ...field.params },
-  };
+  editingField.value = structuredClone(field);
   dialogOpen.value = true;
 }
 
@@ -141,7 +143,7 @@ function saveFieldConfig(): void {
 /** Dialog 中切换类型时重置参数默认值。 */
 function onDialogTypeChange(type: FieldType): void {
   editingField.value.type = type;
-  const meta = FIELD_TYPE_OPTIONS.find((m) => m.value === type) as FieldTypeMeta;
+  const meta = getTypeMeta(type);
   const params: Record<string, string | number> = {};
   for (const p of meta.params) params[p.key] = p.default;
   editingField.value.params = params;
@@ -149,7 +151,7 @@ function onDialogTypeChange(type: FieldType): void {
 
 /** Dialog 中当前类型的参数元数据。 */
 const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
-  return (FIELD_TYPE_OPTIONS.find((m) => m.value === editingField.value.type) as FieldTypeMeta).params;
+  return getTypeMeta(editingField.value.type).params;
 });
 </script>
 
@@ -204,7 +206,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
               aria-label="列名"
             />
             <span class="shrink-0 px-2 py-0.5 bg-hover text-text border border-border rounded-sm text-[0.8125rem]">
-              {{ (FIELD_TYPE_OPTIONS.find((m) => m.value === field.type) as FieldTypeMeta).label }}
+              {{ getTypeMeta(field.type).label }}
             </span>
             <button
               type="button"
