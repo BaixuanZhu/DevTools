@@ -136,7 +136,7 @@ function saveFieldConfig(): void {
   const updated = editingField.value;
   const idx = fields.value.findIndex((f) => f.rowId === updated.rowId);
   if (idx === -1) return;
-  fields.value[idx] = { ...updated };
+  fields.value[idx] = structuredClone(updated);
   dialogOpen.value = false;
 }
 
