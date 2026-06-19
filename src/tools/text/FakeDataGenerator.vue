@@ -62,23 +62,14 @@ const records = ref<Record<string, unknown>[]>([]);
 /** 校验错误信息（内联提示）。 */
 const errorMsg = ref('');
 
-/** 类型下拉选项。 */
-const typeOptions = FIELD_TYPE_OPTIONS.map((m) => ({ value: m.value, label: m.label }));
-
 /** 序列化结果文本。 */
 const output = computed(() => {
   if (!records.value.length) return '';
   return format.value === 'json' ? toJson(records.value) : toCsv(records.value, fields.value);
 });
 
-/** 修改某字段类型时重置其参数为该类型默认值。 */
-function onTypeChange(field: FieldConfig, type: FieldType): void {
-  field.type = type;
-  const meta = FIELD_TYPE_OPTIONS.find((m) => m.value === type) as FieldTypeMeta;
-  const params: Record<string, string | number> = {};
-  for (const p of meta.params) params[p.key] = p.default;
-  field.params = params;
-}
+/** 类型下拉选项（Dialog 中使用）。 */
+const typeOptions = FIELD_TYPE_OPTIONS.map((m) => ({ value: m.value, label: m.label }));
 
 /** 添加一个默认字段行。 */
 function addField(): void {
