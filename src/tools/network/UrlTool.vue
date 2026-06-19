@@ -25,21 +25,27 @@ const BTN_SECONDARY_CLASS =
   'px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent';
 
 const input = ref(DEFAULT_INPUT);
-const parsed = ref<UrlParsedParts | null>(parseUrl(DEFAULT_INPUT));
-const params = ref<Array<{ key: string; value: string }>>(parsed.value?.params ?? []);
+const currentAction = ref<'encode' | 'decode'>('encode');
+const parsed = ref<UrlParsedParts | null>(null);
+const params = ref<Array<{ key: string; value: string }>>([]);
 const parseError = ref('');
 const encodeResult = ref<UrlEncodeResult | null>(null);
 const decodeResult = ref<UrlDecodeResult | null>(null);
 
 // 输入变化时自动解析
-watch(input, (val) => {
-  encodeResult.value = null;
-  decodeResult.value = null;
+watch([input, currentAction], ([val, action]) => {
   const trimmed = val.trim();
   if (!trimmed) {
     parsed.value = null;
     params.value = [];
     parseError.value = '';
+    if (action === 'encode') {
+      encodeResult.value = encodeUrl('');
+      decodeResult.value = null;
+    } else {
+      decodeResult.value = decodeUrl('');
+      encodeResult.value = null;
+    }
     return;
   }
   const result = parseUrl(trimmed);
@@ -52,25 +58,29 @@ watch(input, (val) => {
     params.value = [];
     parseError.value = '无法解析为合法 URL，请检查协议和格式';
   }
-});
+  if (action === 'encode') {
+    encodeResult.value = encodeUrl(trimmed);
+    decodeResult.value = null;
+  } else {
+    decodeResult.value = decodeUrl(trimmed);
+    encodeResult.value = null;
+  }
+}, { immediate: true });
 
-/** 编码当前输入 */
+/** 切换到编码模式 */
 function handleEncode() {
-  if (!input.value.trim()) return;
-  decodeResult.value = null;
-  encodeResult.value = encodeUrl(input.value);
+  currentAction.value = 'encode';
 }
 
-/** 解码当前输入 */
+/** 切换到解码模式 */
 function handleDecode() {
-  if (!input.value.trim()) return;
-  encodeResult.value = null;
-  decodeResult.value = decodeUrl(input.value);
+  currentAction.value = 'decode';
 }
 
 /** 清空所有状态 */
 function handleClear() {
   input.value = '';
+  currentAction.value = 'encode';
   parsed.value = null;
   params.value = [];
   parseError.value = '';
@@ -120,43 +130,55 @@ function applyParams() {
     <!-- 编解码层 -->
     <div class="mb-5 p-4 border border-border rounded-sm bg-card">
       <div class="flex items-center gap-2 mb-3">
-        <button type="button" :class="BTN_SECONDARY_CLASS" @click="handleEncode">编码</button>
-        <button type="button" :class="BTN_SECONDARY_CLASS" @click="handleDecode">解码</button>
+        <button
+          type="button"
+          :class="currentAction === 'encode' ? BTN_PRIMARY_CLASS : BTN_SECONDARY_CLASS"
+          @click="handleEncode"
+        >
+          编码
+        </button>
+        <button
+          type="button"
+          :class="currentAction === 'decode' ? BTN_PRIMARY_CLASS : BTN_SECONDARY_CLASS"
+          @click="handleDecode"
+        >
+          解码
+        </button>
       </div>
 
-      <div v-if="encodeResult" class="flex flex-col gap-3">
+      <div v-if="currentAction === 'encode'" class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">encodeURIComponent</span>
-            <CopyButton :text="encodeResult.component.value" size="sm" />
+            <span class="text-[0.6875rem] font-semibold text-muted">URL 组件编码</span>
+            <CopyButton :text="encodeResult?.component.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult.component.value }}</code>
+          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult?.component.value ?? '' }}</code>
         </div>
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">encodeURI</span>
-            <CopyButton :text="encodeResult.full.value" size="sm" />
+            <span class="text-[0.6875rem] font-semibold text-muted">URL 整体编码</span>
+            <CopyButton :text="encodeResult?.full.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult.full.value }}</code>
+          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult?.full.value ?? '' }}</code>
         </div>
       </div>
 
-      <div v-if="decodeResult" class="flex flex-col gap-3">
+      <div v-else class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">decodeURIComponent</span>
-            <CopyButton :text="decodeResult.component.value" size="sm" />
+            <span class="text-[0.6875rem] font-semibold text-muted">URL 组件解码</span>
+            <CopyButton :text="decodeResult?.component.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult.component.value }}</code>
-          <p v-if="decodeResult.component.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.component.error }}</p>
+          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult?.component.value ?? '' }}</code>
+          <p v-if="decodeResult?.component.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.component.error }}</p>
         </div>
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">decodeURI</span>
-            <CopyButton :text="decodeResult.full.value" size="sm" />
+            <span class="text-[0.6875rem] font-semibold text-muted">URL 整体解码</span>
+            <CopyButton :text="decodeResult?.full.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult.full.value }}</code>
-          <p v-if="decodeResult.full.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.full.error }}</p>
+          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult?.full.value ?? '' }}</code>
+          <p v-if="decodeResult?.full.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.full.error }}</p>
         </div>
       </div>
     </div>
