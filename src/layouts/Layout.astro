@@ -37,10 +37,22 @@ if (jsonLd) {
     <SeoHead title={title} description={description} jsonLd={allJsonLd} keywords={keywords} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
+    <!-- 提前建立与 Google Fonts 源的连接，减少 DNS/TCP/TLS 耗时 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- 非阻塞加载字体 CSS：先以 preload 方式获取，加载完成后提升为 stylesheet -->
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap"
-      rel="stylesheet"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap"
+      />
+    </noscript>
     <title>{title}</title>
   </head>
   <body class="bg-surface text-text font-sans text-base leading-normal antialiased">
