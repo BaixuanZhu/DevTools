@@ -20,7 +20,7 @@ import {
 const DEFAULT_ENV_INPUT = `# 应用配置
 APP_NAME=MyApp
 DB_USER=admin
-DATABASE_URL="postgres://user:${DB_USER}@host"
+DATABASE_URL="postgres://user:\${DB_USER}@host"
 export PORT=3000
 GREETING="Hello\\nWorld"
 EMPTY=""`;
@@ -58,6 +58,7 @@ function convertLeftToRight(): void {
     errorMsg.value = '';
   } else {
     errorMsg.value = result.error;
+    diagnostics.value = null;
   }
 }
 
@@ -79,6 +80,7 @@ function convertRightToLeft(): void {
     errorMsg.value = '';
   } else {
     errorMsg.value = result.error;
+    diagnostics.value = null;
   }
 }
 
@@ -87,7 +89,10 @@ watch(leftValue, () => {
   if (isSwapping.value || convertingFrom.value === 'right') return;
   convertingFrom.value = 'left';
   convertLeftToRight();
-  convertingFrom.value = null;
+  // 延迟重置：对方 watch 为 flush:pre 异步触发，须等其执行（看到标志后短路）再清空
+  nextTick(() => {
+    convertingFrom.value = null;
+  });
 });
 
 /** 监听右侧变化 */
@@ -95,7 +100,9 @@ watch(rightValue, () => {
   if (isSwapping.value || convertingFrom.value === 'left') return;
   convertingFrom.value = 'right';
   convertRightToLeft();
-  convertingFrom.value = null;
+  nextTick(() => {
+    convertingFrom.value = null;
+  });
 });
 
 /** 监听 JSON 缩进变化，重新生成右侧 */
@@ -103,7 +110,9 @@ watch(jsonIndent, () => {
   if (convertingFrom.value === 'right') return;
   convertingFrom.value = 'left';
   convertLeftToRight();
-  convertingFrom.value = null;
+  nextTick(() => {
+    convertingFrom.value = null;
+  });
 });
 
 /**
@@ -130,9 +139,13 @@ function handleClear(): void {
   diagnostics.value = null;
 }
 
-/** 组件挂载时执行初始转换 */
+/** 组件挂载时执行初始转换（设标志避免初始 rightValue 变化触发反向回写） */
 onMounted(() => {
+  convertingFrom.value = 'left';
   convertLeftToRight();
+  nextTick(() => {
+    convertingFrom.value = null;
+  });
 });
 
 /** 诊断提示文案 */
