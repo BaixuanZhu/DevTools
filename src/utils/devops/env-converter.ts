@@ -5,7 +5,7 @@
  * 解析采用逐行扫描 + 引号感知状态机，不依赖第三方库。
  */
 
-/** 输入文本软上限（字节），超过则短路返回错误 */
+/** 输入文本软上限（UTF-16 代码单元数），超过则短路返回错误 */
 export const MAX_INPUT_LENGTH = 500_000;
 
 /** 单个键值对（保留 .env 中的定义顺序） */
@@ -267,7 +267,7 @@ export type EnvToJsonResult = EnvToJsonSuccess | EnvParseFailure;
  *
  * 注释丢弃、key 顺序保留、值已完成插值。
  * @param text - .env 文本
- * @param indent - 缩进空格数；2 为美化（默认），0 为紧凑
+ * @param indent - 2 为美化（默认），0 为紧凑；其他值按美化处理
  * @returns JSON 字符串（含诊断）或中文错误
  */
 export function envTextToJson(text: string, indent: number = 2): EnvToJsonResult {
@@ -301,13 +301,25 @@ export type JsonToEnvResult = JsonToEnvSuccess | EnvParseFailure;
 /**
  * 按 .env 引号策略包装值。
  *
- * 含空白 / # / " / ' / $ 或为空时加双引号，并转义内部的 \\ " $。
+ * 含空白 / # / " / ' / $ 或为空时加双引号，并转义内部的 \\ " $ 以及换行 / 制表符，
+ * 保证双引号内的值始终落在同一物理行，确保 .env → JSON → .env 往返闭合。
  * @param value - 已字符串化的值
  * @returns .env 行右侧文本
  */
 function quoteValue(value: string): string {
   if (value === '' || NEED_QUOTE_PATTERN.test(value)) {
-    const escaped = value.replace(/[\\"]|\$/g, (m) => `\\${m}`);
+    const escaped = value.replace(/[\\\n\r\t"]|\$/g, (m) => {
+      switch (m) {
+        case '\n':
+          return '\\n';
+        case '\r':
+          return '\\r';
+        case '\t':
+          return '\\t';
+        default:
+          return `\\${m}`;
+      }
+    });
     return `"${escaped}"`;
   }
   return value;

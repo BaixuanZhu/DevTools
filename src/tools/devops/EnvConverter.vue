@@ -10,7 +10,6 @@ import { ref, watch, computed, onMounted, nextTick } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
-import { useCopy } from '../../composables/useCopy';
 import {
   envTextToJson,
   jsonToEnvText,
@@ -40,8 +39,6 @@ const jsonIndent = ref<2 | 0>(2);
 const convertingFrom = ref<'left' | 'right' | null>(null);
 /** 交换操作标志，用于跳过 watch 触发 */
 const isSwapping = ref(false);
-
-const { copy } = useCopy();
 
 /**
  * 将左侧 .env 转换为右侧 JSON。

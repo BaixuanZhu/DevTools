@@ -261,4 +261,16 @@ describe('jsonToEnvText', () => {
     expect(r.ok).toBe(false);
     if (!r.ok) expect(r.error).toContain('顶层须为对象');
   });
+
+  it('含单引号加双引号', () => {
+    const r = jsonToEnvText('{"A":"it\'s"}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('A="it\'s"');
+  });
+
+  it('含真实换行转义为 \\n（闭合往返）', () => {
+    const r = jsonToEnvText('{"A":"a\\nb"}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('A="a\\nb"');
+  });
 });
