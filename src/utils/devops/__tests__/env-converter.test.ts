@@ -77,3 +77,88 @@ describe('parseEnv - 结构规则', () => {
     if (!r.ok) expect(r.error).toBe('输入过长，已停止解析');
   });
 });
+
+describe('parseEnv - 引号与转义', () => {
+  it('双引号内转义 \\n \\t \\\\ \\" \\$', () => {
+    const r = parseEnv('A="1\\n2\\t3\\\\4\\"5\\$6"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('1\n2\t3\\4"5$6');
+  });
+
+  it('非法转义保留原样（含反斜杠）', () => {
+    const r = parseEnv('A="x\\qy"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('x\\qy');
+  });
+
+  it('单引号内全字面量（不转义不插值）', () => {
+    const r = parseEnv("A='${B}\\n$C'");
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('${B}\\n$C');
+  });
+
+  it('双引号未闭合报错带行号', () => {
+    const r = parseEnv('A="unterminated');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('第 1 行：双引号未闭合');
+  });
+
+  it('单引号未闭合报错带行号', () => {
+    const r = parseEnv("A='unterminated");
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('第 1 行：单引号未闭合');
+  });
+
+  it('无引号值不转义反斜杠（Windows 路径）', () => {
+    const r = parseEnv('PATH=C:\\Windows\\System32');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('C:\\Windows\\System32');
+  });
+});
+
+describe('parseEnv - 变量插值', () => {
+  it('双引号内 ${VAR} 引用上方变量', () => {
+    const r = parseEnv('USER=admin\nURL="u:${USER}"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[1].value).toBe('u:admin');
+  });
+
+  it('双引号内 $VAR 引用上方变量', () => {
+    const r = parseEnv('PORT=3000\nD=":$PORT"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[1].value).toBe(':3000');
+  });
+
+  it('未定义变量保留原样', () => {
+    const r = parseEnv('A="x:${MISSING}y"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('x:${MISSING}y');
+  });
+
+  it('仅引用上方：后方定义不回改', () => {
+    const r = parseEnv('A="${B}"\nB=later');
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.result[0].value).toBe('${B}');
+      expect(r.result[1].value).toBe('later');
+    }
+  });
+
+  it('无引号值也支持插值', () => {
+    const r = parseEnv('HOST=localhost\nURL=$HOST:8080');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[1].value).toBe('localhost:8080');
+  });
+
+  it('双引号内 \\$ 为字面美元（不插值）', () => {
+    const r = parseEnv('A="price: \\$5"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('price: $5');
+  });
+
+  it('裸 $ 后非变量名字符视为字面 $', () => {
+    const r = parseEnv('A="cost $$ total"');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result[0].value).toBe('cost $$ total');
+  });
+});

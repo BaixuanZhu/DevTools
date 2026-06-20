@@ -41,26 +41,149 @@ export type EnvParseResult = EnvParseSuccess | EnvParseFailure;
 /** 合法变量名：字母或下划线开头，后接字母/数字/下划线 */
 const KEY_PATTERN = /^[A-Za-z_]\w*$/;
 
+/** 合法变量名片段（用于 $VAR 匹配） */
+const VAR_NAME_PATTERN = /^[A-Za-z_]\w*/;
+
 /** 整行注释：行首或仅前导空白后跟 # */
 const COMMENT_PATTERN = /^\s*#/;
 
 /**
- * 解析单行的值部分。
+ * 从指定位置（指向 `$`）读取一次插值并替换。
  *
- * 本版本仅处理无引号值（原样 trim），引号 / 转义 / 插值在后续扩展。
+ * 规则：
+ * - `${NAME}`：命中已解析值则替换，否则原样保留 `${NAME}`
+ * - `$NAME`（NAME 为合法变量名）：同上
+ * - 裸 `$`（后非变量名字符）：字面 `$`
+ *
+ * 仅查询已解析表，未命中不报错（保留原样）。
+ * @param text - 原始文本
+ * @param pos - `$` 所在下标
+ * @param vars - 已解析变量表
+ * @returns 替换后的字符串与消耗的字符数
+ */
+function readInterpolation(
+  text: string,
+  pos: number,
+  vars: Map<string, string>,
+): { value: string; consumed: number } {
+  // ${VAR}
+  if (text[pos + 1] === '{') {
+    const end = text.indexOf('}', pos + 2);
+    if (end === -1) return { value: '$', consumed: 1 }; // 未闭合，按字面 $
+    const name = text.slice(pos + 2, end);
+    if (!KEY_PATTERN.test(name)) return { value: '$', consumed: 1 }; // 非法名，按字面 $
+    const found = vars.get(name);
+    return {
+      value: found !== undefined ? found : text.slice(pos, end + 1),
+      consumed: end + 1 - pos,
+    };
+  }
+  // $VAR
+  const match = VAR_NAME_PATTERN.exec(text.slice(pos + 1));
+  if (match) {
+    const name = match[0];
+    const found = vars.get(name);
+    return {
+      value: found !== undefined ? found : `$${name}`,
+      consumed: 1 + name.length,
+    };
+  }
+  // 裸 $
+  return { value: '$', consumed: 1 };
+}
+
+/**
+ * 对无引号文本做插值（不转义反斜杠）。
+ * @param text - 已 trim 的无引号值
+ * @param vars - 已解析变量表
+ * @returns 插值后的值
+ */
+function interpolate(text: string, vars: Map<string, string>): string {
+  let out = '';
+  let i = 0;
+  while (i < text.length) {
+    if (text[i] === '$') {
+      const r = readInterpolation(text, i, vars);
+      out += r.value;
+      i += r.consumed;
+    } else {
+      out += text[i];
+      i += 1;
+    }
+  }
+  return out;
+}
+
+/**
+ * 解析双引号包裹的值（含转义与插值）。
+ *
+ * 起始字符 `text[0]` 必须为 `"`。返回到闭合 `"` 为止的值。
+ * @param text - 以 `"` 开头的原始片段
+ * @param vars - 已解析变量表
+ * @param lineNum - 当前行号
+ * @returns 解析后的值，或未闭合错误
+ */
+function parseDoubleQuoted(
+  text: string,
+  vars: Map<string, string>,
+  lineNum: number,
+): { value: string } | { error: string } {
+  let out = '';
+  let i = 1;
+  while (i < text.length) {
+    const ch = text[i];
+    if (ch === '\\') {
+      const next = text[i + 1];
+      if (next === 'n') { out += '\n'; i += 2; }
+      else if (next === 't') { out += '\t'; i += 2; }
+      else if (next === 'r') { out += '\r'; i += 2; }
+      else if (next === '\\') { out += '\\'; i += 2; }
+      else if (next === '"') { out += '"'; i += 2; }
+      else if (next === '$') { out += '$'; i += 2; }
+      else { out += '\\'; i += 1; } // 非法转义：保留反斜杠
+    } else if (ch === '"') {
+      return { value: out };
+    } else if (ch === '$') {
+      const r = readInterpolation(text, i, vars);
+      out += r.value;
+      i += r.consumed;
+    } else {
+      out += ch;
+      i += 1;
+    }
+  }
+  return { error: `第 ${lineNum} 行：双引号未闭合` };
+}
+
+/**
+ * 解析单行的值部分（支持双引号 / 单引号 / 无引号）。
+ *
+ * - 双引号：转义 `\n \t \r \\ \" \$` + 插值
+ * - 单引号：全字面量（不转义、不插值）
+ * - 无引号：trim 尾部空白 + 插值，不转义反斜杠
  * @param raw - 等号右侧的原始文本
- * @param _vars - 已解析变量表（本版本未使用，预留插值扩展）
- * @param _lineNum - 当前行号（本版本未使用，预留错误定位）
- * @returns 解析后的值，或错误
+ * @param vars - 已解析变量表
+ * @param lineNum - 当前行号
+ * @returns 解析后的值，或错误（带行号）
  */
 function parseValue(
   raw: string,
-  _vars: Map<string, string>,
-  _lineNum: number,
+  vars: Map<string, string>,
+  lineNum: number,
 ): { value: string } | { error: string } {
-  void _vars;
-  void _lineNum;
-  return { value: raw.trim() };
+  const trimmed = raw.replace(/^\s+/, '');
+
+  if (trimmed[0] === "'") {
+    const end = trimmed.indexOf("'", 1);
+    if (end === -1) return { error: `第 ${lineNum} 行：单引号未闭合` };
+    return { value: trimmed.slice(1, end) };
+  }
+
+  if (trimmed[0] === '"') {
+    return parseDoubleQuoted(trimmed, vars, lineNum);
+  }
+
+  return { value: interpolate(raw.trim(), vars) };
 }
 
 /**
