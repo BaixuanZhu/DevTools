@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEnv, MAX_INPUT_LENGTH } from '../env-converter';
+import { parseEnv, MAX_INPUT_LENGTH, envTextToJson } from '../env-converter';
 
 describe('parseEnv - 结构规则', () => {
   it('解析单个无引号键值对', () => {
@@ -160,5 +160,43 @@ describe('parseEnv - 变量插值', () => {
     const r = parseEnv('A="cost $$ total"');
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.result[0].value).toBe('cost $$ total');
+  });
+});
+
+describe('envTextToJson', () => {
+  it('美化输出（2 空格缩进）并保留顺序', () => {
+    const r = envTextToJson('B=2\nA=1', 2);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('{\n  "B": "2",\n  "A": "1"\n}');
+  });
+
+  it('紧凑输出（indent=0）', () => {
+    const r = envTextToJson('A=1\nB=2', 0);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('{"A":"1","B":"2"}');
+  });
+
+  it('默认 indent 为美化', () => {
+    const r = envTextToJson('A=1');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('{\n  "A": "1"\n}');
+  });
+
+  it('附带诊断（注释与重复键）', () => {
+    const r = envTextToJson('# c\nA=1\nA=2', 2);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.diagnostics).toEqual({ droppedComments: 1, overwrittenKeys: 1 });
+  });
+
+  it('透传解析错误', () => {
+    const r = envTextToJson('3FOO=bad');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('变量名');
+  });
+
+  it('插值结果进入 JSON', () => {
+    const r = envTextToJson('U=admin\nURL="${U}:80"', 2);
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toContain('"URL": "admin:80"');
   });
 });

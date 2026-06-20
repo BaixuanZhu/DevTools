@@ -251,3 +251,37 @@ export function parseEnv(text: string): EnvParseResult {
 
   return { ok: true, result: entries, diagnostics };
 }
+
+/** envTextToJson 成功 */
+export interface EnvToJsonSuccess {
+  ok: true;
+  result: string;
+  diagnostics: EnvDiagnostics;
+}
+
+/** envTextToJson 返回类型（失败复用 EnvParseFailure） */
+export type EnvToJsonResult = EnvToJsonSuccess | EnvParseFailure;
+
+/**
+ * 将 .env 文本转换为 JSON 字符串。
+ *
+ * 注释丢弃、key 顺序保留、值已完成插值。
+ * @param text - .env 文本
+ * @param indent - 缩进空格数；2 为美化（默认），0 为紧凑
+ * @returns JSON 字符串（含诊断）或中文错误
+ */
+export function envTextToJson(text: string, indent: number = 2): EnvToJsonResult {
+  const parsed = parseEnv(text);
+  if (!parsed.ok) return parsed;
+
+  const obj: Record<string, string> = {};
+  for (const entry of parsed.result) {
+    obj[entry.key] = entry.value;
+  }
+
+  return {
+    ok: true,
+    result: JSON.stringify(obj, null, indent === 0 ? 0 : 2),
+    diagnostics: parsed.diagnostics,
+  };
+}
