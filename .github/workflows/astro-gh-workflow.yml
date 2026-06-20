@@ -51,7 +51,7 @@ jobs:
         run: pnpm install --frozen-lockfile   # 严格按 lock 文件安装，类似 npm ci
 
       - name: Build your site
-        run: pnpm run build     # 会执行 package.json 中的 build 脚本
+        run: pnpm exec astro build --base=/DevTools   # 会执行 package.json 中的 build 脚本
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
