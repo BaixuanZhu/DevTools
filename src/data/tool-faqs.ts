@@ -224,6 +224,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '不写。自 Docker Compose v2 起，<code>version</code> 字段已弃用，当前推荐做法是不指定 version，使用最新的 Compose 规范格式。',
     },
   ],
+  'env-converter': [
+    {
+      question: '`.env` 里的注释会保留到 JSON 吗？',
+      answer: '不会。标准 JSON 不支持注释，转换时 <code>#</code> 注释会被丢弃，状态栏会显示「已丢弃 N 条注释」提示数量，避免静默丢失。',
+    },
+    {
+      question: '支持变量插值吗？',
+      answer: '支持 <code>${VAR}</code> / <code>$VAR</code> 引用<strong>同一文件中上方</strong>已定义的变量；未定义的保留原样不报错。不支持 <code>${VAR:-default}</code> 等 shell 进阶语法。',
+    },
+    {
+      question: 'JSON 里有嵌套对象怎么办？',
+      answer: '<code>.env</code> 格式仅支持扁平键值对，遇到对象或数组值会报错提示。如 <code>DATABASE__HOST</code> 这类双下划线写法会被当作普通 key 原样保留，不自动展开为嵌套结构。',
+    },
+    {
+      question: '生成的 `.env` 值什么时候会加引号？',
+      answer: '当值包含空格、<code>#</code>、<code>"</code>、<code>\'</code>、<code>$</code> 或为空字符串时自动加双引号，并转义内部的 <code>"</code> <code>\\</code> <code>$</code>；其余情况输出不加引号的简洁形式。',
+    },
+  ],
   'qr-code-reader': [
     {
       question: '为什么识别失败？',

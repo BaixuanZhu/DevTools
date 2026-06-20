@@ -388,6 +388,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['json-to-yaml'],
   },
   {
+    id: 'env-converter',
+    name: '环境变量转换器',
+    description: '.env 配置与 JSON 双向互转，支持引号、转义与同文件变量插值',
+    seoDescription: '在线 .env 与 JSON 互转工具，支持单双引号、转义字符与同文件变量插值，注释自动剥离并提示数量，纯浏览器端解析数据不上传，前后端环境变量配置转换必备。',
+    category: 'DevOps 工具',
+    icon: '⚙️',
+    path: '/devops/env-converter',
+    keywords: ['env 转 json', 'json 转 env', '环境变量转换', 'dotenv 解析', 'env 在线转换', '.env 配置转换', '环境变量 json 互转', 'env to json'],
+    relatedToolIds: ['docker-converter', 'json-formatter'],
+  },
+  {
     id: 'qr-code-reader',
     name: '二维码识别器',
     description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',
