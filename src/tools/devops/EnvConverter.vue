@@ -4,7 +4,6 @@
  *
  * 提供左右双输入区：左侧编辑 .env 文本，右侧实时输出 JSON；
  * 右侧编辑 JSON，左侧实时输出 .env 文本。
- * 通过交换按钮可快速互换两侧内容。
  */
 import { ref, watch, computed, onMounted, nextTick } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
@@ -37,8 +36,11 @@ const diagnostics = ref<EnvDiagnostics | null>(null);
 const jsonIndent = ref<2 | 0>(2);
 /** 当前正在执行转换的方向，用于防止 watch 循环触发 */
 const convertingFrom = ref<'left' | 'right' | null>(null);
-/** 交换操作标志，用于跳过 watch 触发 */
-const isSwapping = ref(false);
+/** JSON 输出格式选项 */
+const jsonFormatOptions: { value: 2 | 0; label: string }[] = [
+  { value: 2, label: '美化' },
+  { value: 0, label: '紧凑' },
+];
 
 /**
  * 将左侧 .env 转换为右侧 JSON。
@@ -86,7 +88,7 @@ function convertRightToLeft(): void {
 
 /** 监听左侧变化 */
 watch(leftValue, () => {
-  if (isSwapping.value || convertingFrom.value === 'right') return;
+  if (convertingFrom.value === 'right') return;
   convertingFrom.value = 'left';
   convertLeftToRight();
   // 延迟重置：对方 watch 为 flush:pre 异步触发，须等其执行（看到标志后短路）再清空
@@ -97,7 +99,7 @@ watch(leftValue, () => {
 
 /** 监听右侧变化 */
 watch(rightValue, () => {
-  if (isSwapping.value || convertingFrom.value === 'left') return;
+  if (convertingFrom.value === 'left') return;
   convertingFrom.value = 'right';
   convertRightToLeft();
   nextTick(() => {
@@ -114,20 +116,6 @@ watch(jsonIndent, () => {
     convertingFrom.value = null;
   });
 });
-
-/**
- * 交换两侧内容。
- * 交换时不触发自动转换，由用户后续编辑触发。
- */
-function handleSwap(): void {
-  isSwapping.value = true;
-  const temp = leftValue.value;
-  leftValue.value = rightValue.value;
-  rightValue.value = temp;
-  nextTick(() => {
-    isSwapping.value = false;
-  });
-}
 
 /**
  * 清空两侧输入和错误状态。
@@ -172,25 +160,24 @@ const diagnosticsHint = computed(() => {
 
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
       <template #actions>
-        <div class="flex items-center gap-2">
-          <label class="flex items-center gap-1.5 text-[0.8125rem] text-muted cursor-pointer">
-            <span>JSON 格式</span>
-            <select
-              v-model.number="jsonIndent"
-              class="px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] outline-none focus:border-accent cursor-pointer"
-              aria-label="JSON 输出格式"
+        <div class="flex items-center gap-2 mr-auto">
+          <span class="text-[0.8125rem] text-muted">JSON 格式</span>
+          <div class="inline-flex rounded-sm border border-border overflow-hidden">
+            <button
+              v-for="opt in jsonFormatOptions"
+              :key="opt.value"
+              type="button"
+              :class="[
+                'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
+                jsonIndent === opt.value
+                  ? 'bg-accent text-white'
+                  : 'bg-card text-muted hover:bg-hover hover:text-text',
+              ]"
+              @click="jsonIndent = opt.value"
             >
-              <option :value="2">美化</option>
-              <option :value="0">紧凑</option>
-            </select>
-          </label>
-          <button
-            class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
-            @click="handleSwap"
-          >
-            <span>⇄</span>
-            <span>交换</span>
-          </button>
+              {{ opt.label }}
+            </button>
+          </div>
         </div>
       </template>
 
