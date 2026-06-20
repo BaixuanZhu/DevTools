@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEnv, MAX_INPUT_LENGTH, envTextToJson } from '../env-converter';
+import { parseEnv, MAX_INPUT_LENGTH, envTextToJson, jsonToEnvText } from '../env-converter';
 
 describe('parseEnv - 结构规则', () => {
   it('解析单个无引号键值对', () => {
@@ -198,5 +198,67 @@ describe('envTextToJson', () => {
     const r = envTextToJson('U=admin\nURL="${U}:80"', 2);
     expect(r.ok).toBe(true);
     if (r.ok) expect(r.result).toContain('"URL": "admin:80"');
+  });
+});
+
+describe('jsonToEnvText', () => {
+  it('简单值不加引号', () => {
+    const r = jsonToEnvText('{"A":"1","B":"hello"}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('A=1\nB=hello');
+  });
+
+  it('含空格加双引号', () => {
+    const r = jsonToEnvText('{"A":"hello world"}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('A="hello world"');
+  });
+
+  it('空字符串加双引号', () => {
+    const r = jsonToEnvText('{"E":""}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('E=""');
+  });
+
+  it('含 # $ " 加双引号并转义', () => {
+    const r = jsonToEnvText('{"A":"a#b$c\\"d"}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('A="a#b\\$c\\"d"');
+  });
+
+  it('非字符串值 String() 化', () => {
+    const r = jsonToEnvText('{"PORT":3000,"DEBUG":true,"FLAG":null}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('PORT=3000\nDEBUG=true\nFLAG=null');
+  });
+
+  it('保留 JSON key 顺序', () => {
+    const r = jsonToEnvText('{"Z":1,"A":2,"M":3}');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.result).toBe('Z=1\nA=2\nM=3');
+  });
+
+  it('嵌套对象报错', () => {
+    const r = jsonToEnvText('{"db":{"host":"h"}}');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('键「db」的值为对象，.env 仅支持扁平键值对');
+  });
+
+  it('数组值报错', () => {
+    const r = jsonToEnvText('{"list":[1,2]}');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toBe('键「list」的值为数组，.env 仅支持扁平键值对');
+  });
+
+  it('JSON 语法错误透传', () => {
+    const r = jsonToEnvText('{invalid}');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('JSON 语法错误');
+  });
+
+  it('顶层非对象报错', () => {
+    const r = jsonToEnvText('[1,2,3]');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('顶层须为对象');
   });
 });

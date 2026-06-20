@@ -285,3 +285,69 @@ export function envTextToJson(text: string, indent: number = 2): EnvToJsonResult
     diagnostics: parsed.diagnostics,
   };
 }
+
+/** 需要加双引号的特征：空白、#、"、'、$ */
+const NEED_QUOTE_PATTERN = /[\s#"'\$]/;
+
+/** jsonToEnvText 成功 */
+export interface JsonToEnvSuccess {
+  ok: true;
+  result: string;
+}
+
+/** jsonToEnvText 返回类型（失败复用 EnvParseFailure） */
+export type JsonToEnvResult = JsonToEnvSuccess | EnvParseFailure;
+
+/**
+ * 按 .env 引号策略包装值。
+ *
+ * 含空白 / # / " / ' / $ 或为空时加双引号，并转义内部的 \\ " $。
+ * @param value - 已字符串化的值
+ * @returns .env 行右侧文本
+ */
+function quoteValue(value: string): string {
+  if (value === '' || NEED_QUOTE_PATTERN.test(value)) {
+    const escaped = value.replace(/[\\"]|\$/g, (m) => `\\${m}`);
+    return `"${escaped}"`;
+  }
+  return value;
+}
+
+/**
+ * 将 JSON 文本转换为 .env 文本。
+ *
+ * 仅支持扁平键值对；对象 / 数组值、非对象顶层报错。
+ * key 顺序按 JSON 解析后的对象顺序保留。
+ * @param jsonText - JSON 文本
+ * @returns .env 文本或中文错误
+ */
+export function jsonToEnvText(jsonText: string): JsonToEnvResult {
+  if (jsonText.length > MAX_INPUT_LENGTH) {
+    return { ok: false, error: '输入过长，已停止解析' };
+  }
+
+  let data: unknown;
+  try {
+    data = JSON.parse(jsonText);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return { ok: false, error: `JSON 语法错误：${msg}` };
+  }
+
+  if (data === null || typeof data !== 'object' || Array.isArray(data)) {
+    return { ok: false, error: 'JSON 顶层须为对象（键值对集合），.env 仅支持扁平键值对' };
+  }
+
+  const obj = data as Record<string, unknown>;
+  const lines: string[] = [];
+  for (const key of Object.keys(obj)) {
+    const rawVal = obj[key];
+    if (rawVal !== null && typeof rawVal === 'object') {
+      const kind = Array.isArray(rawVal) ? '数组' : '对象';
+      return { ok: false, error: `键「${key}」的值为${kind}，.env 仅支持扁平键值对` };
+    }
+    lines.push(`${key}=${quoteValue(String(rawVal))}`);
+  }
+
+  return { ok: true, result: lines.join('\n') };
+}
