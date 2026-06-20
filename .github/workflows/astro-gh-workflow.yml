@@ -1,19 +1,15 @@
 name: Deploy to GitHub Pages
 
 on:
-  # 每次推送到 main 分支时触发
   push:
     branches: [ main ]
-  # 允许手动从 GitHub Actions 标签页触发
   workflow_dispatch:
 
-# 赋予 GITHUB_TOKEN 必要的权限
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 确保只有一个部署任务在运行
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -24,15 +20,39 @@ jobs:
     steps:
       - name: Checkout your repository
         uses: actions/checkout@v7
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
-          cache: npm # 或 yarn, pnpm
+          node-version: 24
+          # 注意：setup-node 自 v4 起支持直接指定 package-manager
+          # 但我们用更通用的方式：手动安装 pnpm
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10   # 根据你项目实际使用的 pnpm 版本
+          run_install: false   # 让后面独立执行 install
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install dependencies
-        run: npm install # 或 yarn, pnpm install
+        run: pnpm install --frozen-lockfile   # 严格按 lock 文件安装，类似 npm ci
+
       - name: Build your site
-        run: npm run build # 或 yarn build, pnpm run build
+        run: pnpm run build     # 会执行 package.json 中的 build 脚本
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
