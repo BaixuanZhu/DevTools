@@ -7,8 +7,8 @@
 
 // ==================== 类型 ====================
 
-/** 支持的输出格式 */
-export type OutputFormat = 'png' | 'jpeg' | 'webp';
+/** 支持的输出格式（GIF / BMP 仅作输入，不在此列） */
+export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'tiff' | 'ico';
 
 /** 加载后的位图及其原始尺寸 */
 export interface LoadedImage {
@@ -54,13 +54,19 @@ export const CANVAS_MAX_DIMENSION = 16384;
 export const DEFAULT_QUALITY = 80;
 
 /** 无损格式（不支持质量调节） */
-export const LOSSLESS_FORMATS: OutputFormat[] = ['png'];
+export const LOSSLESS_FORMATS: OutputFormat[] = ['png', 'tiff', 'ico'];
 
-/** 输出格式选项（供 OptionRadioGroup 使用） */
-export const OUTPUT_FORMATS: { value: OutputFormat; label: string }[] = [
-  { value: 'png', label: 'PNG' },
-  { value: 'jpeg', label: 'JPEG' },
-  { value: 'webp', label: 'WebP' },
+/** 格式所属分组（有损可调质量 / 无损） */
+export type FormatGroup = 'lossy' | 'lossless';
+
+/** 输出格式选项（供 OptionRadioGroup 使用，按有损/无损分组） */
+export const OUTPUT_FORMATS: { value: OutputFormat; label: string; group: FormatGroup }[] = [
+  { value: 'jpeg', label: 'JPEG', group: 'lossy' },
+  { value: 'webp', label: 'WebP', group: 'lossy' },
+  { value: 'avif', label: 'AVIF', group: 'lossy' },
+  { value: 'png', label: 'PNG', group: 'lossless' },
+  { value: 'tiff', label: 'TIFF', group: 'lossless' },
+  { value: 'ico', label: 'ICO', group: 'lossless' },
 ];
 
 // ==================== 纯函数 ====================
@@ -102,9 +108,20 @@ export function computeScaledSize(
  * @param format 输出格式
  */
 export function getOutputMime(format: OutputFormat): string {
-  if (format === 'png') return 'image/png';
-  if (format === 'jpeg') return 'image/jpeg';
-  return 'image/webp';
+  switch (format) {
+    case 'png':
+      return 'image/png';
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'webp':
+      return 'image/webp';
+    case 'avif':
+      return 'image/avif';
+    case 'tiff':
+      return 'image/tiff';
+    case 'ico':
+      return 'image/x-icon';
+  }
 }
 
 /**
@@ -112,9 +129,20 @@ export function getOutputMime(format: OutputFormat): string {
  * @param format 输出格式
  */
 export function getOutputExtension(format: OutputFormat): string {
-  if (format === 'png') return '.png';
-  if (format === 'jpeg') return '.jpg';
-  return '.webp';
+  switch (format) {
+    case 'png':
+      return '.png';
+    case 'jpeg':
+      return '.jpg';
+    case 'webp':
+      return '.webp';
+    case 'avif':
+      return '.avif';
+    case 'tiff':
+      return '.tiff';
+    case 'ico':
+      return '.ico';
+  }
 }
 
 /**
@@ -136,14 +164,53 @@ export function needsFillBackground(format: OutputFormat): boolean {
 /**
  * 根据输入图片的 MIME 推荐默认输出格式。
  *
- * PNG/JPEG/WebP 保持原格式，其余（GIF/BMP/AVIF 等）默认 WebP。
+ * - PNG/JPEG/WebP/AVIF/TIFF 保持原格式；
+ * - BMP / ICO 输入默认 PNG（保留无损）；
+ * - GIF / 未知格式默认 WebP（GIF 仅取首帧）。
  * @param mime 输入图片 MIME 类型
  */
 export function defaultFormatForInput(mime: string): OutputFormat {
-  if (mime === 'image/png') return 'png';
-  if (mime === 'image/jpeg') return 'jpeg';
-  if (mime === 'image/webp') return 'webp';
-  return 'webp';
+  switch (mime) {
+    case 'image/png':
+      return 'png';
+    case 'image/jpeg':
+      return 'jpeg';
+    case 'image/webp':
+      return 'webp';
+    case 'image/avif':
+      return 'avif';
+    case 'image/tiff':
+      return 'tiff';
+    case 'image/bmp':
+      return 'png';
+    case 'image/x-icon':
+    case 'image/vnd.microsoft.icon':
+      return 'png';
+    default:
+      return 'webp';
+  }
+}
+
+/** 编码路径种类：canvas 原生 / 各懒加载编码器 */
+export type EncoderKind = 'canvas' | 'avif' | 'tiff' | 'ico';
+
+/**
+ * 根据输出格式选择编码路径（纯函数，供 convertImage 分派与单测使用）。
+ * @param format 输出格式
+ */
+export function pickEncoderKind(format: OutputFormat): EncoderKind {
+  switch (format) {
+    case 'png':
+    case 'jpeg':
+    case 'webp':
+      return 'canvas';
+    case 'avif':
+      return 'avif';
+    case 'tiff':
+      return 'tiff';
+    case 'ico':
+      return 'ico';
+  }
 }
 
 // ==================== 尺寸校验 ====================

@@ -8,6 +8,7 @@ import {
   needsFillBackground,
   defaultFormatForInput,
   checkCanvasLimits,
+  pickEncoderKind,
 } from '../image-convert';
 
 describe('formatBytes', () => {
@@ -54,22 +55,31 @@ describe('getOutputMime', () => {
     expect(getOutputMime('png')).toBe('image/png');
     expect(getOutputMime('jpeg')).toBe('image/jpeg');
     expect(getOutputMime('webp')).toBe('image/webp');
+    expect(getOutputMime('avif')).toBe('image/avif');
+    expect(getOutputMime('tiff')).toBe('image/tiff');
+    expect(getOutputMime('ico')).toBe('image/x-icon');
   });
 });
 
 describe('getOutputExtension', () => {
-  it('jpeg 扩展名用 .jpg', () => {
+  it('jpeg 扩展名用 .jpg，其余按格式名', () => {
     expect(getOutputExtension('png')).toBe('.png');
     expect(getOutputExtension('jpeg')).toBe('.jpg');
     expect(getOutputExtension('webp')).toBe('.webp');
+    expect(getOutputExtension('avif')).toBe('.avif');
+    expect(getOutputExtension('tiff')).toBe('.tiff');
+    expect(getOutputExtension('ico')).toBe('.ico');
   });
 });
 
 describe('isLossless', () => {
-  it('仅 png 为无损', () => {
+  it('png / tiff / ico 为无损，jpeg / webp / avif 为有损', () => {
     expect(isLossless('png')).toBe(true);
+    expect(isLossless('tiff')).toBe(true);
+    expect(isLossless('ico')).toBe(true);
     expect(isLossless('jpeg')).toBe(false);
     expect(isLossless('webp')).toBe(false);
+    expect(isLossless('avif')).toBe(false);
   });
 });
 
@@ -78,20 +88,37 @@ describe('needsFillBackground', () => {
     expect(needsFillBackground('jpeg')).toBe(true);
     expect(needsFillBackground('png')).toBe(false);
     expect(needsFillBackground('webp')).toBe(false);
+    expect(needsFillBackground('avif')).toBe(false);
+    expect(needsFillBackground('tiff')).toBe(false);
+    expect(needsFillBackground('ico')).toBe(false);
   });
 });
 
 describe('defaultFormatForInput', () => {
-  it('PNG/JPEG/WebP 保持原格式', () => {
+  it('原生输出格式保持原格式', () => {
     expect(defaultFormatForInput('image/png')).toBe('png');
     expect(defaultFormatForInput('image/jpeg')).toBe('jpeg');
     expect(defaultFormatForInput('image/webp')).toBe('webp');
   });
 
-  it('其他格式（GIF/BMP/空）默认 WebP', () => {
+  it('AVIF / TIFF 输入映射到对应输出', () => {
+    expect(defaultFormatForInput('image/avif')).toBe('avif');
+    expect(defaultFormatForInput('image/tiff')).toBe('tiff');
+  });
+
+  it('GIF 输入默认 WebP（首帧）', () => {
     expect(defaultFormatForInput('image/gif')).toBe('webp');
-    expect(defaultFormatForInput('image/bmp')).toBe('webp');
+  });
+
+  it('BMP / ICO 输入默认 PNG（保留无损）', () => {
+    expect(defaultFormatForInput('image/bmp')).toBe('png');
+    expect(defaultFormatForInput('image/x-icon')).toBe('png');
+    expect(defaultFormatForInput('image/vnd.microsoft.icon')).toBe('png');
+  });
+
+  it('未知/空 MIME 默认 WebP', () => {
     expect(defaultFormatForInput('')).toBe('webp');
+    expect(defaultFormatForInput('image/unknown')).toBe('webp');
   });
 });
 
@@ -108,5 +135,19 @@ describe('checkCanvasLimits', () => {
 
   it('高度超限拒绝', () => {
     expect(checkCanvasLimits(1000, 20000).ok).toBe(false);
+  });
+});
+
+describe('pickEncoderKind', () => {
+  it('png / jpeg / webp 走 canvas 原生编码', () => {
+    expect(pickEncoderKind('png')).toBe('canvas');
+    expect(pickEncoderKind('jpeg')).toBe('canvas');
+    expect(pickEncoderKind('webp')).toBe('canvas');
+  });
+
+  it('avif / tiff / ico 走各自编码器', () => {
+    expect(pickEncoderKind('avif')).toBe('avif');
+    expect(pickEncoderKind('tiff')).toBe('tiff');
+    expect(pickEncoderKind('ico')).toBe('ico');
   });
 });
