@@ -412,12 +412,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-converter',
     name: '图片转换与压缩',
-    description: 'PNG / JPG / WebP 格式互转、质量压缩与尺寸缩放，纯浏览器端 Canvas 本地处理',
-    seoDescription: '免费在线图片转换与压缩工具，支持 PNG、JPG、WebP 格式互转、自定义质量压缩与按比例尺寸缩放，纯浏览器端 Canvas 本地处理图片绝不上传，前端开发与博客配图优化必备，即开即用。',
+    description: 'PNG / JPG / WebP / AVIF / TIFF / ICO 格式互转、质量压缩与尺寸缩放，支持读取 GIF / BMP，纯浏览器端本地处理',
+    seoDescription: '免费在线图片转换与压缩工具，支持 PNG、JPG、WebP、AVIF、TIFF、ICO 格式互转与读取 GIF、BMP，自定义质量压缩与按比例尺寸缩放，可生成多尺寸 favicon（ICO），纯浏览器端本地处理图片绝不上传，前端开发、博客配图与网站图标制作必备，即开即用。',
     category: '媒体工具',
     icon: '🗜️',
     path: '/media/image-converter',
-    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩'],
+    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩', 'avif 转换', 'tiff 转 png', 'ico 转换', 'favicon 生成', '图片转 avif', 'gif 转 png'],
     relatedToolIds: ['base64-to-image', 'qr-code-generator'],
   },
   {

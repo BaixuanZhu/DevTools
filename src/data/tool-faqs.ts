@@ -265,6 +265,22 @@ const toolFaqs: Record<string, FaqItem[]> = {
       question: '带透明背景的图片转格式会怎样？',
       answer: '转 <strong>PNG / WebP</strong> 保留透明；转 <strong>JPEG</strong> 时透明区域会自动填充白色背景（JPEG 不支持透明通道），工具会给出提示。',
     },
+    {
+      question: '支持哪些图片格式？',
+      answer: '读取（输入）支持 <strong>PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF</strong>；转换（输出）支持 <strong>PNG / JPG / WebP / AVIF / TIFF / ICO</strong>。其中 GIF / BMP 仅作为输入读取，转换时需选择其他输出格式。',
+    },
+    {
+      question: '为什么 GIF 转换后不会动？',
+      answer: '本工具按<strong>单张静态图</strong>处理，GIF 输入时只取<strong>第一帧</strong>。如需保留动画（多帧、帧率、循环），属于动图编辑场景，不在本工具范围内。',
+    },
+    {
+      question: 'AVIF 编码为什么比较慢？',
+      answer: 'AVIF 压缩率高、编码运算量大，浏览器 Canvas 原生不支持输出 AVIF，本工具使用 WASM 编码器（首次使用时加载），大图编码可能需要数秒，属正常现象。',
+    },
+    {
+      question: 'ICO 输出为什么是固定尺寸？',
+      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具固定输出 <strong>16 / 32 / 48</strong> 三种标准尺寸并打包进同一个 .ico 文件，覆盖主流浏览器需求，因此尺寸滑块对 ICO 不生效。',
+    },
   ],
   'ipv6-cidr': [
     {
