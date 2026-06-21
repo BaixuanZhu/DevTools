@@ -51,6 +51,14 @@ export default defineConfig({
     ],
     vite: {
         plugins: [tailwindcss()],
+        worker: {
+            /**
+             * @jsquash/avif 的多线程 emscripten worker（avif_enc_mt）会触发 code-splitting，
+             * 而 Vite 默认 worker.format=iife 不支持 code-splitting，故改用 es。
+             * 与项目现有 module worker（new Worker(..., { type: 'module' })）一致。
+             */
+            format: 'es',
+        },
         optimizeDeps: {
             include: ['gm-crypto'],
             /**
