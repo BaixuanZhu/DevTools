@@ -242,19 +242,34 @@ export function checkCanvasLimits(
 /**
  * 加载图片文件为位图，自动纠正手机拍照的 EXIF 方向。
  *
+ * TIFF 走 utif2 解码（浏览器原生不支持），其余格式走 createImageBitmap。
+ * 所有解码异常统一归一化为中文错误，避免底层库原始异常冒泡。
+ *
  * @param file 用户上传的图片文件
  * @throws 当浏览器无法解码该文件时抛出，由调用方捕获并提示
  */
 export async function loadImage(file: File): Promise<LoadedImage> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-  return { bitmap, width: bitmap.width, height: bitmap.height };
+  try {
+    if (file.type === 'image/tiff') {
+      const { decodeTiff } = await import('./decoders/tiff');
+      return await decodeTiff(file);
+    }
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    return { bitmap, width: bitmap.width, height: bitmap.height };
+  } catch {
+    throw new Error(
+      '图片解码失败：可能文件损坏，或浏览器不支持该格式（如 AVIF 需 Chrome / 新版 Safari）',
+    );
+  }
 }
 
 /**
  * 转换图片：按百分比缩放尺寸，再以指定格式/质量编码。
  *
- * - 无损格式（png）忽略 quality；
- * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）。
+ * - 无损格式（png/tiff/ico）忽略 quality；
+ * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）；
+ * - ICO 固定输出 16/32/48 三尺寸，忽略 scale；
+ * - avif/tiff/ico 编码器懒加载。
  *
  * @param opts 转换选项
  * @returns 转换结果（含 object URL，调用方负责释放）
@@ -262,6 +277,20 @@ export async function loadImage(file: File): Promise<LoadedImage> {
  */
 export async function convertImage(opts: ConvertOptions): Promise<ConvertResult> {
   const { bitmap, format, quality, scale, fillBackground } = opts;
+
+  // ICO：多尺寸封装，忽略 scale
+  if (format === 'ico') {
+    const { encodeIco } = await import('./encoders/ico');
+    const r = await encodeIco(bitmap, fillBackground);
+    return {
+      blob: r.blob,
+      url: URL.createObjectURL(r.blob),
+      width: r.width,
+      height: r.height,
+      size: r.size,
+    };
+  }
+
   const { width, height } = computeScaledSize(bitmap.width, bitmap.height, scale);
 
   const canvas = document.createElement('canvas');
@@ -276,18 +305,26 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
   }
   ctx.drawImage(bitmap, 0, 0, width, height);
 
-  const mime = getOutputMime(format);
-  const qualityArg = isLossless(format) ? undefined : quality / 100;
-  const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob(resolve, mime, qualityArg);
-  });
-  if (!blob) throw new Error('图片编码失败，请尝试其他格式或尺寸');
+  // 原生 canvas 编码（png/jpeg/webp）
+  if (pickEncoderKind(format) === 'canvas') {
+    const mime = getOutputMime(format);
+    const qualityArg = isLossless(format) ? undefined : quality / 100;
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, mime, qualityArg),
+    );
+    if (!blob) throw new Error('图片编码失败，请尝试其他格式或尺寸');
+    return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
+  }
 
-  return {
-    blob,
-    url: URL.createObjectURL(blob),
-    width,
-    height,
-    size: blob.size,
-  };
+  // 懒加载编码器（avif/tiff）
+  const imageData = ctx.getImageData(0, 0, width, height);
+  let blob: Blob;
+  if (format === 'avif') {
+    const { encodeAvif } = await import('./encoders/avif');
+    blob = await encodeAvif(imageData, quality);
+  } else {
+    const { encodeTiff } = await import('./encoders/tiff');
+    blob = await encodeTiff(imageData);
+  }
+  return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
 }
