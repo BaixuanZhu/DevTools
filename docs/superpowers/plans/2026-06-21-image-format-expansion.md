@@ -540,7 +540,9 @@ git commit -m "feat(image-convert): add utif2-based TIFF decoder"
 
 ---
 
-## Task 4: AVIF 编码封装 `encoders/avif.ts`（含纯函数 TDD）
+## Task 4: AVIF 编码封装 `encoders/avif.ts`（✅ 已完成，实现已修正）
+
+> **修订（2026-06-21，spike 后核实）：** @jsquash/avif 用 `quality`（0-100，越大越好，default 50）**而非** `cqLevel`（证据：`meta.js` defaultOptions、`avif_enc.d.ts` EncodeOptions、`encode.js`）。因此**删除 `qualityToCqLevel` 与其测试**，`encodeAvif` 直接 `encode(imageData, { quality })` 透传，无 `as never` 类型断言。下方原始步骤（cqLevel 方案）已过时，以本修订为准。commit cd1a673..ccd16cc。
 
 **Files:**
 - Create: `src/utils/media/encoders/avif.ts`
