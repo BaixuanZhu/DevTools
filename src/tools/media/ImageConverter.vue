@@ -12,6 +12,7 @@ import {
   defaultFormatForInput,
   isLossless,
   needsFillBackground,
+  getOutputExtension,
   checkCanvasLimits,
   OUTPUT_FORMATS,
   DEFAULT_QUALITY,
@@ -52,8 +53,29 @@ const targetSize = computed(() => {
   return computeScaledSize(loaded.value.width, loaded.value.height, scale.value);
 });
 
-/** 质量控件是否禁用（PNG 无损） */
+/** 质量控件是否禁用（PNG/TIFF/ICO 无损） */
 const qualityDisabled = computed(() => isLossless(format.value));
+
+/** 有损格式选项（供 OptionRadioGroup） */
+const lossyFormats = computed(() =>
+  OUTPUT_FORMATS.filter((f) => f.group === 'lossy'),
+);
+
+/** 无损格式选项（供 OptionRadioGroup） */
+const losslessFormats = computed(() =>
+  OUTPUT_FORMATS.filter((f) => f.group === 'lossless'),
+);
+
+/** 当前是否 ICO 输出（固定多尺寸，禁用 scale） */
+const isIco = computed(() => format.value === 'ico');
+
+/** 无损格式的禁用提示文案 */
+const losslessHint = computed(() => {
+  if (format.value === 'png') return 'PNG 为无损格式，不支持质量调节';
+  if (format.value === 'tiff') return 'TIFF 为无损格式，不支持质量调节';
+  if (format.value === 'ico') return 'ICO 为无损格式，不支持质量调节';
+  return '';
+});
 
 /** 体积节省比（负数表示增大） */
 const savings = computed(() => {
@@ -201,7 +223,7 @@ async function handlePaste(event: ClipboardEvent): Promise<void> {
 function handleDownload(): void {
   if (!result.value) return;
   const baseName = originalName.value.replace(/\.[^.]+$/, '') || 'image';
-  const ext = format.value === 'png' ? 'png' : format.value === 'jpeg' ? 'jpg' : 'webp';
+  const ext = getOutputExtension(format.value).slice(1);
   const a = document.createElement('a');
   a.href = result.value.url;
   a.download = `${baseName}-compressed.${ext}`;
@@ -238,7 +260,7 @@ onUnmounted(() => {
   <div>
     <ToolHeader
       title="图片转换与压缩"
-      description="PNG / JPG / WebP 格式互转、质量压缩与尺寸缩放，纯浏览器端 Canvas 本地处理"
+      description="PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持读取 GIF / BMP / ICO / TIFF，纯浏览器端本地处理"
       :show-example="false"
     />
 
@@ -258,7 +280,7 @@ onUnmounted(() => {
             @dragleave="handleDragLeave"
           >
             <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
-            <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / GIF / BMP 等，上限 50MB</div>
+            <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF，上限 50MB</div>
           </div>
 
           <div v-else class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
@@ -313,7 +335,10 @@ onUnmounted(() => {
       <template #actions>
         <div class="w-full flex flex-col gap-4 border-t border-border pt-4">
           <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <OptionRadioGroup v-model="format" :options="OUTPUT_FORMATS" label="输出格式" />
+            <div class="flex items-center gap-4 flex-wrap">
+              <OptionRadioGroup v-model="format" :options="lossyFormats" label="有损" />
+              <OptionRadioGroup v-model="format" :options="losslessFormats" label="无损" />
+            </div>
 
             <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
               <span class="text-[0.8125rem] text-muted">质量</span>
@@ -330,7 +355,7 @@ onUnmounted(() => {
               <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2" :class="isIco ? 'opacity-50' : ''">
               <span class="text-[0.8125rem] text-muted">尺寸</span>
               <input
                 v-model.number="scale"
@@ -339,16 +364,18 @@ onUnmounted(() => {
                 max="100"
                 step="1"
                 aria-label="尺寸"
+                :disabled="isIco"
                 class="w-32 accent-accent"
               />
               <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
-              <span v-if="targetSize" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
+              <span v-if="targetSize && !isIco" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
             </div>
           </div>
 
-          <!-- 预留一行高度，避免切换 PNG/JPEG/WebP 时提示文本出现/消失导致页面跳动 -->
+          <!-- 预留一行高度，避免切换格式时提示文本出现/消失导致页面跳动 -->
           <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
-            <p v-if="qualityDisabled" class="m-0">PNG 为无损格式，不支持质量调节</p>
+            <p v-if="isIco" class="m-0">ICO 固定输出 16 / 32 / 48 三尺寸（favicon 标准），尺寸与质量滑块不适用</p>
+            <p v-else-if="qualityDisabled" class="m-0">{{ losslessHint }}</p>
             <p v-else-if="loaded && needsFillBackground(format)" class="m-0">
               JPEG 不支持透明背景，透明区域将填充白色
             </p>
