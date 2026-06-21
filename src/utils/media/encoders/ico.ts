@@ -4,6 +4,9 @@ const ICO_SIZES = [16, 32, 48] as const;
 /**
  * 将位图缩放到指定尺寸并编码为 PNG 字节（用于 ICO 打包）。
  *
+ * 采用 cover 策略：从源图居中取最小正方形区域，再缩放到目标 size×size，
+ * 避免非正方形源图（如横幅）被横向拉伸成方形导致 favicon 失真。
+ *
  * @param bitmap 源位图
  * @param size 目标宽高（正方形）
  * @param fillBackground 是否先填白底
@@ -22,7 +25,11 @@ async function rasterizeToPng(
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, size, size);
   }
-  ctx.drawImage(bitmap, 0, 0, size, size);
+  // cover：取源图居中的最小正方形区域，缩放到目标尺寸，避免非正方形图被拉伸失真
+  const srcSize = Math.min(bitmap.width, bitmap.height);
+  const sx = (bitmap.width - srcSize) / 2;
+  const sy = (bitmap.height - srcSize) / 2;
+  ctx.drawImage(bitmap, sx, sy, srcSize, srcSize, 0, 0, size, size);
   const blob = await new Promise<Blob | null>((resolve) =>
     canvas.toBlob(resolve, 'image/png'),
   );
