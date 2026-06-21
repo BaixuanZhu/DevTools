@@ -53,6 +53,12 @@ export default defineConfig({
         plugins: [tailwindcss()],
         optimizeDeps: {
             include: ['gm-crypto'],
+            /**
+             * @jsquash/avif 内含 emscripten 生成的 wasm 加载逻辑，
+             * 预打包会改变 import.meta.url、破坏 wasm 相对路径导致加载失败，
+             * 故排除预打包，让其按原始 ESM 被 serve（wasm 由 emscripten 自行 fetch）。
+             */
+            exclude: ['@jsquash/avif'],
         },
     },
 });

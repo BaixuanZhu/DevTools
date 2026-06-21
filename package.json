@@ -16,6 +16,7 @@
   "dependencies": {
     "@astrojs/vue": "^6.0.1",
     "@headlessui/vue": "^1.7.23",
+    "@jsquash/avif": "^2.1.1",
     "@noble/ciphers": "^2.2.0",
     "alpinejs": "^3.15.12",
     "astro": "^6.4.2",
@@ -25,12 +26,13 @@
     "des.js": "^1.1.0",
     "gm-crypto": "^0.1.12",
     "js-md5": "^0.8.3",
-    "jsqr": "^1.4.0",
     "js-yaml": "^4.2.0",
     "jsonpath-plus": "^10.4.0",
+    "jsqr": "^1.4.0",
     "marked": "^18.0.5",
     "prismjs": "^1.30.0",
     "qrcode": "^1.5.4",
+    "utif2": "^4.1.0",
     "uuid": "^14.0.0",
     "vue": "^3.5.35"
   },
