@@ -67,8 +67,6 @@ const sourceImageData = ref<ImageData | null>(null);
 const displayUrl = ref('');
 /** 当前展示图的状态徽标 */
 const displayLabel = ref<'original' | 'scrambled' | 'restored'>('original');
-/** 原图上传文件大小（体积对比基准） */
-const originalSize = ref(0);
 const originalName = ref('');
 /** 当前展示图大小 */
 const currentSize = ref(0);
@@ -89,12 +87,6 @@ const params = computed<ScrambleParams>(() => ({
 }));
 
 const canProcess = computed(() => sourceImageData.value !== null && errorMsg.value === '');
-
-/** 当前展示图相对原图的体积倍数（置乱后通常显著增大） */
-const sizeRatio = computed(() => {
-  if (!currentSize.value || !originalSize.value) return 1;
-  return currentSize.value / originalSize.value;
-});
 
 /** 当前展示图的中文状态文案 */
 const stateLabel = computed(() =>
@@ -120,7 +112,6 @@ function resetState(): void {
   displayUrl.value = '';
   sourceImageData.value = null;
   dimensions.value = null;
-  originalSize.value = 0;
   originalName.value = '';
   currentSize.value = 0;
   displayLabel.value = 'original';
@@ -190,7 +181,6 @@ async function processFile(file: File): Promise<void> {
 
   // FileDropzone 已在抛出前校验类型与大小；此处仅做防御性断言。
   originalName.value = file.name;
-  originalSize.value = file.size;
 
   // 识别置乱参数：tEXt 优先，文件名兜底
   const buf = await file.arrayBuffer();
@@ -457,25 +447,28 @@ onUnmounted(() => {
         </template>
       </FileDropzone>
 
+      <!-- 当前图片状态 -->
+      <div v-if="displayUrl" class="flex items-center gap-2 text-sm">
+        <span class="text-muted">状态</span>
+        <span
+          class="px-2 py-0.5 rounded-sm text-[0.8125rem] font-medium"
+          :class="
+            displayLabel === 'original'
+              ? 'bg-card border border-border text-text'
+              : displayLabel === 'scrambled'
+                ? 'bg-accent/10 border border-accent/30 text-accent'
+                : 'bg-success/10 border border-success/30 text-success'
+          "
+        >
+          {{ isProcessing ? '正在处理…' : stateLabel }}
+        </span>
+      </div>
+
       <!-- 文件元信息区：放在 FileDropzone 外部，点击图片不会触发选择器 -->
       <div v-if="displayUrl" class="flex flex-col gap-1.5 text-xs text-muted">
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="font-medium text-text break-all">{{ originalName }}</span>
-          <span class="font-mono">{{ dimensions?.width }}×{{ dimensions?.height }}</span>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-          <span class="px-1.5 py-0.5 rounded-sm bg-card border border-border text-[0.8125rem]">
-            {{ isProcessing ? '正在处理…' : stateLabel }}
-          </span>
-          <span class="font-mono">{{ formatBytes(currentSize) }}</span>
-        </div>
-        <div v-if="displayLabel !== 'original' && originalSize && currentSize">
-          原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
-          <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
-        </div>
-        <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5">
-          混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
-        </p>
+        <div class="font-medium text-text break-all">{{ originalName }}</div>
+        <div class="font-mono">{{ dimensions?.width }}×{{ dimensions?.height }}</div>
+        <div class="font-mono">{{ formatBytes(currentSize) }}</div>
       </div>
     </div>
   </div>
