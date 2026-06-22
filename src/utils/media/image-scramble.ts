@@ -4,13 +4,13 @@
 export type ScrambleMode = 'scramble' | 'restore';
 
 /** 块大小（像素边长），用户可选；块越大置换表越小、速度越快 */
-export type BlockSize = 2 | 4 | 8 | 16;
+export type BlockSize = 2 | 4 | 8 | 16 | 32 | 64 | 128;
 
 /** 置乱参数 */
 export interface ScrambleParams {
   /** 混淆种子（非空字符串），作为 PRNG 种子决定块重排顺序 */
   seed: string;
-  /** 块大小（像素），2/4/8/16 */
+  /** 块大小（像素），2/4/8/16/32/64/128 */
   blockSize: BlockSize;
 }
 
@@ -34,8 +34,13 @@ export interface ScrambleResult {
   height: number;
 }
 
-/** 合法块大小集合，用于运行时校验（Worker 反序列化后参数无字面量类型保证） */
-const VALID_BLOCK_SIZES: readonly BlockSize[] = [2, 4, 8, 16];
+/**
+ * 合法块大小集合，用于运行时校验（Worker 反序列化后参数无字面量类型保证）。
+ *
+ * 同时供领域编解码层（`scramble-meta.ts`）校验外部传入的 blockSize 字段是否合法，
+ * 因此需对外导出。
+ */
+export const VALID_BLOCK_SIZES: readonly BlockSize[] = [2, 4, 8, 16, 32, 64, 128];
 
 /**
  * 校验置乱参数是否合法。
@@ -44,7 +49,7 @@ const VALID_BLOCK_SIZES: readonly BlockSize[] = [2, 4, 8, 16];
  */
 export function validateParams(params: ScrambleParams): void {
   if (!VALID_BLOCK_SIZES.includes(params.blockSize as BlockSize)) {
-    throw new Error('块大小需为 2、4、8 或 16');
+    throw new Error('块大小需为 2、4、8、16、32、64 或 128');
   }
   if (params.seed.length === 0) {
     throw new Error('请输入混淆种子');

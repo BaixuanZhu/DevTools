@@ -1,10 +1,14 @@
 <script setup lang="ts">
 /**
- * 图片置乱/还原工具主组件。
+ * 图片混淆工具主组件。
  *
- * 顶部操作区（模式/种子/块大小 + 置乱·还原/下载/清空）+ 单一原位图片区：上传后显示原图，
- * 点「置乱」或「还原」在原位替换为处理结果（块级像素重排，尺寸恒定、完全可逆）。
+ * 顶部操作区（块大小 + 混淆/还原/下载/清空）+ 单一原位图片区：上传后显示原图，
+ * 点「混淆」或「还原」在原位替换为处理结果（块级像素重排，尺寸恒定、完全可逆）。
  * 大图（>400 万像素）自动走 Web Worker 处理，避免阻塞主线程。
+ *
+ * 参数自动管理：置乱时用 `crypto.randomUUID()` 自动生成种子，并把还原所需的全部参数
+ * （种子 + 块大小）双写到 PNG `tEXt` 块和下载文件名；上传含参数的图片时自动识别并一键
+ * 还原（tEXt 优先，文件名兜底）。
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
@@ -20,6 +24,15 @@ import type {
   ScrambleParams,
   BlockSize,
 } from '../../utils/media/image-scramble';
+import {
+  generateSeed,
+  encodeParams,
+  encodeFilename,
+  decodeFilename,
+  readScrambleMetaFromPng,
+  PARAMS_KEY,
+} from '../../utils/media/scramble-meta';
+import { isPng, writeTextChunk } from '../../utils/media/png-metadata';
 
 /** 上传文件大小上限（50MB） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
@@ -30,6 +43,9 @@ const blockSizeOptions: { value: number; label: string }[] = [
   { value: 4, label: '4×4' },
   { value: 8, label: '8×8' },
   { value: 16, label: '16×16' },
+  { value: 32, label: '32×32' },
+  { value: 64, label: '64×64' },
+  { value: 128, label: '128×128' },
 ];
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
@@ -37,8 +53,11 @@ const isDragging = ref(false);
 const errorMsg = ref('');
 const isProcessing = ref(false);
 
-const mode = ref<ScrambleMode>('scramble');
-const seed = ref('12345');
+/**
+ * 当前种子（内部状态，不对用户展示）。混淆时若为空则自动生成（`generateSeed()`）；
+ * 上传含元数据的图片时由 `processFile` 回填。全程自动管理，用户无需感知。
+ */
+const seed = ref('');
 const blockSize = ref<number>(8);
 
 /** 当前像素源（下一次置乱/还原的输入），尺寸自上传后恒定 */
@@ -78,7 +97,7 @@ const sizeRatio = computed(() => {
 
 /** 当前展示图的中文状态文案 */
 const stateLabel = computed(() =>
-  displayLabel.value === 'original' ? '原始图片' : displayLabel.value === 'scrambled' ? '已置乱' : '已还原',
+  displayLabel.value === 'original' ? '原始图片' : displayLabel.value === 'scrambled' ? '已混淆' : '已还原',
 );
 
 /**
@@ -108,10 +127,17 @@ function resetState(): void {
 
 /**
  * 将 ImageData 编码为 PNG 并生成 object URL。
+ *
  * @param imageData 像素数据
+ * @param options.embed 是否把置乱参数写入 PNG tEXt 块（仅置乱结果为 true）
+ * @param options.seed 用于嵌入的种子（embed=true 时必填）
+ * @param options.blockSize 用于嵌入的块大小（embed=true 时必填）
  * @returns object URL 与 PNG blob 大小
  */
-async function imageDataToUrl(imageData: ImageData): Promise<{ url: string; size: number }> {
+async function imageDataToUrl(
+  imageData: ImageData,
+  options: { embed: boolean; seed?: string; blockSize?: BlockSize } = { embed: false },
+): Promise<{ url: string; size: number }> {
   const canvas = document.createElement('canvas');
   canvas.width = imageData.width;
   canvas.height = imageData.height;
@@ -120,13 +146,40 @@ async function imageDataToUrl(imageData: ImageData): Promise<{ url: string; size
   ctx.putImageData(imageData, 0, 0);
   const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
   if (!blob) throw new Error('PNG 编码失败');
-  return { url: URL.createObjectURL(blob), size: blob.size };
+
+  // 不嵌入：原图 / 还原结果直接返回
+  if (!options.embed) {
+    return { url: URL.createObjectURL(blob), size: blob.size };
+  }
+
+  // 嵌入：toBlob 产出的 PNG → arrayBuffer → 注入 tEXt → 重新封装 Blob
+  const seed = options.seed;
+  const blockSize = options.blockSize;
+  // 调用方约定：embed=true 时必传 seed/blockSize；防御性兜底
+  if (!seed || blockSize == null) {
+    return { url: URL.createObjectURL(blob), size: blob.size };
+  }
+  try {
+    const buf = await blob.arrayBuffer();
+    const encoded = writeTextChunk(buf, PARAMS_KEY, encodeParams(seed, blockSize));
+    const embeddedBlob = new Blob([encoded], { type: 'image/png' });
+    return { url: URL.createObjectURL(embeddedBlob), size: embeddedBlob.size };
+  } catch {
+    // 元数据注入失败：降级用未嵌入 blob，提示用户保留完整文件名兜底还原
+    dispatchToast('元数据写入失败，请保留完整下载文件名以便还原');
+    return { url: URL.createObjectURL(blob), size: blob.size };
+  }
 }
 
 /**
- * 处理上传的图片文件：校验类型/尺寸 → 解码为 ImageData 作为像素源，展示原图。
+ * 处理上传的图片文件：校验类型/尺寸 → 识别置乱参数 → 解码为 ImageData 作为像素源 →
+ * 展示原图（或已置乱图）。
  *
- * 不自动置乱——按需求，上传后由用户显式点「置乱」。
+ * 参数识别优先级：PNG tEXt > 文件名 > 无（当新图）。
+ * - 命中参数：回填 blockSize/seed 并自动调用 `runProcess('restore')`，
+ *   把上传的已置乱图当作 source 跑一次还原，完成后提示「已识别参数并自动还原」。
+ * - 未命中：当新图处理，清空 seed（待用户点「置乱」时生成），不自动置乱。
+ *
  * @param file 用户上传或粘贴的图片文件
  */
 async function processFile(file: File): Promise<void> {
@@ -145,6 +198,12 @@ async function processFile(file: File): Promise<void> {
 
   originalName.value = file.name;
   originalSize.value = file.size;
+
+  // 识别置乱参数：tEXt 优先，文件名兜底
+  const buf = await file.arrayBuffer();
+  const meta = isPng(buf) ? readScrambleMetaFromPng(buf) : null;
+  const fallback = decodeFilename(file.name);
+  const detected = meta ?? fallback;
 
   try {
     const bitmap = await createImageBitmap(file);
@@ -165,16 +224,30 @@ async function processFile(file: File): Promise<void> {
     dimensions.value = { width: canvas.width, height: canvas.height };
     displayUrl.value = URL.createObjectURL(file);
     currentSize.value = file.size;
-    displayLabel.value = 'original';
   } catch {
     errorMsg.value = '图片解码失败，可能文件损坏或格式不支持';
+    return;
+  }
+
+  if (detected) {
+    // 命中参数：回填并自动还原（把上传的已置乱图当 source）
+    blockSize.value = detected.blockSize;
+    seed.value = detected.seed;
+    displayLabel.value = 'scrambled';
+    await runProcess('restore');
+    dispatchToast('已识别参数并自动还原');
+  } else {
+    // 未命中：当新图处理，清空 seed（置乱时自动生成）
+    seed.value = '';
+    displayLabel.value = 'original';
   }
 }
 
 /**
- * 执行一次置乱/还原：校验参数 → 取像素源 → 调度算法 → 原位更新展示图。
+ * 执行一次置乱或还原：校验参数 → 取像素源 → 调度算法 → 原位更新展示图。
+ * @param processMode 置乱或还原模式
  */
-async function handleProcess(): Promise<void> {
+async function runProcess(processMode: ScrambleMode): Promise<void> {
   if (isProcessing.value) return;
   if (!sourceImageData.value) return;
   errorMsg.value = '';
@@ -186,19 +259,38 @@ async function handleProcess(): Promise<void> {
 
   isProcessing.value = true;
   try {
-    const result = await processImageData(sourceImageData.value, mode.value, params.value);
+    const result = await processImageData(sourceImageData.value, processMode, params.value);
     sourceImageData.value = result;
     dimensions.value = { width: result.width, height: result.height };
-    const { url, size } = await imageDataToUrl(result);
+    // 仅置乱结果嵌入参数（还原/原图不需要元数据）
+    const { url, size } =
+      processMode === 'scramble'
+        ? await imageDataToUrl(result, {
+            embed: true,
+            seed: seed.value,
+            blockSize: blockSize.value as BlockSize,
+          })
+        : await imageDataToUrl(result);
     if (displayUrl.value) URL.revokeObjectURL(displayUrl.value);
     displayUrl.value = url;
     currentSize.value = size;
-    displayLabel.value = mode.value === 'scramble' ? 'scrambled' : 'restored';
+    displayLabel.value = processMode === 'scramble' ? 'scrambled' : 'restored';
   } catch (e) {
     errorMsg.value = e instanceof Error ? e.message : '图像处理失败';
   } finally {
     isProcessing.value = false;
   }
+}
+
+/** 对当前展示图执行置乱，并在原位更新为结果。进入时若无种子则自动生成。 */
+function handleScramble(): void {
+  if (!seed.value) seed.value = generateSeed();
+  void runProcess('scramble');
+}
+
+/** 对当前展示图执行还原，并在原位更新为结果。 */
+function handleRestore(): void {
+  void runProcess('restore');
 }
 
 /**
@@ -250,27 +342,34 @@ async function processImageData(
   });
 }
 
-/** 下载当前展示图 PNG，文件名带状态后缀。 */
+/**
+ * 下载当前展示图 PNG。
+ *
+ * 文件名规则：
+ * - 置乱态：用 `encodeFilename` 内嵌完整种子与块大小（tEXt 被剥离时的还原兜底）。
+ * - 还原/原图：维持状态后缀。
+ */
 function handleDownload(): void {
   if (!displayUrl.value) return;
   const baseName = originalName.value.replace(/\.[^.]+$/, '') || 'image';
-  const suffix =
-    displayLabel.value === 'scrambled' ? 'scrambled' : displayLabel.value === 'restored' ? 'restored' : 'original';
+  const fileName =
+    displayLabel.value === 'scrambled'
+      ? `${encodeFilename(baseName, seed.value, blockSize.value as BlockSize)}.png`
+      : `${baseName}-${displayLabel.value === 'restored' ? 'restored' : 'original'}.png`;
   const a = document.createElement('a');
   a.href = displayUrl.value;
-  a.download = `${baseName}-${suffix}.png`;
+  a.download = fileName;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   dispatchToast('已开始下载');
 }
 
-/** 清空：释放资源、重置所有参数到默认值。 */
+/** 清空：释放资源、重置所有参数到默认值（种子清空，等待下次混淆时自动生成）。 */
 function handleClear(): void {
   resetState();
   errorMsg.value = '';
-  mode.value = 'scramble';
-  seed.value = '12345';
+  seed.value = '';
   blockSize.value = 8;
   if (fileInputRef.value) fileInputRef.value.value = '';
 }
@@ -307,31 +406,14 @@ onUnmounted(() => {
 <template>
   <div class="mx-auto w-full max-w-[960px]">
     <ToolHeader
-      title="图片置乱/还原"
-      description="基于种子的可逆块级像素置乱，将图片分块重排为抽象效果并一键还原，输出 PNG 格式"
+      title="图片混淆"
+      description="可逆块级像素混淆，将图片分块重排为抽象效果并一键还原，输出 PNG 格式"
       :show-example="false"
     />
 
     <!-- 顶部操作区：参数 + 操作按钮 -->
     <div class="border border-border rounded-sm p-4 flex flex-col gap-4">
       <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-        <OptionRadioGroup
-          v-model="mode"
-          :options="[
-            { value: 'scramble', label: '置乱' },
-            { value: 'restore', label: '还原' },
-          ]"
-          label="模式"
-        />
-        <div class="flex items-center gap-2">
-          <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">种子</span>
-          <input
-            v-model="seed"
-            type="text"
-            class="px-3 py-1.5 border border-border rounded-sm text-sm w-52 bg-card text-text focus:outline-none focus:border-accent"
-            placeholder="输入任意字符串"
-          />
-        </div>
         <OptionRadioGroup
           v-model="blockSize"
           :options="blockSizeOptions"
@@ -344,11 +426,21 @@ onUnmounted(() => {
           type="button"
           :disabled="!canProcess || isProcessing"
           class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          :aria-label="mode === 'scramble' ? '开始置乱' : '开始还原'"
-          @click="handleProcess"
+          aria-label="开始混淆"
+          @click="handleScramble"
         >
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          {{ mode === 'scramble' ? '置乱' : '还原' }}
+          混淆
+        </button>
+        <button
+          type="button"
+          :disabled="!canProcess || isProcessing"
+          class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          aria-label="开始还原"
+          @click="handleRestore"
+        >
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+          还原
         </button>
         <button
           type="button"
@@ -393,13 +485,13 @@ onUnmounted(() => {
           :alt="stateLabel"
           class="max-h-[480px] w-full object-contain rounded-sm bg-white"
         />
-        <!-- 体积对比：置乱后像素随机化，无损 PNG 无法压缩，体积增大属正常 -->
+        <!-- 体积对比：混淆后像素随机化，无损 PNG 无法压缩，体积增大属正常 -->
         <div v-if="displayLabel !== 'original' && originalSize && currentSize" class="text-xs text-muted">
           原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
           <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
         </div>
         <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5" class="text-xs text-muted">
-          置乱后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
+          混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
         </p>
       </div>
     </div>

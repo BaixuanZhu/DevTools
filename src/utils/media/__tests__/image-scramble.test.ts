@@ -40,7 +40,7 @@ function createTwoColorImageData(width: number, height: number): ImageData {
 describe('validateParams', () => {
   it('accepts valid params', () => {
     expect(() => validateParams({ seed: 'abc', blockSize: 8 })).not.toThrow();
-    for (const size of [2, 4, 8, 16] as const) {
+    for (const size of [2, 4, 8, 16, 32, 64, 128] as const) {
       expect(() => validateParams({ seed: 'abc', blockSize: size })).not.toThrow();
     }
   });
@@ -51,7 +51,7 @@ describe('validateParams', () => {
 
   it('rejects invalid block size', () => {
     expect(() => validateParams({ seed: 'abc', blockSize: 3 as never })).toThrow('块大小');
-    expect(() => validateParams({ seed: 'abc', blockSize: 32 as never })).toThrow('块大小');
+    expect(() => validateParams({ seed: 'abc', blockSize: 33 as never })).toThrow('块大小');
   });
 });
 

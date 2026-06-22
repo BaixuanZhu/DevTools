@@ -44,3 +44,5 @@ screenshots
 
 # superpowers worktrees
 .worktrees/
+.superpowers
+.playwright-cli

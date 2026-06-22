@@ -477,13 +477,13 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'image-scrambler',
-    name: '图片置乱/还原',
-    description: '基于种子的可逆块级像素置乱，将图片分块重排为抽象效果并一键还原',
-    seoDescription: '免费在线图片置乱与还原工具，基于种子与可调块大小（2/4/8/16）对图片进行可逆块级像素重排，可将图片打乱为抽象拼图噪点效果并一键还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
+    name: '图片混淆',
+    description: '可逆块级像素混淆，将图片分块重排为抽象效果并一键还原；还原参数自动写入图片元数据，重新上传即可还原',
+    seoDescription: '免费在线图片混淆工具，通过可调块大小（2/4/8/16/32/64/128）对图片进行可逆块级像素重排，可将图片打乱为抽象拼图噪点效果并一键还原；还原参数自动写入 PNG 元数据与文件名，重新上传即可自动还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
     category: '媒体工具',
     icon: '🔀',
     path: '/media/image-scrambler',
-    keywords: ['图片置乱', '图片加密', '像素混淆', '块级置乱', '分块重排', '图片打乱', '图片还原', '图像置乱', 'image scrambling'],
+    keywords: ['图片混淆', '图片置乱', '图片加密', '像素混淆', '块级置乱', '分块重排', '图片打乱', '图片还原', '图像置乱', 'image scrambling'],
     relatedToolIds: ['image-converter', 'base64-to-image', 'qr-code-generator'],
   },
 ];
