@@ -142,3 +142,106 @@ export function arnoldRestore(imageData: ImageData, iterations: number): ImageDa
 
   return new ImageData(dst, n, n);
 }
+
+/**
+ * 生成 Logistic 混沌序列。
+ *
+ * @param r 控制参数，范围 3.57-4.0
+ * @param x0 初始值，范围 0-1
+ * @param count 需要生成的序列长度
+ * @param warmUp 预热次数，用于跳过瞬态
+ * @returns 混沌序列
+ */
+function generateLogisticSequence(r: number, x0: number, count: number, warmUp = 1000): Float64Array {
+  const sequence = new Float64Array(count);
+  let x = x0;
+  for (let i = 0; i < warmUp; i++) {
+    x = r * x * (1 - x);
+  }
+  for (let i = 0; i < count; i++) {
+    x = r * x * (1 - x);
+    sequence[i] = x;
+  }
+  return sequence;
+}
+
+/**
+ * 根据混沌序列生成像素位置置换表。
+ *
+ * @param sequence 混沌序列
+ * @param length 像素总数
+ * @returns 置换表（scramble[i] 表示原第 i 个像素的新位置）
+ */
+function buildPermutation(sequence: Float64Array, length: number): Uint32Array {
+  const indices = new Uint32Array(length);
+  for (let i = 0; i < length; i++) {
+    indices[i] = i;
+  }
+  // 使用序列值作为排序键
+  indices.sort((a, b) => sequence[a] - sequence[b]);
+  return indices;
+}
+
+/**
+ * 对像素矩阵执行 Logistic 混沌位置置乱。
+ *
+ * @param imageData 源像素数据
+ * @param r 控制参数
+ * @param x0 初始值
+ * @param iterations 迭代次数
+ * @returns 置乱后的像素数据
+ */
+export function logisticScramble(imageData: ImageData, r: number, x0: number, iterations: number): ImageData {
+  const { width, height, data } = imageData;
+  const pixelCount = width * height;
+  let current = new Uint8ClampedArray(data);
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const sequence = generateLogisticSequence(r, x0, pixelCount, 1000 + iter * 100);
+    const permutation = buildPermutation(sequence, pixelCount);
+    const next = new Uint8ClampedArray(data.length);
+    for (let i = 0; i < pixelCount; i++) {
+      const srcIdx = i * 4;
+      const dstIdx = permutation[i] * 4;
+      next[dstIdx] = current[srcIdx];
+      next[dstIdx + 1] = current[srcIdx + 1];
+      next[dstIdx + 2] = current[srcIdx + 2];
+      next[dstIdx + 3] = current[srcIdx + 3];
+    }
+    current = next;
+  }
+
+  return new ImageData(current, width, height);
+}
+
+/**
+ * 对像素矩阵执行 Logistic 混沌位置还原。
+ *
+ * @param imageData 源像素数据
+ * @param r 控制参数
+ * @param x0 初始值
+ * @param iterations 迭代次数
+ * @returns 还原后的像素数据
+ */
+export function logisticRestore(imageData: ImageData, r: number, x0: number, iterations: number): ImageData {
+  const { width, height, data } = imageData;
+  const pixelCount = width * height;
+  let current = new Uint8ClampedArray(data);
+
+  for (let iter = iterations - 1; iter >= 0; iter--) {
+    const sequence = generateLogisticSequence(r, x0, pixelCount, 1000 + iter * 100);
+    const permutation = buildPermutation(sequence, pixelCount);
+    const next = new Uint8ClampedArray(data.length);
+    for (let i = 0; i < pixelCount; i++) {
+      const srcIdx = permutation[i] * 4;
+      const dstIdx = i * 4;
+      next[dstIdx] = current[srcIdx];
+      next[dstIdx + 1] = current[srcIdx + 1];
+      next[dstIdx + 2] = current[srcIdx + 2];
+      next[dstIdx + 3] = current[srcIdx + 3];
+    }
+    current = next;
+  }
+
+  return new ImageData(current, width, height);
+}
