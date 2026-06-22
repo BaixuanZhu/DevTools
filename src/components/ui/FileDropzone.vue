@@ -152,7 +152,6 @@ onUnmounted(() => {
       class="hidden"
       :accept="accept"
       @change="handleChange"
-      @click.stop
     />
 
     <div class="flex-1 flex flex-col items-center justify-center w-full">

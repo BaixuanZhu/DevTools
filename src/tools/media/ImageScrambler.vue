@@ -187,15 +187,7 @@ async function processFile(file: File): Promise<void> {
   resetState();
   errorMsg.value = '';
 
-  if (!file.type.startsWith('image/')) {
-    errorMsg.value = '请上传图片文件';
-    return;
-  }
-  if (file.size > FILE_SIZE_LIMIT) {
-    errorMsg.value = `图片过大（${formatBytes(file.size)}），超过 ${formatBytes(FILE_SIZE_LIMIT)} 上限`;
-    return;
-  }
-
+  // FileDropzone 已在抛出前校验类型与大小；此处仅做防御性断言。
   originalName.value = file.name;
   originalSize.value = file.size;
 

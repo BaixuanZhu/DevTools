@@ -16,13 +16,14 @@ export function validateFile(file: File, accept?: string, maxSize?: number): str
       .filter(Boolean);
     const accepted = tokens.some((token) => {
       const lowerToken = token.toLowerCase();
+      const lowerType = file.type.toLowerCase();
       if (lowerToken.startsWith('.')) {
         return file.name.toLowerCase().endsWith(lowerToken);
       }
       if (lowerToken.endsWith('/*')) {
-        return file.type.startsWith(lowerToken.slice(0, -1));
+        return lowerType.startsWith(lowerToken.slice(0, -1));
       }
-      return file.type === token;
+      return lowerType === lowerToken;
     });
     if (!accepted) return `文件类型不符，请上传 ${accept} 格式`;
   }
