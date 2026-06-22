@@ -10,10 +10,10 @@
  * （种子 + 块大小）双写到 PNG `tEXt` 块和下载文件名；上传含参数的图片时自动识别并一键
  * 还原（tEXt 优先，文件名兜底）。
  */
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
+import FileDropzone from '../../components/ui/FileDropzone.vue';
 import { formatBytes, checkCanvasLimits } from '../../utils/media/image-convert';
 import {
   validateParams,
@@ -48,8 +48,8 @@ const blockSizeOptions: { value: number; label: string }[] = [
   { value: 128, label: '128×128' },
 ];
 
-const fileInputRef = ref<HTMLInputElement | null>(null);
-const isDragging = ref(false);
+/** 当前通过 FileDropzone 选中的文件 */
+const selectedFile = ref<File | null>(null);
 const errorMsg = ref('');
 const isProcessing = ref(false);
 
@@ -371,34 +371,9 @@ function handleClear(): void {
   errorMsg.value = '';
   seed.value = '';
   blockSize.value = 8;
-  if (fileInputRef.value) fileInputRef.value.value = '';
 }
-
-/**
- * 全局粘贴事件处理：检测剪贴板中的图片并触发处理。
- * @param event 剪贴板事件
- */
-async function handlePaste(event: ClipboardEvent): Promise<void> {
-  const items = event.clipboardData?.items;
-  if (!items) return;
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    if (item?.type.startsWith('image/')) {
-      const file = item.getAsFile();
-      if (file) {
-        await processFile(file);
-        return;
-      }
-    }
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('paste', handlePaste);
-});
 
 onUnmounted(() => {
-  window.removeEventListener('paste', handlePaste);
   resetState();
 });
 </script>
@@ -452,56 +427,51 @@ onUnmounted(() => {
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           下载
         </button>
-        <ClearButton @clear="handleClear" />
       </div>
     </div>
 
     <p v-if="errorMsg" class="text-[0.8125rem] text-error mt-2">{{ errorMsg }}</p>
 
-    <!-- 单一图片区：空态为上传区，有图态为当前展示图（置乱/还原在原位替换） -->
+    <!-- 单一图片区：FileDropzone 包裹空态与图片展示，内置删除入口 -->
     <div class="mt-4">
-      <div
-        v-if="!displayUrl"
-        class="border-2 border-dashed rounded-lg p-10 min-h-[400px] flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
-        :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
-        @click="fileInputRef?.click()"
-        @drop.prevent="(e) => { isDragging = false; const f = e.dataTransfer?.files?.[0]; if (f) void processFile(f); }"
-        @dragover.prevent="isDragging = true"
-        @dragleave="isDragging = false"
+      <FileDropzone
+        v-model="selectedFile"
+        accept="image/*"
+        :max-size="FILE_SIZE_LIMIT"
+        enable-drag
+        enable-paste
+        clearable
+        @select="(f) => void processFile(f)"
+        @clear="handleClear"
+        @error="(msg) => errorMsg = msg"
       >
-        <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
-        <div class="text-xs text-muted mt-1">支持任意图片格式，上限 50MB</div>
-      </div>
-
-      <div v-else class="bg-hover border border-border rounded-sm p-4 flex flex-col gap-2">
-        <div class="flex items-center justify-between gap-2">
-          <span class="text-[0.8125rem] font-medium text-muted">{{ isProcessing ? '正在处理…' : stateLabel }}</span>
-          <span class="text-xs text-muted font-mono">
-            {{ dimensions?.width }}×{{ dimensions?.height }} · {{ formatBytes(currentSize) }}
-          </span>
-        </div>
-        <img
-          :src="displayUrl"
-          :alt="stateLabel"
-          class="max-h-[480px] w-full object-contain rounded-sm bg-white"
-        />
-        <!-- 体积对比：混淆后像素随机化，无损 PNG 无法压缩，体积增大属正常 -->
-        <div v-if="displayLabel !== 'original' && originalSize && currentSize" class="text-xs text-muted">
-          原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
-          <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
-        </div>
-        <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5" class="text-xs text-muted">
-          混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
-        </p>
-      </div>
+        <template #default>
+          <div v-if="!displayUrl" class="flex flex-col items-center justify-center text-center">
+            <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
+            <div class="text-xs text-muted mt-1">支持任意图片格式，上限 50MB</div>
+          </div>
+          <div v-else class="w-full flex flex-col gap-2">
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-[0.8125rem] font-medium text-muted">{{ isProcessing ? '正在处理…' : stateLabel }}</span>
+              <span class="text-xs text-muted font-mono">
+                {{ dimensions?.width }}×{{ dimensions?.height }} · {{ formatBytes(currentSize) }}
+              </span>
+            </div>
+            <img
+              :src="displayUrl"
+              :alt="stateLabel"
+              class="max-h-[480px] w-full object-contain rounded-sm bg-white cursor-pointer"
+            />
+            <div v-if="displayLabel !== 'original' && originalSize && currentSize" class="text-xs text-muted">
+              原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
+              <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
+            </div>
+            <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5" class="text-xs text-muted">
+              混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
+            </p>
+          </div>
+        </template>
+      </FileDropzone>
     </div>
-
-    <input
-      ref="fileInputRef"
-      type="file"
-      accept="image/*"
-      class="hidden"
-      @change="(e) => { const f = (e.target as HTMLInputElement).files?.[0]; if (f) void processFile(f); }"
-    />
   </div>
 </template>
