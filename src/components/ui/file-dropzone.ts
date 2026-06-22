@@ -1,4 +1,4 @@
-import { formatBytes } from '../../utils/media/image-convert';
+import { formatBytes } from '../../utils/shared/format';
 
 /**
  * 校验文件是否满足 accept 与 maxSize 约束。

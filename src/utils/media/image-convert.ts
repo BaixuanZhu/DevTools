@@ -71,18 +71,7 @@ export const OUTPUT_FORMATS: { value: OutputFormat; label: string; group: Format
 
 // ==================== 纯函数 ====================
 
-/**
- * 格式化字节数为人类可读字符串。
- *
- * <1KB 显示 B，<1MB 显示 KB（一位小数），≥1MB 显示 MB（两位小数）。
- * @param bytes 字节数
- */
-export function formatBytes(bytes: number): string {
-  if (bytes < 0) return '0 B';
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
-}
+export { formatBytes } from '../shared/format';
 
 /**
  * 按百分比计算目标尺寸，锁定宽高比，最小为 1px。
