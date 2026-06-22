@@ -36,6 +36,18 @@ describe('validateParams', () => {
       }),
     ).toThrow('迭代次数需在 1 到 50 之间');
   });
+
+  it('rejects NaN r', () => {
+    expect(() =>
+      validateParams({ algorithm: 'logistic', iterations: 5, r: Number.NaN, x0: 0.5, seed: 'a', padding: 'expand' }),
+    ).toThrow('Logistic 控制参数需在 3.57 到 4.0 之间');
+  });
+
+  it('rejects NaN x0', () => {
+    expect(() =>
+      validateParams({ algorithm: 'logistic', iterations: 5, r: 3.99, x0: Number.NaN, seed: 'a', padding: 'expand' }),
+    ).toThrow('初始值需在 0 到 1 之间');
+  });
 });
 
 describe('arnoldScramble', () => {
@@ -148,5 +160,16 @@ describe('scrambleImageData', () => {
         expect(restored.imageData.data[restIdx + 3]).toBe(original.data[origIdx + 3]);
       }
     }
+  });
+
+  it('rejects zero-dimension image', () => {
+    const empty = new ImageData(new Uint8ClampedArray(0), 0, 0);
+    expect(() =>
+      scrambleImageData({
+        imageData: empty,
+        mode: 'scramble',
+        params: { algorithm: 'arnold', iterations: 1, r: 3.99, x0: 0.5, seed: 'a', padding: 'expand' },
+      }),
+    ).toThrow('图片尺寸无效');
   });
 });

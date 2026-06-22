@@ -54,10 +54,10 @@ export function validateParams(params: ScrambleParams): void {
   if (!Number.isInteger(params.iterations) || params.iterations < 1 || params.iterations > 50) {
     throw new Error('迭代次数需在 1 到 50 之间');
   }
-  if (params.r < 3.57 || params.r > 4.0) {
+  if (!Number.isFinite(params.r) || params.r < 3.57 || params.r > 4.0) {
     throw new Error('Logistic 控制参数需在 3.57 到 4.0 之间');
   }
-  if (params.x0 <= 0 || params.x0 >= 1) {
+  if (!Number.isFinite(params.x0) || params.x0 <= 0 || params.x0 >= 1) {
     throw new Error('初始值需在 0 到 1 之间');
   }
   if (params.seed.length === 0) {
@@ -447,6 +447,10 @@ export function makeSquareImageData(
 export function scrambleImageData(options: ScrambleOptions): ScrambleResult {
   const { imageData, mode, params } = options;
   validateParams(params);
+
+  if (imageData.width < 1 || imageData.height < 1) {
+    throw new Error('图片尺寸无效，无法处理空图像');
+  }
 
   if (params.algorithm === 'arnold') {
     const { imageData: squareImageData } = makeSquareImageData(imageData, params.padding);

@@ -142,6 +142,7 @@ function clearResult(): void {
  * 执行一次置乱/还原：校验参数 → 取像素 → 调度算法 → 转 PNG → 更新预览。
  */
 async function handleProcess(): Promise<void> {
+  if (isProcessing.value) return;
   if (!loaded.value) return;
   errorMsg.value = '';
   const validation = validateCurrentParams();
