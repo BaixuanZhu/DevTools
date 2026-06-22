@@ -101,16 +101,22 @@ function handleChange(event: Event): void {
 
 function handleDrop(event: DragEvent): void {
   event.preventDefault();
+  if (!props.enableDrag) {
+    isDragging.value = false;
+    return;
+  }
   isDragging.value = false;
   processFile(event.dataTransfer?.files?.[0]);
 }
 
 function handleDragOver(event: DragEvent): void {
   event.preventDefault();
+  if (!props.enableDrag) return;
   isDragging.value = true;
 }
 
 function handleDragLeave(): void {
+  if (!props.enableDrag) return;
   isDragging.value = false;
 }
 
