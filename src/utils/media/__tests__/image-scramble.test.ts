@@ -1,6 +1,6 @@
 // src/utils/media/__tests__/image-scramble.test.ts
 import { describe, it, expect } from 'vitest';
-import { validateParams, arnoldScramble, arnoldRestore, logisticScramble, logisticRestore, confusionScramble, confusionRestore } from '../image-scramble';
+import { validateParams, arnoldScramble, arnoldRestore, logisticScramble, logisticRestore, confusionScramble, confusionRestore, makeSquareImageData } from '../image-scramble';
 
 function createTestImageData(width: number, height: number): ImageData {
   const data = new Uint8ClampedArray(width * height * 4);
@@ -79,5 +79,25 @@ describe('confusionScramble', () => {
     const a = confusionScramble(original, 'seed-a', 3);
     const b = confusionScramble(original, 'seed-b', 3);
     expect(a.data).not.toEqual(b.data);
+  });
+});
+
+describe('makeSquareImageData', () => {
+  it('expands non-square image to square by edge expansion', () => {
+    const original = createTestImageData(30, 20);
+    const { imageData, originalWidth, originalHeight } = makeSquareImageData(original, 'expand');
+    expect(imageData.width).toBe(30);
+    expect(imageData.height).toBe(30);
+    expect(originalWidth).toBe(30);
+    expect(originalHeight).toBe(20);
+  });
+
+  it('crops non-square image to square from center', () => {
+    const original = createTestImageData(30, 20);
+    const { imageData, originalWidth, originalHeight } = makeSquareImageData(original, 'crop');
+    expect(imageData.width).toBe(20);
+    expect(imageData.height).toBe(20);
+    expect(originalWidth).toBe(30);
+    expect(originalHeight).toBe(20);
   });
 });

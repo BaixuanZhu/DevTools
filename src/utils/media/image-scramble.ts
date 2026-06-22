@@ -372,3 +372,63 @@ export function confusionRestore(imageData: ImageData, seed: string, iterations:
 
   return new ImageData(current, width, height);
 }
+
+/**
+ * 将任意比例像素数据处理为正方形。
+ *
+ * - expand：边缘外扩填充，不丢失内容；
+ * - crop：居中裁切，可能丢失边缘。
+ *
+ * @param imageData 源像素数据
+ * @param padding 处理策略
+ * @returns 正方形像素数据及原始尺寸
+ */
+export function makeSquareImageData(
+  imageData: ImageData,
+  padding: ArnoldPadding,
+): { imageData: ImageData; originalWidth: number; originalHeight: number } {
+  const { width, height, data } = imageData;
+  if (width === height) {
+    return { imageData, originalWidth: width, originalHeight: height };
+  }
+
+  if (padding === 'crop') {
+    const n = Math.min(width, height);
+    const offsetX = Math.floor((width - n) / 2);
+    const offsetY = Math.floor((height - n) / 2);
+    const cropped = new Uint8ClampedArray(n * n * 4);
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const srcIdx = ((offsetY + y) * width + offsetX + x) * 4;
+        const dstIdx = (y * n + x) * 4;
+        cropped[dstIdx] = data[srcIdx];
+        cropped[dstIdx + 1] = data[srcIdx + 1];
+        cropped[dstIdx + 2] = data[srcIdx + 2];
+        cropped[dstIdx + 3] = data[srcIdx + 3];
+      }
+    }
+    return { imageData: new ImageData(cropped, n, n), originalWidth: width, originalHeight: height };
+  }
+
+  // expand
+  const n = Math.max(width, height);
+  const offsetX = Math.floor((n - width) / 2);
+  const offsetY = Math.floor((n - height) / 2);
+  const expanded = new Uint8ClampedArray(n * n * 4);
+
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      // 将目标坐标映射回源图坐标，超出部分用最近边缘像素
+      const srcX = Math.min(Math.max(x - offsetX, 0), width - 1);
+      const srcY = Math.min(Math.max(y - offsetY, 0), height - 1);
+      const srcIdx = (srcY * width + srcX) * 4;
+      const dstIdx = (y * n + x) * 4;
+      expanded[dstIdx] = data[srcIdx];
+      expanded[dstIdx + 1] = data[srcIdx + 1];
+      expanded[dstIdx + 2] = data[srcIdx + 2];
+      expanded[dstIdx + 3] = data[srcIdx + 3];
+    }
+  }
+
+  return { imageData: new ImageData(expanded, n, n), originalWidth: width, originalHeight: height };
+}
