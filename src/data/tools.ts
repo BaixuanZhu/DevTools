@@ -478,12 +478,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-scrambler',
     name: '图片置乱/还原',
-    description: '通过 Arnold 变换、Logistic 混沌或快速混淆对图片像素进行可逆置乱',
-    seoDescription: '免费在线图片置乱与还原工具，支持 Arnold 变换、Logistic 混沌映射、种子快速混淆三种可逆算法，可将图片打乱为抽象噪点并一键还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
+    description: '基于种子的可逆块级像素置乱，将图片分块重排为抽象效果并一键还原',
+    seoDescription: '免费在线图片置乱与还原工具，基于种子与可调块大小（2/4/8/16）对图片进行可逆块级像素重排，可将图片打乱为抽象拼图噪点效果并一键还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
     category: '媒体工具',
     icon: '🔀',
     path: '/media/image-scrambler',
-    keywords: ['图片置乱', '图片加密', 'Arnold 变换', '混沌图像加密', '像素混淆', '图片还原', '图像置乱', 'image scrambling'],
+    keywords: ['图片置乱', '图片加密', '像素混淆', '块级置乱', '分块重排', '图片打乱', '图片还原', '图像置乱', 'image scrambling'],
     relatedToolIds: ['image-converter', 'base64-to-image', 'qr-code-generator'],
   },
 ];

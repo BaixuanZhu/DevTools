@@ -3,26 +3,15 @@
 /** 置乱模式 */
 export type ScrambleMode = 'scramble' | 'restore';
 
-/** 置乱算法 */
-export type ScrambleAlgorithm = 'arnold' | 'logistic' | 'confusion';
-
-/** Arnold 变换对非正方形图片的处理策略 */
-export type ArnoldPadding = 'expand' | 'crop';
+/** 块大小（像素边长），用户可选；块越大置换表越小、速度越快 */
+export type BlockSize = 2 | 4 | 8 | 16;
 
 /** 置乱参数 */
 export interface ScrambleParams {
-  /** 算法类型 */
-  algorithm: ScrambleAlgorithm;
-  /** 迭代次数 1-50 */
-  iterations: number;
-  /** Logistic 控制参数 r，范围 3.57-4.0 */
-  r: number;
-  /** Logistic 初始值 x0，范围 0-1 */
-  x0: number;
-  /** 快速混淆种子 */
+  /** 混淆种子（非空字符串），作为 PRNG 种子决定块重排顺序 */
   seed: string;
-  /** Arnold 正方形处理策略 */
-  padding: ArnoldPadding;
+  /** 块大小（像素），2/4/8/16 */
+  blockSize: BlockSize;
 }
 
 /** 置乱操作选项 */
@@ -45,20 +34,17 @@ export interface ScrambleResult {
   height: number;
 }
 
+/** 合法块大小集合，用于运行时校验（Worker 反序列化后参数无字面量类型保证） */
+const VALID_BLOCK_SIZES: readonly BlockSize[] = [2, 4, 8, 16];
+
 /**
  * 校验置乱参数是否合法。
  * @param params 待校验参数
  * @throws 参数不合法时抛出中文错误
  */
 export function validateParams(params: ScrambleParams): void {
-  if (!Number.isInteger(params.iterations) || params.iterations < 1 || params.iterations > 50) {
-    throw new Error('迭代次数需在 1 到 50 之间');
-  }
-  if (!Number.isFinite(params.r) || params.r < 3.57 || params.r > 4.0) {
-    throw new Error('Logistic 控制参数需在 3.57 到 4.0 之间');
-  }
-  if (!Number.isFinite(params.x0) || params.x0 <= 0 || params.x0 >= 1) {
-    throw new Error('初始值需在 0 到 1 之间');
+  if (!VALID_BLOCK_SIZES.includes(params.blockSize as BlockSize)) {
+    throw new Error('块大小需为 2、4、8 或 16');
   }
   if (params.seed.length === 0) {
     throw new Error('请输入混淆种子');
@@ -66,188 +52,7 @@ export function validateParams(params: ScrambleParams): void {
 }
 
 /**
- * 对正方形像素矩阵执行 Arnold 变换（位置置乱）。
- *
- * 公式：[x'] = [2 1][x] (mod N)
- *       [y']   [1 1][y]
- *
- * @param imageData 正方形像素数据
- * @param iterations 迭代次数
- * @returns 置乱后的像素数据
- * @throws 宽高不相等时抛出错误
- */
-export function arnoldScramble(imageData: ImageData, iterations: number): ImageData {
-  const { width, height, data } = imageData;
-  if (width !== height) {
-    throw new Error('Arnold 变换要求宽高相等的正方形图像');
-  }
-  const n = width;
-  const src = new Uint8ClampedArray(data);
-  const dst = new Uint8ClampedArray(data.length);
-
-  for (let iter = 0; iter < iterations; iter++) {
-    for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) {
-        const xNew = (2 * x + y) % n;
-        const yNew = (x + y) % n;
-        const srcIdx = (y * n + x) * 4;
-        const dstIdx = (yNew * n + xNew) * 4;
-        dst[dstIdx] = src[srcIdx];
-        dst[dstIdx + 1] = src[srcIdx + 1];
-        dst[dstIdx + 2] = src[srcIdx + 2];
-        dst[dstIdx + 3] = src[srcIdx + 3];
-      }
-    }
-    src.set(dst);
-  }
-
-  return new ImageData(dst, n, n);
-}
-
-/**
- * 对正方形像素矩阵执行 Arnold 逆变换（还原）。
- *
- * 公式：[x'] = [ 1 -1][x] (mod N)
- *       [y']   [-1  2][y]
- *
- * @param imageData 正方形像素数据
- * @param iterations 迭代次数
- * @returns 还原后的像素数据
- * @throws 宽高不相等时抛出错误
- */
-export function arnoldRestore(imageData: ImageData, iterations: number): ImageData {
-  const { width, height, data } = imageData;
-  if (width !== height) {
-    throw new Error('Arnold 变换要求宽高相等的正方形图像');
-  }
-  const n = width;
-  const src = new Uint8ClampedArray(data);
-  const dst = new Uint8ClampedArray(data.length);
-
-  for (let iter = 0; iter < iterations; iter++) {
-    for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) {
-        const xNew = (x - y + n) % n;
-        const yNew = (-x + 2 * y + n) % n;
-        const srcIdx = (y * n + x) * 4;
-        const dstIdx = (yNew * n + xNew) * 4;
-        dst[dstIdx] = src[srcIdx];
-        dst[dstIdx + 1] = src[srcIdx + 1];
-        dst[dstIdx + 2] = src[srcIdx + 2];
-        dst[dstIdx + 3] = src[srcIdx + 3];
-      }
-    }
-    src.set(dst);
-  }
-
-  return new ImageData(dst, n, n);
-}
-
-/**
- * 生成 Logistic 混沌序列。
- *
- * @param r 控制参数，范围 3.57-4.0
- * @param x0 初始值，范围 0-1
- * @param count 需要生成的序列长度
- * @param warmUp 预热次数，用于跳过瞬态
- * @returns 混沌序列
- */
-function generateLogisticSequence(r: number, x0: number, count: number, warmUp = 1000): Float64Array {
-  const sequence = new Float64Array(count);
-  let x = x0;
-  for (let i = 0; i < warmUp; i++) {
-    x = r * x * (1 - x);
-  }
-  for (let i = 0; i < count; i++) {
-    x = r * x * (1 - x);
-    sequence[i] = x;
-  }
-  return sequence;
-}
-
-/**
- * 根据混沌序列生成像素位置置换表。
- *
- * @param sequence 混沌序列
- * @param length 像素总数
- * @returns 置换表（scramble[i] 表示原第 i 个像素的新位置）
- */
-function buildPermutation(sequence: Float64Array, length: number): Uint32Array {
-  const indices = new Uint32Array(length);
-  for (let i = 0; i < length; i++) {
-    indices[i] = i;
-  }
-  // 使用序列值作为排序键
-  indices.sort((a, b) => sequence[a] - sequence[b]);
-  return indices;
-}
-
-/**
- * 对像素矩阵执行 Logistic 混沌位置置乱。
- *
- * @param imageData 源像素数据
- * @param r 控制参数
- * @param x0 初始值
- * @param iterations 迭代次数
- * @returns 置乱后的像素数据
- */
-export function logisticScramble(imageData: ImageData, r: number, x0: number, iterations: number): ImageData {
-  const { width, height, data } = imageData;
-  const pixelCount = width * height;
-  let current = new Uint8ClampedArray(data);
-
-  for (let iter = 0; iter < iterations; iter++) {
-    const sequence = generateLogisticSequence(r, x0, pixelCount, 1000 + iter * 100);
-    const permutation = buildPermutation(sequence, pixelCount);
-    const next = new Uint8ClampedArray(data.length);
-    for (let i = 0; i < pixelCount; i++) {
-      const srcIdx = i * 4;
-      const dstIdx = permutation[i] * 4;
-      next[dstIdx] = current[srcIdx];
-      next[dstIdx + 1] = current[srcIdx + 1];
-      next[dstIdx + 2] = current[srcIdx + 2];
-      next[dstIdx + 3] = current[srcIdx + 3];
-    }
-    current = next;
-  }
-
-  return new ImageData(current, width, height);
-}
-
-/**
- * 对像素矩阵执行 Logistic 混沌位置还原。
- *
- * @param imageData 源像素数据
- * @param r 控制参数
- * @param x0 初始值
- * @param iterations 迭代次数
- * @returns 还原后的像素数据
- */
-export function logisticRestore(imageData: ImageData, r: number, x0: number, iterations: number): ImageData {
-  const { width, height, data } = imageData;
-  const pixelCount = width * height;
-  let current = new Uint8ClampedArray(data);
-
-  for (let iter = iterations - 1; iter >= 0; iter--) {
-    const sequence = generateLogisticSequence(r, x0, pixelCount, 1000 + iter * 100);
-    const permutation = buildPermutation(sequence, pixelCount);
-    const next = new Uint8ClampedArray(data.length);
-    for (let i = 0; i < pixelCount; i++) {
-      const srcIdx = permutation[i] * 4;
-      const dstIdx = i * 4;
-      next[dstIdx] = current[srcIdx];
-      next[dstIdx + 1] = current[srcIdx + 1];
-      next[dstIdx + 2] = current[srcIdx + 2];
-      next[dstIdx + 3] = current[srcIdx + 3];
-    }
-    current = next;
-  }
-
-  return new ImageData(current, width, height);
-}
-
-/**
- * 根据字符串种子生成 32 位无符号整数哈希。
+ * 根据字符串种子生成 32 位无符号整数哈希（FNV-1a 变体）。
  *
  * @param seed 种子字符串
  * @returns 哈希值
@@ -262,184 +67,158 @@ function hashSeed(seed: string): number {
 }
 
 /**
- * 线性同余生成器（LCG），根据种子产生伪随机序列。
+ * 创建确定性伪随机数生成器（mulberry32）。
  *
- * @param seed 种子
- * @param length 序列长度
- * @returns 伪随机字节序列
+ * 种子相同则序列相同，置乱与还原复用同一序列即可保证可逆。
+ * mulberry32 是广泛使用的标准微型 PRNG，自实现，不引入第三方库。
+ *
+ * @param seed 32 位无符号种子
+ * @returns 返回 [0, 1) 浮点数的生成函数
  */
-function generateLcgSequence(seed: number, length: number): Uint8Array {
-  const sequence = new Uint8Array(length);
-  let state = seed;
-  for (let i = 0; i < length; i++) {
-    state = (1103515245 * state + 12345) >>> 0;
-    sequence[i] = state & 0xff;
-  }
-  return sequence;
+function createPrng(seed: number): () => number {
+  let state = seed >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) >>> 0;
+    let t = state;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
 
 /**
- * 对像素矩阵执行基于种子的快速混淆。
+ * 用给定 rng 生成 [0, count) 的 Fisher-Yates 随机置换表。
  *
- * 使用 XOR 自逆特性，再次用相同参数处理即可还原。
+ * @param count 待置换元素个数
+ * @param rng 伪随机数生成函数
+ * @returns perm[i] 表示原位置 i 映射到的目标位置
+ */
+function buildPermutation(count: number, rng: () => number): Uint32Array {
+  const perm = new Uint32Array(count);
+  for (let i = 0; i < count; i++) perm[i] = i;
+  for (let i = count - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = perm[i];
+    perm[i] = perm[j];
+    perm[j] = tmp;
+  }
+  return perm;
+}
+
+/**
+ * 在像素缓冲区中按块复制：把源图 (srcPixelX, srcPixelY) 起的 blockSize×blockSize 块
+ * 逐行拷贝到目标缓冲区 (dstPixelX, dstPixelY) 位置。
+ *
+ * @param src 源像素缓冲区
+ * @param dst 目标像素缓冲区
+ * @param width 图像宽度（像素），用于计算行步长
+ * @param blockSize 块边长
+ * @param srcPixelX 源块左上角 x
+ * @param srcPixelY 源块左上角 y
+ * @param dstPixelX 目标块左上角 x
+ * @param dstPixelY 目标块左上角 y
+ */
+function copyBlock(
+  src: Uint8ClampedArray,
+  dst: Uint8ClampedArray,
+  width: number,
+  blockSize: number,
+  srcPixelX: number,
+  srcPixelY: number,
+  dstPixelX: number,
+  dstPixelY: number,
+): void {
+  const rowBytes = width * 4;
+  const blockRowBytes = blockSize * 4;
+  for (let by = 0; by < blockSize; by++) {
+    const srcOffset = (srcPixelY + by) * rowBytes + srcPixelX * 4;
+    const dstOffset = (dstPixelY + by) * rowBytes + dstPixelX * 4;
+    dst.set(src.subarray(srcOffset, srcOffset + blockRowBytes), dstOffset);
+  }
+}
+
+/**
+ * 对像素矩阵执行基于种子的块级置乱。
+ *
+ * 将图像划分为 cols×rows 个 blockSize×blockSize 完整块（cols=floor(W/B)、rows=floor(H/B)），
+ * 用 PRNG+种子生成块置换表后整体重排块；右/下边缘不足一个完整块的条带原样保留，
+ * 因此图像尺寸不变（契合原位展示），且完全可逆。
  *
  * @param imageData 源像素数据
  * @param seed 种子字符串
- * @param iterations 迭代次数
- * @returns 混淆后的像素数据
+ * @param blockSize 块边长
+ * @returns 置乱后的像素数据（与源同尺寸）
  */
-export function confusionScramble(imageData: ImageData, seed: string, iterations: number): ImageData {
+export function confusionScramble(imageData: ImageData, seed: string, blockSize: number): ImageData {
   const { width, height, data } = imageData;
-  const totalBytes = data.length;
-  const seedHash = hashSeed(seed);
-  let current = new Uint8ClampedArray(data);
+  const dst = new Uint8ClampedArray(data); // 先整体复制，覆盖边缘条带（恒等）
+  const cols = Math.floor(width / blockSize);
+  const rows = Math.floor(height / blockSize);
+  const blockCount = cols * rows;
+  if (blockCount === 0) return new ImageData(dst, width, height); // 无完整块 → 空操作
 
-  for (let iter = 0; iter < iterations; iter++) {
-    const sequence = generateLcgSequence(seedHash + iter, totalBytes);
-    const next = new Uint8ClampedArray(totalBytes);
-    const rowBytes = width * 4;
+  const rng = createPrng(hashSeed(seed));
+  const perm = buildPermutation(blockCount, rng);
 
-    // 第一步：简单行交错（奇数行左移 1 像素）
-    for (let y = 1; y < height; y += 2) {
-      const rowStart = y * rowBytes;
-      for (let x = 0; x < width; x++) {
-        const srcX = (x + 1) % width;
-        const srcIdx = rowStart + srcX * 4;
-        const dstIdx = rowStart + x * 4;
-        next[dstIdx] = current[srcIdx];
-        next[dstIdx + 1] = current[srcIdx + 1];
-        next[dstIdx + 2] = current[srcIdx + 2];
-        next[dstIdx + 3] = current[srcIdx + 3];
-      }
-    }
-    // 非交错行直接复制
-    for (let y = 0; y < height; y += 2) {
-      const rowStart = y * rowBytes;
-      for (let i = rowStart; i < rowStart + rowBytes; i++) {
-        next[i] = current[i];
-      }
-    }
-    // 第二步：XOR 混淆
-    for (let i = 0; i < totalBytes; i++) {
-      next[i] ^= sequence[i];
-    }
-    current = next;
+  // 置乱：目标槽 i ← 源槽 perm[i]
+  for (let i = 0; i < blockCount; i++) {
+    const srcSlot = perm[i];
+    copyBlock(
+      data,
+      dst,
+      width,
+      blockSize,
+      (srcSlot % cols) * blockSize,
+      Math.floor(srcSlot / cols) * blockSize,
+      (i % cols) * blockSize,
+      Math.floor(i / cols) * blockSize,
+    );
   }
-
-  return new ImageData(current, width, height);
+  return new ImageData(dst, width, height);
 }
 
 /**
- * 对像素矩阵执行快速混淆还原。
+ * 对像素矩阵执行块级置乱的还原。
+ *
+ * 与 {@link confusionScramble} 使用相同的种子生成同一置换表，按逆方向取回块。
  *
  * @param imageData 源像素数据
  * @param seed 种子字符串
- * @param iterations 迭代次数
- * @returns 还原后的像素数据
+ * @param blockSize 块边长
+ * @returns 还原后的像素数据（与源同尺寸）
  */
-export function confusionRestore(imageData: ImageData, seed: string, iterations: number): ImageData {
+export function confusionRestore(imageData: ImageData, seed: string, blockSize: number): ImageData {
   const { width, height, data } = imageData;
-  const totalBytes = data.length;
-  const seedHash = hashSeed(seed);
-  let current = new Uint8ClampedArray(data);
+  const dst = new Uint8ClampedArray(data); // 先整体复制，覆盖边缘条带（恒等）
+  const cols = Math.floor(width / blockSize);
+  const rows = Math.floor(height / blockSize);
+  const blockCount = cols * rows;
+  if (blockCount === 0) return new ImageData(dst, width, height);
 
-  for (let iter = iterations - 1; iter >= 0; iter--) {
-    const sequence = generateLcgSequence(seedHash + iter, totalBytes);
-    const rowBytes = width * 4;
-    const next = new Uint8ClampedArray(totalBytes);
+  const rng = createPrng(hashSeed(seed));
+  const perm = buildPermutation(blockCount, rng);
 
-    // 先还原 XOR
-    for (let i = 0; i < totalBytes; i++) {
-      next[i] = current[i] ^ sequence[i];
-    }
-
-    // 再还原行交错（奇数行右移 1 像素）
-    const temp = new Uint8ClampedArray(next);
-    for (let y = 1; y < height; y += 2) {
-      const rowStart = y * rowBytes;
-      for (let x = 0; x < width; x++) {
-        const dstX = (x + 1) % width;
-        const srcIdx = rowStart + x * 4;
-        const dstIdx = rowStart + dstX * 4;
-        next[dstIdx] = temp[srcIdx];
-        next[dstIdx + 1] = temp[srcIdx + 1];
-        next[dstIdx + 2] = temp[srcIdx + 2];
-        next[dstIdx + 3] = temp[srcIdx + 3];
-      }
-    }
-    current = next;
+  // 还原：目标槽 perm[i] ← 源槽 i（数学上等价于逆置换）
+  for (let i = 0; i < blockCount; i++) {
+    const dstSlot = perm[i];
+    copyBlock(
+      data,
+      dst,
+      width,
+      blockSize,
+      (i % cols) * blockSize,
+      Math.floor(i / cols) * blockSize,
+      (dstSlot % cols) * blockSize,
+      Math.floor(dstSlot / cols) * blockSize,
+    );
   }
-
-  return new ImageData(current, width, height);
+  return new ImageData(dst, width, height);
 }
 
 /**
- * 将任意比例像素数据处理为正方形。
+ * 根据参数执行置乱或还原（统一入口）。
  *
- * - expand：边缘外扩填充，不丢失内容；
- * - crop：居中裁切，可能丢失边缘。
- *
- * @param imageData 源像素数据
- * @param padding 处理策略
- * @returns 正方形像素数据及原始尺寸
- */
-export function makeSquareImageData(
-  imageData: ImageData,
-  padding: ArnoldPadding,
-): { imageData: ImageData; originalWidth: number; originalHeight: number } {
-  const { width, height, data } = imageData;
-  if (width === height) {
-    return { imageData, originalWidth: width, originalHeight: height };
-  }
-
-  if (padding === 'crop') {
-    const n = Math.min(width, height);
-    const offsetX = Math.floor((width - n) / 2);
-    const offsetY = Math.floor((height - n) / 2);
-    const cropped = new Uint8ClampedArray(n * n * 4);
-    for (let y = 0; y < n; y++) {
-      for (let x = 0; x < n; x++) {
-        const srcIdx = ((offsetY + y) * width + offsetX + x) * 4;
-        const dstIdx = (y * n + x) * 4;
-        cropped[dstIdx] = data[srcIdx];
-        cropped[dstIdx + 1] = data[srcIdx + 1];
-        cropped[dstIdx + 2] = data[srcIdx + 2];
-        cropped[dstIdx + 3] = data[srcIdx + 3];
-      }
-    }
-    return { imageData: new ImageData(cropped, n, n), originalWidth: width, originalHeight: height };
-  }
-
-  // expand
-  const n = Math.max(width, height);
-  const offsetX = Math.floor((n - width) / 2);
-  const offsetY = Math.floor((n - height) / 2);
-  const expanded = new Uint8ClampedArray(n * n * 4);
-
-  for (let y = 0; y < n; y++) {
-    for (let x = 0; x < n; x++) {
-      // 将目标坐标映射回源图坐标，超出部分用最近边缘像素
-      const srcX = Math.min(Math.max(x - offsetX, 0), width - 1);
-      const srcY = Math.min(Math.max(y - offsetY, 0), height - 1);
-      const srcIdx = (srcY * width + srcX) * 4;
-      const dstIdx = (y * n + x) * 4;
-      expanded[dstIdx] = data[srcIdx];
-      expanded[dstIdx + 1] = data[srcIdx + 1];
-      expanded[dstIdx + 2] = data[srcIdx + 2];
-      expanded[dstIdx + 3] = data[srcIdx + 3];
-    }
-  }
-
-  return { imageData: new ImageData(expanded, n, n), originalWidth: width, originalHeight: height };
-}
-
-/**
- * 根据参数执行置乱或还原。
- *
- * - Arnold：先经 {@link makeSquareImageData} 处理成正方形（expand 外扩 / crop 居中裁切），
- *   再执行 Arnold 变换。expand 与 crop 均直接输出处理后的正方形——expand 不裁回原始
- *   宽高，因为裁切会丢弃 Arnold 混入的外扩边缘像素，导致无法可逆还原。
- * - Logistic / Confusion：在原始尺寸上直接运算，返回同尺寸结果。
+ * 在原始尺寸上直接做块级运算，返回同尺寸结果。任意比例图片均无需正方形预处理。
  *
  * @param options 置乱选项
  * @returns 处理后的像素数据及尺寸
@@ -452,27 +231,9 @@ export function scrambleImageData(options: ScrambleOptions): ScrambleResult {
     throw new Error('图片尺寸无效，无法处理空图像');
   }
 
-  if (params.algorithm === 'arnold') {
-    const { imageData: squareImageData } = makeSquareImageData(imageData, params.padding);
-    const processed =
-      mode === 'scramble'
-        ? arnoldScramble(squareImageData, params.iterations)
-        : arnoldRestore(squareImageData, params.iterations);
-    return { imageData: processed, width: processed.width, height: processed.height };
-  }
-
-  if (params.algorithm === 'logistic') {
-    const processed =
-      mode === 'scramble'
-        ? logisticScramble(imageData, params.r, params.x0, params.iterations)
-        : logisticRestore(imageData, params.r, params.x0, params.iterations);
-    return { imageData: processed, width: processed.width, height: processed.height };
-  }
-
-  // confusion
   const processed =
     mode === 'scramble'
-      ? confusionScramble(imageData, params.seed, params.iterations)
-      : confusionRestore(imageData, params.seed, params.iterations);
+      ? confusionScramble(imageData, params.seed, params.blockSize)
+      : confusionRestore(imageData, params.seed, params.blockSize);
   return { imageData: processed, width: processed.width, height: processed.height };
 }
