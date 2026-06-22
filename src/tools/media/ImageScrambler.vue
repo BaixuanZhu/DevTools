@@ -70,6 +70,12 @@ const showConfusionOptions = computed(() => algorithm.value === 'confusion');
 
 const canProcess = computed(() => loaded.value !== null && errorMsg.value === '');
 
+/** 结果体积相对原图的倍数，用于在结果区展示体积对比（置乱后通常显著增大） */
+const sizeRatio = computed(() => {
+  if (!resultInfo.value || !originalSize.value) return 1;
+  return resultInfo.value.size / originalSize.value;
+});
+
 /**
  * 校验当前参数是否合法。
  * @returns 空字符串表示合法，否则为中文错误描述
@@ -304,7 +310,7 @@ onUnmounted(() => {
 
     <ResponsiveWorkspace mode="horizontal">
       <template #actions>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center justify-center gap-3 w-full">
           <OptionRadioGroup
             v-model="mode"
             :options="[
@@ -313,6 +319,28 @@ onUnmounted(() => {
             ]"
             label="模式"
           />
+          <div class="h-6 w-px bg-border" aria-hidden="true" />
+          <ClearButton @clear="handleClear" />
+          <button
+            type="button"
+            :disabled="!canProcess || isProcessing"
+            class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            @click="handleProcess"
+            :aria-label="mode === 'scramble' ? '开始置乱' : '开始还原'"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            {{ mode === 'scramble' ? '置乱' : '还原' }}
+          </button>
+          <button
+            type="button"
+            :disabled="!resultUrl"
+            class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color] duration-150 hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            @click="handleDownload"
+            aria-label="下载结果"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            下载
+          </button>
         </div>
       </template>
 
@@ -394,31 +422,6 @@ onUnmounted(() => {
               <span class="text-[0.8125rem] font-mono w-6">{{ iterations }}</span>
             </div>
           </div>
-
-          <!-- ICON 操作栏 -->
-          <div class="flex items-center gap-2">
-            <ClearButton @clear="handleClear" />
-            <button
-              type="button"
-              :disabled="!canProcess || isProcessing"
-              class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              @click="handleProcess"
-              :aria-label="mode === 'scramble' ? '开始置乱' : '开始还原'"
-            >
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-              {{ mode === 'scramble' ? '置乱' : '还原' }}
-            </button>
-            <button
-              type="button"
-              :disabled="!resultUrl"
-              class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color] duration-150 hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              @click="handleDownload"
-              aria-label="下载结果"
-            >
-              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              下载
-            </button>
-          </div>
         </div>
       </template>
 
@@ -433,8 +436,16 @@ onUnmounted(() => {
               class="max-h-[360px] w-full object-contain rounded-sm bg-white"
             />
             <div class="text-xs text-muted font-mono">
-              {{ resultInfo?.width }}×{{ resultInfo?.height }} · {{ resultInfo ? formatBytes(resultInfo.size) : '' }}
+              {{ resultInfo?.width }}×{{ resultInfo?.height }} · {{ formatBytes(resultInfo?.size ?? 0) }}
             </div>
+            <!-- 体积对比：置乱后像素随机化，无损 PNG 无法压缩，体积增大属正常 -->
+            <div v-if="originalSize && resultInfo" class="text-xs text-muted">
+              原图 {{ formatBytes(originalSize) }} → 结果 {{ formatBytes(resultInfo.size) }}
+              <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
+            </div>
+            <p v-if="mode === 'scramble' && originalSize && sizeRatio > 1.5" class="text-xs text-muted">
+              置乱后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
+            </p>
           </div>
 
           <div v-else-if="isProcessing" class="bg-hover border border-border rounded-sm p-10 min-h-[360px] flex flex-col items-center justify-center text-center text-muted text-sm">
