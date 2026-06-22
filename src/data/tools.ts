@@ -475,6 +475,17 @@ export const tools: ToolMeta[] = [
     keywords: ['假数据生成', '测试数据生成', 'mock 数据', '随机姓名生成', '随机邮箱', 'faker', '生成 JSON 测试数据', '生成 CSV 测试数据', 'Lorem ipsum', '造数据'],
     relatedToolIds: ['random-string', 'uuid-generator', 'text-toolbox'],
   },
+  {
+    id: 'image-scrambler',
+    name: '图片置乱/还原',
+    description: '通过 Arnold 变换、Logistic 混沌或快速混淆对图片像素进行可逆置乱',
+    seoDescription: '免费在线图片置乱与还原工具，支持 Arnold 变换、Logistic 混沌映射、种子快速混淆三种可逆算法，可将图片打乱为抽象噪点并一键还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
+    category: '媒体工具',
+    icon: '🔀',
+    path: '/media/image-scrambler',
+    keywords: ['图片置乱', '图片加密', 'Arnold 变换', '混沌图像加密', '像素混淆', '图片还原', '图像置乱', 'image scrambling'],
+    relatedToolIds: ['image-converter', 'base64-to-image', 'qr-code-generator'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
