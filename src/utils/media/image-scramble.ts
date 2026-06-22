@@ -64,3 +64,81 @@ export function validateParams(params: ScrambleParams): void {
     throw new Error('请输入混淆种子');
   }
 }
+
+/**
+ * 对正方形像素矩阵执行 Arnold 变换（位置置乱）。
+ *
+ * 公式：[x'] = [2 1][x] (mod N)
+ *       [y']   [1 1][y]
+ *
+ * @param imageData 正方形像素数据
+ * @param iterations 迭代次数
+ * @returns 置乱后的像素数据
+ * @throws 宽高不相等时抛出错误
+ */
+export function arnoldScramble(imageData: ImageData, iterations: number): ImageData {
+  const { width, height, data } = imageData;
+  if (width !== height) {
+    throw new Error('Arnold 变换要求宽高相等的正方形图像');
+  }
+  const n = width;
+  const src = new Uint8ClampedArray(data);
+  const dst = new Uint8ClampedArray(data.length);
+
+  for (let iter = 0; iter < iterations; iter++) {
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const xNew = (2 * x + y) % n;
+        const yNew = (x + y) % n;
+        const srcIdx = (y * n + x) * 4;
+        const dstIdx = (yNew * n + xNew) * 4;
+        dst[dstIdx] = src[srcIdx];
+        dst[dstIdx + 1] = src[srcIdx + 1];
+        dst[dstIdx + 2] = src[srcIdx + 2];
+        dst[dstIdx + 3] = src[srcIdx + 3];
+      }
+    }
+    src.set(dst);
+  }
+
+  return new ImageData(dst, n, n);
+}
+
+/**
+ * 对正方形像素矩阵执行 Arnold 逆变换（还原）。
+ *
+ * 公式：[x'] = [ 1 -1][x] (mod N)
+ *       [y']   [-1  2][y]
+ *
+ * @param imageData 正方形像素数据
+ * @param iterations 迭代次数
+ * @returns 还原后的像素数据
+ * @throws 宽高不相等时抛出错误
+ */
+export function arnoldRestore(imageData: ImageData, iterations: number): ImageData {
+  const { width, height, data } = imageData;
+  if (width !== height) {
+    throw new Error('Arnold 变换要求宽高相等的正方形图像');
+  }
+  const n = width;
+  const src = new Uint8ClampedArray(data);
+  const dst = new Uint8ClampedArray(data.length);
+
+  for (let iter = 0; iter < iterations; iter++) {
+    for (let y = 0; y < n; y++) {
+      for (let x = 0; x < n; x++) {
+        const xNew = (x - y + n) % n;
+        const yNew = (-x + 2 * y + n) % n;
+        const srcIdx = (y * n + x) * 4;
+        const dstIdx = (yNew * n + xNew) * 4;
+        dst[dstIdx] = src[srcIdx];
+        dst[dstIdx + 1] = src[srcIdx + 1];
+        dst[dstIdx + 2] = src[srcIdx + 2];
+        dst[dstIdx + 3] = src[srcIdx + 3];
+      }
+    }
+    src.set(dst);
+  }
+
+  return new ImageData(dst, n, n);
+}
