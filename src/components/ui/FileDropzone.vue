@@ -3,10 +3,13 @@
  * 通用文件拖拽/点击/粘贴选择区。
  *
  * 支持点击选择、拖拽上传、剪贴板粘贴，内置文件类型与大小校验。
- * 选中文件后通过 `select` 事件与 `update:modelValue` 抛出，调用方负责后续处理。
+ * 选中文件后通过 `select` 事件与 `update:modelValue` 抛出。
+ *
+ * 组件始终维持一个外层拖拽区，空态与已选文件态都保持可点击/可拖拽。
+ * 文件预览内容通过 `file` slot 注入到拖拽区内部；删除 ICON 固定在右上角，
+ * 点击时阻止冒泡以避免误触发选择器。
  */
 import { computed, ref, onMounted, onUnmounted } from 'vue';
-import { formatBytes } from '../../utils/media/image-convert';
 import { validateFile } from './file-dropzone';
 
 interface Props {
@@ -20,7 +23,7 @@ interface Props {
   enableDrag?: boolean;
   /** 是否监听全局 paste 事件（默认 false） */
   enablePaste?: boolean;
-  /** 是否显示内置删除 ICON（默认 true） */
+  /** 是否在默认 trigger 中显示删除按钮（默认 true） */
   clearable?: boolean;
 }
 
@@ -118,13 +121,22 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="relative border-2 border-dashed rounded-lg min-h-[400px] flex flex-col transition-[border-color,background-color] duration-150"
+    class="relative border-2 border-dashed rounded-lg min-h-[400px] flex flex-col transition-[border-color,background-color] duration-150 cursor-pointer"
     :class="[isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent']"
     @click="handleClick"
     @drop.prevent="handleDrop"
     @dragover.prevent="handleDragOver"
     @dragleave="handleDragLeave"
   >
+    <input
+      ref="inputRef"
+      type="file"
+      class="hidden"
+      :accept="accept"
+      @change="handleChange"
+    />
+
+    <!-- 删除按钮：右上角，点击只清空不打开选择器 -->
     <button
       v-if="clearable && hasFile"
       type="button"
@@ -133,7 +145,7 @@ onUnmounted(() => {
       @click.stop="handleClear"
     >
       <svg
-        class="w-4 h-4"
+        class="w-5 h-5"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -146,18 +158,28 @@ onUnmounted(() => {
       </svg>
     </button>
 
-    <input
-      ref="inputRef"
-      type="file"
-      class="hidden"
-      :accept="accept"
-      @change="handleChange"
-    />
-
-    <div class="flex-1 flex flex-col items-center justify-center w-full">
+    <!-- 空态：整个区域可点击 -->
+    <div
+      v-if="!hasFile"
+      class="flex-1 flex flex-col items-center justify-center w-full"
+    >
       <slot>
         <div class="text-sm text-text">拖入文件 / 点击选择</div>
         <div v-if="accept" class="text-xs text-muted mt-1">支持 {{ accept }} 格式</div>
+      </slot>
+    </div>
+
+    <!-- 已选文件态：文件预览/内容在拖拽区内部，点击会打开选择器 -->
+    <div
+      v-else
+      class="flex-1 flex flex-col items-center justify-center w-full p-4"
+    >
+      <slot
+        name="file"
+        :file="modelValue"
+        :clear="handleClear"
+      >
+        <div class="text-sm text-text">{{ modelValue?.name }}</div>
       </slot>
     </div>
   </div>

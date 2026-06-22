@@ -14,7 +14,8 @@ import { ref, computed, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import FileDropzone from '../../components/ui/FileDropzone.vue';
-import { formatBytes, checkCanvasLimits } from '../../utils/media/image-convert';
+import { formatBytes } from '../../utils/shared/format';
+import { checkCanvasLimits } from '../../utils/media/image-convert';
 import {
   validateParams,
   scrambleImageData,
@@ -280,8 +281,9 @@ function handleScramble(): void {
   void runProcess('scramble');
 }
 
-/** 对当前展示图执行还原，并在原位更新为结果。 */
+/** 对当前展示图执行还原，并在原位更新为结果。未检测到种子时静默不执行。 */
 function handleRestore(): void {
+  if (!seed.value) return;
   void runProcess('restore');
 }
 
@@ -424,8 +426,8 @@ onUnmounted(() => {
 
     <p v-if="errorMsg" class="text-[0.8125rem] text-error mt-2">{{ errorMsg }}</p>
 
-    <!-- 单一图片区：FileDropzone 包裹空态与图片展示，内置删除入口 -->
-    <div class="mt-4">
+    <!-- 单一图片区：FileDropzone 内部只放图片预览，元信息放在外部 -->
+    <div class="mt-4 flex flex-col gap-3">
       <FileDropzone
         v-model="selectedFile"
         accept="image/*"
@@ -438,32 +440,43 @@ onUnmounted(() => {
         @error="(msg) => errorMsg = msg"
       >
         <template #default>
-          <div v-if="!displayUrl" class="flex flex-col items-center justify-center text-center">
+          <div class="flex flex-col items-center justify-center text-center">
             <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
             <div class="text-xs text-muted mt-1">支持任意图片格式，上限 50MB</div>
           </div>
-          <div v-else class="w-full flex flex-col gap-2">
-            <div class="flex items-center justify-between gap-2">
-              <span class="text-[0.8125rem] font-medium text-muted">{{ isProcessing ? '正在处理…' : stateLabel }}</span>
-              <span class="text-xs text-muted font-mono">
-                {{ dimensions?.width }}×{{ dimensions?.height }} · {{ formatBytes(currentSize) }}
-              </span>
-            </div>
+        </template>
+
+        <template #file="{ file }">
+          <div v-if="displayUrl" class="relative flex items-center justify-center rounded-sm bg-white w-full">
             <img
               :src="displayUrl"
               :alt="stateLabel"
-              class="max-h-[480px] w-full object-contain rounded-sm bg-white cursor-pointer"
+              class="max-h-[480px] w-full object-contain rounded-sm"
             />
-            <div v-if="displayLabel !== 'original' && originalSize && currentSize" class="text-xs text-muted">
-              原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
-              <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
-            </div>
-            <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5" class="text-xs text-muted">
-              混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
-            </p>
           </div>
         </template>
       </FileDropzone>
+
+      <!-- 文件元信息区：放在 FileDropzone 外部，点击图片不会触发选择器 -->
+      <div v-if="displayUrl" class="flex flex-col gap-1.5 text-xs text-muted">
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="font-medium text-text break-all">{{ originalName }}</span>
+          <span class="font-mono">{{ dimensions?.width }}×{{ dimensions?.height }}</span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="px-1.5 py-0.5 rounded-sm bg-card border border-border text-[0.8125rem]">
+            {{ isProcessing ? '正在处理…' : stateLabel }}
+          </span>
+          <span class="font-mono">{{ formatBytes(currentSize) }}</span>
+        </div>
+        <div v-if="displayLabel !== 'original' && originalSize && currentSize">
+          原图 {{ formatBytes(originalSize) }} → 当前 {{ formatBytes(currentSize) }}
+          <span class="font-mono">（{{ sizeRatio >= 1 ? sizeRatio.toFixed(1) + ' 倍' : '更小' }}）</span>
+        </div>
+        <p v-if="displayLabel === 'scrambled' && originalSize && sizeRatio > 1.5">
+          混淆后像素被打乱为随机分布，PNG 无损压缩失效，体积显著增大属正常现象，不影响还原。
+        </p>
+      </div>
     </div>
   </div>
 </template>
