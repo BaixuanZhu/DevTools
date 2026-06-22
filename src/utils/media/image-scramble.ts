@@ -156,7 +156,9 @@ function copyBlock(
  */
 export function confusionScramble(imageData: ImageData, seed: string, blockSize: number): ImageData {
   const { width, height, data } = imageData;
-  const dst = new Uint8ClampedArray(data); // 先整体复制，覆盖边缘条带（恒等）
+  // lib.dom 将 ImageDataArray 限定为 Uint8ClampedArray<ArrayBuffer>；
+  // 从现有 Uint8ClampedArray 构造时 TypeScript 会推断为 ArrayBufferLike，这里显式收窄。
+  const dst = new Uint8ClampedArray(data) as Uint8ClampedArray<ArrayBuffer>;
   const cols = Math.floor(width / blockSize);
   const rows = Math.floor(height / blockSize);
   const blockCount = cols * rows;
@@ -194,7 +196,9 @@ export function confusionScramble(imageData: ImageData, seed: string, blockSize:
  */
 export function confusionRestore(imageData: ImageData, seed: string, blockSize: number): ImageData {
   const { width, height, data } = imageData;
-  const dst = new Uint8ClampedArray(data); // 先整体复制，覆盖边缘条带（恒等）
+  // lib.dom 将 ImageDataArray 限定为 Uint8ClampedArray<ArrayBuffer>；
+  // 从现有 Uint8ClampedArray 构造时 TypeScript 会推断为 ArrayBufferLike，这里显式收窄。
+  const dst = new Uint8ClampedArray(data) as Uint8ClampedArray<ArrayBuffer>;
   const cols = Math.floor(width / blockSize);
   const rows = Math.floor(height / blockSize);
   const blockCount = cols * rows;

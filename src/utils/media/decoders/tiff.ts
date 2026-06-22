@@ -22,7 +22,13 @@ export async function decodeTiff(file: File): Promise<LoadedImage> {
   UTIF.decodeImage(buffer, first);
   const rgba = UTIF.toRGBA8(first);
   const { width, height } = first;
-  const imageData = new ImageData(new Uint8ClampedArray(rgba), width, height);
+  // lib.dom 将 ImageDataArray 限定为 Uint8ClampedArray<ArrayBuffer>；
+  // 从 Uint8Array 构造时 TypeScript 会推断为 ArrayBufferLike，这里显式收窄。
+  const imageData = new ImageData(
+    new Uint8ClampedArray(rgba) as Uint8ClampedArray<ArrayBuffer>,
+    width,
+    height,
+  );
   const bitmap = await createImageBitmap(imageData);
   return { bitmap, width, height };
 }

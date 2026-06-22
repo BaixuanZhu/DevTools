@@ -97,7 +97,10 @@ describe('genIp', () => {
     for (let i = 0; i < 100; i++) {
       const parts = genIp().split('.').map(Number);
       expect(parts).toHaveLength(4);
-      parts.forEach((n) => expect(n).toBeGreaterThanOrEqual(0) && expect(n).toBeLessThanOrEqual(255));
+      parts.forEach((n) => {
+        expect(n).toBeGreaterThanOrEqual(0);
+        expect(n).toBeLessThanOrEqual(255);
+      });
     }
   });
 });

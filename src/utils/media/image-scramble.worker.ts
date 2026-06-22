@@ -30,7 +30,13 @@ const workerScope = self as unknown as WorkerGlobalScope;
 workerScope.onmessage = (event: MessageEvent<WorkerInput>) => {
   try {
     const { imageData, mode, params } = event.data;
-    const img = new ImageData(imageData.data, imageData.width, imageData.height);
+    // lib.dom 将 ImageDataArray 限定为 Uint8ClampedArray<ArrayBuffer>；
+    // 主线程通过 postMessage 传入的 data 实际为 ArrayBuffer，这里显式收窄。
+    const img = new ImageData(
+      imageData.data as Uint8ClampedArray<ArrayBuffer>,
+      imageData.width,
+      imageData.height,
+    );
     const result = scrambleImageData({ imageData: img, mode, params });
     workerScope.postMessage(
       { result: { width: result.width, height: result.height, data: result.imageData.data } },

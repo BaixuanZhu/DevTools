@@ -309,7 +309,9 @@ async function processImageData(
         return;
       }
       const result = event.data.result!;
-      resolve(new ImageData(result.data, result.width, result.height));
+      // lib.dom 将 ImageDataArray 限定为 Uint8ClampedArray<ArrayBuffer>；
+      // Worker 回传的 data 实际由结构化克隆生成，此处显式收窄以通过严格类型检查。
+      resolve(new ImageData(result.data as Uint8ClampedArray<ArrayBuffer>, result.width, result.height));
     };
     worker.onerror = (err) => {
       worker.terminate();
