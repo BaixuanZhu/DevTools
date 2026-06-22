@@ -1,6 +1,6 @@
 // src/utils/media/__tests__/image-scramble.test.ts
 import { describe, it, expect } from 'vitest';
-import { validateParams, arnoldScramble, arnoldRestore, logisticScramble, logisticRestore, confusionScramble, confusionRestore, makeSquareImageData } from '../image-scramble';
+import { validateParams, arnoldScramble, arnoldRestore, logisticScramble, logisticRestore, confusionScramble, confusionRestore, makeSquareImageData, scrambleImageData } from '../image-scramble';
 
 function createTestImageData(width: number, height: number): ImageData {
   const data = new Uint8ClampedArray(width * height * 4);
@@ -99,5 +99,54 @@ describe('makeSquareImageData', () => {
     expect(imageData.height).toBe(20);
     expect(originalWidth).toBe(30);
     expect(originalHeight).toBe(20);
+  });
+});
+
+describe('scrambleImageData', () => {
+  it('scrambles and restores with Arnold + expand (square output)', () => {
+    const original = createTestImageData(30, 20);
+    const scrambled = scrambleImageData({
+      imageData: original,
+      mode: 'scramble',
+      params: {
+        algorithm: 'arnold',
+        iterations: 5,
+        r: 3.99,
+        x0: 0.5,
+        seed: 'abc',
+        padding: 'expand',
+      },
+    });
+    // expand 不裁切：输出为外扩后的 30×30 正方形
+    expect(scrambled.width).toBe(30);
+    expect(scrambled.height).toBe(30);
+
+    const restored = scrambleImageData({
+      imageData: scrambled.imageData,
+      mode: 'restore',
+      params: {
+        algorithm: 'arnold',
+        iterations: 5,
+        r: 3.99,
+        x0: 0.5,
+        seed: 'abc',
+        padding: 'expand',
+      },
+    });
+    expect(restored.width).toBe(30);
+    expect(restored.height).toBe(30);
+
+    // 内部原始内容区域（offsetY = floor((30-20)/2) = 5，目标行 5..24）应完整还原
+    const offsetY = 5;
+    for (let y = 0; y < 20; y++) {
+      for (let x = 0; x < 30; x++) {
+        const origIdx = (y * 30 + x) * 4;
+        const restIdx = ((offsetY + y) * 30 + x) * 4;
+        expect(restored.imageData.data[restIdx]).toBe(original.data[origIdx]);
+        expect(restored.imageData.data[restIdx + 1]).toBe(original.data[origIdx + 1]);
+        expect(restored.imageData.data[restIdx + 2]).toBe(original.data[origIdx + 2]);
+        expect(restored.imageData.data[restIdx + 3]).toBe(original.data[origIdx + 3]);
+      }
+    }
   });
 });

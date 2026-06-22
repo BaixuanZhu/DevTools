@@ -432,3 +432,43 @@ export function makeSquareImageData(
 
   return { imageData: new ImageData(expanded, n, n), originalWidth: width, originalHeight: height };
 }
+
+/**
+ * 根据参数执行置乱或还原。
+ *
+ * - Arnold：先经 {@link makeSquareImageData} 处理成正方形（expand 外扩 / crop 居中裁切），
+ *   再执行 Arnold 变换。expand 与 crop 均直接输出处理后的正方形——expand 不裁回原始
+ *   宽高，因为裁切会丢弃 Arnold 混入的外扩边缘像素，导致无法可逆还原。
+ * - Logistic / Confusion：在原始尺寸上直接运算，返回同尺寸结果。
+ *
+ * @param options 置乱选项
+ * @returns 处理后的像素数据及尺寸
+ */
+export function scrambleImageData(options: ScrambleOptions): ScrambleResult {
+  const { imageData, mode, params } = options;
+  validateParams(params);
+
+  if (params.algorithm === 'arnold') {
+    const { imageData: squareImageData } = makeSquareImageData(imageData, params.padding);
+    const processed =
+      mode === 'scramble'
+        ? arnoldScramble(squareImageData, params.iterations)
+        : arnoldRestore(squareImageData, params.iterations);
+    return { imageData: processed, width: processed.width, height: processed.height };
+  }
+
+  if (params.algorithm === 'logistic') {
+    const processed =
+      mode === 'scramble'
+        ? logisticScramble(imageData, params.r, params.x0, params.iterations)
+        : logisticRestore(imageData, params.r, params.x0, params.iterations);
+    return { imageData: processed, width: processed.width, height: processed.height };
+  }
+
+  // confusion
+  const processed =
+    mode === 'scramble'
+      ? confusionScramble(imageData, params.seed, params.iterations)
+      : confusionRestore(imageData, params.seed, params.iterations);
+  return { imageData: processed, width: processed.width, height: processed.height };
+}
