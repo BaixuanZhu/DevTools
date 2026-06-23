@@ -57,9 +57,9 @@ const errorMsg = ref('');
 /** 表图来源：manual 手动上传 / auto 自动生成 / null 未设置 */
 type SurfaceSource = 'manual' | 'auto' | null;
 const surfaceSource = ref<SurfaceSource>(null);
-/** 里图暗化滑块值 0-80（百分比），实际 d = 值/100；Task 3 加 UI */
+/** 里图暗化滑块值 0-80（百分比），实际 d = 值/100 */
 const darken = ref(30);
-/** 暗化系数（滑块值/100），generateAutoSurface 与 Task 3 watch 共用 */
+/** 暗化系数（滑块值/100），generateAutoSurface 与 watch 共用 */
 const darkenFactor = computed(() => darken.value / 100);
 /** 里图原图整图像素缓存，作为自动生成表图的输入 */
 const hiddenImageData = ref<ImageData | null>(null);
@@ -275,6 +275,9 @@ async function generateAutoSurface(): Promise<void> {
     surfaceSource.value = 'auto';
     clearResult();
   } catch (e) {
+    autoSurface.value = null;
+    autoHidden.value = null;
+    surfaceSource.value = null;
     errorMsg.value = e instanceof Error ? e.message : '自动表图生成失败';
   }
 }
@@ -407,7 +410,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-[960px]">
+  <div class="mx-auto w-full max-w-240">
     <ToolHeader
       title="幻影坦克"
       description="将两张图合成为透明PNG：白底显示表图、黑底显示里图，逐像素控制透明度实现双重显示"

@@ -133,7 +133,7 @@ export function generateSurfaceFromHidden(input: AutoSurfaceInput): AutoSurfaceO
   const { width, height, data } = imageData;
   const surfaceData = new Uint8ClampedArray(data.length);
   const hiddenData = new Uint8ClampedArray(data.length);
-  const keep = 1 - darken; // 暗化后保留比例
+  const keep = Math.max(0, 1 - darken); // 暗化后保留比例；clamp 防御越界 darken
 
   for (let i = 0; i < data.length; i += 4) {
     // 1. 等比压暗里图（保色相），赋 Uint8ClampedArray 自动取整
