@@ -489,12 +489,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'phantom-tank',
     name: '幻影坦克',
-    description: '将两张图合成为透明PNG：白底显示表图、黑底显示里图，逐像素控制透明度实现双重显示',
-    seoDescription: '免费在线幻影坦克生成器，把两张图片合成一张带透明通道的PNG，纯白背景下呈现表图、纯黑背景下呈现里图，逐像素计算透明度实现双重显示效果，纯浏览器端本地处理图片绝不上传，社交头像封面趣味图片制作必备。',
+    description: '将两张图合成为透明PNG：白底显示表图、黑底显示里图；也支持只上传里图、自动生成反相表图',
+    seoDescription: '免费在线幻影坦克生成器，把两张图片合成一张带透明通道的PNG，纯白背景下呈现表图、纯黑背景下呈现里图；也可只上传里图，自动生成反相表图并通过暗化滑块调节黑底清晰度，逐像素计算透明度实现双重显示效果，纯浏览器端本地处理图片绝不上传，社交头像封面趣味图片制作必备。',
     category: '媒体工具',
     icon: '👻',
     path: '/media/phantom-tank',
-    keywords: ['幻影坦克', 'phantom tank', 'mirage tank', '双重图片', '透明背景图片', '白底黑底图片', '图片合成', '隐藏图片', '一图双义'],
+    keywords: ['幻影坦克', 'phantom tank', 'mirage tank', '双重图片', '透明背景图片', '白底黑底图片', '图片合成', '隐藏图片', '一图双义', '自动生成表图', '单图幻影坦克'],
     relatedToolIds: ['image-converter', 'image-scrambler', 'qr-code-generator'],
   },
 ];
