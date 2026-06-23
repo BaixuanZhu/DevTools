@@ -11,7 +11,7 @@
  *   即呈现对应背景下的双重显示效果。
  * - 大图（>400 万像素）自动走 Web Worker，避免阻塞主线程。
  */
-import { ref, computed, onUnmounted } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import FileDropzone from '../../components/ui/FileDropzone.vue';
@@ -66,6 +66,23 @@ const hiddenImageData = ref<ImageData | null>(null);
 /** 自动生成的表图/暗化里图像素缓存，auto 合成输入 */
 const autoSurface = ref<ImageData | null>(null);
 const autoHidden = ref<ImageData | null>(null);
+
+/** 滑块防抖句柄，避免拖动时高频重算 */
+let darkenTimer: ReturnType<typeof setTimeout> | null = null;
+/** 滑块仅在表图为 auto 来源时启用 */
+const sliderDisabled = computed(() => surfaceSource.value !== 'auto');
+
+/**
+ * 暗化滑块联动：auto 来源下防抖重算表图；manual 时滑块已禁用，不触发。
+ */
+watch(darken, () => {
+  if (surfaceSource.value !== 'auto') return;
+  if (darkenTimer) clearTimeout(darkenTimer);
+  darkenTimer = setTimeout(() => {
+    darkenTimer = null;
+    void generateAutoSurface();
+  }, 150);
+});
 
 /** 两图是否均已就绪，可否生成 */
 const canGenerate = computed(() => {
@@ -377,6 +394,11 @@ function handleClear(): void {
   handleHiddenClear();
   errorMsg.value = '';
   bgMode.value = 'checker';
+  darken.value = 30;
+  if (darkenTimer) {
+    clearTimeout(darkenTimer);
+    darkenTimer = null;
+  }
 }
 
 onUnmounted(() => {
@@ -451,6 +473,38 @@ onUnmounted(() => {
           </div>
         </template>
       </FileDropzone>
+    </div>
+
+    <!-- 自动表图控件组：从里图生成 + 暗化滑块 -->
+    <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-sm border border-border bg-card p-3">
+      <button
+        type="button"
+        :disabled="!hiddenBitmap"
+        class="px-3 py-1.5 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+        aria-label="从里图自动生成表图"
+        title="用里图的反相自动生成表图"
+        @click="generateAutoSurface"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+        从里图自动生成
+      </button>
+      <div class="flex items-center gap-2">
+        <span class="text-[0.8125rem] text-muted">里图暗化</span>
+        <input
+          v-model.number="darken"
+          type="range"
+          min="0"
+          max="80"
+          step="1"
+          :disabled="sliderDisabled"
+          class="w-40 accent-accent cursor-pointer disabled:cursor-not-allowed"
+          aria-label="里图暗化强度"
+        />
+        <span class="text-xs text-muted font-mono w-10">{{ darken }}%</span>
+      </div>
+      <span v-if="sliderDisabled && surfaceSource === 'manual'" class="text-xs text-muted">
+        手动表图模式下不可调，点左侧按钮切回自动
+      </span>
     </div>
 
     <!-- 操作按钮 -->
