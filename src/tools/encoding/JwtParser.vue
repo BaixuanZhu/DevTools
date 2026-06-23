@@ -365,7 +365,7 @@ watch(mode, (newMode) => {
               <!-- 标准声明 -->
               <div class="flex flex-col gap-1 mb-2">
                 <div v-for="(value, key) in standardClaims" :key="String(key)" class="flex items-baseline gap-4 py-1 border-b border-border last:border-b-0">
-                  <span class="font-mono text-[0.8125rem] font-semibold min-w-[120px] text-text">
+                  <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-text">
                     {{ key }}
                     <span v-if="getClaimLabel(String(key))" class="text-[0.6875rem] font-normal text-muted ml-1">{{ getClaimLabel(String(key)) }}</span>
                   </span>
@@ -380,7 +380,7 @@ watch(mode, (newMode) => {
                 <div class="flex flex-col gap-1 mb-2">
                   <div v-for="(value, key) in customClaims" :key="String(key)" class="py-1 border-b border-border last:border-b-0">
                     <div class="flex items-baseline gap-4">
-                      <span class="font-mono text-[0.8125rem] font-semibold min-w-[120px] text-text">
+                      <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-text">
                         {{ key }}
                       </span>
 
@@ -402,7 +402,7 @@ watch(mode, (newMode) => {
                     </div>
 
                     <!-- 时间戳提示 -->
-                    <div v-if="getTimestampHint(String(key), value)" class="text-[0.6875rem] text-muted mt-0.5 ml-[136px]">
+                    <div v-if="getTimestampHint(String(key), value)" class="text-[0.6875rem] text-muted mt-0.5 ml-34">
                       {{ getTimestampHint(String(key), value) }}
                     </div>
                   </div>

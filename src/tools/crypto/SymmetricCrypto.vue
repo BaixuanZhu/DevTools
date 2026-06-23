@@ -141,8 +141,8 @@ function handleClear() {
     <ModeTabGroup v-model="mode" :options="[{ key: 'encrypt', label: '加密' }, { key: 'decrypt', label: '解密' }]"/>
 
     <div class="flex gap-4 mb-4 flex-wrap">
-      <SelectListbox v-model="algorithm" label="算法" class="w-[200px]" :options="algorithmOptions"/>
-      <SelectListbox v-if="showKeyLength" v-model="keyLength" label="密钥长度" class="w-[140px]"
+      <SelectListbox v-model="algorithm" label="算法" class="w-50" :options="algorithmOptions"/>
+      <SelectListbox v-if="showKeyLength" v-model="keyLength" label="密钥长度" class="w-35"
                      :options="keyLengthOptions"/>
     </div>
 

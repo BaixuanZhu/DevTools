@@ -234,19 +234,19 @@ function handleDownload() {
         <div v-if="result">
           <div class="flex flex-col gap-1.5 mb-4">
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">MIME 类型：</span>
+              <span class="text-muted min-w-20">MIME 类型：</span>
               <span class="text-text">{{ result.mimeType }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">文件大小：</span>
+              <span class="text-muted min-w-20">文件大小：</span>
               <span class="text-text">{{ result.sizeFormatted }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">扩展名：</span>
+              <span class="text-muted min-w-20">扩展名：</span>
               <span class="text-text">{{ result.extension }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">文件名：</span>
+              <span class="text-muted min-w-20">文件名：</span>
               <span class="text-text">{{ result.fileName }}</span>
             </div>
           </div>

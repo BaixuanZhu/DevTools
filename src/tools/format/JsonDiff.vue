@@ -669,7 +669,7 @@ onUnmounted(() => {
       <div v-else-if="diffMode === 'strict' && strictResult" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <!-- 左侧（删除） -->
         <div
-          class="border border-border rounded-sm bg-card overflow-hidden max-h-[600px]"
+          class="border border-border rounded-sm bg-card overflow-hidden max-h-150"
         >
           <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
             原始版本（删除行）
@@ -705,7 +705,7 @@ onUnmounted(() => {
 
         <!-- 右侧（新增） -->
         <div
-          class="border border-border rounded-sm bg-card overflow-hidden max-h-[600px]"
+          class="border border-border rounded-sm bg-card overflow-hidden max-h-150"
         >
           <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
             修改版本（新增行）
@@ -752,7 +752,7 @@ onUnmounted(() => {
             展开全部（{{ diffLines }} 行）
           </button>
         </div>
-        <div class="overflow-auto max-h-[600px]">
+        <div class="overflow-auto max-h-150">
           <table class="w-full border-collapse font-mono text-sm">
             <thead>
               <tr class="border-b border-border">

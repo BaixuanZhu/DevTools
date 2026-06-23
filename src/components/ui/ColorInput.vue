@@ -101,7 +101,7 @@ function onTextBlur() {
     <label
       v-if="label"
       :for="inputId"
-      class="text-[0.8125rem] text-muted min-w-[72px] shrink-0"
+      class="text-[0.8125rem] text-muted min-w-18 shrink-0"
     >
       {{ label }}
     </label>
@@ -119,7 +119,7 @@ function onTextBlur() {
         :value="textValue"
         @input="onTextChange"
         @blur="onTextBlur"
-        class="px-2 py-1 border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent hover:border-accent w-[88px] transition-colors"
+        class="px-2 py-1 border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent hover:border-accent w-22 transition-colors"
         :class="isValid ? 'border-border' : 'border-error'"
         placeholder="#000000"
         maxlength="7"

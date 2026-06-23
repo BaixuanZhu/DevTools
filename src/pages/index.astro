@@ -15,7 +15,7 @@ const toolsJson = JSON.stringify(
 
 <ToolLayout title="DevTools - 在线工具箱">
   <div
-    class="max-w-[1280px] mx-auto"
+    class="max-w-320 mx-auto"
     x-data="{ query: '', searchIds: null, tools: [], init() { var el = document.getElementById('tools-data'); this.tools = el ? JSON.parse(el.textContent || '[]') : []; }, applyFilter() { var self = this; this.$refs.grid.querySelectorAll('[data-category]').forEach(function(el) { var id = el.getAttribute('data-id'); var matchSearch = !self.searchIds || self.searchIds.has(id); el.style.display = matchSearch ? '' : 'none'; }); }, handleSearch() { if (!this.query.trim()) { this.searchIds = null; this.applyFilter(); return; } var q = this.query.toLowerCase(); var results = this.tools.filter(function(t) { return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q); }); this.searchIds = new Set(results.map(function(t) { return t.id; })); this.applyFilter(); } }"
   >
     <!-- Hero Section -->
@@ -24,7 +24,7 @@ const toolsJson = JSON.stringify(
       <p class="text-muted text-base m-0 mb-8">零门槛的浏览器端在线工具，即开即用</p>
 
       <!-- Search Bar -->
-      <div class="max-w-[560px] mx-auto mb-6">
+      <div class="max-w-140 mx-auto mb-6">
         <div class="flex items-center gap-2 px-5 py-3 border border-border rounded-lg bg-card transition-[border-color] duration-150 focus-within:border-accent">
           <span class="text-base shrink-0">🔍</span>
           <input

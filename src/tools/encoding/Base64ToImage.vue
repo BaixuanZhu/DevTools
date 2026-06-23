@@ -218,15 +218,15 @@ function handleDownload() {
 
           <div class="flex flex-col gap-1.5 mb-3">
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[60px]">尺寸：</span>
+              <span class="text-muted min-w-15">尺寸：</span>
               <span class="text-text">{{ result.width }} × {{ result.height }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[60px]">大小：</span>
+              <span class="text-muted min-w-15">大小：</span>
               <span class="text-text">{{ result.sizeFormatted }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[60px]">格式：</span>
+              <span class="text-muted min-w-15">格式：</span>
               <span class="text-text">{{ result.mimeType }}</span>
             </div>
           </div>

@@ -147,7 +147,7 @@ const breadcrumbItems = toolId && toolMeta
       @sidebar-close.window="isOpen = false"
       @keydown.escape="isOpen = false"
       :class="isOpen && 'sidebar-open'"
-      class="sidebar fixed left-0 top-0 bottom-0 w-[240px] border-r border-border bg-card flex flex-col"
+      class="sidebar fixed left-0 top-0 bottom-0 w-60 border-r border-border bg-card flex flex-col"
       role="navigation"
       aria-label="工具导航"
     >
@@ -223,7 +223,7 @@ const breadcrumbItems = toolId && toolMeta
     ></div>
 
     <!-- 右侧区域 -->
-    <div class="ml-[240px] max-lg:ml-0 flex flex-col min-h-0 min-h-dvh">
+    <div class="ml-60 max-lg:ml-0 flex flex-col min-h-0 min-h-dvh">
       <!-- Header -->
       <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
         <!-- 左侧：汉堡按钮 + 移动端 Logo -->

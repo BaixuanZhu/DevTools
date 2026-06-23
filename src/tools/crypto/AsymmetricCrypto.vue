@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue';
+import {ref, computed, watch, onMounted} from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
@@ -22,7 +22,7 @@ import {
   type KeyExportFormat,
   type KeyEncoding,
 } from '../../utils/crypto/asymmetric';
-import type { OutputFormat } from '../../utils/shared/array-buffer';
+import type {OutputFormat} from '../../utils/shared/array-buffer';
 
 type OperationMode = 'generate' | 'encrypt' | 'decrypt' | 'sign' | 'verify';
 
@@ -48,25 +48,25 @@ const meta = computed(() => ALGORITHM_META[algorithm.value]);
 
 /** 算法选项 */
 const algorithmOptions = computed(() =>
-  ALL_ASYMMETRIC_ALGORITHMS.map((id) => ({
-    value: id,
-    label: ALGORITHM_META[id].label,
-  })),
+    ALL_ASYMMETRIC_ALGORITHMS.map((id) => ({
+      value: id,
+      label: ALGORITHM_META[id].label,
+    })),
 );
 
 /** 密钥长度选项（仅 RSA） */
 const keySizeOptions = computed(() =>
-  meta.value.keySizeOptions.map((size) => ({ value: size, label: `${size} 位` })),
+    meta.value.keySizeOptions.map((size) => ({value: size, label: `${size} 位`})),
 );
 
 /** 曲线选项（仅 ECDSA） */
 const curveOptions = computed(() =>
-  meta.value.curveOptions.map((c) => ({ value: c, label: c })),
+    meta.value.curveOptions.map((c) => ({value: c, label: c})),
 );
 
 /** 哈希选项 */
 const hashOptions = computed(() =>
-  meta.value.hashOptions.map((h) => ({ value: h, label: h })),
+    meta.value.hashOptions.map((h) => ({value: h, label: h})),
 );
 
 /** 是否显示密钥长度选择 */
@@ -80,30 +80,30 @@ const showHash = computed(() => meta.value.hashOptions.length > 0);
 
 /** 当前算法支持的操作模式 */
 const availableModes = computed(() => {
-  const modes: { key: string; label: string }[] = [{ key: 'generate', label: '生成密钥对' }];
+  const modes: { key: string; label: string }[] = [{key: 'generate', label: '生成密钥对'}];
   if (meta.value.supportsEncrypt) {
-    modes.push({ key: 'encrypt', label: '加密' });
-    modes.push({ key: 'decrypt', label: '解密' });
+    modes.push({key: 'encrypt', label: '加密'});
+    modes.push({key: 'decrypt', label: '解密'});
   }
   if (meta.value.supportsSign) {
-    modes.push({ key: 'sign', label: '签名' });
-    modes.push({ key: 'verify', label: '验签' });
+    modes.push({key: 'sign', label: '签名'});
+    modes.push({key: 'verify', label: '验签'});
   }
   return modes;
 });
 
 /** 导出格式选项（用于生成模式） */
 const exportFormatOptions = [
-  { value: 'spki', label: 'PEM / DER (SPKI/PKCS#8)' },
-  { value: 'jwk', label: 'JWK (JSON)' },
+  {value: 'spki', label: 'PEM / DER (SPKI/PKCS#8)'},
+  {value: 'jwk', label: 'JWK (JSON)'},
 ];
 
 /** 编码格式选项（仅非 JWK） */
 const keyEncodingOptions = [
-  { value: 'pem', label: 'PEM' },
-  { value: 'base64', label: 'Base64' },
-  { value: 'hex', label: '小写 Hex' },
-  { value: 'hexUpper', label: '大写 HEX' },
+  {value: 'pem', label: 'PEM'},
+  {value: 'base64', label: 'Base64'},
+  {value: 'hex', label: '小写 Hex'},
+  {value: 'hexUpper', label: '大写 HEX'},
 ];
 
 /** 当前模式的输入标签 */
@@ -161,9 +161,9 @@ const dataFormatLabel = computed(() => {
 
 /** 数据格式选项 */
 const dataFormatOptions = [
-  { value: 'base64', label: 'Base64' },
-  { value: 'hex', label: '小写 Hex' },
-  { value: 'hexUpper', label: '大写 HEX' },
+  {value: 'base64', label: 'Base64'},
+  {value: 'hex', label: '小写 Hex'},
+  {value: 'hexUpper', label: '大写 HEX'},
 ];
 
 /** 操作按钮文本 */
@@ -240,7 +240,7 @@ async function handleGenerateKeys() {
     publicKeyText.value = await exportKeyString(keyPair.publicKey, pubFormat, keyEncoding.value);
     privateKeyText.value = await exportKeyString(keyPair.privateKey, privFormat, keyEncoding.value);
 
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '密钥对生成成功' } }));
+    document.dispatchEvent(new CustomEvent('toast', {detail: {message: '密钥对生成成功'}}));
   } catch (err) {
     errorMsg.value = err instanceof Error ? err.message : '生成密钥对失败';
   } finally {
@@ -271,12 +271,12 @@ async function execute() {
         }
         const pubFormat = exportFormat.value === 'jwk' ? 'jwk' : 'spki';
         const publicKey = await importKeyString(
-          publicKeyText.value,
-          algorithm.value,
-          pubFormat,
-          'public',
-          hash.value,
-          curve.value,
+            publicKeyText.value,
+            algorithm.value,
+            pubFormat,
+            'public',
+            hash.value,
+            curve.value,
         );
         outputText.value = await encryptRSAOAEP(inputText.value, publicKey, dataFormat.value);
         break;
@@ -288,12 +288,12 @@ async function execute() {
         }
         const privFormat = exportFormat.value === 'jwk' ? 'jwk' : 'pkcs8';
         const privateKey = await importKeyString(
-          privateKeyText.value,
-          algorithm.value,
-          privFormat,
-          'private',
-          hash.value,
-          curve.value,
+            privateKeyText.value,
+            algorithm.value,
+            privFormat,
+            'private',
+            hash.value,
+            curve.value,
         );
         outputText.value = await decryptRSAOAEP(inputText.value, privateKey, dataFormat.value);
         break;
@@ -305,12 +305,12 @@ async function execute() {
         }
         const privFormat = exportFormat.value === 'jwk' ? 'jwk' : 'pkcs8';
         const privateKey = await importKeyString(
-          privateKeyText.value,
-          algorithm.value,
-          privFormat,
-          'private',
-          hash.value,
-          curve.value,
+            privateKeyText.value,
+            algorithm.value,
+            privFormat,
+            'private',
+            hash.value,
+            curve.value,
         );
         outputText.value = await signData(inputText.value, privateKey, algorithm.value, hash.value, dataFormat.value);
         break;
@@ -326,24 +326,24 @@ async function execute() {
         }
         const pubFormat = exportFormat.value === 'jwk' ? 'jwk' : 'spki';
         const publicKey = await importKeyString(
-          publicKeyText.value,
-          algorithm.value,
-          pubFormat,
-          'public',
-          hash.value,
-          curve.value,
+            publicKeyText.value,
+            algorithm.value,
+            pubFormat,
+            'public',
+            hash.value,
+            curve.value,
         );
         const isValid = await verifySignature(
-          inputText.value,
-          signatureText.value,
-          publicKey,
-          algorithm.value,
-          hash.value,
-          dataFormat.value,
+            inputText.value,
+            signatureText.value,
+            publicKey,
+            algorithm.value,
+            hash.value,
+            dataFormat.value,
         );
         outputText.value = isValid ? '✓ 签名有效' : '✗ 签名无效';
         if (isValid) {
-          document.dispatchEvent(new CustomEvent('toast', { detail: { message: '签名验证通过' } }));
+          document.dispatchEvent(new CustomEvent('toast', {detail: {message: '签名验证通过'}}));
         }
         break;
       }
@@ -380,64 +380,64 @@ function handleClear() {
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div class="max-w-180">
     <ToolHeader
-      title="非对称加解密"
-      description="支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等算法的密钥生成、加解密与签名验签"
-      :show-example="false"
+        title="非对称加解密"
+        description="支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等算法的密钥生成、加解密与签名验签"
+        :show-example="false"
     />
 
     <!-- Ed25519 不支持提示 -->
     <div
-      v-if="algorithm === 'Ed25519' && !ed25519Supported"
-      class="mb-4 p-3 border border-error rounded-sm bg-red-50 text-error text-[0.8125rem]"
+        v-if="algorithm === 'Ed25519' && !ed25519Supported"
+        class="mb-4 p-3 border border-error rounded-sm bg-red-50 text-error text-[0.8125rem]"
     >
       当前浏览器不支持 Ed25519 算法，请使用 Chrome 132+、Edge 132+ 或 Firefox 129+
     </div>
 
     <!-- 操作模式切换 -->
-    <ModeTabGroup v-model="mode" :options="availableModes" />
+    <ModeTabGroup v-model="mode" :options="availableModes"/>
 
     <!-- 算法和参数选择 -->
     <div class="flex gap-4 mb-4 flex-wrap">
-      <SelectListbox v-model="algorithm" label="算法" class="w-[180px]" :options="algorithmOptions" />
+      <SelectListbox v-model="algorithm" label="算法" class="w-45" :options="algorithmOptions"/>
       <SelectListbox
-        v-if="showKeySize"
-        v-model="keySize"
-        label="密钥长度"
-        class="w-[140px]"
-        :options="keySizeOptions"
+          v-if="showKeySize"
+          v-model="keySize"
+          label="密钥长度"
+          class="w-35"
+          :options="keySizeOptions"
       />
       <SelectListbox
-        v-if="showCurve"
-        v-model="curve"
-        label="椭圆曲线"
-        class="w-[140px]"
-        :options="curveOptions"
+          v-if="showCurve"
+          v-model="curve"
+          label="椭圆曲线"
+          class="w-35"
+          :options="curveOptions"
       />
       <SelectListbox
-        v-if="showHash"
-        v-model="hash"
-        label="哈希算法"
-        class="w-[160px]"
-        :options="hashOptions"
+          v-if="showHash"
+          v-model="hash"
+          label="哈希算法"
+          class="w-40"
+          :options="hashOptions"
       />
     </div>
 
     <!-- 生成模式：导出格式选择 -->
     <div v-if="mode === 'generate'" class="flex gap-4 mb-4 flex-wrap">
       <SelectListbox
-        v-model="exportFormat"
-        label="导出格式"
-        class="w-[220px]"
-        :options="exportFormatOptions"
+          v-model="exportFormat"
+          label="导出格式"
+          class="w-55"
+          :options="exportFormatOptions"
       />
       <SelectListbox
-        v-if="exportFormat !== 'jwk'"
-        v-model="keyEncoding"
-        label="编码格式"
-        class="w-[140px]"
-        :options="keyEncodingOptions"
+          v-if="exportFormat !== 'jwk'"
+          v-model="keyEncoding"
+          label="编码格式"
+          class="w-35"
+          :options="keyEncodingOptions"
       />
     </div>
 
@@ -446,25 +446,25 @@ function handleClear() {
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
           <label class="block text-[0.8125rem] text-muted font-medium">公钥</label>
-          <CopyButton v-if="publicKeyText" :text="publicKeyText" />
+          <CopyButton v-if="publicKeyText" :text="publicKeyText" size="md"/>
         </div>
         <textarea
-          v-model="publicKeyText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-          rows="5"
-          placeholder="公钥将显示在这里，或粘贴已有公钥"
+            v-model="publicKeyText"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="5"
+            placeholder="公钥将显示在这里，或粘贴已有公钥"
         ></textarea>
       </div>
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
           <label class="block text-[0.8125rem] text-muted font-medium">私钥</label>
-          <CopyButton v-if="privateKeyText" :text="privateKeyText" />
+          <CopyButton v-if="privateKeyText" :text="privateKeyText" size="md"/>
         </div>
         <textarea
-          v-model="privateKeyText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-          rows="5"
-          placeholder="私钥将显示在这里，或粘贴已有私钥"
+            v-model="privateKeyText"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="5"
+            placeholder="私钥将显示在这里，或粘贴已有私钥"
         ></textarea>
       </div>
     </div>
@@ -472,21 +472,21 @@ function handleClear() {
     <!-- 操作按钮行 -->
     <div class="flex gap-2 items-center mb-4">
       <button
-        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="isProcessing || isDisabled"
-        @click="handleAction"
+          class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="isProcessing || isDisabled"
+          @click="handleAction"
       >
         {{ actionButtonText }}
       </button>
-      <ClearButton @clear="handleClear" />
+      <ClearButton @clear="handleClear"/>
     </div>
 
     <!-- 数据格式选择器（操作模式） -->
     <div v-if="mode !== 'generate'" class="mb-4">
       <SelectListbox
-        v-model="dataFormat"
-        :label="dataFormatLabel"
-        :options="dataFormatOptions"
+          v-model="dataFormat"
+          :label="dataFormatLabel"
+          :options="dataFormatOptions"
       />
     </div>
 
@@ -495,10 +495,10 @@ function handleClear() {
       <div class="mb-3">
         <label class="block text-[0.8125rem] text-muted font-medium mb-1">{{ inputLabel }}</label>
         <textarea
-          v-model="inputText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-          rows="4"
-          :placeholder="inputPlaceholder"
+            v-model="inputText"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="4"
+            :placeholder="inputPlaceholder"
         ></textarea>
       </div>
 
@@ -506,10 +506,10 @@ function handleClear() {
       <div v-if="mode === 'verify'" class="mb-3">
         <label class="block text-[0.8125rem] text-muted font-medium mb-1">签名</label>
         <textarea
-          v-model="signatureText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
-          rows="3"
-          :placeholder="`输入 ${dataFormat === 'base64' ? 'Base64' : 'Hex'} 编码的签名`"
+            v-model="signatureText"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            rows="3"
+            :placeholder="`输入 ${dataFormat === 'base64' ? 'Base64' : 'Hex'} 编码的签名`"
         ></textarea>
       </div>
     </div>
@@ -521,15 +521,15 @@ function handleClear() {
     <div v-if="outputText && mode !== 'generate'" class="mb-4">
       <div class="flex items-center justify-between mb-2">
         <span class="text-sm font-medium">{{ outputLabel }}</span>
-        <CopyButton :text="outputText" />
+        <CopyButton :text="outputText" size="md"/>
       </div>
       <div
-        class="border border-border rounded-md p-4 bg-card"
-        :class="outputText.startsWith('✓') ? 'border-success' : outputText.startsWith('✗') ? 'border-error' : ''"
+          class="border border-border rounded-md p-4 bg-card"
+          :class="outputText.startsWith('✓') ? 'border-success' : outputText.startsWith('✗') ? 'border-error' : ''"
       >
         <code
-          class="font-mono text-[0.8125rem] break-all"
-          :class="outputText.startsWith('✓') ? 'text-success' : outputText.startsWith('✗') ? 'text-error' : 'text-text'"
+            class="font-mono text-[0.8125rem] break-all"
+            :class="outputText.startsWith('✓') ? 'text-success' : outputText.startsWith('✗') ? 'text-error' : 'text-text'"
         >
           {{ outputText }}
         </code>
@@ -542,7 +542,8 @@ function handleClear() {
       <div class="pt-2">
         <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
           <p class="m-0">
-            <strong>RSA-OAEP</strong>：基于 RSA 的加密算法，使用公钥加密、私钥解密。支持 2048/3072/4096 位密钥长度和 SHA-256/384/512 哈希。
+            <strong>RSA-OAEP</strong>：基于 RSA 的加密算法，使用公钥加密、私钥解密。支持 2048/3072/4096 位密钥长度和
+            SHA-256/384/512 哈希。
           </p>
           <p class="m-0">
             <strong>RSA-PSS</strong>：基于 RSA 的签名算法，使用私钥签名、公钥验签。salt 长度根据哈希算法自动确定。
@@ -554,7 +555,8 @@ function handleClear() {
             <strong>Ed25519</strong>：现代 Edwards 曲线签名算法，安全性高、速度快。需要 Chrome/Edge 132+ 或 Firefox 129+。
           </p>
           <p class="m-0">
-            密钥导出格式：<strong>PEM</strong> 为标准文本格式（带 BEGIN/END 标记）；<strong>JWK</strong> 为 JSON Web Key 格式；<strong>Base64/Hex</strong> 为纯二进制编码。
+            密钥导出格式：<strong>PEM</strong> 为标准文本格式（带 BEGIN/END 标记）；<strong>JWK</strong> 为 JSON Web Key 格式；<strong>Base64/Hex</strong>
+            为纯二进制编码。
           </p>
         </div>
       </div>

@@ -376,7 +376,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
           :key="algo"
           class="flex items-center gap-4 px-4 py-2.5 border-b border-border last:border-b-0"
         >
-          <span class="text-xs font-semibold text-accent min-w-[60px]">{{ algo }}</span>
+          <span class="text-xs font-semibold text-accent min-w-15">{{ algo }}</span>
           <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ hash }}</code>
           <CopyButton :text="hash" />
         </div>

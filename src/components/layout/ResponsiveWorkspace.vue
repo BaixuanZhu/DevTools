@@ -44,7 +44,7 @@ withDefaults(defineProps<Props>(), {
   <div
     :class="[
       'mx-auto w-full transition-all duration-300 ease-in-out',
-      mode === 'vertical' ? 'max-w-[720px] flex flex-col' : 'max-w-[1600px] grid grid-cols-1 lg:grid-cols-2',
+      mode === 'vertical' ? 'max-w-180 flex flex-col' : 'max-w-400 grid grid-cols-1 lg:grid-cols-2',
       gap,
     ]"
   >

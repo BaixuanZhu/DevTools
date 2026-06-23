@@ -228,14 +228,14 @@ function handleClear() {
       <SelectListbox
         v-model="cipherMode"
         label="密文模式"
-        class="w-[140px]"
+        class="w-35"
         :options="cipherModeOptions"
       />
       <SelectListbox
         v-if="mode !== 'generate'"
         v-model="dataFormat"
         :label="dataFormatLabel"
-        class="w-[140px]"
+        class="w-35"
         :options="dataFormatOptions"
       />
     </div>

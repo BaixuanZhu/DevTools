@@ -183,6 +183,80 @@ public/          # 不经处理的静态文件（favicon 等）
 - **测试文件位置**：单元测试放在被测模块所在目录的 `__tests__/` 子目录中，如
   `src/utils/format/__tests__/json-diff.test.ts`
 
+### Styling Conventions（强制）
+
+项目使用 Tailwind CSS v4，所有样式类名必须遵循以下规范：
+
+#### 优先使用标准类名
+
+**禁止使用任意值语法**（`-[value]`）来表示可以通过 Tailwind 标准类名表示的值：
+
+❌ **错误**：
+```html
+<div class="w-[120px]">        <!-- 应使用 w-30 -->
+<div class="min-h-[160px]">     <!-- 应使用 min-h-40 -->
+<div class="max-w-[720px]">      <!-- 应使用 max-w-180 -->
+```
+
+✅ **正确**：
+```html
+<div class="w-30">              <!-- 30 * 4px = 120px -->
+<div class="min-h-40">           <!-- 40 * 4px = 160px -->
+<div class="max-w-180">          <!-- 180 * 4px = 720px -->
+```
+
+**转换规则**：Tailwind 默认间距系统基于 4px 单位，计算公式为 `像素值 / 4 = 类名数值`。
+
+常见转换对照：
+| 任意值语法 | 标准类名 | 像素值 |
+|-----------|---------|--------|
+| `w-[80px]` | `w-20` | 80px |
+| `w-[120px]` | `w-30` | 120px |
+| `w-[140px]` | `w-35` | 140px |
+| `w-[160px]` | `w-40` | 160px |
+| `w-[180px]` | `w-45` | 180px |
+| `w-[200px]` | `w-50` | 200px |
+| `min-h-[120px]` | `min-h-30` | 120px |
+| `max-h-[400px]` | `max-h-100` | 400px |
+
+#### 任意值语法的合法使用场景
+
+以下情况**允许且必须**使用任意值语法：
+
+1. **设计令牌值**（定义于 DESIGN.md）：
+   - 文本大小：`text-[0.8125rem]`（label）、`text-[0.75rem]`（sidebar-heading）
+   - 这些是精确的排版尺寸，不在 Tailwind 默认系统中
+
+2. **特殊值**（非 4 的倍数）：
+   - `h-[57px]`、`w-[57px]` 等无法被标准类名精确表示的值
+
+3. **特殊层级和效果**：
+   - z-index：`z-[99]`、`z-[100]`（Toast 层级）
+   - 自定义阴影：`shadow-[0_2px_8px_rgba(0,0,0,0.06)]`
+
+#### 为什么要遵守这个规范
+
+1. **更好的 CSS 压缩**：标准类名可以被 PurgeCSS/tree-shaking 更好地优化
+2. **更好的可读性**：`w-30` 比 `w-[120px]` 更简洁易懂
+3. **设计一致性**：遵循 Tailwind 的 4px 基准单位系统，避免随意选择的数值
+4. **避免 IDE 警告**：JetBrains IDEA 等 IDE 会提示任意值语法可以转换为标准类名
+
+#### 检查和修复
+
+使用 IDEA MCP 工具检查文件中的任意值语法：
+```bash
+# 获取文件中的所有 Tailwind 警告
+get_file_problems(filePath="src/components/Example.vue")
+```
+
+定期运行以下检查确保代码符合规范：
+```bash
+# 搜索可能需要转换的任意值
+search_text("w-[1")  # 搜索宽度任意值
+search_text("h-[1")  # 搜索高度任意值
+search_text("min-w-[1")  # 搜索最小宽度任意值
+```
+
 ## Dependency Rules（强制）
 
 ### 库选型原则

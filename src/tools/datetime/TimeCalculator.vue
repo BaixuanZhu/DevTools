@@ -224,12 +224,12 @@ onMounted(() => {
 
       <!-- 时间差结果 -->
       <div v-if="diffDisplay" class="flex items-center gap-3 px-4 py-3 mt-3 border border-border rounded-sm bg-surface">
-        <span class="text-xs font-semibold text-accent min-w-[64px] shrink-0">时间差</span>
+        <span class="text-xs font-semibold text-accent min-w-16 shrink-0">时间差</span>
         <code class="flex-1 font-mono text-sm text-text select-all break-all">{{ diffDisplay }}</code>
         <CopyButton :text="diffDisplay" size="sm" />
       </div>
       <div v-if="diffResult" class="flex items-center gap-3 px-4 py-2 mt-2 border border-border rounded-sm bg-surface">
-        <span class="text-xs font-semibold text-accent min-w-[64px] shrink-0">总秒数</span>
+        <span class="text-xs font-semibold text-accent min-w-16 shrink-0">总秒数</span>
         <code class="flex-1 font-mono text-sm text-text select-all">{{ diffResult.totalSeconds }}</code>
         <CopyButton :text="String(diffResult.totalSeconds)" size="sm" />
       </div>

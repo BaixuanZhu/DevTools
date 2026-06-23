@@ -23,7 +23,7 @@ import {
 const version = ref<UuidVersion>('v4');
 const outputFormat = ref<UuidFormat>('lowercase');
 const namespacePreset = ref<string>('DNS');
-const namespaceUuid = ref(NAMESPACE_PRESETS.DNS);
+const namespaceUuid = ref<string>(NAMESPACE_PRESETS.DNS);
 const nameValue = ref('');
 const count = ref(1);
 const enableConversion = ref(false);
@@ -137,7 +137,7 @@ function formatTimestamp(iso: string): string {
               :options="NAMESPACE_PRESET_OPTIONS as any"
             />
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[0.8125rem] text-muted min-w-[48px] shrink-0">UUID</span>
+              <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">UUID</span>
               <input
                 :value="namespaceUuid"
                 :readonly="namespacePreset !== 'custom'"
@@ -150,7 +150,7 @@ function formatTimestamp(iso: string): string {
               />
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[0.8125rem] text-muted min-w-[48px] shrink-0">名称</span>
+              <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">名称</span>
               <input
                 v-model="nameValue"
                 type="text"
@@ -178,7 +178,7 @@ function formatTimestamp(iso: string): string {
 
       <!-- 数量和生成按钮 -->
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[48px] shrink-0">数量</span>
+        <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">数量</span>
         <input
           v-model.number="count"
           type="number"
@@ -204,16 +204,16 @@ function formatTimestamp(iso: string): string {
     </div>
 
     <!-- 结果区 -->
-    <div class="border border-border rounded-md bg-card mt-4 min-h-[120px]">
+    <div class="border border-border rounded-md bg-card mt-4 min-h-30">
       <div
         v-if="results.length === 0"
-        class="flex items-center justify-center h-[120px] text-muted text-sm"
+        class="flex items-center justify-center h-30 text-muted text-sm"
       >
         点击「生成」按钮查看结果
       </div>
       <template v-else>
         <div
-          class="flex justify-between items-center px-4 py-2 border-b border-border sticky top-0 bg-card rounded-t-md z-[1]"
+          class="flex justify-between items-center px-4 py-2 border-b border-border sticky top-0 bg-card rounded-t-md z-1"
         >
           <span class="text-xs text-muted">共 {{ results.length }} 条</span>
           <button
@@ -223,7 +223,7 @@ function formatTimestamp(iso: string): string {
             复制全部
           </button>
         </div>
-        <div class="max-h-[400px] overflow-y-auto px-4 py-2 flex flex-col gap-1">
+        <div class="max-h-100 overflow-y-auto px-4 py-2 flex flex-col gap-1">
           <div
             v-for="(uuid, i) in formattedResults"
             :key="i"

@@ -206,7 +206,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
             <input
               v-model="field.name"
               type="text"
-              class="flex-1 min-w-[120px] px-3 h-8 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+              class="flex-1 min-w-30 px-3 h-8 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
               placeholder="列名"
               aria-label="列名"
             />
@@ -247,7 +247,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
           type="number"
           min="1"
           max="500"
-          class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[80px]"
+          class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-20"
           @blur="clampCount"
         />
       </div>
@@ -270,7 +270,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
 
     <!-- 结果区 -->
     <div class="mt-6">
-      <div v-if="!output" class="border border-border rounded-md bg-card min-h-[120px] flex items-center justify-center">
+      <div v-if="!output" class="border border-border rounded-md bg-card min-h-30 flex items-center justify-center">
         <p class="text-muted text-[0.8125rem]">配置字段后点击「生成」</p>
       </div>
       <div v-else class="border border-border rounded-md bg-card overflow-hidden">

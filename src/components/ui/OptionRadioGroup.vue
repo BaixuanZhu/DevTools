@@ -37,7 +37,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">{{ label }}</span>
+    <span v-if="label" class="text-[0.8125rem] text-muted min-w-18 shrink-0">{{ label }}</span>
     <RadioGroup :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" class="flex gap-1 flex-wrap">
       <RadioGroupOption
         v-for="option in options"

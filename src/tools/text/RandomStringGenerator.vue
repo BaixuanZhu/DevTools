@@ -85,7 +85,7 @@ async function copyAll() {
     <div class="border border-border rounded-md p-6 bg-card flex flex-col gap-4">
       <!-- 字符类型 Switches -->
       <div class="flex items-center gap-4 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">字符类型</span>
+        <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">字符类型</span>
         <div class="flex items-center gap-3">
           <ToggleSwitch v-model="charTypes.uppercase" description="A-Z" />
           <ToggleSwitch v-model="charTypes.lowercase" description="a-z" />
@@ -95,7 +95,7 @@ async function copyAll() {
 
       <!-- 特殊字符 -->
       <div class="flex items-center gap-4 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-[72px] shrink-0">特殊字符</span>
+        <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">特殊字符</span>
         <div class="flex items-center gap-2">
           <ToggleSwitch v-model="charTypes.special" description="特殊" />
           <input
@@ -178,7 +178,7 @@ async function copyAll() {
 
     <!-- 结果面板 -->
     <div class="mt-6">
-      <div v-if="results.length === 0" class="border border-border rounded-md bg-card min-h-[120px] flex items-center justify-center">
+      <div v-if="results.length === 0" class="border border-border rounded-md bg-card min-h-30 flex items-center justify-center">
         <p class="text-muted text-[0.8125rem]">配置参数后点击「生成」</p>
       </div>
 
@@ -199,7 +199,7 @@ async function copyAll() {
             class="flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150 group"
             @click="copySingle(str)"
           >
-            <span class="text-[0.75rem] text-muted min-w-[32px] text-right shrink-0">{{ idx + 1 }}</span>
+            <span class="text-[0.75rem] text-muted min-w-8 text-right shrink-0">{{ idx + 1 }}</span>
             <code class="text-[0.8125rem] font-mono text-text break-all flex-1">{{ str }}</code>
             <span class="text-[0.75rem] text-muted opacity-0 group-hover:opacity-100 shrink-0 transition-[opacity] duration-150">复制</span>
           </div>

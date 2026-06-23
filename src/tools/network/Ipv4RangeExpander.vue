@@ -159,7 +159,7 @@ watch([startIP, endIP], () => {
           <span class="text-[0.6875rem] font-semibold text-muted">CIDR 表示法</span>
           <span class="text-[0.6875rem] font-semibold text-muted">子网掩码</span>
           <span class="text-[0.6875rem] font-semibold text-muted text-right">IP 数量</span>
-          <span class="min-w-[48px]"></span>
+          <span class="min-w-12"></span>
         </div>
 
         <!-- 列表内容 -->

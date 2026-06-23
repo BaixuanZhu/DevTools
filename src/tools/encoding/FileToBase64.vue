@@ -221,23 +221,23 @@ function handleClear() {
           <!-- 文件元信息 -->
           <div class="flex flex-col gap-1.5 mb-4">
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">文件名：</span>
+              <span class="text-muted min-w-20">文件名：</span>
               <span class="text-text break-all">{{ fileName }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">原始大小：</span>
+              <span class="text-muted min-w-20">原始大小：</span>
               <span class="text-text">{{ formatFileSize(fileSize) }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">MIME 类型：</span>
+              <span class="text-muted min-w-20">MIME 类型：</span>
               <span class="text-text">{{ effectiveMime }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">Base64 长度：</span>
+              <span class="text-muted min-w-20">Base64 长度：</span>
               <span class="text-text">{{ base64Length.toLocaleString() }} 字符</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-[80px]">编码后大小：</span>
+              <span class="text-muted min-w-20">编码后大小：</span>
               <span class="text-text">{{ formatFileSize(encodedSize) }}（约膨胀 {{ inflatePercent }}%）</span>
             </div>
           </div>

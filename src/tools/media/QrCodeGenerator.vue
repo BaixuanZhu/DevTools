@@ -307,7 +307,7 @@ onMounted(() => {
               :max="QR_DOWNLOAD_MAX_SIZE"
               step="128"
               v-model.number="downloadSize"
-              class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[88px]"
+              class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-22"
             />
           </div>
         </div>

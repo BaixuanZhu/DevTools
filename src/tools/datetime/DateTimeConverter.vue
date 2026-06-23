@@ -299,7 +299,7 @@ const unifiedResultFields = computed(() => {
           :key="field.label"
           class="flex items-center gap-3 px-3 py-1 rounded-sm transition-colors duration-100 hover:bg-hover"
         >
-          <span class="text-xs font-semibold text-accent min-w-[72px] shrink-0">{{ field.label }}</span>
+          <span class="text-xs font-semibold text-accent min-w-18 shrink-0">{{ field.label }}</span>
           <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ isMounted ? field.value : '-' }}</code>
           <CopyButton
             :text="field.value"
@@ -346,7 +346,7 @@ const unifiedResultFields = computed(() => {
                   :aria-describedby="tsErrorMsg ? 'ts-error' : undefined"
                 />
               </div>
-              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-[32px]">
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-8">
               </div>
             </div>
 
@@ -366,7 +366,7 @@ const unifiedResultFields = computed(() => {
                   :aria-describedby="dateErrorMsg ? 'date-error' : undefined"
                 />
               </div>
-              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-[32px]">
+              <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-8">
                 <button
                   type="button"
                   class="text-xs text-muted bg-transparent focus:outline-none focus:text-accent"
@@ -440,7 +440,7 @@ const unifiedResultFields = computed(() => {
                 :key="field.label"
                 class="flex items-center gap-3 px-4 py-2 border border-border rounded-sm bg-card"
               >
-                <span class="text-xs font-semibold text-accent min-w-[80px] shrink-0">{{ field.label }}</span>
+                <span class="text-xs font-semibold text-accent min-w-20 shrink-0">{{ field.label }}</span>
                 <code class="flex-1 font-mono text-[0.8125rem] text-text select-all break-all">{{ field.value }}</code>
                 <CopyButton
                   :text="field.value"

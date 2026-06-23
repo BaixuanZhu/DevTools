@@ -443,7 +443,7 @@ onUnmounted(() => {
             <img
               :src="displayUrl"
               :alt="stateLabel"
-              class="max-h-[480px] w-full object-contain rounded-sm"
+              class="max-h-120 w-full object-contain rounded-sm"
             />
           </div>
         </template>
