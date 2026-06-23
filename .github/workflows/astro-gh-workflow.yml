@@ -31,7 +31,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10   # 根据你项目实际使用的 pnpm 版本
+          version: 10.33.0   # 根据你项目实际使用的 pnpm 版本
           run_install: false   # 让后面独立执行 install
 
       - name: Get pnpm store directory
