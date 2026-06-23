@@ -17,7 +17,7 @@ import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import FileDropzone from '../../components/ui/FileDropzone.vue';
 import { formatBytes } from '../../utils/shared/format';
 import { checkCanvasLimits } from '../../utils/media/image-convert';
-import { createPhantomTank } from '../../utils/media/phantom-tank';
+import { createPhantomTank, generateSurfaceFromHidden } from '../../utils/media/phantom-tank';
 
 /** 上传文件大小上限（50MB） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
@@ -53,6 +53,19 @@ const dimensions = ref<{ width: number; height: number } | null>(null);
 const bgMode = ref<BgMode>('checker');
 const isProcessing = ref(false);
 const errorMsg = ref('');
+
+/** 表图来源：manual 手动上传 / auto 自动生成 / null 未设置 */
+type SurfaceSource = 'manual' | 'auto' | null;
+const surfaceSource = ref<SurfaceSource>(null);
+/** 里图暗化滑块值 0-80（百分比），实际 d = 值/100；Task 3 加 UI */
+const darken = ref(30);
+/** 暗化系数（滑块值/100），generateAutoSurface 与 Task 3 watch 共用 */
+const darkenFactor = computed(() => darken.value / 100);
+/** 里图原图整图像素缓存，作为自动生成表图的输入 */
+const hiddenImageData = ref<ImageData | null>(null);
+/** 自动生成的表图/暗化里图像素缓存，auto 合成输入 */
+const autoSurface = ref<ImageData | null>(null);
+const autoHidden = ref<ImageData | null>(null);
 
 /** 两图是否均已就绪，可否生成 */
 const canGenerate = computed(
@@ -110,6 +123,7 @@ async function decodeBitmap(file: File): Promise<ImageBitmap> {
 async function handleSurfaceSelect(file: File): Promise<void> {
   clearResult();
   errorMsg.value = '';
+  surfaceSource.value = 'manual'; // 手动上传覆盖 auto 预览
   if (surfacePreviewUrl.value) URL.revokeObjectURL(surfacePreviewUrl.value);
   surfacePreviewUrl.value = URL.createObjectURL(file);
   try {
@@ -117,6 +131,7 @@ async function handleSurfaceSelect(file: File): Promise<void> {
     surfaceBitmap.value = await decodeBitmap(file);
   } catch (e) {
     surfaceBitmap.value = null;
+    surfaceSource.value = null;
     if (surfacePreviewUrl.value) {
       URL.revokeObjectURL(surfacePreviewUrl.value);
       surfacePreviewUrl.value = '';
@@ -134,8 +149,17 @@ async function handleHiddenSelect(file: File): Promise<void> {
   try {
     if (hiddenBitmap.value) hiddenBitmap.value.close?.();
     hiddenBitmap.value = await decodeBitmap(file);
+    // 缓存里图原图整图像素（不裁剪，auto 单图无对齐问题）
+    hiddenImageData.value = cropCenterToImageData(
+      hiddenBitmap.value,
+      hiddenBitmap.value.width,
+      hiddenBitmap.value.height,
+    );
+    // 自动生成一次反相表图预览，让用户打开即可见效果
+    await generateAutoSurface();
   } catch (e) {
     hiddenBitmap.value = null;
+    hiddenImageData.value = null;
     if (hiddenPreviewUrl.value) {
       URL.revokeObjectURL(hiddenPreviewUrl.value);
       hiddenPreviewUrl.value = '';
@@ -151,6 +175,9 @@ function handleSurfaceClear(): void {
   if (surfacePreviewUrl.value) URL.revokeObjectURL(surfacePreviewUrl.value);
   surfacePreviewUrl.value = '';
   surfaceFile.value = null;
+  surfaceSource.value = null;
+  autoSurface.value = null;
+  autoHidden.value = null;
   clearResult();
 }
 
@@ -161,6 +188,16 @@ function handleHiddenClear(): void {
   if (hiddenPreviewUrl.value) URL.revokeObjectURL(hiddenPreviewUrl.value);
   hiddenPreviewUrl.value = '';
   hiddenFile.value = null;
+  hiddenImageData.value = null;
+  autoSurface.value = null;
+  autoHidden.value = null;
+  // 里图没了，auto 表图失效，一并清掉
+  if (surfaceSource.value === 'auto') {
+    if (surfacePreviewUrl.value) URL.revokeObjectURL(surfacePreviewUrl.value);
+    surfacePreviewUrl.value = '';
+    surfaceFile.value = null;
+    surfaceSource.value = null;
+  }
   clearResult();
 }
 
@@ -181,6 +218,44 @@ function cropCenterToImageData(bitmap: ImageBitmap, targetW: number, targetH: nu
   // 9 参数 drawImage：源区域 (sx,sy,targetW,targetH) → 目标 (0,0,targetW,targetH)，等比无缩放
   ctx.drawImage(bitmap, sx, sy, targetW, targetH, 0, 0, targetW, targetH);
   return ctx.getImageData(0, 0, targetW, targetH);
+}
+
+/**
+ * 从里图原图生成自动表图 + 暗化里图，并把表图预览填充到表图区。
+ *
+ * 将 surface 画到 canvas 编码为 PNG Blob，包装成 File 赋给 surfaceFile，
+ * 使现有 FileDropzone 无需改造即可显示预览与删除。来源标记为 'auto'。
+ */
+async function generateAutoSurface(): Promise<void> {
+  const imgData = hiddenImageData.value;
+  if (!imgData) return;
+  errorMsg.value = '';
+  try {
+    const { surface, hidden } = generateSurfaceFromHidden({
+      imageData: imgData,
+      darken: darkenFactor.value,
+    });
+    autoSurface.value = surface;
+    autoHidden.value = hidden;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = surface.width;
+    canvas.height = surface.height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('无法创建 Canvas 2D 上下文');
+    ctx.putImageData(surface, 0, 0);
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) throw new Error('表图编码失败');
+
+    if (surfacePreviewUrl.value) URL.revokeObjectURL(surfacePreviewUrl.value);
+    surfacePreviewUrl.value = URL.createObjectURL(blob);
+    // 包装 File 让 FileDropzone 的 hasFile/预览/删除正常工作；auto 合成不依赖此 File
+    surfaceFile.value = new File([blob], 'auto-surface.png', { type: 'image/png' });
+    surfaceSource.value = 'auto';
+    clearResult();
+  } catch (e) {
+    errorMsg.value = e instanceof Error ? e.message : '自动表图生成失败';
+  }
 }
 
 /**
@@ -235,25 +310,30 @@ async function processImageData(imageDataA: ImageData, imageDataB: ImageData): P
  */
 async function handleGenerate(): Promise<void> {
   if (isProcessing.value) return;
-  const bitmapA = surfaceBitmap.value;
-  const bitmapB = hiddenBitmap.value;
-  if (!bitmapA || !bitmapB) return;
   errorMsg.value = '';
-
-  // 取两图较小公共尺寸，各自中心裁剪对齐
-  const targetW = Math.min(bitmapA.width, bitmapB.width);
-  const targetH = Math.min(bitmapA.height, bitmapB.height);
-  const limit = checkCanvasLimits(targetW, targetH);
-  if (!limit.ok) {
-    errorMsg.value = limit.error!;
-    return;
-  }
-
   isProcessing.value = true;
   try {
-    const dataA = cropCenterToImageData(bitmapA, targetW, targetH);
-    const dataB = cropCenterToImageData(bitmapB, targetW, targetH);
-    const result = await processImageData(dataA, dataB);
+    let result: ImageData;
+    if (surfaceSource.value === 'auto') {
+      const s = autoSurface.value;
+      const h = autoHidden.value;
+      if (!s || !h) throw new Error('表图未就绪，请重新上传里图或点「从里图自动生成」');
+      const limit = checkCanvasLimits(s.width, s.height);
+      if (!limit.ok) throw new Error(limit.error!);
+      // auto 单图：表图与暗化里图同尺寸，直接合成
+      result = await processImageData(s, h);
+    } else {
+      const bitmapA = surfaceBitmap.value;
+      const bitmapB = hiddenBitmap.value;
+      if (!bitmapA || !bitmapB) throw new Error('请上传表图与里图');
+      const targetW = Math.min(bitmapA.width, bitmapB.width);
+      const targetH = Math.min(bitmapA.height, bitmapB.height);
+      const limit = checkCanvasLimits(targetW, targetH);
+      if (!limit.ok) throw new Error(limit.error!);
+      const dataA = cropCenterToImageData(bitmapA, targetW, targetH);
+      const dataB = cropCenterToImageData(bitmapB, targetW, targetH);
+      result = await processImageData(dataA, dataB);
+    }
 
     const canvas = document.createElement('canvas');
     canvas.width = result.width;
@@ -261,9 +341,7 @@ async function handleGenerate(): Promise<void> {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('无法创建 Canvas 2D 上下文');
     ctx.putImageData(result, 0, 0);
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, 'image/png'),
-    );
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
     if (!blob) throw new Error('PNG 编码失败');
 
     if (resultUrl.value) URL.revokeObjectURL(resultUrl.value);
