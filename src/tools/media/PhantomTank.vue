@@ -68,9 +68,13 @@ const autoSurface = ref<ImageData | null>(null);
 const autoHidden = ref<ImageData | null>(null);
 
 /** 两图是否均已就绪，可否生成 */
-const canGenerate = computed(
-  () => surfaceBitmap.value !== null && hiddenBitmap.value !== null && !isProcessing.value,
-);
+const canGenerate = computed(() => {
+  if (isProcessing.value) return false;
+  if (!hiddenBitmap.value) return false;
+  // auto 模式：表图已自动生成（autoSurface 就绪）即可合成；manual 模式需手动上传的表图位图
+  if (surfaceSource.value === 'auto') return autoSurface.value !== null;
+  return surfaceBitmap.value !== null;
+});
 
 /**
  * 派发全局 toast 通知（由 Alpine 侧 Layout 捕获并展示）。
