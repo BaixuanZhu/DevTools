@@ -100,3 +100,62 @@ export function createPhantomTank(input: PhantomTankInput): ImageData {
 
   return new ImageData(out, width, height);
 }
+
+/** 自动表图生成输入：里图原图 + 暗化强度。 */
+export interface AutoSurfaceInput {
+  /** 里图原图（彩色）的像素数据 */
+  imageData: ImageData;
+  /** 暗化强度 d ∈ [0, 0.8]，滑块百分比 / 100；0 不暗化 */
+  darken: number;
+}
+
+/** 自动表图生成输出：表图 + 暗化里图，同尺寸、同一 d 计算。 */
+export interface AutoSurfaceOutput {
+  /** 灰度反相表图（R=G=B=La），白底显示 */
+  surface: ImageData;
+  /** 等比压暗的彩色里图（保色相），黑底显示 */
+  hidden: ImageData;
+}
+
+/**
+ * 从里图自动生成配套表图：里图各通道等比压暗 → 算灰度 → 自适应反相得表图。
+ *
+ * 自适应反相 La = max(255 − L, L)：L ≤ 127 走真反相（白底清晰负片）；
+ * L > 127 时 La = L，该处 alpha=255，但里图本就偏亮、白底合成也接近白，视觉无穿帮。
+ *
+ * 同时返回暗化里图，保证表图与里图用同一 d、尺寸天然一致，供 {@link createPhantomTank} 合成。
+ *
+ * @param input 里图原图与暗化强度
+ * @returns surface 灰度反相表图、hidden 暗化彩色里图（均与输入同尺寸）
+ */
+export function generateSurfaceFromHidden(input: AutoSurfaceInput): AutoSurfaceOutput {
+  const { imageData, darken } = input;
+  const { width, height, data } = imageData;
+  const surfaceData = new Uint8ClampedArray(data.length);
+  const hiddenData = new Uint8ClampedArray(data.length);
+  const keep = 1 - darken; // 暗化后保留比例
+
+  for (let i = 0; i < data.length; i += 4) {
+    // 1. 等比压暗里图（保色相），赋 Uint8ClampedArray 自动取整
+    const rd = data[i] * keep;
+    const gd = data[i + 1] * keep;
+    const bd = data[i + 2] * keep;
+    hiddenData[i] = rd;
+    hiddenData[i + 1] = gd;
+    hiddenData[i + 2] = bd;
+    hiddenData[i + 3] = 255;
+
+    // 2. 暗化里图灰度 → 3. 自适应反相表图（灰度）
+    const l = toGray(rd, gd, bd);
+    const la = Math.max(255 - l, l);
+    surfaceData[i] = la;
+    surfaceData[i + 1] = la;
+    surfaceData[i + 2] = la;
+    surfaceData[i + 3] = 255;
+  }
+
+  return {
+    surface: new ImageData(surfaceData, width, height),
+    hidden: new ImageData(hiddenData, width, height),
+  };
+}
