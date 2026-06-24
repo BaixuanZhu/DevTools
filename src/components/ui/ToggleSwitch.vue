@@ -6,8 +6,10 @@ withDefaults(
     modelValue: boolean;
     label?: string;
     description?: string;
+    /** 是否在开关右侧显示状态文字（description 或「已开启/已关闭」），默认 true */
+    showStatus?: boolean;
   }>(),
-  { label: undefined, description: undefined },
+  { label: undefined, description: undefined, showStatus: true },
 );
 
 const emit = defineEmits<{
@@ -34,6 +36,6 @@ const emit = defineEmits<{
         ]"
       />
     </Switch>
-    <span class="text-[0.8125rem] text-muted">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
+    <span v-if="showStatus" class="text-[0.8125rem] text-muted">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
   </div>
 </template>

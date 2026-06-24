@@ -1,16 +1,15 @@
 <script setup lang="ts">
 /**
- * sitemap.xml 生成器主组件。
+ * sitemap 生成器主组件。
  *
  * 左侧支持逐条添加与批量粘贴录入 URL，每条可设 lastmod/changefreq/priority；
- * 右侧实时输出标准 sitemap.xml，并置顶诚实提示 Google 仅参考 lastmod。
+ * 右侧实时输出标准 sitemap.xml（priority/changefreq 已被 Google 忽略的说明见页面 FAQ）。
  */
 import { reactive, ref, computed } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
-import { useCopy } from '../../composables/useCopy';
 import { downloadTextFile } from '../../utils/shared/download';
 import {
   generateSitemapXml,
@@ -83,10 +82,6 @@ function locHint(u: SitemapUrl): string {
   return isValidHttpUrl(u.loc) ? '' : '建议使用完整 URL（以 https:// 开头）';
 }
 
-const { copy: copyText } = useCopy();
-function handleCopy(): void {
-  copyText(sitemapXml.value);
-}
 function handleDownload(): void {
   downloadTextFile('sitemap.xml', sitemapXml.value, 'application/xml;charset=utf-8');
 }
@@ -100,7 +95,7 @@ function handleClear(): void {
 <template>
   <div>
     <ToolHeader
-      title="sitemap.xml 生成器"
+      title="sitemap 生成器"
       description="逐条或批量录入 URL，设置频率/优先级/修改时间，生成标准 sitemap.xml"
       :show-example="false"
     />
@@ -154,7 +149,7 @@ function handleClear(): void {
                   <input
                     v-model="u.lastmod"
                     type="date"
-                    class="w-full px-2 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent"
+                    class="w-full px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] focus:outline-none focus:border-accent box-border"
                   />
                 </div>
                 <div>
@@ -185,23 +180,13 @@ function handleClear(): void {
 
       <!-- 输出区 -->
       <template #output>
-        <!-- 诚实提示框 -->
-        <div class="mb-2 p-3 border border-border rounded-sm bg-hover text-[0.8125rem] text-muted">
-          ℹ️ Google 仅参考 <code class="bg-card px-1 py-0.5 rounded-sm">&lt;lastmod&gt;</code>，已忽略 <code class="bg-card px-1 py-0.5 rounded-sm">&lt;priority&gt;</code> 与 <code class="bg-card px-1 py-0.5 rounded-sm">&lt;changefreq&gt;</code>。
-        </div>
-        <div class="flex justify-end gap-2 mb-2">
-          <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer hover:bg-hover transition-[background-color] duration-150"
-            @click="handleDownload"
-          >下载 sitemap.xml</button>
-          <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer hover:bg-hover transition-[background-color] duration-150"
-            @click="handleCopy"
-          >复制结果</button>
-        </div>
-        <CodePanel label="sitemap.xml" :copy-text="sitemapXml" show-copy>
+        <CodePanel
+          label="sitemap.xml"
+          :copy-text="sitemapXml"
+          show-copy
+          show-download
+          @download="handleDownload"
+        >
           <pre class="w-full p-4 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ sitemapXml }}</pre>
         </CodePanel>
       </template>

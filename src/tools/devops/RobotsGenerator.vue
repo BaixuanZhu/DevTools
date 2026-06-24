@@ -11,7 +11,6 @@ import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
-import { useCopy } from '../../composables/useCopy';
 import { downloadTextFile } from '../../utils/shared/download';
 import {
   generateRobotsTxt,
@@ -94,10 +93,6 @@ function removeSitemap(idx: number): void {
   sitemaps.splice(idx, 1);
 }
 
-const { copy: copyText } = useCopy();
-function handleCopy(): void {
-  copyText(robotsText.value);
-}
 function handleDownload(): void {
   downloadTextFile('robots.txt', robotsText.value, 'text/plain;charset=utf-8');
 }
@@ -202,14 +197,19 @@ function handleClear(): void {
             <p class="text-[0.75rem] text-muted m-0">
               勾选即为该爬虫生成 <code class="bg-hover px-1 py-0.5 rounded-sm">Disallow: /</code>，禁止抓取整站
             </p>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <ToggleSwitch
+            <div class="flex flex-col gap-2">
+              <div
                 v-for="c in AI_CRAWLERS"
                 :key="c.userAgent"
-                :model-value="aiSelected.has(c.userAgent)"
-                :label="`${c.userAgent} · ${c.vendor}`"
-                @update:model-value="toggleAi(c.userAgent)"
-              />
+                class="flex items-center justify-between gap-3"
+              >
+                <span class="text-[0.8125rem] text-text">{{ c.userAgent }} · {{ c.vendor }}</span>
+                <ToggleSwitch
+                  :model-value="aiSelected.has(c.userAgent)"
+                  :show-status="false"
+                  @update:model-value="toggleAi(c.userAgent)"
+                />
+              </div>
             </div>
           </div>
 
@@ -256,19 +256,13 @@ function handleClear(): void {
 
       <!-- 输出区 -->
       <template #output>
-        <div class="flex justify-end gap-2 mb-2">
-          <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer hover:bg-hover transition-[background-color] duration-150"
-            @click="handleDownload"
-          >下载 robots.txt</button>
-          <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer hover:bg-hover transition-[background-color] duration-150"
-            @click="handleCopy"
-          >复制结果</button>
-        </div>
-        <CodePanel label="robots.txt" :copy-text="robotsText" show-copy>
+        <CodePanel
+          label="robots.txt"
+          :copy-text="robotsText"
+          show-copy
+          show-download
+          @download="handleDownload"
+        >
           <pre class="w-full p-4 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ robotsText }}</pre>
         </CodePanel>
       </template>

@@ -2,9 +2,12 @@
 /**
  * 一体化代码面板容器。
  *
- * 为内容区提供带边框的卡片外壳，并在顶部标题栏嵌入复制/清空图标按钮。
+ * 为内容区提供带边框的卡片外壳，并在顶部标题栏嵌入复制/下载/清空图标按钮。
  * 标题栏与内容区共享同一个边框容器，视觉上融为一体；按钮通过 slot 外部渲染，
  * 不会成为 textarea 等内容的子元素。
+ *
+ * 复制由组件内部直接处理并在按钮上反馈已复制状态；下载与清空仅触发事件，
+ * 具体行为（文件名、内容类型、清空范围）由父组件决定。
  *
  * @example
  * ```vue
@@ -12,7 +15,7 @@
  *   <textarea v-model="input" class="w-full h-80 p-3 bg-card text-text font-mono text-sm" />
  * </CodePanel>
  *
- * <CodePanel label="输出结果" showCopy :copyText="output">
+ * <CodePanel label="输出结果" showCopy showDownload :copyText="output" @download="handleDownload">
  *   <pre class="w-full h-80 p-3 bg-card text-text font-mono text-sm">{{ output }}</pre>
  * </CodePanel>
  * ```
@@ -24,7 +27,9 @@ interface Props {
   label?: string;
   /** 是否显示复制图标按钮 */
   showCopy?: boolean;
-  /** 要复制的文本内容 */
+  /** 是否显示下载图标按钮（点击触发 download 事件，由父组件处理实际下载） */
+  showDownload?: boolean;
+  /** 要复制/下载的文本内容（为空时复制与下载按钮自动禁用） */
   copyText?: string;
   /** 是否显示清空图标按钮 */
   showClear?: boolean;
@@ -36,6 +41,7 @@ const props = defineProps<Props>();
 
 const emit = defineEmits<{
   (e: 'clear'): void;
+  (e: 'download'): void;
 }>();
 
 const { copied, copy } = useCopy();
@@ -44,6 +50,11 @@ const { copied, copy } = useCopy();
 async function handleCopy(): Promise<void> {
   if (!props.copyText) return;
   await copy(props.copyText);
+}
+
+/** 处理下载：交由父组件决定文件名与内容类型 */
+function handleDownload(): void {
+  emit('download');
 }
 
 /** 处理清空 */
@@ -56,7 +67,7 @@ function handleClear(): void {
   <div class="border border-border rounded-sm overflow-hidden bg-card">
     <!-- 标题栏：label + 操作按钮 -->
     <div
-      v-if="label || showCopy || showClear"
+      v-if="label || showCopy || showDownload || showClear"
       class="flex items-center justify-between px-4 py-1.5 border-b border-border"
     >
       <label
@@ -67,7 +78,7 @@ function handleClear(): void {
       </label>
 
       <div
-        v-if="showCopy || showClear"
+        v-if="showCopy || showDownload || showClear"
         class="flex gap-1"
       >
         <!-- 复制按钮 -->
@@ -116,6 +127,33 @@ function handleClear(): void {
           >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        </button>
+
+        <!-- 下载按钮 -->
+        <button
+          v-if="showDownload"
+          type="button"
+          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          :class="(!copyText || disabled) && 'opacity-50 cursor-not-allowed'"
+          :disabled="!copyText || disabled"
+          title="下载"
+          @click="handleDownload"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
           </svg>
         </button>
 
