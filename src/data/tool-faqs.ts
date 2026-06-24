@@ -538,6 +538,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '不能完全保证。robots.txt 只是「请求」爬虫不要抓取，已被收录的 URL 仍可能出现在搜索结果（仅不显示摘要）。若要彻底移除，应配合 <code>noindex</code> meta 标签或搜索引擎后台的移除工具。',
     },
   ],
+  'sitemap-generator': [
+    {
+      question: 'priority 和 changefreq 现在还有用吗？',
+      answer: '对 <strong>Google 已基本无效</strong>。Google 官方明确表示完全忽略 <code>&lt;priority&gt;</code> 与 <code>&lt;changefreq&gt;</code>，仅参考 <code>&lt;lastmod&gt;</code>（且仅当值真实准确时）。建议重点维护 lastmod，priority/changefreq 仅作其他引擎的参考。',
+    },
+    {
+      question: 'sitemap.xml 对 SEO 有什么实际作用？',
+      answer: '主要帮助搜索引擎<strong>发现和调度抓取</strong>你的页面，尤其对新站、内链稀少或内容频繁更新的站点。它不直接提升排名，但能让重要页面更快被收录。建议同时在 robots.txt 中用 <code>Sitemap:</code> 指令声明其位置。',
+    },
+    {
+      question: 'sitemap 里的 URL 有数量限制吗？',
+      answer: '单个 sitemap.xml 最多 <strong>50,000 条 URL</strong> 且压缩前不超过 <strong>50MB</strong>。超出需拆分为多个 sitemap 并用 sitemap index 引用（本工具暂不支持 index，可手工拆分）。',
+    },
+  ],
 };
 
 /**

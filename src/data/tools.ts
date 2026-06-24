@@ -421,6 +421,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['sitemap-generator', 'meta-tag-generator'],
   },
   {
+    id: 'sitemap-generator',
+    name: 'sitemap.xml 生成器',
+    description: '逐条或批量粘贴录入 URL，设置更新频率、优先级与最后修改时间，生成标准 sitemap.xml，诚实提示字段有效性',
+    seoDescription: '在线 sitemap.xml 生成器，逐条添加或批量粘贴 URL 列表，设置 changefreq、priority 与 lastmod，生成标准 sitemap.xml 可复制下载，并诚实提示 priority/changefreq 已被 Google 忽略、仅 lastmod 有效，纯浏览器端生成。',
+    category: 'DevOps 工具',
+    icon: '🗺️',
+    path: '/devops/sitemap-generator',
+    keywords: ['sitemap.xml 生成', 'sitemap 生成器', '网站地图生成', 'sitemap 在线', 'url 列表转 sitemap', 'lastmod', 'changefreq', 'priority', '网站地图在线生成'],
+    relatedToolIds: ['robots-generator', 'meta-tag-generator'],
+  },
+  {
     id: 'qr-code-reader',
     name: '二维码识别器',
     description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',
