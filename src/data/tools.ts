@@ -399,6 +399,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['docker-converter', 'json-formatter'],
   },
   {
+    id: 'meta-tag-generator',
+    name: 'Meta 标签生成器',
+    description: '填写表单实时生成 Basic / Open Graph / Twitter Card / JSON-LD 标签，附社交分享卡片预览',
+    seoDescription: '在线 Meta 标签生成器，填写标题、描述、关键词、URL、预览图，实时生成 Basic、Open Graph、Twitter Card 与 Article/WebSite JSON-LD 结构化数据，并提供 Facebook、X、微信等社交分享卡片可视化预览，浏览器端生成可一键复制。',
+    category: 'DevOps 工具',
+    icon: '🏷️',
+    path: '/devops/meta-tag-generator',
+    keywords: ['meta 标签生成', 'open graph 生成', 'og 标签', 'twitter card 生成', 'json-ld 生成', '结构化数据生成', 'seo meta 标签', '社交分享卡片预览', 'og image 尺寸'],
+    relatedToolIds: ['docker-converter', 'env-converter'],
+  },
+  {
     id: 'qr-code-reader',
     name: '二维码识别器',
     description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',

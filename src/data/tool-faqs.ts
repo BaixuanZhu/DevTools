@@ -242,6 +242,28 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '当值包含空格、<code>#</code>、<code>"</code>、<code>\'</code>、<code>$</code> 或为空字符串时自动加双引号，并转义内部的 <code>"</code> <code>\\</code> <code>$</code>；其余情况输出不加引号的简洁形式。',
     },
   ],
+  'meta-tag-generator': [
+    {
+      question: 'og:image 推荐尺寸是多少？',
+      answer: '推荐 <code>1200×630</code> 像素、不超过 <strong>8MB</strong>，且必须是<strong>绝对 URL</strong>（带 <code>https://</code>）。部分平台要求图片至少 200×200。',
+    },
+    {
+      question: 'Twitter Card 类型怎么选？',
+      answer: '大图分享选 <code>summary_large_image</code>，纯文字摘要选 <code>summary</code>，视频/音频分别用 <code>player</code> / <code>app</code>。',
+    },
+    {
+      question: '为什么微信里分享的卡片没更新？',
+      answer: '微信有<strong>独立的链接抓取与缓存机制</strong>，不一定实时读取标准 OG 标签；可在微信公众平台用「抓取诊断」刷新，或等待缓存过期。',
+    },
+    {
+      question: 'JSON-LD 结构化数据放在哪里？',
+      answer: '放在页面 <code>&lt;head&gt;</code> 内，用 <code>&lt;script type="application/ld+json"&gt;</code> 包裹。它能帮助搜索引擎与 AI 理解页面内容。',
+    },
+    {
+      question: 'meta keywords 现在还有用吗？',
+      answer: 'Google 等主流搜索引擎已基本忽略 <code>meta keywords</code>，少数搜索引擎仍参考。建议优先写好 <strong>title</strong> 与 <strong>description</strong>。',
+    },
+  ],
   'qr-code-reader': [
     {
       question: '为什么识别失败？',
