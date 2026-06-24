@@ -410,6 +410,17 @@ export const tools: ToolMeta[] = [
     relatedToolIds: ['docker-converter', 'env-converter'],
   },
   {
+    id: 'robots-generator',
+    name: 'robots.txt 生成器',
+    description: '按 User-agent 分组可视化添加 Allow/Disallow 规则，一键拦截 GPTBot、ClaudeBot 等 AI 训练爬虫，生成标准 robots.txt',
+    seoDescription: '在线 robots.txt 生成器，按 User-agent 分组可视化添加 Allow/Disallow 规则，一键禁止 GPTBot、ClaudeBot、Google-Extended 等主流 AI 训练爬虫抓取，配通俗规则解释，纯浏览器端生成可复制下载。',
+    category: 'DevOps 工具',
+    icon: '🤖',
+    path: '/devops/robots-generator',
+    keywords: ['robots.txt 生成', 'robots 生成器', '屏蔽 ai 爬虫', '拦截 gptbot', '拦截 claudebot', '拦截 google-extended', 'disallow 规则', 'user-agent 规则', '禁止 ai 抓取', 'seo robots'],
+    relatedToolIds: ['sitemap-generator', 'meta-tag-generator'],
+  },
+  {
     id: 'qr-code-reader',
     name: '二维码识别器',
     description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',

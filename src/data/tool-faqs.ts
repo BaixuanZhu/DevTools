@@ -524,6 +524,20 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '里图越亮，黑底越看不清，需要把<strong>「里图暗化」调大</strong>（亮调图建议 70%–80%）压暗里图，黑底主体才会清晰；暗调图保持较小值即可。白底只能显示灰度反相、无法是彩色负片，这是幻影坦克<strong>逐像素亮度算法的固有限制</strong>，非工具缺陷。',
     },
   ],
+  'robots-generator': [
+    {
+      question: '如何一键屏蔽 ChatGPT、Gemini、Claude 等 AI 抓取？',
+      answer: '在「AI 爬虫一键拦截」区勾选对应爬虫（如 <code>GPTBot</code>、<code>Google-Extended</code>、<code>ClaudeBot</code>），或点击「一键拦截所有 AI 爬虫」全选。工具会自动为每个爬虫生成 <code>User-agent: &lt;bot&gt;</code> + <code>Disallow: /</code> 规则组，禁止其抓取整站。',
+    },
+    {
+      question: 'Allow 和 Disallow 冲突时谁优先？',
+      answer: '按 <strong>最长（最具体）匹配路径优先</strong>；若两者匹配的路径长度相同，则 <strong>Allow 优先于 Disallow</strong>。规则在文件中的书写顺序不影响优先级，路径匹配区分大小写。',
+    },
+    {
+      question: 'robots.txt 能阻止搜索引擎收录吗？',
+      answer: '不能完全保证。robots.txt 只是「请求」爬虫不要抓取，已被收录的 URL 仍可能出现在搜索结果（仅不显示摘要）。若要彻底移除，应配合 <code>noindex</code> meta 标签或搜索引擎后台的移除工具。',
+    },
+  ],
 };
 
 /**
