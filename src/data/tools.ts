@@ -422,9 +422,9 @@ export const tools: ToolMeta[] = [
   },
   {
     id: 'sitemap-generator',
-    name: 'sitemap.xml 生成器',
+    name: 'sitemap 生成器',
     description: '逐条或批量粘贴录入 URL，设置更新频率、优先级与最后修改时间，生成标准 sitemap.xml，诚实提示字段有效性',
-    seoDescription: '在线 sitemap.xml 生成器，逐条添加或批量粘贴 URL 列表，设置 changefreq、priority 与 lastmod，生成标准 sitemap.xml 可复制下载，并诚实提示 priority/changefreq 已被 Google 忽略、仅 lastmod 有效，纯浏览器端生成。',
+    seoDescription: '在线 sitemap 生成器，逐条添加或批量粘贴 URL 列表，设置 changefreq、priority 与 lastmod，生成标准 sitemap.xml 可复制下载，并诚实提示 priority/changefreq 已被 Google 忽略、仅 lastmod 有效，纯浏览器端生成。',
     category: 'DevOps 工具',
     icon: '🗺️',
     path: '/devops/sitemap-generator',
