@@ -8,6 +8,9 @@ import { parseTomlSafe, stringifyTomlSafe } from './toml';
 import type { TomlStringResult } from './toml';
 import { INPUT_SIZE_WARNING, INPUT_SIZE_LIMIT } from './toml';
 
+// 重新导出，供 toml-formatter.worker.ts 与 TomlFormatter.vue 消费
+export type { TomlStringResult } from './toml';
+
 // ---- 类型 ----
 
 /** 校验结果 */
