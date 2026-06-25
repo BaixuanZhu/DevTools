@@ -43,20 +43,19 @@ export interface ValidationResult {
   column?: number;
 }
 
-/** JSON Path 查询成功结果 */
-export interface PathQuerySuccess {
-  ok: true;
-  results: unknown[];
+/** 实时分析结果（校验 + 统计，一次 parse 产出） */
+export interface AnalysisResult {
+  /** 是否为合法 JSON */
+  ok: boolean;
+  /** 提示信息（成功为「格式有效」，失败为翻译后的错误描述） */
+  message: string;
+  /** 错误所在行（仅失败时） */
+  line?: number;
+  /** 错误所在列（仅失败时） */
+  column?: number;
+  /** 统计信息（仅成功时） */
+  stats?: JsonStats;
 }
-
-/** JSON Path 查询失败结果 */
-export interface PathQueryError {
-  ok: false;
-  error: string;
-}
-
-/** JSON Path 查询返回类型 */
-export type PathQueryResult = PathQuerySuccess | PathQueryError;
 
 /** Web Worker 请求消息 */
 export interface WorkerRequest {
@@ -185,7 +184,7 @@ export function minifyJson(input: string): OperationResult {
 export function validateJson(input: string): ValidationResult {
   try {
     JSON.parse(input);
-    return { ok: true, message: '✓ JSON 格式有效' };
+    return { ok: true, message: 'JSON 格式有效' };
   } catch (e) {
     const pos = parseErrorPosition(e, input);
     return {
@@ -197,26 +196,24 @@ export function validateJson(input: string): ValidationResult {
 }
 
 /**
- * 执行 JSON Path 查询。
+ * 校验 JSON 并计算统计信息（一次 parse 同时产出校验结论与统计）。
+ *
+ * 供单框实时校验使用，避免先校验再统计导致的重复解析。
  *
  * @param input - 原始 JSON 字符串
- * @param path - JSON Path 表达式
- * @returns 查询结果
+ * @returns 分析结果（成功带 stats，失败带行列号）
  */
-export async function queryJsonPath(input: string, path: string): Promise<PathQueryResult> {
+export function analyzeJson(input: string): AnalysisResult {
   try {
     const parsed = JSON.parse(input);
-    const { JSONPath } = await import('jsonpath-plus');
-    const results = JSONPath({ path, json: parsed, resultType: 'value' });
-    if (!Array.isArray(results) || results.length === 0) {
-      return { ok: true, results: [] };
-    }
-    return { ok: true, results };
+    return { ok: true, message: 'JSON 格式有效', stats: computeStats(input, parsed) };
   } catch (e) {
-    if (e instanceof SyntaxError && String(e.message).includes('JSON')) {
-      return { ok: false, error: `JSON 语法错误：${e.message}` };
-    }
-    return { ok: false, error: `JSON Path 表达式错误：${e instanceof Error ? e.message : String(e)}` };
+    const pos = parseErrorPosition(e, input);
+    return {
+      ok: false,
+      message: `JSON 语法错误：${extractErrorMessage(e)}`,
+      ...pos,
+    };
   }
 }
 

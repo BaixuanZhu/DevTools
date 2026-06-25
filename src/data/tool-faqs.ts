@@ -84,10 +84,6 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '本工具在浏览器端运行，一般可以处理 <strong>数 MB</strong> 大小的 JSON 文件。具体限制取决于浏览器可用内存。超大文件建议使用桌面端工具处理。',
     },
     {
-      question: 'JSON Path 查询是什么？',
-      answer: 'JSON Path 是一种查询语言，用于从 JSON 数据中提取特定节点。例如 <code>$.store.book[0].title</code> 可以提取第一本书的标题。支持过滤、切片等高级语法。',
-    },
-    {
       question: 'JSON 压缩有什么用？',
       answer: 'JSON 压缩会移除所有空白字符（空格、换行、缩进），将 JSON 压缩为单行。适用于<strong>减小文件体积</strong>和网络传输场景，但可读性较差。配合格式化工具可随时还原。',
     },
