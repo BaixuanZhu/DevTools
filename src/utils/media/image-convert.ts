@@ -5,6 +5,8 @@
  * 以及依赖浏览器 Canvas API 的解码/编码函数。
  */
 
+import { drawWatermark, type WatermarkOptions } from './watermark';
+
 // ==================== 类型 ====================
 
 /** 支持的输出格式（GIF / BMP 仅作输入，不在此列） */
@@ -29,6 +31,8 @@ export interface ConvertOptions {
   scale: number;
   /** 是否填充白底（jpeg 不支持透明） */
   fillBackground: boolean;
+  /** 可选文字水印；不传或文本为空则不绘制，ICO 输出忽略 */
+  watermark?: WatermarkOptions;
 }
 
 /** 图片转换结果 */
@@ -293,6 +297,11 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
     ctx.fillRect(0, 0, width, height);
   }
   ctx.drawImage(bitmap, 0, 0, width, height);
+
+  // 文字水印：在编码前绘制，canvas 原生与 avif/tiff（getImageData）路径共用同一 ctx
+  if (opts.watermark) {
+    drawWatermark(ctx, width, height, opts.watermark);
+  }
 
   // 原生 canvas 编码（png/jpeg/webp）
   if (pickEncoderKind(format) === 'canvas') {

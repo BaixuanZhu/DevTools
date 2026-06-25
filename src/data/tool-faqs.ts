@@ -299,6 +299,18 @@ const toolFaqs: Record<string, FaqItem[]> = {
       question: 'ICO 输出为什么是固定尺寸？',
       answer: 'ICO 主要用于 <strong>favicon</strong>，本工具固定输出 <strong>16 / 32 / 48</strong> 三种标准尺寸并打包进同一个 .ico 文件，覆盖主流浏览器需求，因此尺寸滑块对 ICO 不生效。',
     },
+    {
+      question: '擦除 EXIF 会影响画质吗？',
+      answer: '对 <strong>JPEG</strong> 且方向正常的图片走<strong>无损字节剥离</strong>：只删除 EXIF / GPS / 设备等元数据段，像素与画质完全不变；若图片带<strong>旋转方向信息</strong>（如竖拍手机照），为保持显示方向会改走重新编码，画质略有损失。<strong>PNG / WebP</strong> 等其他格式需重新编码擦除。',
+    },
+    {
+      question: '水印支持哪些设置？',
+      answer: '支持<strong>纯文字水印</strong>，可调字号、颜色、透明度、旋转角度；位置提供<strong>九宫格</strong>九个锚位与<strong>整图平铺</strong>两种模式。水印在转换 / 压缩时一并绘制，单张处理，不支持图片 logo 水印与批量。',
+    },
+    {
+      question: '为什么开启擦除后提示「未检测到敏感信息」？',
+      answer: '若上传图片本身<strong>不含 EXIF</strong>（如截图、网络下载图、已被清理过的图），则无可擦除项。擦除仅针对原始元数据，不影响图片内容；此时仍会正常输出图片。',
+    },
   ],
   'ipv6-cidr': [
     {
