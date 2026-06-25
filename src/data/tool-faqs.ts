@@ -552,6 +552,48 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '单个 sitemap.xml 最多 <strong>50,000 条 URL</strong> 且压缩前不超过 <strong>50MB</strong>。超出需拆分为多个 sitemap 并用 sitemap index 引用（本工具暂不支持 index，可手工拆分）。',
     },
   ],
+  'toml-json-converter': [
+    {
+      question: 'TOML 和 JSON 有什么区别？',
+      answer: '<strong>TOML</strong> 是专为配置文件设计的格式，语义清晰、支持注释、日期、多行字符串等；<strong>JSON</strong> 通用性更强、机器友好，但不支持注释。配置类场景常用 TOML，数据传输常用 JSON。',
+    },
+    {
+      question: '为什么我的 JSON 转 TOML 报错？',
+      answer: 'TOML <strong>顶层必须是对象（表）</strong>，且<strong>不支持 null</strong>。如果 JSON 顶层是数组或标量，或包含 null 值，转换会失败并提示具体路径。请将顶层包装为对象、移除或替换 null。',
+    },
+    {
+      question: '转换会丢失信息吗？',
+      answer: '存在少量有损情况：TOML 的浮点 <code>1.0</code> 会按整数 <code>1</code> 处理；TOML 的日期时间转为 JSON 后是字符串，再转回 TOML 无法还原为日期类型。常规配置数据可无损往返。',
+    },
+  ],
+  'toml-yaml-converter': [
+    {
+      question: 'TOML 和 YAML 该用哪个？',
+      answer: '两者都适合配置。TOML 类型明确、不易出错；YAML 更简洁、支持复杂嵌套与引用，但<code>缩进敏感</code>易出格式错误。需要与 Rust/Python 生态对接选 TOML，需要极致简洁或大量嵌套可选 YAML。',
+    },
+    {
+      question: 'YAML 转 TOML 时 null 怎么办？',
+      answer: 'TOML <strong>不支持 null</strong>。若 YAML 中含 <code>null</code>、<code>~</code> 或空值，转换会报错并给出路径，请替换为具体值或移除该键。',
+    },
+    {
+      question: '支持 YAML 的哪些特性？',
+      answer: '基于 <code>js-yaml</code>，支持锚点、引用、多行字符串、流式语法等。但转 TOML 时，YAML 的引用会被展开为重复数据（TOML 无引用概念）。',
+    },
+  ],
+  'toml-formatter': [
+    {
+      question: '格式化会修改我的 TOML 内容吗？',
+      answer: '会重新序列化以统一格式（键值间距、表头顺序），但<strong>不改变数据语义</strong>。注释会丢失（解析-序列化往返不含注释），如需保留注释请手动调整。',
+    },
+    {
+      question: '校验提示的行列号准吗？',
+      answer: '准确。工具基于 smol-toml 解析，错误信息会标注具体的<strong>行号与列号</strong>，便于定位语法问题（如缺失值、非法字符）。',
+    },
+    {
+      question: '支持多大的 TOML 文件？',
+      answer: '输入硬上限 <strong>10MB</strong>。超过 5MB 会提示可能卡顿，超过 1MB 的美化会自动走 Web Worker 异步处理避免阻塞界面。',
+    },
+  ],
 };
 
 /**
