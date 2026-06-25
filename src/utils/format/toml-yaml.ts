@@ -9,6 +9,15 @@ import type { TomlStringResult, TomlFailure } from './toml';
 
 // ---- 示例数据 ----
 
+/** 默认 TOML 示例（Cargo.toml 风格，与 EXAMPLE_YAML 等价） */
+export const EXAMPLE_TOML = `[package]
+name = "demo"
+version = "1.0.0"
+
+[dependencies]
+serde = "1.0"
+tokio = { version = "1", features = ["full"] }`;
+
 /** 默认 YAML 示例 */
 export const EXAMPLE_YAML = `package:
   name: demo
