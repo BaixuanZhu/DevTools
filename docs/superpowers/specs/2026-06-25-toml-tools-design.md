@@ -81,11 +81,10 @@ TOML 是强类型配置格式，与 JSON/YAML 互转**非完全无损**。处理
 ```
 src/utils/format/
   toml.ts                       # smol-toml 封装：parseTomlSafe / stringifyTomlSafe + 错误归一化
-  toml-json.ts                  # TOML↔JSON 互转逻辑 + Worker 消息类型
-  toml-json.worker.ts           # 大文件互转 Worker
-  toml-yaml.ts                  # TOML↔YAML 互转逻辑
-  toml-yaml.worker.ts           # 大文件互转 Worker
+  toml-json.ts                  # TOML↔JSON 互转逻辑（主线程同步）
+  toml-yaml.ts                  # TOML↔YAML 互转逻辑（主线程同步）
   toml-formatter.ts             # TOML 校验 + 美化逻辑
+  toml-formatter.worker.ts      # 大文件美化 Worker
   __tests__/
     toml.test.ts
     toml-json.test.ts
@@ -132,9 +131,9 @@ src/pages/format/
 
 性能：
 
-- 输入 >500KB 走 Web Worker
+- 互转工具主线程同步（TOML 配置文件通常较小，与 `EnvConverter` 一致，不引入 Worker）
+- `toml-formatter` 单向美化 >1MB 走 Web Worker
 - 输入大小硬上限 10MB
-- 防抖 500ms
 - 单工具页 JS（gzip）< 50KB
 
 ## 8. 测试策略
