@@ -6,7 +6,6 @@
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import CodePanel from '../../components/ui/CodePanel.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
@@ -103,11 +102,7 @@ function handleValidate(): void {
   if (result.ok) {
     setOutput(result.message);
   } else {
-    let msg = result.message;
-    if (result.line !== undefined && result.column !== undefined) {
-      msg += `（第 ${result.line} 行，第 ${result.column} 列）`;
-    }
-    setError(msg);
+    setError(result.message);
   }
 }
 
