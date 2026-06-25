@@ -39,8 +39,14 @@ export interface ConvertOptions {
 export interface ConvertResult {
   /** 编码后的 Blob */
   blob: Blob;
-  /** 预览用的 object URL（用完需 revokeObjectURL） */
+  /** 下载用的 object URL，指向真实编码结果（用完需 revokeObjectURL） */
   url: string;
+  /**
+   * 预览专用的 object URL。仅当输出格式浏览器 `<img>` 无法直接渲染（如 TIFF）时存在，
+   * 此时应优先用它做预览，`url` 仅用于下载。为空表示 `url` 本身即可预览。
+   * 存在时同样需 revokeObjectURL。
+   */
+  previewUrl?: string;
   /** 结果宽度 */
   width: number;
   /** 结果高度 */
@@ -316,13 +322,25 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
 
   // 懒加载编码器（avif/tiff）
   const imageData = ctx.getImageData(0, 0, width, height);
-  let blob: Blob;
   if (format === 'avif') {
     const { encodeAvif } = await import('./encoders/avif');
-    blob = await encodeAvif(imageData, quality);
-  } else {
-    const { encodeTiff } = await import('./encoders/tiff');
-    blob = await encodeTiff(imageData);
+    const blob = await encodeAvif(imageData, quality);
+    return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
   }
-  return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
+
+  // TIFF：浏览器 <img> 无法渲染，复用同一 canvas 额外生成 PNG 预览，
+  // 下载仍用真实 TIFF blob（url），预览用 previewUrl。
+  const { encodeTiff } = await import('./encoders/tiff');
+  const blob = await encodeTiff(imageData);
+  const previewBlob = await new Promise<Blob | null>((resolve) =>
+    canvas.toBlob(resolve, 'image/png'),
+  );
+  return {
+    blob,
+    url: URL.createObjectURL(blob),
+    previewUrl: previewBlob ? URL.createObjectURL(previewBlob) : undefined,
+    width,
+    height,
+    size: blob.size,
+  };
 }

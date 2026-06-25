@@ -81,7 +81,7 @@ const erasedCount = ref(0);
 /** 文字水印 */
 const watermarkEnabled = ref(false);
 const watermarkText = ref(DEFAULT_WATERMARK.text);
-const watermarkSize = ref(DEFAULT_WATERMARK.fontSize);
+const watermarkSize = ref(DEFAULT_WATERMARK.fontSizePct);
 const watermarkColor = ref(DEFAULT_WATERMARK.color);
 const watermarkOpacity = ref(DEFAULT_WATERMARK.opacity);
 const watermarkRotation = ref(DEFAULT_WATERMARK.rotation);
@@ -112,13 +112,11 @@ let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 /** 聚合的水印选项（供 convertImage） */
 const watermarkOpts = computed<WatermarkOptions>(() => ({
   text: watermarkText.value,
-  fontSize: watermarkSize.value,
+  fontSizePct: watermarkSize.value,
   color: watermarkColor.value,
   opacity: watermarkOpacity.value,
   rotation: watermarkRotation.value,
   slot: watermarkSlot.value,
-  padding: DEFAULT_WATERMARK.padding,
-  tileGap: DEFAULT_WATERMARK.tileGap,
 }));
 
 /** 输入是否为 JPEG（无损剥离仅对 JPEG 生效） */
@@ -165,14 +163,6 @@ const losslessFormats = computed(() => OUTPUT_FORMATS.filter((f) => f.group === 
 
 /** 当前是否 ICO 输出（固定多尺寸，禁用 scale） */
 const isIco = computed(() => format.value === 'ico');
-
-/** 无损格式的禁用提示文案 */
-const losslessHint = computed(() => {
-  if (format.value === 'png') return 'PNG 为无损格式，不支持质量调节';
-  if (format.value === 'tiff') return 'TIFF 为无损格式，不支持质量调节';
-  if (format.value === 'ico') return 'ICO 为无损格式，不支持质量调节';
-  return '';
-});
 
 /** 体积节省比（负数表示增大） */
 const savings = computed(() => {
@@ -343,6 +333,7 @@ watch([format, quality, scale, eraseExif, watermarkEnabled, watermarkOpts], () =
 function clearResult(): void {
   if (result.value) {
     URL.revokeObjectURL(result.value.url);
+    if (result.value.previewUrl) URL.revokeObjectURL(result.value.previewUrl);
     result.value = null;
   }
 }
@@ -366,8 +357,11 @@ function handlePick(): void {
 }
 
 function handleChange(event: Event): void {
-  const file = (event.target as HTMLInputElement).files?.[0];
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
   if (file) void processFile(file);
+  // 重置 value，确保连续选择同一文件仍能触发 change
+  input.value = '';
 }
 
 function handleDrop(event: DragEvent): void {
@@ -427,7 +421,7 @@ function handleClear(): void {
   eraseExif.value = false;
   watermarkEnabled.value = false;
   watermarkText.value = DEFAULT_WATERMARK.text;
-  watermarkSize.value = DEFAULT_WATERMARK.fontSize;
+  watermarkSize.value = DEFAULT_WATERMARK.fontSizePct;
   watermarkColor.value = DEFAULT_WATERMARK.color;
   watermarkOpacity.value = DEFAULT_WATERMARK.opacity;
   watermarkRotation.value = DEFAULT_WATERMARK.rotation;
@@ -463,7 +457,7 @@ onUnmounted(() => {
 
           <div
             v-if="!originalUrl"
-            class="border-2 border-dashed rounded-lg p-10 min-h-[360px] flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
+            class="border-2 border-dashed rounded-lg p-10 min-h-90 flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
             :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
             @click="handlePick"
             @drop="handleDrop"
@@ -474,12 +468,28 @@ onUnmounted(() => {
             <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF，上限 50MB</div>
           </div>
 
-          <div v-else class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
-            <img
-              :src="originalUrl"
-              alt="原始图片"
-              class="max-h-[360px] w-full object-contain rounded-sm bg-white"
-            />
+          <div
+            v-else
+            class="group relative bg-hover border rounded-sm p-3 flex flex-col gap-2 cursor-pointer transition-[border-color] duration-150"
+            :class="isDragging ? 'border-accent' : 'border-border hover:border-accent'"
+            @click="handlePick"
+            @drop="handleDrop"
+            @dragover="handleDragOver"
+            @dragleave="handleDragLeave"
+          >
+            <div class="relative">
+              <img
+                :src="originalUrl"
+                alt="原始图片"
+                class="max-h-90 w-full object-contain rounded-sm bg-white"
+              />
+              <div
+                class="absolute inset-0 flex items-center justify-center rounded-sm bg-black/45 text-sm text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100"
+                :class="isDragging ? 'opacity-100' : ''"
+              >
+                点击或拖入图片更换 · Ctrl+V 粘贴
+              </div>
+            </div>
             <div class="text-xs text-muted font-mono">
               {{ loaded?.width }}×{{ loaded?.height }} · {{ formatBytes(originalSize) }}
             </div>
@@ -497,9 +507,9 @@ onUnmounted(() => {
 
           <div v-if="result" class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
             <img
-              :src="result.url"
+              :src="result.previewUrl ?? result.url"
               alt="压缩结果"
-              class="max-h-[360px] w-full object-contain rounded-sm bg-white"
+              class="max-h-90 w-full object-contain rounded-sm bg-white"
             />
             <div class="flex items-center justify-between text-xs font-mono">
               <span class="text-muted">{{ result.width }}×{{ result.height }} · {{ formatBytes(result.size) }}</span>
@@ -510,16 +520,13 @@ onUnmounted(() => {
             <p v-if="eraseExif && erasedCount > 0" class="text-[0.8125rem]" :class="lastPath === 'strip' ? 'text-success' : 'text-muted'">
               {{ lastPath === 'strip' ? `已无损清除 ${erasedCount} 项隐私信息` : `已通过重新编码清除 ${erasedCount} 项隐私信息` }}
             </p>
-            <p v-else-if="savings && savings.pct < 0" class="text-[0.8125rem] text-muted">
-              当前设置下体积未减小，可降低质量或更换为 WebP
-            </p>
           </div>
 
-          <div v-else-if="loaded" class="bg-hover border border-border rounded-sm p-10 min-h-[360px] flex flex-col items-center justify-center text-center text-muted text-sm">
+          <div v-else-if="loaded" class="bg-hover border border-border rounded-sm p-10 min-h-90 flex flex-col items-center justify-center text-center text-muted text-sm">
             正在生成预览…
           </div>
 
-          <div v-else class="bg-hover border border-border rounded-sm p-10 min-h-[360px] flex flex-col items-center justify-center text-center text-muted text-sm">
+          <div v-else class="bg-hover border border-border rounded-sm p-10 min-h-90 flex flex-col items-center justify-center text-center text-muted text-sm">
             上传图片后预览压缩结果
           </div>
         </div>
@@ -527,56 +534,59 @@ onUnmounted(() => {
 
       <!-- 控件栏（横跨两栏） -->
       <template #actions>
-        <div class="w-full flex flex-col gap-4 border-t border-border pt-4">
-          <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
-            <div class="flex items-center gap-4 flex-wrap">
-              <OptionRadioGroup v-model="format" :options="lossyFormats" label="有损" />
-              <OptionRadioGroup v-model="format" :options="losslessFormats" label="无损" />
+        <div class="w-full flex flex-col gap-5 border-t border-border pt-4">
+          <!-- 输出设置 -->
+          <section class="flex flex-col gap-3">
+            <h3 class="text-[0.8125rem] font-semibold text-text">输出设置</h3>
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <div class="flex items-center gap-4 flex-wrap">
+                <OptionRadioGroup v-model="format" :options="lossyFormats" label="有损" />
+                <OptionRadioGroup v-model="format" :options="losslessFormats" label="无损" />
+              </div>
+
+              <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
+                <span class="text-[0.8125rem] text-muted">质量</span>
+                <input
+                  v-model.number="quality"
+                  type="range"
+                  min="10"
+                  max="100"
+                  step="1"
+                  aria-label="质量"
+                  :disabled="qualityDisabled"
+                  class="w-32 accent-accent"
+                />
+                <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+              </div>
+
+              <div class="flex items-center gap-2" :class="isIco ? 'opacity-50' : ''">
+                <span class="text-[0.8125rem] text-muted">尺寸</span>
+                <input
+                  v-model.number="scale"
+                  type="range"
+                  min="1"
+                  max="100"
+                  step="1"
+                  aria-label="尺寸"
+                  :disabled="isIco"
+                  class="w-32 accent-accent"
+                />
+                <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
+                <span v-if="targetSize && !isIco" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
+              </div>
             </div>
 
-            <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
-              <span class="text-[0.8125rem] text-muted">质量</span>
-              <input
-                v-model.number="quality"
-                type="range"
-                min="10"
-                max="100"
-                step="1"
-                aria-label="质量"
-                :disabled="qualityDisabled"
-                class="w-32 accent-accent"
-              />
-              <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+            <!-- 预留一行高度，避免切换格式时提示文本出现/消失导致页面跳动 -->
+            <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
+              <p v-if="isIco" class="m-0">ICO 固定输出 16 / 32 / 48 三尺寸（favicon 标准），尺寸与质量滑块不适用</p>
+              <p v-else-if="loaded && needsFillBackground(format)" class="m-0">
+                JPEG 不支持透明背景，透明区域将填充白色
+              </p>
             </div>
-
-            <div class="flex items-center gap-2" :class="isIco ? 'opacity-50' : ''">
-              <span class="text-[0.8125rem] text-muted">尺寸</span>
-              <input
-                v-model.number="scale"
-                type="range"
-                min="1"
-                max="100"
-                step="1"
-                aria-label="尺寸"
-                :disabled="isIco"
-                class="w-32 accent-accent"
-              />
-              <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
-              <span v-if="targetSize && !isIco" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
-            </div>
-          </div>
-
-          <!-- 预留一行高度，避免切换格式时提示文本出现/消失导致页面跳动 -->
-          <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
-            <p v-if="isIco" class="m-0">ICO 固定输出 16 / 32 / 48 三尺寸（favicon 标准），尺寸与质量滑块不适用</p>
-            <p v-else-if="qualityDisabled" class="m-0">{{ losslessHint }}</p>
-            <p v-else-if="loaded && needsFillBackground(format)" class="m-0">
-              JPEG 不支持透明背景，透明区域将填充白色
-            </p>
-          </div>
+          </section>
 
           <!-- 隐私元数据擦除 -->
-          <div v-if="loaded" class="flex flex-col gap-2 border-t border-border pt-3">
+          <section class="flex flex-col gap-2 border-t border-border pt-4">
             <ToggleSwitch v-model="eraseExif" label="擦除隐私元数据" />
             <div v-if="eraseExif" class="flex flex-col gap-1 text-[0.8125rem] text-muted">
               <p v-if="privacyHint" class="m-0">{{ privacyHint }}</p>
@@ -597,51 +607,67 @@ onUnmounted(() => {
               </div>
               <p v-else class="m-0">未检测到敏感信息</p>
             </div>
-          </div>
+          </section>
 
           <!-- 文字水印 -->
-          <div v-if="loaded" class="flex flex-col gap-2 border-t border-border pt-3">
+          <section class="flex flex-col gap-3 border-t border-border pt-4">
             <ToggleSwitch v-model="watermarkEnabled" label="添加文字水印" />
-            <div v-if="watermarkEnabled" class="flex flex-wrap items-center gap-x-5 gap-y-2">
-              <input
-                v-model="watermarkText"
-                type="text"
-                placeholder="水印文字"
-                aria-label="水印文字"
-                class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] w-40"
-              />
-              <div class="flex items-center gap-2">
-                <span class="text-[0.8125rem] text-muted">字号</span>
-                <input v-model.number="watermarkSize" type="range" min="10" max="120" step="1" aria-label="字号" class="w-28 accent-accent" />
-                <span class="text-[0.8125rem] font-mono w-8">{{ watermarkSize }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[0.8125rem] text-muted">透明度</span>
-                <input v-model.number="watermarkOpacity" type="range" min="0" max="1" step="0.05" aria-label="透明度" class="w-28 accent-accent" />
-                <span class="text-[0.8125rem] font-mono w-8">{{ Math.round(watermarkOpacity * 100) }}%</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[0.8125rem] text-muted">旋转</span>
-                <input v-model.number="watermarkRotation" type="range" min="-90" max="90" step="1" aria-label="旋转" class="w-28 accent-accent" />
-                <span class="text-[0.8125rem] font-mono w-10">{{ watermarkRotation }}°</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[0.8125rem] text-muted">颜色</span>
-                <input v-model="watermarkColor" type="color" aria-label="颜色" class="w-8 h-8 rounded-sm cursor-pointer border border-border bg-surface p-0.5" />
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[0.8125rem] text-muted">位置</span>
-                <SelectListbox
-                  class="w-24"
-                  :model-value="watermarkSlot"
-                  :options="watermarkSlotOptions"
-                  @update:model-value="(v) => (watermarkSlot = v as WatermarkSlot)"
+            <div v-if="watermarkEnabled" class="flex flex-col gap-3">
+              <label class="flex flex-col gap-1">
+                <span class="text-[0.8125rem] text-muted">水印文字</span>
+                <input
+                  v-model="watermarkText"
+                  type="text"
+                  placeholder="水印文字"
+                  aria-label="水印文字"
+                  class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] w-full max-w-80"
                 />
+              </label>
+
+              <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3">
+                <div class="flex flex-col gap-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[0.8125rem] text-muted">大小</span>
+                    <span class="text-[0.8125rem] font-mono">{{ watermarkSize }}%</span>
+                  </div>
+                  <input v-model.number="watermarkSize" type="range" min="1" max="12" step="1" aria-label="大小" class="w-full accent-accent" />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[0.8125rem] text-muted">透明度</span>
+                    <span class="text-[0.8125rem] font-mono">{{ Math.round(watermarkOpacity * 100) }}%</span>
+                  </div>
+                  <input v-model.number="watermarkOpacity" type="range" min="0" max="1" step="0.05" aria-label="透明度" class="w-full accent-accent" />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[0.8125rem] text-muted">旋转</span>
+                    <span class="text-[0.8125rem] font-mono">{{ watermarkRotation }}°</span>
+                  </div>
+                  <input v-model.number="watermarkRotation" type="range" min="-90" max="90" step="1" aria-label="旋转" class="w-full accent-accent" />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <span class="text-[0.8125rem] text-muted">颜色</span>
+                  <input v-model="watermarkColor" type="color" aria-label="颜色" class="w-12 h-8 rounded-sm cursor-pointer border border-border bg-surface p-0.5" />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <span class="text-[0.8125rem] text-muted">位置</span>
+                  <SelectListbox
+                    class="w-full"
+                    :model-value="watermarkSlot"
+                    :options="watermarkSlotOptions"
+                    @update:model-value="(v) => (watermarkSlot = v as WatermarkSlot)"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 border-t border-border pt-4">
             <ClearButton @clear="handleClear" />
             <button
               type="button"

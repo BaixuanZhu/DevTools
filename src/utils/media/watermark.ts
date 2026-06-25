@@ -46,30 +46,41 @@ export interface WatermarkLayoutOptions {
   tileGap: number;
 }
 
-/** 完整水印选项（外观 + 布局），供 {@link drawWatermark} 使用。 */
-export interface WatermarkOptions extends WatermarkLayoutOptions {
+/**
+ * 完整水印选项（外观 + 布局），供 {@link drawWatermark} 使用。
+ *
+ * 尺寸相关参数均为「相对短边的比例」而非绝对像素：字号取 `fontSizePct`，
+ * 边距与平铺间距由绘制层依据画布短边自动换算（见 {@link PADDING_RATIO}、
+ * {@link TILE_GAP_RATIO}），从而对任意尺寸图片自适应。
+ */
+export interface WatermarkOptions {
   /** 水印文本（空串则不绘制） */
   text: string;
-  /** 字号（像素） */
-  fontSize: number;
+  /** 字号占图片短边的百分比（如 4 表示 4%） */
+  fontSizePct: number;
   /** CSS 颜色值，如 `#ffffff` */
   color: string;
   /** 不透明度 0-1 */
   opacity: number;
   /** 旋转角度（度，顺时针） */
   rotation: number;
+  /** 锚位或平铺 */
+  slot: WatermarkSlot;
 }
+
+/** 单点模式边距占画布短边的比例。 */
+const PADDING_RATIO = 0.03;
+/** 平铺模式网格间距占画布短边的比例（密度独立于字号）。 */
+const TILE_GAP_RATIO = 0.18;
 
 /** 默认水印参数（组件初始化用）。 */
 export const DEFAULT_WATERMARK: WatermarkOptions = {
   text: '© 你的名字',
-  fontSize: 28,
+  fontSizePct: 4,
   color: '#ffffff',
   opacity: 0.5,
   rotation: -30,
   slot: 'bottom-right',
-  padding: 24,
-  tileGap: 180,
 };
 
 /** 九宫格锚位的对齐方式（列决定 align，行决定 baseline）。 */
@@ -145,7 +156,9 @@ export function computeWatermarkPositions(
 /**
  * 在 Canvas 2D 上下文上绘制文字水印。
  *
- * 设置字号/颜色/不透明度后，对每个锚点平移并旋转，按对齐方式绘制文本。
+ * 尺寸自适应：依据画布短边把 `fontSizePct` 换算为实际字号，边距与平铺间距
+ * 按固定比例（{@link PADDING_RATIO} / {@link TILE_GAP_RATIO}）换算，故大图小图
+ * 水印观感一致。随后对每个锚点平移并旋转，按对齐方式绘制文本。
  * 文本为空白时不绘制。依赖浏览器 Canvas API，不做单测。
  *
  * @param ctx Canvas 2D 上下文（已绘制完图像内容）
@@ -160,13 +173,17 @@ export function drawWatermark(
   opts: WatermarkOptions,
 ): void {
   if (!opts.text.trim()) return;
-  const anchors = computeWatermarkPositions(width, height, opts);
+  const shortSide = Math.min(width, height);
+  const fontPx = Math.max(1, (shortSide * opts.fontSizePct) / 100);
+  const padding = shortSide * PADDING_RATIO;
+  const tileGap = shortSide * TILE_GAP_RATIO;
+  const anchors = computeWatermarkPositions(width, height, { slot: opts.slot, padding, tileGap });
   const opacity = Math.max(0, Math.min(1, opts.opacity));
 
   ctx.save();
   ctx.globalAlpha = opacity;
   ctx.fillStyle = opts.color;
-  ctx.font = `${opts.fontSize}px sans-serif`;
+  ctx.font = `${fontPx}px sans-serif`;
   for (const a of anchors) {
     ctx.save();
     ctx.translate(a.x, a.y);
