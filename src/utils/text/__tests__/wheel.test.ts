@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeWeight, pickWeightedIndex } from '../wheel';
+import { normalizeWeight, pickWeightedIndex, computeSectors } from '../wheel';
 
 describe('normalizeWeight', () => {
   it('保留正有限值', () => {
@@ -27,7 +27,6 @@ describe('pickWeightedIndex', () => {
   });
   it('权重不等时高权重命中更频繁', () => {
     const weights = [1, 9];
-    let hits1 = 0;
     let n = 0;
     const rng = () => (n++ % 10) / 10; // 0,0.1,...,0.9
     let high = 0;
@@ -35,5 +34,31 @@ describe('pickWeightedIndex', () => {
       if (pickWeightedIndex(weights, rng) === 1) high++;
     }
     expect(high).toBe(9); // 总和10，仅落点0.0命中idx0，其余命中idx1
+  });
+});
+
+describe('computeSectors', () => {
+  it('等权时均分 360 度', () => {
+    const s = computeSectors([
+      { text: 'a', weight: 1 },
+      { text: 'b', weight: 1 },
+      { text: 'c', weight: 1 },
+      { text: 'd', weight: 1 },
+    ]);
+    expect(s).toHaveLength(4);
+    expect(s[0]).toEqual({ startDeg: 0, endDeg: 90, midDeg: 45 });
+    expect(s[3].endDeg).toBeCloseTo(360);
+  });
+  it('面积正比于权重', () => {
+    const s = computeSectors([
+      { text: 'a', weight: 1 },
+      { text: 'b', weight: 3 },
+    ]);
+    expect(s[0].endDeg).toBeCloseTo(90);
+    expect(s[1].startDeg).toBeCloseTo(90);
+    expect(s[1].endDeg).toBeCloseTo(360);
+  });
+  it('空数组返回空', () => {
+    expect(computeSectors([])).toEqual([]);
   });
 });

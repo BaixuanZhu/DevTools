@@ -52,3 +52,32 @@ export function createCryptoRng(): () => number {
     return buf[0] / 2 ** 32;
   };
 }
+
+/** 扇区角度（度），从 0 起顺时针 */
+export interface SectorAngle {
+  /** 起始角度 */
+  startDeg: number;
+  /** 结束角度 */
+  endDeg: number;
+  /** 中线角度，用于动画落点与文字绘制 */
+  midDeg: number;
+}
+
+/**
+ * 计算每个选项的扇区起止角度，面积正比于权重，总和为 360 度。
+ * @param items 选项列表
+ * @returns 与 items 等长的扇区角度数组；空输入返回空数组
+ */
+export function computeSectors(items: WheelItem[]): SectorAngle[] {
+  if (items.length === 0) return [];
+  const total = items.reduce((s, it) => s + it.weight, 0);
+  const sectors: SectorAngle[] = [];
+  let acc = 0;
+  for (const it of items) {
+    const startDeg = (acc / total) * 360;
+    acc += it.weight;
+    const endDeg = (acc / total) * 360;
+    sectors.push({ startDeg, endDeg, midDeg: (startDeg + endDeg) / 2 });
+  }
+  return sectors;
+}
