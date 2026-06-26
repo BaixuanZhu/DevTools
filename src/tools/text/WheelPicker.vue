@@ -101,7 +101,7 @@ function restoreWon(index: number): void {
   }
 }
 
-/** 重置：清空已中奖列表（不恢复到 items，避免与现有项重复；由用户决定） */
+/** 全部重置：将所有已中奖项恢复回转盘并清空已中奖列表 */
 function resetWon(): void {
   for (const it of wonItems.value) items.value.push(it);
   wonItems.value = [];
