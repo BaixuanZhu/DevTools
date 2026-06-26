@@ -112,7 +112,7 @@ function draw(): void {
   const radius = CANVAS_SIZE / 2 - 4;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-  if (list.length === 0) {
+  if (list.length < 2) {
     ctx.fillStyle = '#9ca3af';
     ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
