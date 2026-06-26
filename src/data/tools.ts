@@ -445,12 +445,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-converter',
     name: '图片转换与压缩',
-    description: 'PNG / JPG / WebP / AVIF 等格式互转与质量压缩、尺寸缩放，支持 EXIF 隐私擦除（无损去除 GPS 与设备信息）和多尺寸 ICO 图标导出，纯浏览器端本地处理',
-    seoDescription: '免费在线图片转换与压缩工具，支持多图批量处理（一次最多 30 张），PNG、JPG、WebP、AVIF、TIFF、ICO 格式互转与读取 GIF、BMP，自定义质量压缩与按比例尺寸缩放；可逐图裁切、点击预览转换结果、一键打包 ZIP 下载；ICO 可自选 16 / 32 / 48 / 64 / 128 / 256 多尺寸并选择裁切适配方式（裁切填满 / 留白完整、九宫格锚点），一键生成 favicon；内置 EXIF 隐私擦除（默认开启，无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，即开即用。',
+    description: 'PNG / JPG / WebP / AVIF 等格式互转与质量压缩、尺寸缩放，支持 EXIF 隐私擦除（无损去除 GPS 与设备信息）和 ICO 图标导出，纯浏览器端本地处理',
+    seoDescription: '免费在线图片转换与压缩工具，支持多图批量处理（一次最多 30 张），PNG、JPG、WebP、AVIF、TIFF、ICO 格式互转与读取 GIF、BMP，自定义质量压缩与按比例尺寸缩放；可逐图裁切、点击预览转换结果、一键打包 ZIP 下载；ICO 可自选 16 / 32 / 48 / 64 / 128 / 256 尺寸并选择裁切适配方式（裁切填满 / 留白完整、九宫格锚点），一键生成 favicon；内置 EXIF 隐私擦除（默认开启，无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，即开即用。',
     category: '媒体工具',
     icon: '🗜️',
     path: '/media/image-converter',
-    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩', 'avif 转换', 'tiff 转 png', 'ico 转换', 'favicon 生成', '图片转 avif', 'gif 转 png', 'exif 擦除', '去除 exif', '图片去隐私', '去除 gps 信息', '删除拍摄位置', '元数据清除', 'ico 多尺寸', 'favicon 制作', '图标裁切'],
+    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩', 'avif 转换', 'tiff 转 png', 'ico 转换', 'favicon 生成', '图片转 avif', 'gif 转 png', 'exif 擦除', '去除 exif', '图片去隐私', '去除 gps 信息', '删除拍摄位置', '元数据清除', 'ico 生成', 'favicon 制作', '图标裁切'],
     relatedToolIds: ['base64-to-image', 'qr-code-generator'],
   },
   {

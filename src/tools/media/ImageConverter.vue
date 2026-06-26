@@ -122,7 +122,7 @@ onUnmounted(() => {
   <div>
     <ToolHeader
       title="图片转换与压缩"
-      description="批量将 PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除、逐图裁切与多尺寸 ICO 导出，纯浏览器端本地处理"
+      description="批量将 PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除、逐图裁切与 ICO 图标导出，纯浏览器端本地处理"
       :show-example="false"
     />
 

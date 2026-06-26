@@ -297,7 +297,7 @@ const toolFaqs: Record<string, FaqItem[]> = {
     },
     {
       question: 'ICO 可以输出哪些尺寸？',
-      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具提供 <strong>16 / 32 / 48 / 64 / 128 / 256</strong> 多个标准尺寸供自由勾选（默认 16 / 32 / 48），所选尺寸会一并打包进同一个 .ico 文件，覆盖从浏览器标签到桌面图标的不同需求。',
+      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具提供 <strong>16 / 32 / 48 / 64 / 128 / 256</strong> 标准尺寸供选择（默认 32），生成对应尺寸的 .ico 图标，覆盖从浏览器标签到桌面图标的不同需求。',
     },
     {
       question: '转 ICO 时非正方形图片会怎么处理？',
