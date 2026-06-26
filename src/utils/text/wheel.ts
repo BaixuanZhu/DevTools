@@ -122,6 +122,46 @@ function fromUrlSafeBase64(data: string): string {
 }
 
 /**
+ * 解析批量导入文本为选项列表：按行拆分，去首尾空白，忽略空行，按名称去重（保留首次），
+ * 权重统一为 1，数量上限 MAX_ITEMS。
+ * @param text 多行文本，每行一个选项名称
+ * @returns 选项列表
+ */
+export function parseBatch(text: string): WheelItem[] {
+  const seen = new Set<string>();
+  const items: WheelItem[] = [];
+  for (const line of text.split('\n')) {
+    const t = line.trim();
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    items.push({ text: t, weight: 1 });
+    if (items.length >= MAX_ITEMS) break;
+  }
+  return items;
+}
+
+/**
+ * 按下标在色相环上等间隔取色，保证相邻扇区色相区分度。
+ * @param index 扇区下标
+ * @param total 扇区总数
+ * @returns HSL 颜色字符串
+ */
+export function sliceColor(index: number, total: number): string {
+  const hue = total > 0 ? Math.round((index * 360) / total) % 360 : 0;
+  return `hsl(${hue}, 70%, 60%)`;
+}
+
+/** 默认示例选项：打开即可体验 */
+export const DEFAULT_ITEMS: WheelItem[] = [
+  { text: '一等奖', weight: 1 },
+  { text: '二等奖', weight: 1 },
+  { text: '三等奖', weight: 1 },
+  { text: '谢谢参与', weight: 1 },
+  { text: '再来一次', weight: 1 },
+  { text: '神秘大奖', weight: 1 },
+];
+
+/**
  * 将选项编码为 URL-safe Base64 分享串。
  * 所有权重为 1 时退化为纯名称数组以缩短链接；否则编码 [text, weight] 对数组。
  * @param items 选项列表

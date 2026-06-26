@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeWeight, pickWeightedIndex, computeSectors, computeTargetRotation, POINTER_DEG, encodeShare, decodeShare } from '../wheel';
+import { normalizeWeight, pickWeightedIndex, computeSectors, computeTargetRotation, POINTER_DEG, encodeShare, decodeShare, parseBatch, sliceColor, DEFAULT_ITEMS } from '../wheel';
 
 describe('normalizeWeight', () => {
   it('保留正有限值', () => {
@@ -102,5 +102,38 @@ describe('encodeShare / decodeShare', () => {
   it('坏输入抛错', () => {
     expect(() => decodeShare('!!!not-base64!!!')).toThrow();
     expect(() => decodeShare('')).toThrow();
+  });
+});
+
+describe('parseBatch', () => {
+  it('按行解析并忽略空行/首尾空白', () => {
+    expect(parseBatch(' 苹果 \n\n香蕉\n  \n橙子')).toEqual([
+      { text: '苹果', weight: 1 },
+      { text: '香蕉', weight: 1 },
+      { text: '橙子', weight: 1 },
+    ]);
+  });
+  it('去重保留首次出现', () => {
+    expect(parseBatch('A\nB\nA')).toEqual([
+      { text: 'A', weight: 1 },
+      { text: 'B', weight: 1 },
+    ]);
+  });
+  it('超过上限截断', () => {
+    const many = Array.from({ length: 60 }, (_, i) => `x${i}`).join('\n');
+    expect(parseBatch(many)).toHaveLength(50);
+  });
+});
+
+describe('sliceColor', () => {
+  it('返回合法 hsl 字符串且随下标变化', () => {
+    expect(sliceColor(0, 4)).toMatch(/^hsl\(/);
+    expect(sliceColor(0, 4)).not.toBe(sliceColor(1, 4));
+  });
+});
+
+describe('DEFAULT_ITEMS', () => {
+  it('提供至少 2 个默认选项', () => {
+    expect(DEFAULT_ITEMS.length).toBeGreaterThanOrEqual(2);
   });
 });
