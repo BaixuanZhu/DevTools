@@ -5,7 +5,7 @@
  * - 左侧：结构化选项列表（名称+权重）、批量粘贴导入、操作按钮
  * - 右侧：Canvas 转盘与旋转动画（后续任务填充）
  */
-import { ref } from 'vue';
+import { ref, onMounted, watch, nextTick } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
@@ -15,6 +15,11 @@ import {
   normalizeWeight,
   parseBatch,
   DEFAULT_ITEMS,
+  computeSectors,
+  sliceColor,
+  pickWeightedIndex,
+  createCryptoRng,
+  computeTargetRotation,
 } from '../../utils/text/wheel';
 
 /** 活跃选项（可被抽中），唯一真相源 */
@@ -71,6 +76,128 @@ function clearAll(): void {
   items.value = DEFAULT_ITEMS.map((it) => ({ ...it }));
   batchText.value = '';
 }
+
+/** Canvas 引用 */
+const canvasRef = ref<HTMLCanvasElement | null>(null);
+/** 当前旋转角（度） */
+const rotation = ref(0);
+/** 是否旋转中（锁定交互） */
+const spinning = ref(false);
+/** 最近一次中奖项文本 */
+const result = ref<string>('');
+
+/** 有效选项（名称非空），用于绘制与抽取 */
+function validItems(): WheelItem[] {
+  return items.value.filter((it) => it.text.trim().length > 0);
+}
+
+const rng = createCryptoRng();
+const CANVAS_SIZE = 320; // CSS 像素
+
+/** 将转盘绘制到 Canvas（按当前 rotation 与有效选项） */
+function draw(): void {
+  const canvas = canvasRef.value;
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_SIZE * dpr;
+  canvas.height = CANVAS_SIZE * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+  const list = validItems();
+  const cx = CANVAS_SIZE / 2;
+  const cy = CANVAS_SIZE / 2;
+  const radius = CANVAS_SIZE / 2 - 4;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+
+  if (list.length === 0) {
+    ctx.fillStyle = '#9ca3af';
+    ctx.font = '14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('请添加至少 2 个选项', cx, cy);
+    return;
+  }
+
+  const sectors = computeSectors(list);
+  sectors.forEach((s, i) => {
+    const start = toRad(s.startDeg + rotation.value);
+    const end = toRad(s.endDeg + rotation.value);
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, start, end);
+    ctx.closePath();
+    ctx.fillStyle = sliceColor(i, sectors.length);
+    ctx.fill();
+    // 文字
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(toRad(s.midDeg + rotation.value));
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#1f2937';
+    ctx.font = '13px sans-serif';
+    const label = list[i].text.length > 8 ? list[i].text.slice(0, 7) + '…' : list[i].text;
+    ctx.fillText(label, radius - 10, 4);
+    ctx.restore();
+  });
+}
+
+/** easeOutCubic 缓动 */
+function easeOutCubic(t: number): number {
+  return 1 - Math.pow(1 - t, 3);
+}
+
+/**
+ * 旋转抽取：先按权重选出中奖项，再以 easeOutCubic 缓动旋转到目标角。
+ * 动画结束设置 result，并交由 watch（Task 9）处理不重复移除。
+ */
+function spin(): void {
+  const list = validItems();
+  if (spinning.value || list.length < 2) return;
+  spinning.value = true;
+  result.value = '';
+
+  const winnerIndex = pickWeightedIndex(list.map((it) => it.weight), rng);
+  const sectors = computeSectors(list);
+  const winnerMid = sectors[winnerIndex].midDeg;
+  const start = rotation.value;
+  const target = computeTargetRotation(start, winnerMid, 5);
+  const duration = 4000;
+  const startTime = performance.now();
+
+  function frame(now: number): void {
+    const elapsed = now - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    rotation.value = start + (target - start) * easeOutCubic(t);
+    draw();
+    if (t < 1) {
+      requestAnimationFrame(frame);
+    } else {
+      rotation.value = target;
+      draw();
+      spinning.value = false;
+      onSpinEnd(list[winnerIndex]);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+/** 旋转结束回调（Task 9 填充不重复逻辑，本任务仅记录结果） */
+function onSpinEnd(winner: WheelItem): void {
+  result.value = winner.text;
+}
+
+// 选项变化时重绘（非旋转中）
+watch(items, () => {
+  if (!spinning.value) {
+    void nextTick(() => draw());
+  }
+}, { deep: true });
+
+onMounted(() => {
+  void nextTick(() => draw());
+});
 </script>
 
 <template>
@@ -149,7 +276,30 @@ function clearAll(): void {
       </template>
 
       <template #output>
-        <div class="text-sm text-muted">转盘建设中…</div>
+        <div class="flex flex-col items-center gap-4">
+          <div class="relative" :style="{ width: '320px', height: '320px' }">
+            <!-- 指针：固定在顶部，指向圆心 -->
+            <div
+              class="absolute left-1/2 -top-1 -translate-x-1/2 z-10"
+              style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 18px solid var(--color-accent, #ef4444);"
+            ></div>
+            <canvas
+              ref="canvasRef"
+              class="rounded-full shadow-[0_2px_12px_rgba(0,0,0,0.12)]"
+              :style="{ width: '320px', height: '320px' }"
+            ></canvas>
+          </div>
+          <button
+            class="px-8 py-2.5 rounded-sm bg-accent text-white text-sm font-medium cursor-pointer transition-opacity duration-150 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            :disabled="spinning || validItems().length < 2"
+            @click="spin"
+          >
+            {{ spinning ? '旋转中…' : '开始' }}
+          </button>
+          <p v-if="result" class="text-base">
+            🎉 中奖：<strong class="text-accent">{{ result }}</strong>
+          </p>
+        </div>
       </template>
     </ResponsiveWorkspace>
   </div>
