@@ -37,6 +37,7 @@ const lightboxSlides = computed<LightboxSlide[]>(() =>
   items.value
     .filter((it) => it.status === 'done' && it.result)
     .map((it) => ({
+      id: it.id,
       url: it.result!.previewUrl ?? it.result!.url,
       name: it.name,
       width: it.result!.width,
@@ -86,9 +87,7 @@ async function onPaste(e: ClipboardEvent): Promise<void> {
 
 /** 打开某项预览（定位到 slides 中的索引） */
 function openPreview(id: string): void {
-  const idx = lightboxSlides.value.findIndex(
-    (s) => s.name === items.value.find((it) => it.id === id)?.name,
-  );
+  const idx = lightboxSlides.value.findIndex((s) => s.id === id);
   lightboxStart.value = idx >= 0 ? idx : 0;
 }
 

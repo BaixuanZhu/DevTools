@@ -52,6 +52,8 @@ export interface BatchItem {
   status: BatchStatus;
   result: ConvertResult | null;
   error: string;
+  /** true=strip 无损剥离路径 → 下载后缀 -clean；false=canvas 重编码路径 → 下载后缀 -compressed */
+  outputClean: boolean;
 }
 
 /** 同时处理的图片数量上限 */
@@ -60,6 +62,19 @@ const MAX_ITEMS = 30;
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
 /** 参数变更重转防抖 */
 const REQUEUE_DEBOUNCE_MS = 200;
+
+/**
+ * 生成结果文件名。
+ * @param it 批量项
+ * @param format 当前输出格式
+ * @returns 基础名-clean.ext 或 基础名-compressed.ext
+ */
+function resultFileName(it: BatchItem, format: OutputFormat): string {
+  const base = it.name.replace(/\.[^.]+$/, '') || 'image';
+  const ext = getOutputExtension(format).slice(1);
+  const suffix = it.outputClean ? 'clean' : 'compressed';
+  return `${base}-${suffix}.${ext}`;
+}
 
 /**
  * 创建批量转换状态与操作集合。
@@ -125,6 +140,7 @@ export function useImageBatch(params: ConvertParams) {
       if (isPureStrip(it) && it.originalBytes) {
         const cleaned = stripJpegMetadata(it.originalBytes);
         const blob = new Blob([cleaned], { type: 'image/jpeg' });
+        it.outputClean = true;
         it.result = {
           blob,
           url: URL.createObjectURL(blob),
@@ -133,6 +149,7 @@ export function useImageBatch(params: ConvertParams) {
           size: blob.size,
         };
       } else {
+        it.outputClean = false;
         it.result = await convertImage({
           bitmap: it.bitmap,
           format: params.format,
@@ -228,6 +245,7 @@ export function useImageBatch(params: ConvertParams) {
           status: 'queued',
           result: null,
           error: '',
+          outputClean: false,
         });
       } catch {
         errorMsg.value = `「${file.name}」解码失败，已跳过`;
@@ -288,11 +306,9 @@ export function useImageBatch(params: ConvertParams) {
   function downloadItem(id: string): void {
     const it = items.value.find((x) => x.id === id);
     if (!it?.result) return;
-    const base = it.name.replace(/\.[^.]+$/, '') || 'image';
-    const ext = getOutputExtension(params.format).slice(1);
     const a = document.createElement('a');
     a.href = it.result.url;
-    a.download = `${base}-compressed.${ext}`;
+    a.download = resultFileName(it, params.format);
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -300,11 +316,10 @@ export function useImageBatch(params: ConvertParams) {
 
   /** 打包下载所有已完成项 */
   async function downloadAllZip(): Promise<void> {
-    const ext = getOutputExtension(params.format).slice(1);
     const files: ZipFile[] = items.value
       .filter((it) => it.status === 'done' && it.result)
       .map((it) => ({
-        name: `${it.name.replace(/\.[^.]+$/, '') || 'image'}-compressed.${ext}`,
+        name: resultFileName(it, params.format),
         blob: it.result!.blob,
       }));
     if (files.length === 0) return;

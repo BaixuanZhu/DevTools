@@ -9,6 +9,7 @@ import { formatBytes } from '../../utils/media/image-convert';
 
 /** 灯箱单页 */
 export interface LightboxSlide {
+  id: string;
   url: string;
   name: string;
   width: number;
