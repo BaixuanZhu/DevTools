@@ -104,16 +104,21 @@ export function computeTargetRotation(
   return current + delta + extraTurns * 360;
 }
 
-/** UTF-8 安全的 Base64 编码（含 URL-safe 替换、去 padding） */
+/** UTF-8 安全的 URL-safe Base64 编码（去 padding，+/ 替换为 -_） */
 function toUrlSafeBase64(json: string): string {
-  const b64 = btoa(unescape(encodeURIComponent(json)));
+  const bytes = new TextEncoder().encode(json);
+  let binary = '';
+  for (const b of bytes) binary += String.fromCharCode(b);
+  const b64 = btoa(binary);
   return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 /** URL-safe Base64 还原为 UTF-8 字符串 */
 function fromUrlSafeBase64(data: string): string {
   const b64 = data.replace(/-/g, '+').replace(/_/g, '/');
-  return decodeURIComponent(escape(atob(b64)));
+  const binary = atob(b64);
+  const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
 }
 
 /**

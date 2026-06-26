@@ -95,9 +95,9 @@ describe('encodeShare / decodeShare', () => {
     ];
     expect(decodeShare(encodeShare(items))).toEqual(items);
   });
-  it('编码串为 URL-safe（无 +/= 字符）', () => {
-    const s = encodeShare([{ text: '????', weight: 1 }]);
-    expect(s).not.toMatch(/[+\/=]/);
+  it('编码串为 URL-safe（仅含 A-Za-z0-9_-）', () => {
+    const s = encodeShare([{ text: '中文🎡+/=测试', weight: 1 }]);
+    expect(s).toMatch(/^[A-Za-z0-9_-]+$/);
   });
   it('坏输入抛错', () => {
     expect(() => decodeShare('!!!not-base64!!!')).toThrow();
