@@ -311,6 +311,14 @@ const toolFaqs: Record<string, FaqItem[]> = {
       question: '为什么开启擦除后提示「未检测到敏感信息」？',
       answer: '若上传图片本身<strong>不含 EXIF</strong>（如截图、网络下载图、已被清理过的图），则无可擦除项。擦除仅针对原始元数据，不影响图片内容；此时仍会正常输出图片。',
     },
+    {
+      question: '可以一次转换多张图片吗？',
+      answer: '可以。支持<strong>拖入、点击选择或 Ctrl+V 粘贴</strong>批量导入，一次最多同时处理 <strong>30 张</strong>，所有图片共用顶部统一的格式、质量与尺寸设置，转换完成后可逐张下载或一键<strong>打包成 ZIP</strong> 下载。',
+    },
+    {
+      question: '怎么预览转换后的效果？',
+      answer: '每张图片转换完成后，点击该行的<strong>「预览」</strong>按钮即可在灯箱中查看转换结果大图，并用左右箭头或键盘方向键在多张图片间翻页。',
+    },
   ],
   'ipv6-cidr': [
     {

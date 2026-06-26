@@ -446,7 +446,7 @@ export const tools: ToolMeta[] = [
     id: 'image-converter',
     name: '图片转换与压缩',
     description: 'PNG / JPG / WebP / AVIF 等格式互转与质量压缩、尺寸缩放，支持 EXIF 隐私擦除（无损去除 GPS 与设备信息）和多尺寸 ICO 图标导出，纯浏览器端本地处理',
-    seoDescription: '免费在线图片转换与压缩工具，支持 PNG、JPG、WebP、AVIF、TIFF、ICO 格式互转与读取 GIF、BMP，自定义质量压缩与按比例尺寸缩放；ICO 可自选 16 / 32 / 48 / 64 / 128 / 256 多尺寸并选择裁切适配方式（裁切填满 / 留白完整、九宫格锚点），一键生成 favicon；内置 EXIF 隐私擦除（无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，前端开发、博客配图与隐私保护必备，即开即用。',
+    seoDescription: '免费在线图片转换与压缩工具，支持多图批量处理（一次最多 30 张），PNG、JPG、WebP、AVIF、TIFF、ICO 格式互转与读取 GIF、BMP，自定义质量压缩与按比例尺寸缩放；可逐图裁切、点击预览转换结果、一键打包 ZIP 下载；ICO 可自选 16 / 32 / 48 / 64 / 128 / 256 多尺寸并选择裁切适配方式（裁切填满 / 留白完整、九宫格锚点），一键生成 favicon；内置 EXIF 隐私擦除（默认开启，无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，即开即用。',
     category: '媒体工具',
     icon: '🗜️',
     path: '/media/image-converter',
