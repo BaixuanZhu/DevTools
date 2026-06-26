@@ -5,6 +5,7 @@
  * - 左侧：结构化选项列表（名称+权重）、批量粘贴导入、操作按钮
  * - 右侧：Canvas 转盘与旋转动画（后续任务填充）
  */
+import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import { ref, onMounted, watch, nextTick } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
@@ -71,10 +72,49 @@ function importBatch(): void {
   showToast(added > 0 ? `已导入 ${added} 个选项` : '选项已存在，未新增');
 }
 
+/** 不重复抽取开关，默认开启 */
+const noRepeat = ref(true);
+/** 已中奖项列表（不重复模式下从 items 移出） */
+const wonItems = ref<WheelItem[]>([]);
+
+/** 旋转结束：记录结果；不重复模式下将中奖项移入已中奖列表 */
+function onSpinEnd(winner: WheelItem): void {
+  result.value = winner.text;
+  if (noRepeat.value) {
+    const idx = items.value.findIndex(
+      (it) => it.text === winner.text && it.weight === winner.weight,
+    );
+    if (idx !== -1) {
+      const [removed] = items.value.splice(idx, 1);
+      wonItems.value.push(removed);
+      void nextTick(() => draw());
+    }
+  }
+}
+
+/** 将某已中奖项恢复回转盘 */
+function restoreWon(index: number): void {
+  const [restored] = wonItems.value.splice(index, 1);
+  if (restored) {
+    items.value.push(restored);
+    void nextTick(() => draw());
+  }
+}
+
+/** 重置：清空已中奖列表（不恢复到 items，避免与现有项重复；由用户决定） */
+function resetWon(): void {
+  for (const it of wonItems.value) items.value.push(it);
+  wonItems.value = [];
+  void nextTick(() => draw());
+}
+
 /** 清空：恢复默认示例 */
 function clearAll(): void {
   items.value = DEFAULT_ITEMS.map((it) => ({ ...it }));
+  wonItems.value = [];
   batchText.value = '';
+  result.value = '';
+  void nextTick(() => draw());
 }
 
 /** Canvas 引用 */
@@ -183,11 +223,6 @@ function spin(): void {
   requestAnimationFrame(frame);
 }
 
-/** 旋转结束回调（Task 9 填充不重复逻辑，本任务仅记录结果） */
-function onSpinEnd(winner: WheelItem): void {
-  result.value = winner.text;
-}
-
 // 选项变化时重绘（非旋转中）
 watch(items, () => {
   if (!spinning.value) {
@@ -267,6 +302,35 @@ onMounted(() => {
             >
               导入
             </button>
+          </div>
+
+          <!-- 不重复抽取开关 -->
+          <ToggleSwitch v-model="noRepeat" label="不重复抽取" description="中奖后从转盘移除" />
+
+          <!-- 已中奖列表 -->
+          <div v-if="noRepeat && wonItems.length > 0" class="flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[0.8125rem] text-muted">已中奖（{{ wonItems.length }}）</span>
+              <button
+                class="text-[0.8125rem] text-accent hover:underline cursor-pointer bg-transparent border-0 p-0"
+                @click="resetWon"
+              >
+                全部重置
+              </button>
+            </div>
+            <div
+              v-for="(won, index) in wonItems"
+              :key="index"
+              class="flex items-center justify-between px-2 py-1.5 border border-border rounded-sm bg-card text-sm"
+            >
+              <span class="truncate">{{ won.text }}</span>
+              <button
+                class="shrink-0 text-[0.8125rem] text-accent hover:underline cursor-pointer bg-transparent border-0 p-0 ml-2"
+                @click="restoreWon(index)"
+              >
+                恢复
+              </button>
+            </div>
           </div>
         </div>
       </template>
