@@ -113,6 +113,14 @@ describe('parseBatch', () => {
       { text: '橙子', weight: 1 },
     ]);
   });
+  it('解析 CSV 第二列为权重，缺省或非法归一化为 1', () => {
+    expect(parseBatch('苹果,3\n香蕉，2\n橙子\n葡萄,abc')).toEqual([
+      { text: '苹果', weight: 3 },
+      { text: '香蕉', weight: 2 },
+      { text: '橙子', weight: 1 },
+      { text: '葡萄', weight: 1 },
+    ]);
+  });
   it('去重保留首次出现', () => {
     expect(parseBatch('A\nB\nA')).toEqual([
       { text: 'A', weight: 1 },

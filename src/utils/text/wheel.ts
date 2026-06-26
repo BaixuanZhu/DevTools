@@ -122,19 +122,22 @@ function fromUrlSafeBase64(data: string): string {
 }
 
 /**
- * 解析批量导入文本为选项列表：按行拆分，去首尾空白，忽略空行，按名称去重（保留首次），
- * 权重统一为 1，数量上限 MAX_ITEMS。
- * @param text 多行文本，每行一个选项名称
+ * 解析批量导入文本为选项列表（CSV 格式）：按行拆分，每行以逗号（中/英文）分隔，
+ * 第一列为选项名称，第二列为可选权重；权重缺省或非法时归一化为 1。
+ * 去首尾空白，忽略名称为空的行，按名称去重（保留首次），数量上限 MAX_ITEMS。
+ * @param text 多行 CSV 文本，每行形如 `选项名,权重`
  * @returns 选项列表
  */
 export function parseBatch(text: string): WheelItem[] {
   const seen = new Set<string>();
   const items: WheelItem[] = [];
   for (const line of text.split('\n')) {
-    const t = line.trim();
-    if (!t || seen.has(t)) continue;
-    seen.add(t);
-    items.push({ text: t, weight: 1 });
+    if (!line.trim()) continue;
+    const [rawName, rawWeight] = line.split(/[,，]/);
+    const name = (rawName ?? '').trim();
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    items.push({ text: name, weight: normalizeWeight(Number((rawWeight ?? '').trim())) });
     if (items.length >= MAX_ITEMS) break;
   }
   return items;

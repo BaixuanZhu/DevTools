@@ -9,7 +9,6 @@ import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import { ref, onMounted, watch, nextTick } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
 import { useCopy } from '../../composables/useCopy';
 import {
   type WheelItem,
@@ -75,8 +74,8 @@ function importBatch(): void {
   showToast(added > 0 ? `已导入 ${added} 个选项` : '选项已存在，未新增');
 }
 
-/** 不重复抽取开关，默认开启 */
-const noRepeat = ref(true);
+/** 不重复抽取开关，默认关闭 */
+const noRepeat = ref(false);
 /** 已中奖项列表（不重复模式下从 items 移出） */
 const wonItems = ref<WheelItem[]>([]);
 
@@ -295,6 +294,12 @@ onMounted(() => {
                 + 添加选项
               </button>
             </div>
+            <!-- 列标题：对齐下方输入框 -->
+            <div v-if="items.length > 0" class="flex items-center gap-2 text-[0.75rem] text-muted">
+              <span class="flex-1 min-w-0">选项名称</span>
+              <span class="w-16 text-center">权重</span>
+              <span class="shrink-0 w-7"></span>
+            </div>
             <div
               v-for="(item, index) in items"
               :key="index"
@@ -327,11 +332,11 @@ onMounted(() => {
 
           <!-- 批量导入 -->
           <div class="flex flex-col gap-2">
-            <span class="text-[0.8125rem] text-muted">批量导入（每行一个选项）</span>
+            <span class="text-[0.8125rem] text-muted">批量导入（每行一个，格式：选项名,权重）</span>
             <textarea
               v-model="batchText"
               rows="4"
-              placeholder="粘贴多行文本，每行一个选项&#10;张三&#10;李四&#10;王五"
+              placeholder="每行一个选项，逗号后可选填权重（默认 1）&#10;一等奖,1&#10;二等奖,3&#10;谢谢参与"
               class="w-full px-2 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-mono resize-y focus:outline-none focus:border-accent"
             ></textarea>
             <button
@@ -374,21 +379,28 @@ onMounted(() => {
       </template>
 
       <template #actions>
-        <ClearButton @clear="clearAll" />
-        <button
-          class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
-          @click="copyShareLink"
-        >
-          {{ linkCopied ? '已复制' : '复制分享链接' }}
-        </button>
+        <div class="flex flex-wrap items-center gap-2 w-full">
+          <button
+            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+            @click="clearAll"
+          >
+            清空
+          </button>
+          <button
+            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+            @click="copyShareLink"
+          >
+            {{ linkCopied ? '已复制' : '复制分享链接' }}
+          </button>
+        </div>
       </template>
 
       <template #output>
         <div class="flex flex-col items-center gap-4">
           <div class="relative" :style="{ width: '320px', height: '320px' }">
-            <!-- 指针：固定在顶部，指向圆心 -->
+            <!-- 指针：悬于转盘上方外侧，尖端指向圆盘顶部边缘，不遮挡盘内文本 -->
             <div
-              class="absolute left-1/2 -top-1 -translate-x-1/2 z-10"
+              class="absolute left-1/2 -top-5 -translate-x-1/2 z-10"
               style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 18px solid var(--color-accent, #ef4444);"
             ></div>
             <canvas
