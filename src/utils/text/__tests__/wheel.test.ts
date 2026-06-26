@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeWeight, pickWeightedIndex, computeSectors } from '../wheel';
+import { normalizeWeight, pickWeightedIndex, computeSectors, computeTargetRotation, POINTER_DEG } from '../wheel';
 
 describe('normalizeWeight', () => {
   it('保留正有限值', () => {
@@ -60,5 +60,22 @@ describe('computeSectors', () => {
   });
   it('空数组返回空', () => {
     expect(computeSectors([])).toEqual([]);
+  });
+});
+
+describe('computeTargetRotation', () => {
+  it('最终角使中奖中线落在指针处', () => {
+    const final = computeTargetRotation(0, 90, 2);
+    // 中线90 + 最终rotation ≡ POINTER_DEG (mod 360)
+    expect(((90 + final) % 360 + 360) % 360).toBeCloseTo(POINTER_DEG);
+  });
+  it('叠加额外整圈且大于当前角', () => {
+    const final = computeTargetRotation(0, 90, 2);
+    expect(final).toBeGreaterThanOrEqual(2 * 360);
+  });
+  it('从非零当前角也单调向前', () => {
+    const final = computeTargetRotation(400, 0, 3);
+    expect(final).toBeGreaterThan(400);
+    expect(((0 + final) % 360 + 360) % 360).toBeCloseTo(POINTER_DEG);
   });
 });

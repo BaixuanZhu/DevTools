@@ -81,3 +81,25 @@ export function computeSectors(items: WheelItem[]): SectorAngle[] {
   }
   return sectors;
 }
+
+/** 指针固定角度：正上方（12 点方向）对应 270 度 */
+export const POINTER_DEG = 270;
+
+/**
+ * 计算让中奖扇区中线停在指针处所需的最终旋转角（度）。
+ * 约定屏幕角度 = 扇区角度 + rotation；结果在当前角基础上单调向前并叠加整圈。
+ * @param current 当前旋转角（度）
+ * @param winnerMidDeg 中奖扇区中线角度（度）
+ * @param extraTurns 额外整圈数，增强视觉效果
+ * @returns 最终旋转角（度），> current
+ */
+export function computeTargetRotation(
+  current: number,
+  winnerMidDeg: number,
+  extraTurns: number,
+): number {
+  const desiredMod = (((POINTER_DEG - winnerMidDeg) % 360) + 360) % 360;
+  const currentMod = ((current % 360) + 360) % 360;
+  const delta = (((desiredMod - currentMod) % 360) + 360) % 360;
+  return current + delta + extraTurns * 360;
+}
