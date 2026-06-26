@@ -60,8 +60,6 @@ export interface BatchItem {
 const MAX_ITEMS = 30;
 /** 单张文件大小上限 50MB */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
-/** 参数变更重转防抖 */
-const REQUEUE_DEBOUNCE_MS = 200;
 
 /**
  * 生成结果文件名。
@@ -85,10 +83,14 @@ export function useImageBatch(params: ConvertParams) {
   const errorMsg = ref('');
   let idSeq = 0;
   let processing = false;
-  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const doneCount = computed(
     () => items.value.filter((it) => it.status === 'done').length,
+  );
+
+  /** 待转换数量（驱动「转换」按钮可用性） */
+  const pendingCount = computed(
+    () => items.value.filter((it) => it.status === 'queued').length,
   );
 
   /** 读取 JPEG 的 Orientation（失败回退 1） */
@@ -185,9 +187,15 @@ export function useImageBatch(params: ConvertParams) {
     }
   }
 
-  /** 将所有项标记为 queued 并重新入队（参数变更时调用） */
-  function requeueAll(): void {
-    for (const it of items.value) it.status = 'queued';
+  /** 将已出结果/失败项标记为待转换（参数变更时调用，不自动启动转换） */
+  function markAllStale(): void {
+    for (const it of items.value) {
+      if (it.status === 'done' || it.status === 'error') it.status = 'queued';
+    }
+  }
+
+  /** 启动转换：消费所有待转换项（由「转换」按钮触发） */
+  function convert(): void {
     void processQueue();
   }
 
@@ -251,7 +259,6 @@ export function useImageBatch(params: ConvertParams) {
         errorMsg.value = `「${file.name}」解码失败，已跳过`;
       }
     }
-    void processQueue();
   }
 
   /** 删除并释放某项 */
@@ -262,12 +269,11 @@ export function useImageBatch(params: ConvertParams) {
     items.value.splice(idx, 1);
   }
 
-  /** 重试失败项 */
+  /** 重试失败项（仅转换该项，不影响其他待转换项） */
   function retryItem(id: string): void {
     const it = items.value.find((x) => x.id === id);
     if (!it) return;
-    it.status = 'queued';
-    void processQueue();
+    void convertItem(it);
   }
 
   /**
@@ -298,8 +304,7 @@ export function useImageBatch(params: ConvertParams) {
     it.originalUrl = URL.createObjectURL(blob);
     it.originalSize = blob.size;
     it.originalBytes = null; // 已重新编码，strip 失效
-    it.status = 'queued';
-    await processQueue();
+    await convertItem(it); // 裁切是显式单项操作，立即转换该项
   }
 
   /** 下载单项结果（按 strip/canvas 区分后缀） */
@@ -333,7 +338,7 @@ export function useImageBatch(params: ConvertParams) {
     errorMsg.value = '';
   }
 
-  // 参数变更 → 整批重转（防抖）
+  // 参数变更 → 已出结果项标记为待转换，等待用户点击「转换」
   watch(
     () => [
       params.format,
@@ -346,8 +351,7 @@ export function useImageBatch(params: ConvertParams) {
     ],
     () => {
       if (items.value.length === 0) return;
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(requeueAll, REQUEUE_DEBOUNCE_MS);
+      markAllStale();
     },
     { deep: true },
   );
@@ -357,6 +361,8 @@ export function useImageBatch(params: ConvertParams) {
     errorMsg,
     MAX_ITEMS,
     doneCount,
+    pendingCount,
+    convert,
     addFiles,
     removeItem,
     retryItem,

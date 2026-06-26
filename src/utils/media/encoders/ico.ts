@@ -4,6 +4,9 @@ export const ICO_SIZE_OPTIONS = [16, 32, 48, 64, 128, 256] as const;
 /** ICO 默认勾选的尺寸（favicon 标准三尺寸）。 */
 export const DEFAULT_ICO_SIZES: number[] = [16, 32, 48];
 
+/** ICO 单选模式下的默认尺寸（favicon 最常用尺寸）。 */
+export const DEFAULT_ICO_SIZE = 32;
+
 /** ICO 裁切适配方式：cover=裁切填满正方形，contain=等比留白完整保留。 */
 export type IcoFit = 'cover' | 'contain';
 

@@ -31,16 +31,15 @@ const isDone = computed(() => props.item.status === 'done');
     <div class="flex-1 min-w-0">
       <div class="text-sm text-text truncate" :title="item.name">{{ item.name }}</div>
       <div class="text-xs text-muted font-mono flex items-center gap-1.5 flex-wrap">
-        <span>{{ item.width }}×{{ item.height }} · {{ formatBytes(item.originalSize) }}</span>
+        <span>{{ item.width }}×{{ item.height }}</span>
         <template v-if="isDone && item.result">
-          <span class="text-muted">→</span>
           <span class="text-text">{{ formatBytes(item.result.size) }}</span>
           <span v-if="savings !== null" :class="savings >= 0 ? 'text-success' : 'text-error'">
-            {{ savings >= 0 ? `省 ${savings}%` : `增 ${Math.abs(savings)}%` }}
+            {{ savings >= 0 ? `-${savings}%` : `+${Math.abs(savings)}%` }}
           </span>
         </template>
         <span v-else-if="item.status === 'converting'" class="text-muted">转换中…</span>
-        <span v-else-if="item.status === 'queued'" class="text-muted">等待中…</span>
+        <span v-else-if="item.status === 'queued'" class="text-muted">待转换</span>
         <span v-else-if="item.status === 'error'" class="text-error truncate" :title="item.error">{{ item.error }}</span>
       </div>
     </div>

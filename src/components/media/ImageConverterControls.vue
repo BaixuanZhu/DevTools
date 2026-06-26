@@ -11,6 +11,7 @@ import SelectListbox from '../ui/SelectListbox.vue';
 import { OUTPUT_FORMATS, isLossless, type OutputFormat } from '../../utils/media/image-convert';
 import {
   ICO_SIZE_OPTIONS,
+  DEFAULT_ICO_SIZE,
   type IcoFit,
   type IcoAnchor,
 } from '../../utils/media/encoders/ico';
@@ -44,24 +45,26 @@ const icoAnchorOptions: { value: IcoAnchor; label: string }[] = [
   { value: 'bottom-right', label: '右下' },
 ];
 
-/** 切换 ICO 输出尺寸（至少保留一个） */
-function toggleIcoSize(size: number): void {
-  const sizes = props.params.icoSizes;
-  if (sizes.includes(size)) {
-    if (sizes.length === 1) return;
-    props.params.icoSizes = sizes.filter((s) => s !== size);
-  } else {
-    props.params.icoSizes = [...sizes, size].sort((a, b) => a - b);
-  }
-}
+/** ICO 尺寸单选选项 */
+const icoSizeOptions = computed(() =>
+  ICO_SIZE_OPTIONS.map((s) => ({ value: s, label: String(s) })),
+);
+
+/** ICO 尺寸单选值（桥接底层 icoSizes 数组的首元素） */
+const icoSize = computed<number>({
+  get: () => props.params.icoSizes[0] ?? DEFAULT_ICO_SIZE,
+  set: (v) => {
+    props.params.icoSizes = [v];
+  },
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
       <div class="flex items-center gap-4 flex-wrap">
-        <OptionRadioGroup v-model="params.format" :options="lossyFormats" label="有损" />
-        <OptionRadioGroup v-model="params.format" :options="losslessFormats" label="无损" />
+        <OptionRadioGroup v-model="params.format" :options="lossyFormats" label="有损" inline-label />
+        <OptionRadioGroup v-model="params.format" :options="losslessFormats" label="无损" inline-label />
       </div>
 
       <template v-if="!isIco">
@@ -94,23 +97,8 @@ function toggleIcoSize(size: number): void {
 
     <!-- ICO 专属设置 -->
     <div v-if="isIco" class="flex flex-wrap items-center gap-x-6 gap-y-3">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">尺寸</span>
-        <div class="flex gap-1 flex-wrap">
-          <button
-            v-for="size in ICO_SIZE_OPTIONS" :key="size" type="button"
-            :class="[
-              'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
-              'transition-[background-color,border-color] duration-150',
-              params.icoSizes.includes(size)
-                ? 'bg-accent border-accent text-white'
-                : 'bg-surface border-border text-text hover:bg-hover hover:border-accent',
-            ]"
-            @click="toggleIcoSize(size)"
-          >{{ size }}</button>
-        </div>
-      </div>
-      <OptionRadioGroup v-model="params.icoFit" :options="icoFitOptions" label="适配" />
+      <OptionRadioGroup v-model="icoSize" :options="icoSizeOptions" label="尺寸" inline-label />
+      <OptionRadioGroup v-model="params.icoFit" :options="icoFitOptions" label="适配" inline-label />
       <div v-if="params.icoFit === 'cover'" class="flex items-center gap-2">
         <span class="text-[0.8125rem] text-muted">锚点</span>
         <SelectListbox
@@ -121,7 +109,7 @@ function toggleIcoSize(size: number): void {
     </div>
 
     <div class="min-h-5 text-[0.8125rem] text-muted">
-      <p v-if="isIco" class="m-0">ICO 按所选尺寸多尺寸封装；非正方形图按所选适配方式处理</p>
+      <p v-if="isIco" class="m-0">ICO 按所选尺寸封装；非正方形图按所选适配方式处理</p>
       <p v-else-if="hasItems && params.format === 'jpeg'" class="m-0">JPEG 不支持透明背景，透明区域将填充白色</p>
     </div>
   </div>

@@ -13,20 +13,20 @@ import ImageLightbox, { type LightboxSlide } from '../../components/media/ImageL
 import ImageCropper, { type CropResult } from '../../components/media/ImageCropper.vue';
 import { useImageBatch, type ConvertParams } from '../../composables/useImageBatch';
 import { checkCanvasLimits, DEFAULT_QUALITY } from '../../utils/media/image-convert';
-import { DEFAULT_ICO_SIZES } from '../../utils/media/encoders/ico';
+import { DEFAULT_ICO_SIZE } from '../../utils/media/encoders/ico';
 
 const params = reactive<ConvertParams>({
   format: 'webp',
   quality: DEFAULT_QUALITY,
   scale: 100,
   eraseExif: true,
-  icoSizes: [...DEFAULT_ICO_SIZES],
+  icoSizes: [DEFAULT_ICO_SIZE],
   icoFit: 'cover',
   icoAnchor: 'center',
 });
 
 const batch = useImageBatch(params);
-const { items, errorMsg, doneCount } = batch;
+const { items, errorMsg, doneCount, pendingCount } = batch;
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
 const isDragging = ref(false);
@@ -132,17 +132,24 @@ onUnmounted(() => {
     </div>
 
     <!-- 操作条 -->
-    <div class="flex items-center justify-end gap-2 mb-3">
+    <div class="flex items-center justify-between gap-2 mb-3">
       <button
-        type="button" :disabled="doneCount === 0"
-        class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
-        @click="downloadAll"
-      >下载全部 ZIP</button>
-      <button
-        type="button" :disabled="items.length === 0"
-        class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
-        @click="batch.clearAll()"
-      >清空</button>
+        type="button" :disabled="pendingCount === 0"
+        class="px-4 py-1.5 text-[0.8125rem] rounded-sm bg-accent text-white transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        @click="batch.convert()"
+      >转换{{ pendingCount > 0 ? ` (${pendingCount})` : '' }}</button>
+      <div class="flex items-center gap-2">
+        <button
+          type="button" :disabled="doneCount === 0"
+          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="downloadAll"
+        >保存所有</button>
+        <button
+          type="button" :disabled="items.length === 0"
+          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="batch.clearAll()"
+        >清空</button>
+      </div>
     </div>
 
     <!-- 列表 / 空态 -->
