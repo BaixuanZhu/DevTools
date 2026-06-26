@@ -80,13 +80,11 @@ const noRepeat = ref(true);
 /** 已中奖项列表（不重复模式下从 items 移出） */
 const wonItems = ref<WheelItem[]>([]);
 
-/** 旋转结束：记录结果；不重复模式下将中奖项移入已中奖列表 */
+/** 旋转结束：记录结果；不重复模式下按对象身份匹配将中奖项移入已中奖列表，避免同名同权重项误删 */
 function onSpinEnd(winner: WheelItem): void {
   result.value = winner.text;
   if (noRepeat.value) {
-    const idx = items.value.findIndex(
-      (it) => it.text === winner.text && it.weight === winner.weight,
-    );
+    const idx = items.value.findIndex((it) => it === winner);
     if (idx !== -1) {
       const [removed] = items.value.splice(idx, 1);
       wonItems.value.push(removed);
@@ -229,7 +227,7 @@ function easeOutCubic(t: number): number {
 
 /**
  * 旋转抽取：先按权重选出中奖项，再以 easeOutCubic 缓动旋转到目标角。
- * 动画结束设置 result，并交由 watch（Task 9）处理不重复移除。
+ * 动画结束调用 onSpinEnd 设置 result 并处理不重复移除。
  */
 function spin(): void {
   const list = validItems();
