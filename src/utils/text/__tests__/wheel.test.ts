@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { normalizeWeight, pickWeightedIndex, computeSectors, computeTargetRotation, POINTER_DEG } from '../wheel';
+import { normalizeWeight, pickWeightedIndex, computeSectors, computeTargetRotation, POINTER_DEG, encodeShare, decodeShare } from '../wheel';
 
 describe('normalizeWeight', () => {
   it('保留正有限值', () => {
@@ -77,5 +77,30 @@ describe('computeTargetRotation', () => {
     const final = computeTargetRotation(400, 0, 3);
     expect(final).toBeGreaterThan(400);
     expect(((0 + final) % 360 + 360) % 360).toBeCloseTo(POINTER_DEG);
+  });
+});
+
+describe('encodeShare / decodeShare', () => {
+  it('全为权重1时往返一致（含中文）', () => {
+    const items = [
+      { text: '一等奖', weight: 1 },
+      { text: '谢谢参与', weight: 1 },
+    ];
+    expect(decodeShare(encodeShare(items))).toEqual(items);
+  });
+  it('含非1权重时往返一致', () => {
+    const items = [
+      { text: 'A', weight: 3 },
+      { text: 'B', weight: 1 },
+    ];
+    expect(decodeShare(encodeShare(items))).toEqual(items);
+  });
+  it('编码串为 URL-safe（无 +/= 字符）', () => {
+    const s = encodeShare([{ text: '????', weight: 1 }]);
+    expect(s).not.toMatch(/[+\/=]/);
+  });
+  it('坏输入抛错', () => {
+    expect(() => decodeShare('!!!not-base64!!!')).toThrow();
+    expect(() => decodeShare('')).toThrow();
   });
 });

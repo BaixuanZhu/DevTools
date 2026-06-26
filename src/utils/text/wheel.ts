@@ -103,3 +103,55 @@ export function computeTargetRotation(
   const delta = (((desiredMod - currentMod) % 360) + 360) % 360;
   return current + delta + extraTurns * 360;
 }
+
+/** UTF-8 安全的 Base64 编码（含 URL-safe 替换、去 padding） */
+function toUrlSafeBase64(json: string): string {
+  const b64 = btoa(unescape(encodeURIComponent(json)));
+  return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/** URL-safe Base64 还原为 UTF-8 字符串 */
+function fromUrlSafeBase64(data: string): string {
+  const b64 = data.replace(/-/g, '+').replace(/_/g, '/');
+  return decodeURIComponent(escape(atob(b64)));
+}
+
+/**
+ * 将选项编码为 URL-safe Base64 分享串。
+ * 所有权重为 1 时退化为纯名称数组以缩短链接；否则编码 [text, weight] 对数组。
+ * @param items 选项列表
+ * @returns URL-safe Base64 字符串
+ */
+export function encodeShare(items: WheelItem[]): string {
+  const allOne = items.every((it) => it.weight === 1);
+  const payload = allOne
+    ? items.map((it) => it.text)
+    : items.map((it) => [it.text, it.weight] as [string, number]);
+  return toUrlSafeBase64(JSON.stringify(payload));
+}
+
+/**
+ * 解码分享串为选项数组，对结构与类型严格校验。
+ * @param data URL-safe Base64 分享串
+ * @returns 选项列表
+ * @throws 当数据损坏、结构非法或为空时抛出 Error
+ */
+export function decodeShare(data: string): WheelItem[] {
+  if (!data) throw new Error('分享数据为空');
+  const parsed: unknown = JSON.parse(fromUrlSafeBase64(data));
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('分享数据结构非法');
+  }
+  const items: WheelItem[] = parsed.slice(0, MAX_ITEMS).map((entry) => {
+    if (typeof entry === 'string') {
+      return { text: entry, weight: 1 };
+    }
+    if (Array.isArray(entry) && typeof entry[0] === 'string') {
+      return { text: entry[0], weight: normalizeWeight(Number(entry[1])) };
+    }
+    throw new Error('分享数据项非法');
+  });
+  const valid = items.filter((it) => it.text.trim().length > 0);
+  if (valid.length === 0) throw new Error('分享数据无有效选项');
+  return valid;
+}
