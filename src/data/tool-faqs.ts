@@ -296,16 +296,16 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'AVIF 压缩率高、编码运算量大，浏览器 Canvas 原生不支持输出 AVIF，本工具使用 WASM 编码器（首次使用时加载），大图编码可能需要数秒，属正常现象。',
     },
     {
-      question: 'ICO 输出为什么是固定尺寸？',
-      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具固定输出 <strong>16 / 32 / 48</strong> 三种标准尺寸并打包进同一个 .ico 文件，覆盖主流浏览器需求，因此尺寸滑块对 ICO 不生效。',
+      question: 'ICO 可以输出哪些尺寸？',
+      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具提供 <strong>16 / 32 / 48 / 64 / 128 / 256</strong> 多个标准尺寸供自由勾选（默认 16 / 32 / 48），所选尺寸会一并打包进同一个 .ico 文件，覆盖从浏览器标签到桌面图标的不同需求。',
+    },
+    {
+      question: '转 ICO 时非正方形图片会怎么处理？',
+      answer: 'ICO 要求正方形画布，本工具提供两种适配方式：<strong>裁切填满</strong>（cover）按所选<strong>九宫格锚点</strong>从原图截取正方形区域并填满，不变形但会裁掉边缘；<strong>留白完整</strong>（contain）等比缩放完整保留整图、周围透明留白。可按图片主体位置选择合适方式与锚点。',
     },
     {
       question: '擦除 EXIF 会影响画质吗？',
       answer: '对 <strong>JPEG</strong> 且方向正常的图片走<strong>无损字节剥离</strong>：只删除 EXIF / GPS / 设备等元数据段，像素与画质完全不变；若图片带<strong>旋转方向信息</strong>（如竖拍手机照），为保持显示方向会改走重新编码，画质略有损失。<strong>PNG / WebP</strong> 等其他格式需重新编码擦除。',
-    },
-    {
-      question: '水印支持哪些设置？',
-      answer: '支持<strong>纯文字水印</strong>，可调字号、颜色、透明度、旋转角度；位置提供<strong>九宫格</strong>九个锚位与<strong>整图平铺</strong>两种模式。水印在转换 / 压缩时一并绘制，单张处理，不支持图片 logo 水印与批量。',
     },
     {
       question: '为什么开启擦除后提示「未检测到敏感信息」？',

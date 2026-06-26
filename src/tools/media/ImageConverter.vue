@@ -6,7 +6,8 @@ import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
-import ClearButton from '../../components/ui/ClearButton.vue';
+import ImageCropper from '../../components/media/ImageCropper.vue';
+import type { CropResult } from '../../components/media/ImageCropper.vue';
 import {
   loadImage,
   convertImage,
@@ -24,7 +25,12 @@ import {
   type ConvertResult,
 } from '../../utils/media/image-convert';
 import { stripJpegMetadata } from '../../utils/media/exif-strip';
-import { DEFAULT_WATERMARK, type WatermarkOptions, type WatermarkSlot } from '../../utils/media/watermark';
+import {
+  ICO_SIZE_OPTIONS,
+  DEFAULT_ICO_SIZES,
+  type IcoFit,
+  type IcoAnchor,
+} from '../../utils/media/encoders/ico';
 
 /** 单条敏感 EXIF 信息。 */
 interface SensitiveItem {
@@ -78,17 +84,19 @@ const sensitiveExif = ref<SensitiveExifInfo | null>(null);
 /** 最近一次处理实际清除的隐私项数（结果区展示） */
 const erasedCount = ref(0);
 
-/** 文字水印 */
-const watermarkEnabled = ref(false);
-const watermarkText = ref(DEFAULT_WATERMARK.text);
-const watermarkSize = ref(DEFAULT_WATERMARK.fontSizePct);
-const watermarkColor = ref(DEFAULT_WATERMARK.color);
-const watermarkOpacity = ref(DEFAULT_WATERMARK.opacity);
-const watermarkRotation = ref(DEFAULT_WATERMARK.rotation);
-const watermarkSlot = ref<WatermarkSlot>(DEFAULT_WATERMARK.slot);
+/** ICO 输出尺寸（多选）、裁切适配方式与锚点 */
+const icoSizes = ref<number[]>([...DEFAULT_ICO_SIZES]);
+const icoFit = ref<IcoFit>('cover');
+const icoAnchor = ref<IcoAnchor>('center');
 
-/** 水印位置选项（九宫格 + 平铺） */
-const watermarkSlotOptions: { value: WatermarkSlot; label: string }[] = [
+/** ICO 适配方式选项（供 OptionRadioGroup） */
+const icoFitOptions: { value: IcoFit; label: string }[] = [
+  { value: 'cover', label: '裁切填满' },
+  { value: 'contain', label: '留白完整' },
+];
+
+/** ICO cover 模式的九宫格锚点选项 */
+const icoAnchorOptions: { value: IcoAnchor; label: string }[] = [
   { value: 'top-left', label: '左上' },
   { value: 'top-center', label: '上中' },
   { value: 'top-right', label: '右上' },
@@ -98,7 +106,6 @@ const watermarkSlotOptions: { value: WatermarkSlot; label: string }[] = [
   { value: 'bottom-left', label: '左下' },
   { value: 'bottom-center', label: '下中' },
   { value: 'bottom-right', label: '右下' },
-  { value: 'tile', label: '平铺' },
 ];
 
 /** 最近一次走到的处理路径（下载文件名与结果展示用） */
@@ -107,24 +114,30 @@ const lastPath = ref<ProcessPath>('canvas');
 /** 转换结果 */
 const result = ref<ConvertResult | null>(null);
 
+/** 是否处于裁切态 */
+const isCropping = ref(false);
+
+/** 裁切器使用的文件基础名（去掉扩展名） */
+const cropBaseName = computed(() => originalName.value.replace(/\.[^.]+$/, '') || 'image');
+
 let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-/** 聚合的水印选项（供 convertImage） */
-const watermarkOpts = computed<WatermarkOptions>(() => ({
-  text: watermarkText.value,
-  fontSizePct: watermarkSize.value,
-  color: watermarkColor.value,
-  opacity: watermarkOpacity.value,
-  rotation: watermarkRotation.value,
-  slot: watermarkSlot.value,
-}));
+/** 切换某个 ICO 输出尺寸（至少保留一个，不允许全部取消） */
+function toggleIcoSize(size: number): void {
+  if (icoSizes.value.includes(size)) {
+    if (icoSizes.value.length === 1) return;
+    icoSizes.value = icoSizes.value.filter((s) => s !== size);
+  } else {
+    icoSizes.value = [...icoSizes.value, size].sort((a, b) => a - b);
+  }
+}
 
 /** 输入是否为 JPEG（无损剥离仅对 JPEG 生效） */
 const isJpegInput = computed(() => inputFormat.value === 'jpeg');
 
 /**
  * 是否命中「纯擦除场景」：开启擦除 + JPEG 输入 + 输出仍为 JPEG +
- * 原尺寸 + 不加水印 + Orientation 正常。命中则走无损字节剥离，否则走 Canvas。
+ * 原尺寸 + Orientation 正常。命中则走无损字节剥离，否则走 Canvas。
  */
 const isPureStrip = computed(
   () =>
@@ -132,7 +145,6 @@ const isPureStrip = computed(
     isJpegInput.value &&
     format.value === 'jpeg' &&
     scale.value === 100 &&
-    !watermarkEnabled.value &&
     (sensitiveExif.value?.orientation ?? 1) === 1,
 );
 
@@ -142,7 +154,6 @@ const privacyHint = computed(() => {
   if (isPureStrip.value) return '将无损擦除（不重新编码，画质与像素完全不变）';
   if (!isJpegInput.value) return '该格式将重新编码擦除；仅 JPEG 支持无损剥离';
   if ((sensitiveExif.value?.orientation ?? 1) !== 1) return '为保持拍摄方向将重新编码，画质略有损失';
-  if (watermarkEnabled.value) return '加水印需重新编码，元数据会一并清除';
   return '当前转换已自动清除元数据';
 });
 
@@ -281,7 +292,7 @@ async function processFile(file: File): Promise<void> {
  * 立即执行一次处理（释放旧结果）。
  *
  * 命中纯擦除场景走 `stripJpegMetadata` 无损字节剥离；其余走 `convertImage`
- * Canvas 重绘（水印在此绘制，EXIF 随重绘自动清除）。
+ * Canvas 重绘（EXIF 随重绘自动清除）。
  */
 async function reconvert(): Promise<void> {
   if (!loaded.value) return;
@@ -305,7 +316,9 @@ async function reconvert(): Promise<void> {
         quality: quality.value,
         scale: scale.value,
         fillBackground: needsFillBackground(format.value),
-        watermark: watermarkEnabled.value ? watermarkOpts.value : undefined,
+        icoSizes: icoSizes.value,
+        icoFit: icoFit.value,
+        icoAnchor: icoAnchor.value,
       });
       lastPath.value = 'canvas';
     }
@@ -324,7 +337,7 @@ function scheduleReconvert(): void {
   }, RECONVERT_DEBOUNCE_MS);
 }
 
-watch([format, quality, scale, eraseExif, watermarkEnabled, watermarkOpts], () => {
+watch([format, quality, scale, eraseExif, icoFit, icoAnchor, () => [...icoSizes.value]], () => {
   errorMsg.value = '';
   scheduleReconvert();
 });
@@ -395,12 +408,38 @@ async function handlePaste(event: ClipboardEvent): Promise<void> {
   }
 }
 
+/** 裁切完成后的处理：用裁切结果替换原图并重新转换。
+ *
+ * @param result 裁切组件返回的 canvas、blob 与尺寸信息
+ */
+async function onCrop(result: CropResult): Promise<void> {
+  // 用裁切 canvas 生成新位图替换源
+  const bitmap = await createImageBitmap(result.canvas);
+  // 复用尺寸上限校验，超限则放弃并提示
+  const limit = checkCanvasLimits(bitmap.width, bitmap.height);
+  if (!limit.ok) {
+    bitmap.close?.();
+    dispatchToast(limit.error!);
+    return;
+  }
+  loaded.value?.bitmap.close?.();      // 关闭旧位图
+  loaded.value = { bitmap, width: result.width, height: result.height };
+  // 刷新预览与体积
+  if (originalUrl.value) URL.revokeObjectURL(originalUrl.value);
+  originalUrl.value = URL.createObjectURL(result.blob);
+  originalSize.value = result.blob.size;
+  // 裁切已重新编码，原始字节失效 → 清空使纯擦除 strip 路径自动失效
+  originalBytes.value = null;
+  isCropping.value = false;
+  await reconvert();
+}
+
 /** 下载结果（文件名后缀按处理路径区分） */
 function handleDownload(): void {
   if (!result.value) return;
   const baseName = originalName.value.replace(/\.[^.]+$/, '') || 'image';
   const ext = getOutputExtension(format.value).slice(1);
-  const suffix = lastPath.value === 'strip' ? 'clean' : watermarkEnabled.value ? 'watermarked' : 'compressed';
+  const suffix = lastPath.value === 'strip' ? 'clean' : 'compressed';
   const a = document.createElement('a');
   a.href = result.value.url;
   a.download = `${baseName}-${suffix}.${ext}`;
@@ -419,13 +458,10 @@ function handleClear(): void {
   quality.value = DEFAULT_QUALITY;
   scale.value = 100;
   eraseExif.value = false;
-  watermarkEnabled.value = false;
-  watermarkText.value = DEFAULT_WATERMARK.text;
-  watermarkSize.value = DEFAULT_WATERMARK.fontSizePct;
-  watermarkColor.value = DEFAULT_WATERMARK.color;
-  watermarkOpacity.value = DEFAULT_WATERMARK.opacity;
-  watermarkRotation.value = DEFAULT_WATERMARK.rotation;
-  watermarkSlot.value = DEFAULT_WATERMARK.slot;
+  icoSizes.value = [...DEFAULT_ICO_SIZES];
+  icoFit.value = 'cover';
+  icoAnchor.value = 'center';
+  isCropping.value = false;
   if (fileInputRef.value) fileInputRef.value.value = '';
 }
 
@@ -445,7 +481,7 @@ onUnmounted(() => {
   <div>
     <ToolHeader
       title="图片转换与压缩"
-      description="PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除与文字水印，纯浏览器端本地处理"
+      description="PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除与多尺寸 ICO 图标导出，纯浏览器端本地处理"
       :show-example="false"
     />
 
@@ -456,7 +492,23 @@ onUnmounted(() => {
           <div class="text-[0.8125rem] font-medium text-muted">原始图片</div>
 
           <div
-            v-if="!originalUrl"
+            v-if="isCropping"
+            class="border rounded-sm p-3 flex flex-col gap-2"
+            :class="isDragging ? 'border-accent' : 'border-border'"
+            @drop="handleDrop"
+            @dragover="handleDragOver"
+            @dragleave="handleDragLeave"
+          >
+            <ImageCropper
+              :src="originalUrl"
+              :file-name="cropBaseName"
+              @crop="onCrop"
+              @cancel="isCropping = false"
+            />
+          </div>
+
+          <div
+            v-else-if="!originalUrl"
             class="border-2 border-dashed rounded-lg p-10 min-h-90 flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
             :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
             @click="handlePick"
@@ -490,8 +542,24 @@ onUnmounted(() => {
                 点击或拖入图片更换 · Ctrl+V 粘贴
               </div>
             </div>
-            <div class="text-xs text-muted font-mono">
-              {{ loaded?.width }}×{{ loaded?.height }} · {{ formatBytes(originalSize) }}
+            <div class="flex items-center justify-between">
+              <div class="text-xs text-muted font-mono">
+                {{ loaded?.width }}×{{ loaded?.height }} · {{ formatBytes(originalSize) }}
+              </div>
+              <button
+                type="button"
+                title="裁切"
+                aria-label="裁切"
+                class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+                @click.stop="isCropping = true"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="6" cy="6" r="3" />
+                  <path d="M8.4 20.4a2 2 0 0 1-1.4-.6l-6-6a2 2 0 0 1 0-2.8l6-6a2 2 0 0 1 2.8 0l6 6a2 2 0 0 1 0 2.8l-6 6a2 2 0 0 1-1.4.6z" />
+                  <circle cx="18" cy="18" r="3" />
+                  <path d="M8.4 8.4 15.6 15.6" />
+                </svg>
+              </button>
             </div>
           </div>
 
@@ -503,7 +571,37 @@ onUnmounted(() => {
       <!-- 结果 -->
       <template #output>
         <div class="flex flex-col gap-3">
-          <div class="text-[0.8125rem] font-medium text-muted">压缩结果</div>
+          <div class="flex items-center justify-between">
+            <div class="text-[0.8125rem] font-medium text-muted">压缩结果</div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                title="下载结果"
+                aria-label="下载结果"
+                :disabled="!result"
+                class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
+                @click="handleDownload"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </button>
+              <button
+                type="button"
+                title="清空"
+                aria-label="清空"
+                class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+                @click="handleClear"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
           <div v-if="result" class="bg-hover border border-border rounded-sm p-3 flex flex-col gap-2">
             <img
@@ -544,41 +642,78 @@ onUnmounted(() => {
                 <OptionRadioGroup v-model="format" :options="losslessFormats" label="无损" />
               </div>
 
-              <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
-                <span class="text-[0.8125rem] text-muted">质量</span>
-                <input
-                  v-model.number="quality"
-                  type="range"
-                  min="10"
-                  max="100"
-                  step="1"
-                  aria-label="质量"
-                  :disabled="qualityDisabled"
-                  class="w-32 accent-accent"
-                />
-                <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+              <template v-if="!isIco">
+                <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
+                  <span class="text-[0.8125rem] text-muted">质量</span>
+                  <input
+                    v-model.number="quality"
+                    type="range"
+                    min="10"
+                    max="100"
+                    step="1"
+                    aria-label="质量"
+                    :disabled="qualityDisabled"
+                    class="w-32 accent-accent"
+                  />
+                  <span class="text-[0.8125rem] font-mono w-6">{{ qualityDisabled ? '—' : quality }}</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="text-[0.8125rem] text-muted">尺寸</span>
+                  <input
+                    v-model.number="scale"
+                    type="range"
+                    min="1"
+                    max="100"
+                    step="1"
+                    aria-label="尺寸"
+                    class="w-32 accent-accent"
+                  />
+                  <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
+                  <span v-if="targetSize" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
+                </div>
+              </template>
+            </div>
+
+            <!-- ICO 专属：输出尺寸多选 + 裁切适配方式 + 锚点 -->
+            <div v-if="isIco" class="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">尺寸</span>
+                <div class="flex gap-1 flex-wrap">
+                  <button
+                    v-for="size in ICO_SIZE_OPTIONS"
+                    :key="size"
+                    type="button"
+                    :class="[
+                      'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
+                      'transition-[background-color,border-color] duration-150',
+                      icoSizes.includes(size)
+                        ? 'bg-accent border-accent text-white'
+                        : 'bg-surface border-border text-text hover:bg-hover hover:border-accent',
+                    ]"
+                    @click="toggleIcoSize(size)"
+                  >
+                    {{ size }}
+                  </button>
+                </div>
               </div>
 
-              <div class="flex items-center gap-2" :class="isIco ? 'opacity-50' : ''">
-                <span class="text-[0.8125rem] text-muted">尺寸</span>
-                <input
-                  v-model.number="scale"
-                  type="range"
-                  min="1"
-                  max="100"
-                  step="1"
-                  aria-label="尺寸"
-                  :disabled="isIco"
-                  class="w-32 accent-accent"
+              <OptionRadioGroup v-model="icoFit" :options="icoFitOptions" label="适配" />
+
+              <div v-if="icoFit === 'cover'" class="flex items-center gap-2">
+                <span class="text-[0.8125rem] text-muted">锚点</span>
+                <SelectListbox
+                  class="w-28"
+                  :model-value="icoAnchor"
+                  :options="icoAnchorOptions"
+                  @update:model-value="(v) => (icoAnchor = v as IcoAnchor)"
                 />
-                <span class="text-[0.8125rem] font-mono">{{ scale }}%</span>
-                <span v-if="targetSize && !isIco" class="text-[0.8125rem] text-muted">({{ targetSize.width }}×{{ targetSize.height }})</span>
               </div>
             </div>
 
             <!-- 预留一行高度，避免切换格式时提示文本出现/消失导致页面跳动 -->
             <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
-              <p v-if="isIco" class="m-0">ICO 固定输出 16 / 32 / 48 三尺寸（favicon 标准），尺寸与质量滑块不适用</p>
+              <p v-if="isIco" class="m-0">ICO 按所选尺寸多尺寸封装；非正方形图按所选适配方式处理（裁切填满 / 留白完整）</p>
               <p v-else-if="loaded && needsFillBackground(format)" class="m-0">
                 JPEG 不支持透明背景，透明区域将填充白色
               </p>
@@ -608,76 +743,6 @@ onUnmounted(() => {
               <p v-else class="m-0">未检测到敏感信息</p>
             </div>
           </section>
-
-          <!-- 文字水印 -->
-          <section class="flex flex-col gap-3 border-t border-border pt-4">
-            <ToggleSwitch v-model="watermarkEnabled" label="添加文字水印" />
-            <div v-if="watermarkEnabled" class="flex flex-col gap-3">
-              <label class="flex flex-col gap-1">
-                <span class="text-[0.8125rem] text-muted">水印文字</span>
-                <input
-                  v-model="watermarkText"
-                  type="text"
-                  placeholder="水印文字"
-                  aria-label="水印文字"
-                  class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] w-full max-w-80"
-                />
-              </label>
-
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-3">
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[0.8125rem] text-muted">大小</span>
-                    <span class="text-[0.8125rem] font-mono">{{ watermarkSize }}%</span>
-                  </div>
-                  <input v-model.number="watermarkSize" type="range" min="1" max="12" step="1" aria-label="大小" class="w-full accent-accent" />
-                </div>
-
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[0.8125rem] text-muted">透明度</span>
-                    <span class="text-[0.8125rem] font-mono">{{ Math.round(watermarkOpacity * 100) }}%</span>
-                  </div>
-                  <input v-model.number="watermarkOpacity" type="range" min="0" max="1" step="0.05" aria-label="透明度" class="w-full accent-accent" />
-                </div>
-
-                <div class="flex flex-col gap-1">
-                  <div class="flex items-center justify-between">
-                    <span class="text-[0.8125rem] text-muted">旋转</span>
-                    <span class="text-[0.8125rem] font-mono">{{ watermarkRotation }}°</span>
-                  </div>
-                  <input v-model.number="watermarkRotation" type="range" min="-90" max="90" step="1" aria-label="旋转" class="w-full accent-accent" />
-                </div>
-
-                <div class="flex flex-col gap-1">
-                  <span class="text-[0.8125rem] text-muted">颜色</span>
-                  <input v-model="watermarkColor" type="color" aria-label="颜色" class="w-12 h-8 rounded-sm cursor-pointer border border-border bg-surface p-0.5" />
-                </div>
-
-                <div class="flex flex-col gap-1">
-                  <span class="text-[0.8125rem] text-muted">位置</span>
-                  <SelectListbox
-                    class="w-full"
-                    :model-value="watermarkSlot"
-                    :options="watermarkSlotOptions"
-                    @update:model-value="(v) => (watermarkSlot = v as WatermarkSlot)"
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <div class="flex items-center gap-2 border-t border-border pt-4">
-            <ClearButton @clear="handleClear" />
-            <button
-              type="button"
-              :disabled="!result"
-              class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed"
-              @click="handleDownload"
-            >
-              下载结果
-            </button>
-          </div>
         </div>
       </template>
     </ResponsiveWorkspace>
