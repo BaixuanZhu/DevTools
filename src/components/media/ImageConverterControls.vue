@@ -120,7 +120,7 @@ function toggleIcoSize(size: number): void {
       </div>
     </div>
 
-    <div class="min-h-[1.25rem] text-[0.8125rem] text-muted">
+    <div class="min-h-5 text-[0.8125rem] text-muted">
       <p v-if="isIco" class="m-0">ICO 按所选尺寸多尺寸封装；非正方形图按所选适配方式处理</p>
       <p v-else-if="hasItems && params.format === 'jpeg'" class="m-0">JPEG 不支持透明背景，透明区域将填充白色</p>
     </div>
