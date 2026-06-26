@@ -10,6 +10,7 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
+import { useCopy } from '../../composables/useCopy';
 import {
   type WheelItem,
   MAX_ITEMS,
@@ -21,6 +22,8 @@ import {
   pickWeightedIndex,
   createCryptoRng,
   computeTargetRotation,
+  encodeShare,
+  decodeShare,
 } from '../../utils/text/wheel';
 
 /** 活跃选项（可被抽中），唯一真相源 */
@@ -115,6 +118,42 @@ function clearAll(): void {
   batchText.value = '';
   result.value = '';
   void nextTick(() => draw());
+}
+
+const { copied: linkCopied, copy: copyLink } = useCopy();
+
+/** 分享链接长度护栏阈值 */
+const SHARE_URL_MAX = 2000;
+
+/** 生成并复制分享链接（编码当前有效选项及权重） */
+async function copyShareLink(): Promise<void> {
+  const list = validItems();
+  if (list.length < 2) {
+    showToast('请先添加至少 2 个选项');
+    return;
+  }
+  const data = encodeShare(list);
+  const url = `${window.location.origin}${window.location.pathname}?data=${data}`;
+  if (url.length > SHARE_URL_MAX) {
+    showToast('选项过多，链接可能在部分平台被截断');
+  }
+  await copyLink(url);
+  if (linkCopied.value) showToast('分享链接已复制');
+}
+
+/** 从 URL ?data= 直接解码加载（失败则静默回退默认示例） */
+function loadFromUrl(): void {
+  const params = new URLSearchParams(window.location.search);
+  const data = params.get('data');
+  if (!data) return;
+  try {
+    const loaded = decodeShare(data);
+    items.value = loaded;
+    wonItems.value = [];
+    result.value = '';
+  } catch {
+    showToast('分享链接无效，已载入默认示例');
+  }
 }
 
 /** Canvas 引用 */
@@ -231,6 +270,7 @@ watch(items, () => {
 }, { deep: true });
 
 onMounted(() => {
+  loadFromUrl();
   void nextTick(() => draw());
 });
 </script>
@@ -337,6 +377,12 @@ onMounted(() => {
 
       <template #actions>
         <ClearButton @clear="clearAll" />
+        <button
+          class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+          @click="copyShareLink"
+        >
+          {{ linkCopied ? '已复制' : '复制分享链接' }}
+        </button>
       </template>
 
       <template #output>
