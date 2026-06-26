@@ -5,7 +5,11 @@
  * 以及依赖浏览器 Canvas API 的解码/编码函数。
  */
 
-import { drawWatermark, type WatermarkOptions } from './watermark';
+import {
+  DEFAULT_ICO_SIZES,
+  type IcoAnchor,
+  type IcoFit,
+} from './encoders/ico';
 
 // ==================== 类型 ====================
 
@@ -31,8 +35,12 @@ export interface ConvertOptions {
   scale: number;
   /** 是否填充白底（jpeg 不支持透明） */
   fillBackground: boolean;
-  /** 可选文字水印；不传或文本为空则不绘制，ICO 输出忽略 */
-  watermark?: WatermarkOptions;
+  /** ICO 输出尺寸列表；缺省回退到默认三尺寸 */
+  icoSizes?: number[];
+  /** ICO 裁切适配方式；缺省 cover */
+  icoFit?: IcoFit;
+  /** ICO cover 模式锚点；缺省 center */
+  icoAnchor?: IcoAnchor;
 }
 
 /** 图片转换结果 */
@@ -267,7 +275,7 @@ export async function loadImage(file: File): Promise<LoadedImage> {
  *
  * - 无损格式（png/tiff/ico）忽略 quality；
  * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）；
- * - ICO 固定输出 16/32/48 三尺寸，忽略 scale；
+ * - ICO 按 icoSizes 多尺寸封装，裁切方式由 icoFit/icoAnchor 决定，忽略 scale；
  * - avif/tiff/ico 编码器懒加载。
  *
  * @param opts 转换选项
@@ -280,7 +288,12 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
   // ICO：多尺寸封装，忽略 scale
   if (format === 'ico') {
     const { encodeIco } = await import('./encoders/ico');
-    const r = await encodeIco(bitmap, fillBackground);
+    const r = await encodeIco(bitmap, {
+      sizes: opts.icoSizes && opts.icoSizes.length > 0 ? opts.icoSizes : DEFAULT_ICO_SIZES,
+      fit: opts.icoFit ?? 'cover',
+      anchor: opts.icoAnchor ?? 'center',
+      fillBackground,
+    });
     return {
       blob: r.blob,
       url: URL.createObjectURL(r.blob),
@@ -303,11 +316,6 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
     ctx.fillRect(0, 0, width, height);
   }
   ctx.drawImage(bitmap, 0, 0, width, height);
-
-  // 文字水印：在编码前绘制，canvas 原生与 avif/tiff（getImageData）路径共用同一 ctx
-  if (opts.watermark) {
-    drawWatermark(ctx, width, height, opts.watermark);
-  }
 
   // 原生 canvas 编码（png/jpeg/webp）
   if (pickEncoderKind(format) === 'canvas') {

@@ -25,9 +25,11 @@ interface Props<T extends string | number> {
   options: RadioOption<T>[];
   /** 标签文本 */
   label?: string;
+  /** label 紧贴按钮组（去除固定最小宽度），用于水平并排场景 */
+  inlineLabel?: boolean;
 }
 
-const props = withDefaults(defineProps<Props<T>>(), { label: undefined });
+const props = withDefaults(defineProps<Props<T>>(), { label: undefined, inlineLabel: false });
 
 const emit = defineEmits<{
   /** 选中值变化时触发 */
@@ -37,7 +39,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted min-w-18 shrink-0">{{ label }}</span>
+    <span v-if="label" class="text-[0.8125rem] text-muted shrink-0" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
     <RadioGroup :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" class="flex gap-1 flex-wrap">
       <RadioGroupOption
         v-for="option in options"
