@@ -563,6 +563,17 @@ export const tools: ToolMeta[] = [
     keywords: ['toml 格式化', 'toml 美化', 'toml 校验', 'toml 格式', 'toml formatter', 'cargo.toml 格式化', 'pyproject.toml 校验'],
     relatedToolIds: ['toml-json-converter', 'toml-yaml-converter', 'json-formatter'],
   },
+  {
+    id: 'wheel-picker',
+    name: '转盘抽奖',
+    description: '自定义选项的在线转盘抽奖与随机抽签工具，支持批量导入、权重、不重复抽取与配置分享',
+    seoDescription: '免费在线转盘抽奖与随机抽签工具，自定义选项并批量粘贴导入，Canvas 彩色转盘配合缓动动画旋转指向结果，支持为选项设置权重调整中奖概率、不重复抽取（中奖自动移出可恢复），并可将转盘配置编码到链接一键分享，他人打开即用同款转盘，纯浏览器端运算数据不上传。',
+    category: '文本处理',
+    icon: '🎡',
+    path: '/text/wheel-picker',
+    keywords: ['转盘抽奖', '在线抽签', '随机抽签', '随机选择器', '幸运转盘', '决策转盘', '随机点名', '抽奖转盘', 'wheel picker', 'random picker'],
+    relatedToolIds: ['random-string', 'uuid-generator', 'fake-data-generator'],
+  },
 ];
 
 /** 分类 slug 反向映射（英 → 中） */
