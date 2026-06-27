@@ -13,9 +13,11 @@ interface Props {
   description?: string;
   /** 工具 ID（格式：categorySlug/toolSlug，如 encoding/base64） */
   toolId?: string;
+  /** 额外的 JSON-LD 结构化数据（透传至 Layout，如首页的 ItemList） */
+  jsonLd?: object | object[];
 }
 
-const { title, description, toolId = '' } = Astro.props;
+const { title, description, toolId = '', jsonLd } = Astro.props;
 const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
 const categories = getCategories();
 const toolsByCategory = getToolsByCategory();
@@ -39,7 +41,7 @@ const relatedToolIds = toolMeta?.relatedToolIds || [];
 const faqs = getToolFaqs(toolId);
 
 /** 站点基础 URL */
-const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.openbong.cloud';
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.baixuanz.cn';
 
 /** 构建 JSON-LD 结构化数据 */
 const jsonLdItems: object[] = [];
@@ -136,9 +138,15 @@ const breadcrumbItems = toolId && toolMeta
       ];
     })()
   : [];
+
+/** 合并工具页自身结构化数据与外部透传（如首页 ItemList） */
+const allJsonLd: object[] = [
+  ...jsonLdItems,
+  ...(jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : []),
+];
 ---
 
-<Layout title={finalTitle} description={finalDescription} jsonLd={jsonLdItems} keywords={keywords}>
+<Layout title={finalTitle} description={finalDescription} jsonLd={allJsonLd} keywords={keywords}>
   <div id="app">
     <!-- Sidebar (fixed, full height) -->
     <aside
@@ -159,7 +167,7 @@ const breadcrumbItems = toolId && toolMeta
           aria-label="DevTools 首页"
         >
           <svg
-            class="w-6 h-6 text-text group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out"
+            class="w-6 h-6 text-violet-600 group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -168,8 +176,7 @@ const breadcrumbItems = toolId && toolMeta
             stroke-linejoin="round"
             aria-hidden="true"
           >
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
           </svg>
           <span>DevTools</span>
         </a>
@@ -243,9 +250,8 @@ const breadcrumbItems = toolId && toolMeta
           </button>
           <!-- 移动端 Logo -->
           <a href="/" class="lg:hidden group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150" aria-label="DevTools 首页">
-            <svg class="w-6 h-6 text-text group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <polyline points="16 18 22 12 16 6"></polyline>
-              <polyline points="8 6 2 12 8 18"></polyline>
+            <svg class="w-6 h-6 text-violet-600 group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
             </svg>
             <span>DevTools</span>
           </a>

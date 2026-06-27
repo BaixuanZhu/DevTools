@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tools.openbong.cloud/sitemap-index.xml
+Sitemap: https://tools.baixuanz.cn/sitemap-index.xml

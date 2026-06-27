@@ -11,9 +11,27 @@ const toolsJson = JSON.stringify(
     description: t.description,
   })),
 );
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.baixuanz.cn';
+
+/** 首页 ItemList 结构化数据：列出全部工具，便于搜索引擎与 AI 理解站点能力全集 */
+const itemListJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'DevTools 在线工具箱',
+  description: '零门槛的浏览器端在线开发者工具集合',
+  numberOfItems: tools.length,
+  itemListElement: tools.map((tool, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: tool.name,
+    url: `${siteUrl}${tool.path}`,
+    description: tool.description,
+  })),
+};
 ---
 
-<ToolLayout title="DevTools - 在线工具箱">
+<ToolLayout title="DevTools - 在线工具箱" jsonLd={itemListJsonLd}>
   <div
     class="max-w-320 mx-auto"
     x-data="{ query: '', searchIds: null, tools: [], init() { var el = document.getElementById('tools-data'); this.tools = el ? JSON.parse(el.textContent || '[]') : []; }, applyFilter() { var self = this; this.$refs.grid.querySelectorAll('[data-category]').forEach(function(el) { var id = el.getAttribute('data-id'); var matchSearch = !self.searchIds || self.searchIds.has(id); el.style.display = matchSearch ? '' : 'none'; }); }, handleSearch() { if (!this.query.trim()) { this.searchIds = null; this.applyFilter(); return; } var q = this.query.toLowerCase(); var results = this.tools.filter(function(t) { return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q); }); this.searchIds = new Set(results.map(function(t) { return t.id; })); this.applyFilter(); } }"

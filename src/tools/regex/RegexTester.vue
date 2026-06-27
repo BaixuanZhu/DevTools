@@ -35,7 +35,7 @@ const EXAMPLE_TEXT = [
   '2026-06-17 发布 P1 阶段第一项（正则表达式工具）',
   '2026-07-01 启动颜色工具',
   '联系人邮箱：alice@example.com，电话 13800138000',
-  '官网 https://tools.openbong.cloud 已上线',
+  '官网 https://tools.baixuanz.cn 已上线',
 ].join('\n');
 
 /** 防抖延迟（毫秒），避免连续输入触发频繁匹配 */

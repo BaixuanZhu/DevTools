@@ -33,7 +33,7 @@ const PREVIEW_SIZES = [64, 128, 256] as const;
 type PreviewSize = (typeof PREVIEW_SIZES)[number];
 
 // 状态
-const text = ref('https://tools.openbong.cloud');
+const text = ref('https://tools.baixuanz.cn');
 const foreground = ref(QR_DEFAULT_FOREGROUND);
 const background = ref(QR_DEFAULT_BACKGROUND);
 const errorLevel = ref<QrErrorLevel>('M');
