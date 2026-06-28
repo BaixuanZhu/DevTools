@@ -47,7 +47,9 @@ export const RUN_FLAGS: RunFlagEntry[] = [
   { flag: '-d, --detach', category: '基础运行', description: '后台运行容器', example: 'docker run -d nginx' },
   { flag: '--name', category: '基础运行', description: '指定容器名称', example: 'docker run --name my-nginx nginx' },
   { flag: '--rm', category: '基础运行', description: '停止后自动删除容器', example: 'docker run --rm nginx' },
-  { flag: '-it', category: '基础运行', description: '以交互式终端运行', example: 'docker run -it ubuntu bash' },
+  { flag: '-i, --interactive', category: '基础运行', description: '保持标准输入打开（交互模式）', example: 'docker run -i ubuntu' },
+  { flag: '-t, --tty', category: '基础运行', description: '分配伪终端', example: 'docker run -t ubuntu' },
+  { flag: '-it', category: '基础运行', description: '以交互式终端运行（-i -t 组合）', example: 'docker run -it ubuntu bash' },
   { flag: '-w, --workdir', category: '基础运行', description: '设置容器内工作目录', example: 'docker run -w /app node' },
   { flag: '--entrypoint', category: '基础运行', description: '覆盖镜像默认入口命令', example: 'docker run --entrypoint sh nginx' },
 

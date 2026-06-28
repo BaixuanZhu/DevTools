@@ -12,6 +12,7 @@ describe('run-flags-data', () => {
   it('每条数据都有 flag、category、description、example', () => {
     RUN_FLAGS.forEach((entry) => {
       expect(entry.flag).toBeTruthy();
+      expect(entry.category).toBeTruthy();
       expect(entry.description).toBeTruthy();
       expect(entry.example).toBeTruthy();
       expect(RUN_FLAG_CATEGORIES).toContain(entry.category);

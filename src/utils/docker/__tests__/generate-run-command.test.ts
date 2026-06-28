@@ -110,6 +110,18 @@ describe('generateDockerRunCommand', () => {
     );
   });
 
+  it('仅交互模式 -i', () => {
+    expect(generateDockerRunCommand(createState({ interactive: true, tty: false }))).toBe(
+      'docker run -i nginx:latest',
+    );
+  });
+
+  it('仅伪终端 -t', () => {
+    expect(generateDockerRunCommand(createState({ interactive: false, tty: true }))).toBe(
+      'docker run -t nginx:latest',
+    );
+  });
+
   it('额外参数追加在镜像名之后', () => {
     expect(generateDockerRunCommand(createState({ extraArgs: 'bash' }))).toBe(
       'docker run nginx:latest bash',
@@ -118,6 +130,10 @@ describe('generateDockerRunCommand', () => {
 });
 
 describe('escapeShellArg', () => {
+  it('空字符串返回单引号对', () => {
+    expect(escapeShellArg('')).toBe("''");
+  });
+
   it('无特殊字符不添加引号', () => {
     expect(escapeShellArg('nginx')).toBe('nginx');
   });
