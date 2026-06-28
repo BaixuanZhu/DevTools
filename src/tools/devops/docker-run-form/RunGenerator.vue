@@ -68,25 +68,15 @@ const identifiedEnvs = ref<IdentifiedEnv[]>([{ id: ++idCounter, key: '', value: 
 /** 包装后的卷挂载列表 */
 const identifiedVolumes = ref<IdentifiedVolume[]>([{ id: ++idCounter, host: '', container: '', mode: '' }]);
 
-/** 同步 identified 列表到 formState */
-function syncToFormState() {
-  formState.value.ports = identifiedPorts.value.map(({ host, container, protocol }) => ({ host, container, protocol }));
-  formState.value.envs = identifiedEnvs.value.map(({ key, value }) => ({ key, value }));
-  formState.value.volumes = identifiedVolumes.value.map(({ host, container, mode }) => ({ host, container, mode }));
-}
-
-/** 从 formState 同步到 identified 列表（用于填入示例） */
-function syncFromFormState() {
-  identifiedPorts.value = formState.value.ports.map((p) => ({ ...p, id: ++idCounter }));
-  identifiedEnvs.value = formState.value.envs.map((e) => ({ ...e, id: ++idCounter }));
-  identifiedVolumes.value = formState.value.volumes.map((v) => ({ ...v, id: ++idCounter }));
-}
-
 /** 生成的命令 */
-const command = computed(() => {
-  syncToFormState();
-  return generateDockerRunCommand(formState.value);
-});
+const command = computed(() =>
+  generateDockerRunCommand({
+    ...formState.value,
+    ports: identifiedPorts.value.map(({ host, container, protocol }) => ({ host, container, protocol })),
+    envs: identifiedEnvs.value.map(({ key, value }) => ({ key, value })),
+    volumes: identifiedVolumes.value.map(({ host, container, mode }) => ({ host, container, mode })),
+  }),
+);
 
 /** 是否显示空状态提示 */
 const showEmptyHint = computed(() => !formState.value.image.trim());
@@ -196,7 +186,9 @@ function handleClear() {
  */
 function handleExample() {
   formState.value = JSON.parse(JSON.stringify(EXAMPLE_STATE));
-  syncFromFormState();
+  identifiedPorts.value = EXAMPLE_STATE.ports.map((p) => ({ ...p, id: ++idCounter }));
+  identifiedEnvs.value = EXAMPLE_STATE.envs.map((e) => ({ ...e, id: ++idCounter }));
+  identifiedVolumes.value = EXAMPLE_STATE.volumes.map((v) => ({ ...v, id: ++idCounter }));
 }
 
 /** 监听 interactive 与 tty，自动联动为 -it / -i / -t */
