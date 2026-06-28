@@ -265,7 +265,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 </script>
 
 <template>
-  <div class="max-w-[720px]">
+  <div class="max-w-180">
     <ToolHeader
       title="哈希生成器"
       description="支持 MD5、SHA-1、SHA-256 等多种哈希算法，结果可转换为不同进制"
@@ -418,7 +418,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
       </div>
 
       <!-- 算法 + 输出格式 -->
-      <div class="mb-4 flex gap-3">
+      <div class="mb-4 flex gap-3 flex-wrap">
         <SelectListbox
           v-model="hmacAlgorithm"
           label="算法"
