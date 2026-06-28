@@ -11,10 +11,12 @@ import FlagReference from './docker-run-form/FlagReference.vue';
 
 <template>
   <ResponsiveWorkspace mode="vertical">
-    <RunGenerator />
+    <template #input>
+      <RunGenerator />
 
-    <div class="mt-10 pt-8 border-t border-border">
-      <FlagReference />
-    </div>
+      <div class="mt-10 pt-8 border-t border-border">
+        <FlagReference />
+      </div>
+    </template>
   </ResponsiveWorkspace>
 </template>
