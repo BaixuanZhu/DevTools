@@ -16,6 +16,7 @@ function createState(overrides: Partial<FormState> = {}): FormState {
     workdir: '',
     restart: '',
     network: '',
+    networkName: '',
     detach: false,
     interactive: false,
     tty: false,
@@ -78,6 +79,24 @@ describe('generateDockerRunCommand', () => {
     expect(generateDockerRunCommand(state)).toBe(
       'docker run -v /host/data:/data:ro nginx:latest',
     );
+  });
+
+  it('预定义网络模式', () => {
+    expect(generateDockerRunCommand(createState({ network: 'host' }))).toBe(
+      'docker run --network host nginx:latest',
+    );
+  });
+
+  it('自定义网络使用 networkName 指定名称', () => {
+    const state = createState({ network: 'custom', networkName: 'my-net' });
+    expect(generateDockerRunCommand(state)).toBe(
+      'docker run --network my-net nginx:latest',
+    );
+  });
+
+  it('自定义网络但名称为空时忽略 --network', () => {
+    const state = createState({ network: 'custom', networkName: '' });
+    expect(generateDockerRunCommand(state)).toBe('docker run nginx:latest');
   });
 
   it('完整示例按固定顺序输出', () => {

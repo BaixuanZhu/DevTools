@@ -7,8 +7,10 @@ const props = withDefaults(
     modelValue: string | number;
     options: { value: string | number; label: string }[];
     label?: string;
+    /** 透传给触发器按钮的额外 class，用于行内紧凑场景对齐高度（如 h-9） */
+    buttonClass?: string;
   }>(),
-  { label: undefined },
+  { label: undefined, buttonClass: undefined },
 );
 
 const emit = defineEmits<{
@@ -34,6 +36,7 @@ const selectedLabel = computed(() => {
       <ListboxButton
         :class="[
           'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer flex items-center justify-center',
+          props.buttonClass,
         ]"
       >
         <span class="block truncate">{{ selectedLabel }}</span>

@@ -50,8 +50,10 @@ export interface FormState {
   workdir: string;
   /** 重启策略 */
   restart: '' | 'no' | 'always' | 'unless-stopped' | 'on-failure';
-  /** 网络模式 */
-  network: '' | 'bridge' | 'host' | 'none' | 'container:';
+  /** 网络模式；为 `custom` 时使用 networkName 指定自定义网络名称 */
+  network: '' | 'bridge' | 'host' | 'none' | 'custom';
+  /** 自定义网络名称，仅在 network 为 `custom` 时生效 */
+  networkName: string;
   /** 是否后台运行 */
   detach: boolean;
   /** 是否交互模式 */
@@ -102,7 +104,11 @@ export function generateDockerRunCommand(state: FormState): string {
 
   if (state.name.trim()) parts.push('--name', state.name.trim());
   if (state.restart) parts.push('--restart', state.restart);
-  if (state.network) parts.push('--network', state.network);
+  if (state.network === 'custom') {
+    if (state.networkName.trim()) parts.push('--network', state.networkName.trim());
+  } else if (state.network) {
+    parts.push('--network', state.network);
+  }
 
   state.ports.forEach((port) => {
     const protocol = port.protocol || 'tcp';

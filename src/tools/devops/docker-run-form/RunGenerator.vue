@@ -14,24 +14,6 @@ import {
   type FormState,
 } from '../../../utils/docker/generate-run-command';
 
-/** 默认示例状态 */
-const EXAMPLE_STATE: FormState = {
-  image: 'nginx',
-  tag: 'latest',
-  name: 'my-nginx',
-  ports: [{ host: '8080', container: '80', protocol: 'tcp' }],
-  envs: [{ key: 'NGINX_HOST', value: 'example.com' }],
-  volumes: [{ host: '/host/html', container: '/usr/share/nginx/html', mode: 'ro' }],
-  workdir: '',
-  restart: 'unless-stopped',
-  network: 'bridge',
-  detach: true,
-  interactive: false,
-  tty: false,
-  rm: false,
-  extraArgs: '',
-};
-
 /** 表单初始空状态 */
 const EMPTY_STATE: FormState = {
   image: '',
@@ -43,6 +25,7 @@ const EMPTY_STATE: FormState = {
   workdir: '',
   restart: '',
   network: '',
+  networkName: '',
   detach: false,
   interactive: false,
   tty: false,
@@ -96,6 +79,7 @@ const networkOptions = [
   { value: 'bridge', label: 'bridge' },
   { value: 'host', label: 'host' },
   { value: 'none', label: 'none' },
+  { value: 'custom', label: '自定义网络' },
 ];
 
 /** 协议选项 */
@@ -181,16 +165,6 @@ function handleClear() {
   identifiedVolumes.value = [{ id: ++idCounter, host: '', container: '', mode: '' }];
 }
 
-/**
- * 填入示例。
- */
-function handleExample() {
-  formState.value = JSON.parse(JSON.stringify(EXAMPLE_STATE));
-  identifiedPorts.value = EXAMPLE_STATE.ports.map((p) => ({ ...p, id: ++idCounter }));
-  identifiedEnvs.value = EXAMPLE_STATE.envs.map((e) => ({ ...e, id: ++idCounter }));
-  identifiedVolumes.value = EXAMPLE_STATE.volumes.map((v) => ({ ...v, id: ++idCounter }));
-}
-
 /** 监听 interactive 与 tty，自动联动为 -it / -i / -t */
 watch(
   () => formState.value.interactive,
@@ -205,7 +179,7 @@ watch(
     <ToolHeader
       title="Docker Run 命令助手"
       description="填写参数，实时生成可复制的 docker run 命令"
-      @example="handleExample"
+      :show-example="false"
     />
 
     <!-- 表单区 -->
@@ -267,6 +241,17 @@ watch(
         />
       </div>
 
+      <!-- 自定义网络名称 -->
+      <div v-if="formState.network === 'custom'">
+        <label class="block mb-1 text-[0.8125rem] text-muted">自定义网络名称</label>
+        <input
+          v-model="formState.networkName"
+          type="text"
+          placeholder="如 my-net（需先通过 docker network create 创建）"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+        />
+      </div>
+
       <!-- 开关 -->
       <div class="flex flex-wrap gap-6">
         <ToggleSwitch v-model="formState.detach" label="后台运行" description="-d" />
@@ -287,23 +272,24 @@ watch(
               v-model="port.host"
               type="text"
               placeholder="主机端口"
-              class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <span class="text-muted">:</span>
             <input
               v-model="port.container"
               type="text"
               placeholder="容器端口"
-              class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <SelectListbox
               v-model="port.protocol"
               :options="protocolOptions"
               class="w-24"
+              button-class="h-9"
             />
             <button
               type="button"
-              class="px-2 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
               @click="removePort(port.id)"
             >
               删除
@@ -332,18 +318,18 @@ watch(
               v-model="env.key"
               type="text"
               placeholder="KEY"
-              class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <span class="text-muted">=</span>
             <input
               v-model="env.value"
               type="text"
               placeholder="value"
-              class="flex-[2] min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-2 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <button
               type="button"
-              class="px-2 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
               @click="removeEnv(env.id)"
             >
               删除
@@ -372,23 +358,24 @@ watch(
               v-model="vol.host"
               type="text"
               placeholder="主机路径"
-              class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <span class="text-muted">:</span>
             <input
               v-model="vol.container"
               type="text"
               placeholder="容器路径"
-              class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
             />
             <SelectListbox
               v-model="vol.mode"
               :options="volumeModeOptions"
               class="w-24"
+              button-class="h-9"
             />
             <button
               type="button"
-              class="px-2 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
               @click="removeVolume(vol.id)"
             >
               删除
