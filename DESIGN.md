@@ -114,6 +114,8 @@ The system rejects everything PRODUCT.md calls out: login walls, multi-step flow
 
 ### Layout Principles
 
+**应用外壳结构：** 整体页面采用应用外壳式布局，`#app` 为 `h-dvh flex flex-col overflow-hidden` 锁高容器：顶部通栏 Header（`h-[57px] shrink-0`，作为 flex 子项天然钉顶，无需 `sticky`）；下方主体行 `flex-1 flex min-h-0` 内含 Sidebar 与内容列。内容列 `flex-1 flex flex-col overflow-x-hidden overflow-y-auto min-w-0` 是唯一的内容滚动容器，内部依次为 `main`（`flex-1`）与 Footer。**滚动归属：仅内容列与 Sidebar 导航区滚动**——`main` 不可自带 `overflow-x-hidden`（会触发 `overflow-y: auto` 副作用使其自身成为滚动容器、把 Footer 排除在滚动流之外），防水平溢出改由内容列承担。Sidebar 桌面端为静态 flex 列（`w-60 shrink-0`），移动端为 `fixed` 抽屉（详见 §Sidebar Navigation）。Footer 位于内容列底部、随内容滚动。
+
 工具页面采用**分层宽度策略**：ToolLayout.astro 主容器使用 `max-w-full` 不限制宽度，宽度约束由各工具组件自行控制。布局以 1024px 为 Sidebar 常驻/抽屉的分界线（对应 Tailwind `lg` 断点）。
 
 **宽度分层：**
@@ -301,24 +303,26 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 | 元素 | Class |
 |------|-------|
-| Container | `w-[240px] fixed bg-card border-r border-border` |
+| Container（桌面） | `sidebar w-60 shrink-0 border-r border-border bg-card flex flex-col`（静态 flex 列，无 `fixed`） |
+| Container（移动） | `position: fixed`，`top: 57px; height: calc(100dvh - 57px); transform: translateX(-100%)`，`.sidebar-open` 时 `translateX(0)` |
+| Nav scroll | `flex-1 sidebar-nav-scroll overflow-y-auto py-2`（导航区独立滚动，隐藏滚动条见 §Sidebar Scroll） |
 | Group headings | `font-semibold text-xs uppercase tracking-wider text-muted px-4 py-4 pb-1` |
-| Nav links | `flex items-center gap-2 px-4 py-2` |
-| Active link | `bg-hover text-accent border-r-2 border-accent` |
+| Nav links | `flex items-center gap-2 px-4 py-2 text-sm` |
+| Active link | `bg-hover text-accent font-medium` |
 | Hover | `hover:bg-hover` |
-| Mobile | slide-in from left，`bg-[rgba(0,0,0,0.3)]` backdrop，escape 关闭 |
+| Overlay（移动） | `.sidebar-overlay fixed inset-0 bg-black/30 z-[99]`，`top: 57px`；显隐由 Alpine `x-show` 跟随 `sidebar-toggle`/`sidebar-close` 事件（响应式 `show` 变量），点击或 Esc 关闭 |
 
 ### Header
 
 | 元素 | Class |
 |------|-------|
-| Container | `h-[57px] sticky top-0 z-50 bg-card border-b border-border` |
-| Layout | 左侧（汉堡按钮 mobile-only + 移动端 Logo）+ 右侧（收藏夹 · 暗色模式 · GitHub） |
+| Container | `flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0`（通栏，作为 `#app` flex 子项天然钉顶，无需 `sticky`） |
+| Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（收藏夹 · 暗色模式 · Gitee · GitHub） |
+| Logo | `group flex items-center gap-1.5 text-lg font-semibold`，全断点常驻；图标 `text-violet-600`，hover `-rotate-12` |
 | 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，`@click` 触发 `sidebar-toggle` |
-| 移动端 Logo | `lg:hidden`，与 Sidebar Logo 相同样式 |
 | 收藏夹按钮 | `w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover`，下拉面板 `w-[260px]` |
 | 暗色模式按钮 | 同收藏夹按钮样式，当前为 UI 预留（Toast 提示"即将支持"） |
-| GitHub 链接 | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
+| Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 
 ### Tool Header
 
@@ -333,7 +337,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 | 元素 | Class |
 |------|-------|
-| Container | `bg-card border-t border-border` |
+| Container | `bg-card border-t border-border`，位于内容列底部、`main` 之后，随内容滚动（非 `fixed`/`sticky`） |
 | Content | 居中，`text-[0.8125rem] text-muted`，链接 `hover:text-accent` |
 
 ### Toast Notification

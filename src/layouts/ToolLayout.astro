@@ -147,20 +147,24 @@ const allJsonLd: object[] = [
 ---
 
 <Layout title={finalTitle} description={finalDescription} jsonLd={allJsonLd} keywords={keywords}>
-  <div id="app">
-    <!-- Sidebar (fixed, full height) -->
-    <aside
-      x-data="{ isOpen: false }"
-      @sidebar-toggle.window="isOpen = !isOpen"
-      @sidebar-close.window="isOpen = false"
-      @keydown.escape="isOpen = false"
-      :class="isOpen && 'sidebar-open'"
-      class="sidebar fixed left-0 top-0 bottom-0 w-60 border-r border-border bg-card flex flex-col"
-      role="navigation"
-      aria-label="工具导航"
-    >
-      <!-- Logo 区域 (sticky 顶部) -->
-      <div class="sticky top-0 z-10 bg-card border-b border-border h-[57px] flex items-center justify-between px-6 shrink-0">
+  <div id="app" class="h-dvh flex flex-col overflow-hidden">
+    <!-- Header（通栏，横跨全宽） -->
+    <header class="flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
+      <!-- 左侧：汉堡按钮（mobile-only） + Logo（全断点常驻） -->
+      <div class="flex items-center gap-4">
+        <button
+          class="hidden max-lg:flex flex-col gap-1 p-2 border-none bg-transparent cursor-pointer focus:outline-none"
+          aria-label="打开导航菜单"
+          x-data="{ expanded: false }"
+          :aria-expanded="expanded"
+          @click="$dispatch('sidebar-toggle'); expanded = !expanded"
+          @sidebar-toggle.window="expanded = !$el.getAttribute('aria-expanded')"
+          @sidebar-close.window="expanded = false"
+        >
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
+          <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
+        </button>
         <a
           href="/"
           class="group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150"
@@ -180,85 +184,10 @@ const allJsonLd: object[] = [
           </svg>
           <span>DevTools</span>
         </a>
-        <!-- 移动端关闭按钮 -->
-        <button
-          class="lg:hidden flex items-center justify-center w-8 h-8 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
-          aria-label="关闭导航菜单"
-          @click="$dispatch('sidebar-close')"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
       </div>
 
-      <!-- 导航内容 (可滚动) -->
-      <div class="flex-1 sidebar-nav-scroll overflow-y-auto py-2">
-        <!-- 分类导航 -->
-        {categories.map((category) => (
-          <div>
-            <h3 class="text-xs font-semibold text-muted px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
-            <ul class="list-none m-0 p-0">
-              {toolsByCategory[category].map((tool) => (
-                <li>
-                  <a
-                    href={tool.path}
-                    class:list={[
-                      'flex items-center gap-2 px-4 py-2 text-sm text-text transition-[background-color] duration-150 hover:bg-hover focus:outline-none',
-                      currentPath === tool.path && 'bg-hover text-accent font-medium',
-                    ]}
-                  >
-                    <span class="text-base w-6 text-center shrink-0">{tool.icon}</span>
-                    <span>{tool.name}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-    </aside>
-
-    <!-- Mobile overlay -->
-    <div
-      x-data
-      x-show="$el.closest('#app')?.querySelector('aside')?.classList.contains('sidebar-open')"
-      @click="$dispatch('sidebar-close')"
-      class="sidebar-overlay fixed inset-0 bg-black/30 z-[99] hidden"
-      x-cloak
-    ></div>
-
-    <!-- 右侧区域 -->
-    <div class="ml-60 max-lg:ml-0 flex flex-col min-h-0 min-h-dvh">
-      <!-- Header -->
-      <header class="sticky top-0 z-50 flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0">
-        <!-- 左侧：汉堡按钮 + 移动端 Logo -->
-        <div class="flex items-center gap-4">
-          <button
-            class="hidden max-lg:flex flex-col gap-1 p-2 border-none bg-transparent cursor-pointer focus:outline-none"
-            aria-label="打开导航菜单"
-            x-data="{ expanded: false }"
-            :aria-expanded="expanded"
-            @click="$dispatch('sidebar-toggle'); expanded = !expanded"
-            @sidebar-toggle.window="expanded = !$el.getAttribute('aria-expanded')"
-            @sidebar-close.window="expanded = false"
-          >
-            <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
-            <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
-            <span class="block w-[18px] h-[2px] bg-text rounded-[1px]" aria-hidden="true"></span>
-          </button>
-          <!-- 移动端 Logo -->
-          <a href="/" class="lg:hidden group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150" aria-label="DevTools 首页">
-            <svg class="w-6 h-6 text-violet-600 group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-            </svg>
-            <span>DevTools</span>
-          </a>
-        </div>
-
-        <!-- 右侧：工具按钮区 -->
-        <div class="flex items-center gap-1" x-data="{ showPanel: false }">
+      <!-- 右侧：工具按钮区 -->
+      <div class="flex items-center gap-1" x-data="{ showPanel: false }">
 
           <!-- 收藏夹按钮 + 下拉面板 -->
           <div class="relative">
@@ -376,8 +305,61 @@ const allJsonLd: object[] = [
         </div>
       </header>
 
-      <!-- Main content -->
-      <main class="flex-1 p-8 overflow-y-auto overflow-x-hidden max-w-full max-md:p-4">
+    <!-- 主体行：aside + 内容列 -->
+    <div class="flex-1 flex min-h-0">
+      <!-- Sidebar（桌面纯静态；移动端抽屉，定位见 <style>） -->
+      <aside
+        x-data="{ isOpen: false }"
+        @sidebar-toggle.window="isOpen = !isOpen"
+        @sidebar-close.window="isOpen = false"
+        @keydown.escape.window="isOpen = false"
+        :class="isOpen && 'sidebar-open'"
+        class="sidebar w-60 shrink-0 border-r border-border bg-card flex flex-col"
+        role="navigation"
+        aria-label="工具导航"
+      >
+        <!-- 导航内容（可滚动） -->
+        <div class="flex-1 sidebar-nav-scroll overflow-y-auto py-2">
+          {categories.map((category) => (
+            <div>
+              <h3 class="text-xs font-semibold text-muted px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
+              <ul class="list-none m-0 p-0">
+                {toolsByCategory[category].map((tool) => (
+                  <li>
+                    <a
+                      href={tool.path}
+                      class:list={[
+                        'flex items-center gap-2 px-4 py-2 text-sm text-text transition-[background-color] duration-150 hover:bg-hover focus:outline-none',
+                        currentPath === tool.path && 'bg-hover text-accent font-medium',
+                      ]}
+                    >
+                      <span class="text-base w-6 text-center shrink-0">{tool.icon}</span>
+                      <span>{tool.name}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </aside>
+
+      <!-- Mobile overlay -->
+      <div
+        x-data="{ show: false }"
+        @sidebar-toggle.window="show = !show"
+        @sidebar-close.window="show = false"
+        @keydown.escape.window="show = false"
+        x-show="show"
+        @click="$dispatch('sidebar-close')"
+        class="sidebar-overlay fixed inset-0 bg-black/30 z-[99]"
+        x-cloak
+      ></div>
+
+      <!-- 内容列（唯一内容滚动容器） -->
+      <div class="flex-1 flex flex-col overflow-x-hidden overflow-y-auto min-w-0">
+        <!-- Main content -->
+        <main class="flex-1 p-8 max-w-full max-md:p-4">
         {breadcrumbItems.length > 0 && <Breadcrumb items={breadcrumbItems} />}
         <slot />
         {faqs.length > 0 && (
@@ -404,10 +386,11 @@ const allJsonLd: object[] = [
             <RelatedTools toolIds={relatedToolIds} />
           </section>
         )}
-      </main>
+        </main>
 
-      <!-- Footer -->
-      <Footer />
+        <!-- Footer -->
+        <Footer />
+      </div>
     </div>
 
     <!-- Alpine Toast -->
@@ -458,21 +441,28 @@ const allJsonLd: object[] = [
   </div>
 
   <style>
-    /* 移动端侧边栏行为 */
+    /* 移动端侧边栏行为：从 header 下方滑出，保持 header 常驻可见 */
     @media (max-width: 1023px) {
       .sidebar {
+        position: fixed;
         left: 0;
-        top: 0;
+        top: 57px;
         z-index: 100;
+        height: calc(100dvh - 57px);
         transform: translateX(-100%);
         transition: transform 250ms ease;
-        height: 100vh;
       }
       .sidebar.sidebar-open {
         transform: translateX(0);
       }
       .sidebar-overlay {
-        display: block;
+        top: 57px;
+      }
+    }
+    /* 桌面端不显示 overlay（aside 为静态常驻，无抽屉） */
+    @media (min-width: 1024px) {
+      .sidebar-overlay {
+        display: none;
       }
     }
   </style>
