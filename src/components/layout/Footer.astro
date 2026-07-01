@@ -1,51 +1,70 @@
 ---
-interface Props {
-  icp?: string;
-}
-
-const { icp = '' } = Astro.props;
+// 站点备案信息集中配置：号码暂无，留空则对应条目不渲染；填号后自动显示。
+const SITE = {
+  copyrightName: 'DevTools · 开发者工具箱',
+  icp: '桂ICP备2025072594号-3', // 留空则不显示
+  policeNo: '', // 例：'苏公网安备 32XXXXXXXXXX号'，留空则不显示
+  policeUrl: '', // 例：http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=32XXXX
+};
 const year = new Date().getFullYear();
+const linkCls = 'text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150';
 ---
 
-<footer class="px-6 py-4 border-t border-border bg-card">
-  <div class="max-w-3xl mx-auto">
-    <!-- 主行：版权 + 链接 -->
-    <div class="flex items-center justify-between flex-wrap gap-2">
-      <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} DevTools. All rights reserved.</p>
-      <div class="flex items-center gap-4">
-        <a href="/about" class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150">关于</a>
-        <a
-          href="https://gitee.com/baixuanz"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
-        >Gitee</a>
-        <a
-          href="https://github.com/BaixuanZhu/DevTools"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
-        >GitHub</a>
-        <a
-          href="/feedback"
-          class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
-        >反馈</a>
-      </div>
-    </div>
+<footer class="px-6 py-5 border-t border-border bg-card">
+  <div class="max-w-3xl mx-auto flex flex-col items-center gap-2 text-center">
+    <!-- 版权行 -->
+    <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} {SITE.copyrightName}</p>
 
-    <!-- ICP 行（如存在）-->
-    {icp && (
-      <div class="mt-1">
-        <p class="m-0">
+    <!-- 链接行 -->
+    <nav class="flex items-center justify-center flex-wrap gap-4">
+      <a href="/about" class={linkCls}>关于</a>
+      <a
+        href="https://gitee.com/baixuanz"
+        target="_blank"
+        rel="noopener noreferrer"
+        class={linkCls}>Gitee</a>
+      <a
+        href="https://github.com/BaixuanZhu/DevTools"
+        target="_blank"
+        rel="noopener noreferrer"
+        class={linkCls}>GitHub</a>
+      <a href="/feedback" class={linkCls}>反馈</a>
+    </nav>
+
+    <!-- 备案行：任一号码非空才渲染 -->
+    {(SITE.icp || SITE.policeNo) && (
+      <div class="flex items-center justify-center flex-wrap gap-3">
+        {SITE.icp && (
           <a
             href="https://beian.miit.gov.cn/"
             target="_blank"
             rel="noopener noreferrer"
-            class="text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150"
-          >
-            {icp}
+            class={linkCls}>{SITE.icp}</a>
+        )}
+        {SITE.policeNo && (
+          <a
+            href={SITE.policeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            class={`inline-flex items-center gap-1 ${linkCls}`}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true">
+              {/* 国徽占位（盾牌轮廓），未来替换为官方国徽 SVG */}
+              <path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z"></path>
+              <circle cx="12" cy="10" r="2"></circle>
+            </svg>
+            <span>{SITE.policeNo}</span>
           </a>
-        </p>
+        )}
       </div>
     )}
   </div>

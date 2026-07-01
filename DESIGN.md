@@ -335,10 +335,14 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 ### Footer
 
+居中堆叠三行布局（版权 / 链接 / 备案），位于内容列底部、`main` 之后，随内容滚动（非 `fixed`/`sticky`）。
+
 | 元素 | Class |
 |------|-------|
-| Container | `bg-card border-t border-border`，位于内容列底部、`main` 之后，随内容滚动（非 `fixed`/`sticky`） |
-| Content | 居中，`text-[0.8125rem] text-muted`，链接 `hover:text-accent` |
+| Container | `bg-card border-t border-border px-6 py-5` |
+| 内容包裹 | `max-w-3xl mx-auto flex flex-col items-center gap-2 text-center` |
+| 版权行 / 链接行 / 备案行 | `text-[0.8125rem] text-muted`，链接 `hover:text-accent` |
+| 备案行 | ICP / 公安备案号通过组件顶部 `SITE` 常量配置，留空则不渲染；公安备案前缀盾牌图标（内联 SVG 占位，未来替换为官方国徽） |
 
 ### Toast Notification
 
