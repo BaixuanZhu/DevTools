@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import {useCopy} from '../../composables/useCopy';
+import { Check, Copy } from '@lucide/vue';
 
 interface Props {
   /** 要复制的文本 */
@@ -47,35 +48,16 @@ async function handleCopy() {
       :disabled="!text"
       @click="handleCopy"
   >
-    <svg
+    <Check
         v-if="copied"
-        xmlns="http://www.w3.org/2000/svg"
-        :width="iconSize[size]"
-        :height="iconSize[size]"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-    >
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
+        :size="iconSize[size]"
+        :stroke-width="2.5"
+    />
 
-    <svg
+    <Copy
         v-else
-        xmlns="http://www.w3.org/2000/svg"
-        :width="iconSize[size]"
-        :height="iconSize[size]"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </svg>
+        :size="iconSize[size]"
+        :stroke-width="2"
+    />
   </button>
 </template>

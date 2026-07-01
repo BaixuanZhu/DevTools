@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { Listbox, ListboxButton, ListboxOptions, ListboxOption } from '@headlessui/vue';
+import { Check, ChevronDown } from '@lucide/vue';
 
 const props = withDefaults(
   defineProps<{
@@ -41,13 +42,7 @@ const selectedLabel = computed(() => {
       >
         <span class="block truncate">{{ selectedLabel }}</span>
         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-          <svg class="h-4 w-4 text-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path
-              fill-rule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-              clip-rule="evenodd"
-            />
-          </svg>
+          <ChevronDown class="h-4 w-4 text-muted" :size="16" aria-hidden="true" />
         </span>
       </ListboxButton>
       <ListboxOptions
@@ -64,13 +59,7 @@ const selectedLabel = computed(() => {
         >
           <span class="flex items-center justify-center gap-1.5 truncate ui-selected:font-semibold ui-selected:text-accent">{{ option.label }}</span>
           <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 ui-selected:text-accent">
-            <svg class="h-4 w-4 ui-selected:block hidden" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z"
-                clip-rule="evenodd"
-              />
-            </svg>
+            <Check class="h-4 w-4 ui-selected:block hidden" :size="16" aria-hidden="true" />
           </span>
         </ListboxOption>
       </ListboxOptions>
