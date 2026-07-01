@@ -6,6 +6,7 @@
  */
 import { ref, onMounted, onUnmounted } from 'vue';
 import { formatBytes } from '../../utils/media/image-convert';
+import { ChevronLeft, ChevronRight, X } from '@lucide/vue';
 
 /** 灯箱单页 */
 export interface LightboxSlide {
@@ -54,7 +55,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKey));
       class="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-sm text-white/80 hover:text-white hover:bg-white/10"
       @click="emit('close')"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+      <X :size="20" />
     </button>
 
     <button
@@ -62,14 +63,14 @@ onUnmounted(() => window.removeEventListener('keydown', onKey));
       class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10"
       @click="prev"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+      <ChevronLeft :size="24" />
     </button>
     <button
       v-if="slides.length > 1" type="button" aria-label="下一张"
       class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10"
       @click="next"
     >
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+      <ChevronRight :size="24" />
     </button>
 
     <figure class="flex flex-col items-center gap-3 max-w-full max-h-full">

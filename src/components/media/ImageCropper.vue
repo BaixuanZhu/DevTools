@@ -24,6 +24,7 @@ import {
   canvasToCropOutputs,
   type CropOutputType,
 } from '../../utils/media/image-crop';
+import { RotateCcw, RotateCw, FlipHorizontal2, FlipVertical2 } from '@lucide/vue';
 
 // ==================== 类型 ====================
 
@@ -344,10 +345,7 @@ function handleCancel(): void {
             class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
             @click="rotateLeft"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
+            <RotateCcw :size="16" />
           </button>
           <!-- 右转 -->
           <button
@@ -357,10 +355,7 @@ function handleCancel(): void {
             class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
             @click="rotateRight"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-              <path d="M21 3v5h-5" />
-            </svg>
+            <RotateCw :size="16" />
           </button>
           <!-- 水平翻转 -->
           <button
@@ -370,16 +365,7 @@ function handleCancel(): void {
             class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
             @click="flipH"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 20h9" />
-              <path d="M12 4h9" />
-              <path d="M3 12h.01" />
-              <path d="M3 16h.01" />
-              <path d="M3 8h.01" />
-              <path d="M3 20h.01" />
-              <path d="M3 4h.01" />
-              <path d="M8 4v16" />
-            </svg>
+            <FlipHorizontal2 :size="16" />
           </button>
           <!-- 垂直翻转 -->
           <button
@@ -389,14 +375,7 @@ function handleCancel(): void {
             class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
             @click="flipV"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 12h16" />
-              <path d="M4 16h.01" />
-              <path d="M4 8h.01" />
-              <path d="M4 20h.01" />
-              <path d="M4 4h.01" />
-              <path d="M8 4v16" />
-            </svg>
+            <FlipVertical2 :size="16" />
           </button>
         </div>
       </section>

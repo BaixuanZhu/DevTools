@@ -5,6 +5,7 @@
 import { computed } from 'vue';
 import { formatBytes } from '../../utils/media/image-convert';
 import type { BatchItem } from '../../composables/useImageBatch';
+import { RotateCw, Eye, Crop, Download, X } from '@lucide/vue';
 
 const props = defineProps<{ item: BatchItem }>();
 const emit = defineEmits<{
@@ -51,35 +52,35 @@ const isDone = computed(() => props.item.status === 'done');
         class="w-8 h-8 flex items-center justify-center rounded-sm border border-border text-muted hover:bg-hover hover:text-text"
         @click="emit('retry')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" /></svg>
+        <RotateCw :size="15" />
       </button>
       <button
         type="button" title="预览" :disabled="!isDone"
         class="w-8 h-8 flex items-center justify-center rounded-sm border border-border text-muted hover:bg-hover hover:text-text disabled:opacity-40 disabled:cursor-not-allowed"
         @click="emit('preview')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>
+        <Eye :size="15" />
       </button>
       <button
         type="button" title="裁切"
         class="w-8 h-8 flex items-center justify-center rounded-sm border border-border text-muted hover:bg-hover hover:text-text"
         @click="emit('crop')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v14a2 2 0 0 0 2 2h14" /><path d="M18 22V8a2 2 0 0 0-2-2H2" /></svg>
+        <Crop :size="15" />
       </button>
       <button
         type="button" title="下载" :disabled="!isDone"
         class="w-8 h-8 flex items-center justify-center rounded-sm border border-border text-muted hover:bg-hover hover:text-text disabled:opacity-40 disabled:cursor-not-allowed"
         @click="emit('download')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+        <Download :size="15" />
       </button>
       <button
         type="button" title="移除"
         class="w-8 h-8 flex items-center justify-center rounded-sm border border-border text-muted hover:bg-hover hover:text-error"
         @click="emit('remove')"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        <X :size="15" />
       </button>
     </div>
   </div>
