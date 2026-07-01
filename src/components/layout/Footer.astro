@@ -1,5 +1,6 @@
 ---
 // 站点备案信息集中配置：号码暂无，留空则对应条目不渲染；填号后自动显示。
+import { Shield } from '@lucide/astro';
 const SITE = {
   copyrightName: 'DevTools · 开发者工具箱',
   icp: '桂ICP备2025072594号-3', // 留空则不显示
@@ -47,21 +48,7 @@ const linkCls = 'text-[0.8125rem] text-muted hover:text-accent transition-[color
             target="_blank"
             rel="noopener noreferrer"
             class={`inline-flex items-center gap-1 ${linkCls}`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true">
-              {/* 国徽占位（盾牌轮廓），未来替换为官方国徽 SVG */}
-              <path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5l8-3z"></path>
-              <circle cx="12" cy="10" r="2"></circle>
-            </svg>
+            <Shield class="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
             <span>{SITE.policeNo}</span>
           </a>
         )}
