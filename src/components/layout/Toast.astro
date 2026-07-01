@@ -1,0 +1,46 @@
+---
+/**
+ * Alpine Toast 通知区域（共享组件）。
+ *
+ * 渲染 `$store.toast.items` 中的通知项，成功 / 错误用 lucide CircleCheck / CircleX 图标。
+ * 从 ToolLayout 与 SimpleLayout 复用，消除重复标记。
+ *
+ * 说明：原本通过 set:html 注入整段 HTML 字符串以规避 Astro 对 Alpine
+ * `:class="{...}"` 对象语法中 `{}` 的误解析；现改用三元字符串 `:class`，
+ * Astro 可正常解析，从而能直接使用 lucide 组件。
+ */
+import { CircleCheck, CircleX } from '@lucide/astro';
+---
+
+<div
+  class="fixed top-20 left-1/2 -translate-x-1/2 z-[100] flex flex-col-reverse gap-3 max-w-[90vw]"
+  x-cloak
+  x-data
+  role="region"
+  aria-label="通知"
+>
+  <template x-for="toast in $store.toast.items" :key="toast.id">
+    <div
+      :class="toast.type === 'success' ? 'border-border' : 'border-error/20'"
+      class="flex items-center gap-3 px-5 py-3.5 rounded-lg border shadow-lg bg-card text-text text-sm font-sans min-w-48 max-w-sm"
+      role="status"
+      aria-live="polite"
+      x-transition:enter="transition ease-out duration-300"
+      x-transition:enter-start="opacity-0 -translate-y-2 scale-95"
+      x-transition:enter-end="opacity:100 translate-y-0 scale-100"
+      x-transition:leave="transition ease-in duration-200"
+      x-transition:leave-start="opacity:100 translate-y-0 scale-100"
+      x-transition:leave-end="opacity:0 -translate-y-2 scale-95"
+    >
+      <CircleCheck
+        x-show="toast.type === 'success'"
+        class="w-5 h-5 shrink-0 text-success"
+      />
+      <CircleX
+        x-show="toast.type === 'error'"
+        class="w-5 h-5 shrink-0 text-error"
+      />
+      <span x-text="toast.message"></span>
+    </div>
+  </template>
+</div>
