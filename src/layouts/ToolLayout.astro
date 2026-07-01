@@ -178,53 +178,61 @@ const allJsonLd: object[] = [
         </a>
       </div>
 
-      <!-- 右侧：工具按钮区 -->
-      <div class="flex items-center gap-1">
+      <!-- 右侧：工具按钮区 + 个人主页入口 -->
+      <div class="flex items-center gap-3">
 
-        <!-- 收藏夹入口（桌面显示文字，移动端仅图标） -->
-        <a
-          href="/favorites"
-          class="flex items-center gap-1.5 h-9 px-2 max-md:px-1.5 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 focus:outline-none"
-          aria-label="我的收藏"
-        >
-          <Star class="w-5 h-5" />
-          <span class="text-[0.8125rem] font-medium max-md:hidden">我的收藏</span>
-        </a>
+        <!-- 工具按钮组 -->
+        <div class="flex items-center gap-1">
 
-        <!-- 暗色模式按钮（仅 UI 预留） -->
-        <button
-          class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
-          aria-label="切换暗色模式（即将支持）"
-          @click="$store.toast.success('暗色模式即将支持，敬请期待')"
-        >
-          <Sun class="w-5 h-5" />
-        </button>
+          <!-- 收藏夹入口（桌面显示文字，移动端仅图标） -->
+          <a
+            href="/favorites"
+            class="flex items-center gap-1.5 h-9 px-2 max-md:px-1.5 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 focus:outline-none"
+            aria-label="我的收藏"
+          >
+            <Star class="w-5 h-5" />
+            <span class="text-[0.8125rem] font-medium max-md:hidden">我的收藏</span>
+          </a>
 
-        <!-- Gitee 链接 -->
-        <a
-          href="https://gitee.com/baixuanz"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 focus:outline-none"
-          aria-label="Gitee 仓库"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" role="img" aria-hidden="true" fill={`#${siGitee.hex}`}>
-            <path d={siGitee.path} />
-          </svg>
-        </a>
+          <!-- 暗色模式按钮（仅 UI 预留） -->
+          <button
+            class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
+            aria-label="切换暗色模式（即将支持）"
+            @click="$store.toast.success('暗色模式即将支持，敬请期待')"
+          >
+            <Sun class="w-5 h-5" />
+          </button>
+        </div>
 
-        <!-- GitHub 链接 -->
-        <a
-          href="https://github.com/BaixuanZhu/DevTools"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 focus:outline-none"
-          aria-label="GitHub 仓库"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" role="img" aria-hidden="true" fill="currentColor">
-            <path d={siGithub.path} />
-          </svg>
-        </a>
+        <!-- 个人主页入口组（简化样式） -->
+        <div class="flex items-center gap-2 text-text">
+
+          <!-- Gitee 链接 -->
+          <a
+            href="https://gitee.com/baixuanz"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="focus:outline-none"
+            aria-label="Gitee 仓库"
+          >
+            <svg class="w-6 h-6" viewBox="0 0 24 24" role="img" aria-hidden="true" fill={`#${siGitee.hex}`}>
+              <path d={siGitee.path} />
+            </svg>
+          </a>
+
+          <!-- GitHub 链接 -->
+          <a
+            href="https://github.com/BaixuanZhu/DevTools"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="focus:outline-none"
+            aria-label="GitHub 仓库"
+          >
+            <svg class="w-6 h-6" viewBox="0 0 24 24" role="img" aria-hidden="true" fill="currentColor">
+              <path d={siGithub.path} />
+            </svg>
+          </a>
+        </div>
       </div>
     </header>
 
