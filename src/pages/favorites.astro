@@ -1,0 +1,71 @@
+---
+/**
+ * 我的收藏页面
+ *
+ * 展示用户通过 ToolCard 星标收藏的常用工具，支持在页面内直接取消收藏。
+ * 数据来自 localStorage，与 Alpine favorites store 共享同一个 key。
+ */
+import ToolLayout from '../layouts/ToolLayout.astro';
+import { tools } from '../data/tools';
+
+/** 序列化工具数据，供客户端按 path 查找完整工具信息 */
+const toolsJson = JSON.stringify(tools);
+---
+
+<ToolLayout title="我的收藏 | DevTools" description="查看和管理你在 DevTools 收藏的工具">
+  <div
+    class="max-w-320 mx-auto"
+    x-data="{ favorites: [], tools: [], init() { var dataEl = document.getElementById('favorites-tools-data'); this.tools = dataEl ? JSON.parse(dataEl.textContent || '[]') : []; this.loadFavorites(); }, loadFavorites() { this.favorites = Alpine.store('favorites').list; }, get favoriteTools() { var self = this; return this.tools.filter(function(t) { return self.favorites.some(function(f) { return f.path === t.path; }); }); }, toggle(tool) { Alpine.store('favorites').toggle(tool.path, tool.name, tool.icon); this.loadFavorites(); } }"
+  >
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold m-0 mb-3">我的收藏</h1>
+      <p class="text-muted text-base m-0">常用工具集中管理，点击星标即可取消收藏。</p>
+    </div>
+
+    <!-- 收藏网格 -->
+    <div
+      x-show="favoriteTools.length > 0"
+      x-cloak
+      class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4"
+    >
+      <template x-for="tool in favoriteTools" :key="tool.path">
+        <div class="relative flex h-full">
+          <a
+            :href="tool.path"
+            class="flex items-start gap-4 p-5 pr-14 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
+          >
+            <span class="text-[1.75rem] leading-none shrink-0 mt-0.5" x-text="tool.icon"></span>
+            <div class="flex-1 min-w-0">
+              <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug" x-text="tool.name"></h3>
+              <p class="m-0 text-[0.8125rem] text-muted leading-relaxed" x-text="tool.description"></p>
+            </div>
+          </a>
+
+          <!-- 取消收藏按钮 -->
+          <button
+            type="button"
+            class="absolute top-2 right-2 z-10 shrink-0 p-2 rounded-sm border-none bg-transparent cursor-pointer text-amber-500 hover:text-amber-400 transition-[color] duration-150"
+            :aria-label="'取消收藏 ' + tool.name"
+            @click.prevent="toggle(tool)"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" aria-hidden="true">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </template>
+    </div>
+
+    <!-- 空状态 -->
+    <div
+      x-show="favoriteTools.length === 0"
+      x-cloak
+      class="text-center py-16"
+    >
+      <p class="text-muted text-base m-0 mb-2">还没有收藏任何工具</p>
+      <a href="/" class="text-[0.8125rem] text-accent hover:underline">去首页看看吧 →</a>
+    </div>
+  </div>
+
+  <script is:inline id="favorites-tools-data" type="application/json" set:html={toolsJson} />
+</ToolLayout>

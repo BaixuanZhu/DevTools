@@ -90,10 +90,9 @@ if (jsonLd) {
     icon: string;
   }
 
-  // 注册 Alpine store: favorites（Header 下拉面板 + 侧边栏星标共享）
+  // 注册 Alpine store: favorites（侧边栏星标共享）
   Alpine.store('favorites', {
     list: [] as FavoriteItem[],
-    maxCount: 10,
     storageKey: 'devtools-favorites',
 
     /** 从 localStorage 加载收藏数据 */
@@ -122,10 +121,6 @@ if (jsonLd) {
         this.list = this.list.filter((f: FavoriteItem) => f.path !== path);
         Alpine.store('toast').success(`已取消收藏 ${name}`);
       } else {
-        if (this.list.length >= this.maxCount) {
-          Alpine.store('toast').error(`最多收藏 ${this.maxCount} 个工具`);
-          return;
-        }
         this.list = [...this.list, { path, name, icon }];
         Alpine.store('toast').success(`已收藏 ${name}`);
       }

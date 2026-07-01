@@ -320,7 +320,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（收藏夹 · 暗色模式 · Gitee · GitHub） |
 | Logo | `group flex items-center gap-1.5 text-lg font-semibold`，全断点常驻；图标 `text-violet-600`，hover `-rotate-12` |
 | 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，`@click` 触发 `sidebar-toggle` |
-| 收藏夹按钮 | `w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover`，下拉面板 `w-[260px]` |
+| 收藏夹入口 | 桌面：`h-9 px-2` 文本 + Star 图标，文本为「我的收藏」；移动端（`max-md:`）仅显示图标，`px-1.5`。链接到 `/favorites`，hover `text-accent bg-hover` |
 | 暗色模式按钮 | 同收藏夹按钮样式，当前为 UI 预留（Toast 提示"即将支持"） |
 | Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 

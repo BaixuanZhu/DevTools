@@ -1,6 +1,7 @@
 ---
 import ToolLayout from '../layouts/ToolLayout.astro';
 import ToolCard from '../components/layout/ToolCard.astro';
+import { Search, X } from '@lucide/astro';
 import { tools } from '../data/tools';
 
 // 序列化工具数据供客户端搜索使用
@@ -44,7 +45,7 @@ const itemListJsonLd = {
       <!-- Search Bar -->
       <div class="max-w-140 mx-auto mb-6">
         <div class="flex items-center gap-2 px-5 py-3 border border-border rounded-lg bg-card transition-[border-color] duration-150 focus-within:border-accent">
-          <span class="text-base shrink-0">🔍</span>
+          <Search class="w-4 h-4 shrink-0 text-muted" />
           <input
             type="text"
             x-model="query"
@@ -58,32 +59,11 @@ const itemListJsonLd = {
             @click="query = ''; handleSearch()"
             class="border-none bg-transparent cursor-pointer text-muted text-sm px-1 py-0.5 rounded-sm hover:text-text"
             aria-label="清除搜索"
-          >✕</button>
+          >
+            <X class="w-4 h-4" />
+          </button>
         </div>
       </div>
-
-      <!-- 收藏工具 -->
-      <div
-        x-show="$store.favorites.list.length > 0"
-        x-cloak
-        class="mb-8"
-        x-transition
-      >
-        <h2 class="text-sm font-semibold text-muted mb-3">⭐ 我的收藏</h2>
-        <div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3">
-          <template x-for="fav in $store.favorites.list" :key="fav.path">
-            <a
-              :href="fav.path"
-              class="flex items-center gap-3 p-3 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
-            >
-              <span class="text-2xl leading-none" x-text="fav.icon"></span>
-              <span class="text-[0.9375rem] font-semibold text-text" x-text="fav.name"></span>
-            </a>
-          </template>
-        </div>
-      </div>
-    </div>
-
     <!-- Tool Cards Grid -->
     <div
       class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4"
