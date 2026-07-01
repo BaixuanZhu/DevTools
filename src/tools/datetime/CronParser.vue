@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {ref, watch, computed, nextTick} from 'vue';
 import {TabGroup, TabList, Tab, TabPanels, TabPanel} from '@headlessui/vue';
+import { Check } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 
 import CopyButton from '../../components/ui/CopyButton.vue';
@@ -326,18 +327,10 @@ parseExpression();
                             : 'border-border',
                         ]"
                     >
-                      <svg
+                      <Check
                           v-if="fields[config.key].mode === mode"
                           class="w-2.5 h-2.5 text-white"
-                          viewBox="0 0 12 12"
-                          fill="none"
-                          stroke="currentColor"
-                          stroke-width="2"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                      >
-                        <path d="M2.5 6L5 8.5L9.5 3.5"/>
-                      </svg>
+                      />
                     </span>
                     <span
                         :class="[

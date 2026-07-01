@@ -7,6 +7,7 @@
  */
 import ToolLayout from '../layouts/ToolLayout.astro';
 import { tools } from '../data/tools';
+import { Star } from '@lucide/astro';
 
 /** 序列化工具数据，供客户端按 path 查找完整工具信息 */
 const toolsJson = JSON.stringify(tools);
@@ -48,9 +49,7 @@ const toolsJson = JSON.stringify(tools);
             :aria-label="'取消收藏 ' + tool.name"
             @click.prevent="toggle(tool)"
           >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1" aria-hidden="true">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-            </svg>
+            <Star class="w-5 h-5" fill="currentColor" stroke-width={1} aria-hidden="true" />
           </button>
         </div>
       </template>

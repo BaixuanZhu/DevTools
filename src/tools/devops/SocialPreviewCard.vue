@@ -7,6 +7,7 @@
  * 文本与图片字段，不发起任何网络请求；图片加载失败或 URL 为空时渲染占位块。
  */
 import { ref, watch, computed } from 'vue';
+import { Image } from '@lucide/vue';
 import type { MetaFormData, SocialPlatform } from '../../utils/devops/meta-generator';
 
 interface Props {
@@ -75,11 +76,7 @@ function onImgError(): void {
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
       <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted mt-1.5">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <polyline points="21 15 16 10 5 21" />
-        </svg>
+        <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
       <div class="bg-hover px-3 pt-2.5 pb-3">
@@ -98,11 +95,7 @@ function onImgError(): void {
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
       <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted rounded-t-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <polyline points="21 15 16 10 5 21" />
-        </svg>
+        <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
       <div class="border border-border border-t-0 rounded-b-sm px-3 py-2">
@@ -121,11 +114,7 @@ function onImgError(): void {
         </div>
         <div class="w-20 h-20 shrink-0 bg-hover overflow-hidden flex items-center justify-center text-muted">
           <img v-if="hasImage" :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
-          <svg v-else xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
-          </svg>
+          <Image v-else :size="22" :stroke-width="1.6" />
         </div>
       </div>
     </div>
@@ -136,11 +125,7 @@ function onImgError(): void {
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
       <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <polyline points="21 15 16 10 5 21" />
-        </svg>
+        <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
       <div class="border border-border border-t-0 px-3 py-2">
@@ -162,11 +147,7 @@ function onImgError(): void {
           <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
         </div>
         <div v-else class="h-32 w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted mt-2.5">
-          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-            <circle cx="8.5" cy="8.5" r="1.5" />
-            <polyline points="21 15 16 10 5 21" />
-          </svg>
+          <Image :size="28" :stroke-width="1.6" />
           <span class="text-[0.75rem]">暂无预览图</span>
         </div>
       </div>

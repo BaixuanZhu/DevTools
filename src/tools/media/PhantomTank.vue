@@ -12,6 +12,7 @@
  * - 大图（>400 万像素）自动走 Web Worker，避免阻塞主线程。
  */
 import { ref, computed, watch, onUnmounted } from 'vue';
+import { RefreshCw, Sparkles, Download, Trash2 } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import FileDropzone from '../../components/ui/FileDropzone.vue';
@@ -488,7 +489,7 @@ onUnmounted(() => {
         title="用里图的反相自动生成表图"
         @click="generateAutoSurface"
       >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2v6h-6"></path><path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path><path d="M3 22v-6h6"></path><path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path></svg>
+        <RefreshCw class="w-4 h-4" />
         从里图自动生成
       </button>
       <div class="flex items-center gap-2">
@@ -519,7 +520,7 @@ onUnmounted(() => {
         aria-label="生成幻影坦克"
         @click="handleGenerate"
       >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"></path></svg>
+        <Sparkles class="w-4 h-4" />
         生成
       </button>
       <button
@@ -529,7 +530,7 @@ onUnmounted(() => {
         aria-label="下载结果"
         @click="handleDownload"
       >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <Download class="w-4 h-4" />
         下载
       </button>
       <button
@@ -539,7 +540,7 @@ onUnmounted(() => {
         aria-label="清空"
         @click="handleClear"
       >
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <Trash2 class="w-4 h-4" />
         清空
       </button>
     </div>
