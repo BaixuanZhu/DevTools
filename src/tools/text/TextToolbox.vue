@@ -25,6 +25,7 @@ import {
   replaceAll,
   createHistory,
 } from '../../utils/text/text-toolbox';
+import { AlignJustify, Layers, Scissors, Minimize2, ArrowDown, ArrowUp, Undo2, Redo2, Trash2, Search } from '@lucide/vue';
 
 /** 初始示例文本，打开页面即可体验。 */
 const DEFAULT_TEXT = 'Hello World\nFoo Bar\nfoo bar\n\nHello World';
@@ -153,79 +154,41 @@ function handleReplace(): void {
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 清理 -->
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="去空行" aria-label="去空行" @click="apply(removeBlankLines)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <AlignJustify :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="去重" aria-label="去重行" @click="apply(dedupeLines)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="12 2 2 7 12 12 22 7 12 2" />
-            <polyline points="2 17 12 22 22 17" />
-            <polyline points="2 12 12 17 22 12" />
-          </svg>
+          <Layers :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="去首尾空白" aria-label="去除每行首尾空白" @click="apply(trimLines)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="6" cy="6" r="3" />
-            <circle cx="6" cy="18" r="3" />
-            <line x1="20" y1="4" x2="8.12" y2="15.88" />
-            <line x1="14.47" y1="14.48" x2="20" y2="20" />
-            <line x1="8.12" y1="8.12" x2="12" y2="12" />
-          </svg>
+          <Scissors :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="合并空白" aria-label="合并连续空白" @click="apply(collapseWhitespace)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="4 14 10 14 10 20" />
-            <polyline points="20 10 14 10 14 4" />
-            <line x1="14" y1="10" x2="21" y2="3" />
-            <line x1="3" y1="21" x2="10" y2="14" />
-          </svg>
+          <Minimize2 :size="16" />
         </button>
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 排序 -->
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="行升序" aria-label="行升序" @click="apply((t) => sortLines(t, 'asc'))">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <polyline points="19 12 12 19 5 12" />
-          </svg>
+          <ArrowDown :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="行降序" aria-label="行降序" @click="apply((t) => sortLines(t, 'desc'))">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="12" y1="19" x2="12" y2="5" />
-            <polyline points="5 12 12 5 19 12" />
-          </svg>
+          <ArrowUp :size="16" />
         </button>
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 操作 -->
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" :disabled="!canUndo" title="撤销" aria-label="撤销" @click="handleUndo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 14 4 9l5-5" />
-            <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11" />
-          </svg>
+          <Undo2 :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" :disabled="!canRedo" title="重做" aria-label="重做" @click="handleRedo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m15 14 5-5-5-5" />
-            <path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v0A5.5 5.5 0 0 0 9.5 20H13" />
-          </svg>
+          <Redo2 :size="16" />
         </button>
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9']" title="清空" aria-label="清空" @click="handleClear">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 6h18" />
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-          </svg>
+          <Trash2 :size="16" />
         </button>
         <CopyButton :text="text" />
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 查找替换（点击展开） -->
         <DisclosureButton :class="[ICON_BTN_BASE, 'w-9 h-9', open ? 'bg-hover text-text' : '']" title="查找替换" aria-label="查找替换">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
+          <Search :size="16" />
         </DisclosureButton>
       </div>
 

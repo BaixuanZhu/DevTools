@@ -27,6 +27,7 @@ import {
   exportHtml,
   exportPdf,
 } from '../../utils/editor/markdown-export';
+import { Columns2, SquarePen, Eye, Bold, Italic, Code, Link, Terminal, RefreshCw, Download } from '@lucide/vue';
 
 // ---- 常量 ----
 
@@ -95,18 +96,6 @@ const inactiveView = 'bg-card border-border text-muted hover:bg-hover hover:text
 
 /** 工具按钮样式（无激活态） */
 const toolBtn = 'w-8 h-8 flex items-center justify-center rounded-sm border border-border bg-card text-muted cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text';
-
-/** SVG 图标通用属性 */
-const svgAttrs = {
-  width: 16,
-  height: 16,
-  viewBox: '0 0 24 24',
-  fill: 'none',
-  stroke: 'currentColor',
-  'stroke-width': 2,
-  'stroke-linecap': 'round',
-  'stroke-linejoin': 'round',
-};
 
 // ---- 状态 ----
 
@@ -347,10 +336,7 @@ onMounted(() => {
           title="分栏"
           @click="viewMode = 'split'"
         >
-          <svg v-bind="svgAttrs">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <line x1="12" y1="3" x2="12" y2="21" />
-          </svg>
+          <Columns2 :size="16" />
         </button>
         <!-- 编辑 -->
         <button
@@ -358,10 +344,7 @@ onMounted(() => {
           title="编辑"
           @click="viewMode = 'edit'"
         >
-          <svg v-bind="svgAttrs">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-          </svg>
+          <SquarePen :size="16" />
         </button>
         <!-- 预览 -->
         <button
@@ -369,10 +352,7 @@ onMounted(() => {
           title="预览"
           @click="viewMode = 'preview'"
         >
-          <svg v-bind="svgAttrs">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <Eye :size="16" />
         </button>
       </div>
 
@@ -389,39 +369,23 @@ onMounted(() => {
           />
           <!-- 加粗 -->
           <button :class="toolBtn" title="加粗 (Ctrl+B)" @click="handleBold">
-            <svg v-bind="svgAttrs">
-              <path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
-              <path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z" />
-            </svg>
+            <Bold :size="16" />
           </button>
           <!-- 斜体 -->
           <button :class="toolBtn" title="斜体 (Ctrl+I)" @click="handleItalic">
-            <svg v-bind="svgAttrs">
-              <line x1="19" y1="4" x2="10" y2="4" />
-              <line x1="14" y1="20" x2="5" y2="20" />
-              <line x1="15" y1="4" x2="9" y2="20" />
-            </svg>
+            <Italic :size="16" />
           </button>
           <!-- 行内代码 -->
           <button :class="toolBtn" title="行内代码" @click="handleInlineCode">
-            <svg v-bind="svgAttrs">
-              <polyline points="16 18 22 12 16 6" />
-              <polyline points="8 6 2 12 8 18" />
-            </svg>
+            <Code :size="16" />
           </button>
           <!-- 链接 -->
           <button :class="toolBtn" title="链接 (Ctrl+K)" @click="handleLink">
-            <svg v-bind="svgAttrs">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
-            </svg>
+            <Link :size="16" />
           </button>
           <!-- 代码块 -->
           <button :class="toolBtn" title="代码块" @click="handleCodeBlock">
-            <svg v-bind="svgAttrs">
-              <polyline points="4 17 10 11 4 5" />
-              <line x1="12" y1="19" x2="20" y2="19" />
-            </svg>
+            <Terminal :size="16" />
           </button>
           <!-- 列表下拉 -->
           <SelectListbox
@@ -448,21 +412,13 @@ onMounted(() => {
           title="同步滚动"
           @click="syncScroll = !syncScroll"
         >
-          <svg v-bind="svgAttrs">
-            <polyline points="23 4 23 10 17 10" />
-            <polyline points="1 20 1 14 7 14" />
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-          </svg>
+          <RefreshCw :size="16" />
         </button>
 
         <!-- 导出下拉菜单 -->
         <Menu as="div" class="relative">
           <MenuButton :class="toolBtn" title="导出">
-            <svg v-bind="svgAttrs">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
+            <Download :size="16" />
           </MenuButton>
           <MenuItems class="absolute right-0 z-10 mt-1 w-28 origin-top-right rounded-sm bg-card border border-border py-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
             <MenuItem v-slot="{ active }">

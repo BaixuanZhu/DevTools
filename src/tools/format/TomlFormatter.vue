@@ -21,6 +21,7 @@ import {
   type ValidationResult,
   type TomlStringResult,
 } from '../../utils/format/toml-formatter';
+import { LoaderCircle, Sparkles, Trash2, Check, TriangleAlert } from '@lucide/vue';
 
 /** 实时校验防抖延迟（毫秒） */
 const DEBOUNCE_MS = 300;
@@ -216,36 +217,9 @@ onUnmounted(() => {
         @click="handleFormat"
       >
         <!-- 美化中：旋转 loader -->
-        <svg
-          v-if="isFormatting"
-          class="animate-spin"
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-        </svg>
+        <LoaderCircle v-if="isFormatting" class="animate-spin" :size="16" />
         <!-- 美化：sparkles -->
-        <svg
-          v-else
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M12 2l2.4 7.4L22 12l-7.6 2.6L12 22l-2.4-7.4L2 12l7.6-2.6L12 2z" />
-        </svg>
+        <Sparkles v-else :size="16" />
       </button>
 
       <!-- 复制 -->
@@ -259,20 +233,7 @@ onUnmounted(() => {
         class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
         @click="handleClear"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="3 6 5 6 21 6" />
-          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-        </svg>
+        <Trash2 :size="16" />
       </button>
 
       <!-- 行号开关：label 紧贴开关 -->
@@ -326,39 +287,9 @@ onUnmounted(() => {
       :role="validation.state === 'invalid' ? 'alert' : undefined"
     >
       <!-- 成功图标 -->
-      <svg
-        v-if="validation.state === 'valid'"
-        class="mt-0.5 shrink-0"
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <polyline points="20 6 9 17 4 12" />
-      </svg>
+      <Check v-if="validation.state === 'valid'" class="mt-0.5 shrink-0" :size="16" :stroke-width="2.5" />
       <!-- 错误图标 -->
-      <svg
-        v-else
-        class="mt-0.5 shrink-0"
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-        <line x1="12" y1="9" x2="12" y2="13" />
-        <line x1="12" y1="17" x2="12.01" y2="17" />
-      </svg>
+      <TriangleAlert v-else class="mt-0.5 shrink-0" :size="16" />
       <span>{{ validation.message }}</span>
     </div>
   </div>
