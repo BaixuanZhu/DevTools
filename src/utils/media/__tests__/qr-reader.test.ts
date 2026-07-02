@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectContentType, computeScaledSize, QR_MAX_EDGE } from '../qr-reader';
+import { decodeForDisplay, detectContentType, computeScaledSize, QR_MAX_EDGE } from '../qr-reader';
 
 describe('detectContentType', () => {
   it('识别 http/https URL 为 url 类型', () => {
@@ -60,6 +60,42 @@ describe('detectContentType', () => {
 
   it('空字符串为 text 且 value 为空', () => {
     expect(detectContentType('   ')).toEqual({ type: 'text', value: '', href: '' });
+  });
+
+  it('clash 等非 http 协议文本解码显示（text 类型，无 href）', () => {
+    const r = detectContentType('clash://install-config?url=https%3A%2F%2Fx.com%2Fy');
+    expect(r.type).toBe('text');
+    expect(r.value).toBe('clash://install-config?url=https://x.com/y');
+    expect(r.href).toBe('');
+  });
+
+  it('http 中文 URL：value 解码显示，href 保留原始编码', () => {
+    const r = detectContentType('https://example.com/%E4%B8%AD%E6%96%87');
+    expect(r.value).toBe('https://example.com/中文');
+    expect(r.href).toBe('https://example.com/%E4%B8%AD%E6%96%87');
+  });
+});
+
+describe('decodeForDisplay', () => {
+  it('完整解码 clash 订阅链接（结构字符 + 中文）', () => {
+    expect(decodeForDisplay('clash://install-config?url=https%3A%2F%2Fx.com%2Fc%3Ft%3Dab&name=%E8%BF%85%E8%BF%9E'))
+      .toBe('clash://install-config?url=https://x.com/c?t=ab&name=迅连');
+  });
+
+  it('解码 http 中文 URL', () => {
+    expect(decodeForDisplay('https://example.com/%E4%B8%AD%E6%96%87')).toBe('https://example.com/中文');
+  });
+
+  it('非法 UTF-8 序列保留原文', () => {
+    expect(decodeForDisplay('https://example.com/%E4%00')).toBe('https://example.com/%E4%00');
+  });
+
+  it('% 后非 hex 保留原文', () => {
+    expect(decodeForDisplay('100%纯棉')).toBe('100%纯棉');
+  });
+
+  it('无编码原样返回', () => {
+    expect(decodeForDisplay('https://example.com/path')).toBe('https://example.com/path');
   });
 });
 

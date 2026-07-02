@@ -21,6 +21,24 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TEL_RE = /^(?:tel:)?(?:\+\d{1,3}[\s-]?)?(?:1[3-9]\d{9}|\d{3,4}[-\s]\d{7,8})$/;
 
 /**
+ * 把文本中的百分号编码（URL 编码）解码为可读字符，仅用于显示。
+ *
+ * 二维码内容（尤其是订阅、短链等）常以百分号编码形式存储 URL，如
+ * clash://install-config?url=https%3A%2F%2F...&name=%E8%BF%85...，识别后显示成一堆
+ * %XX 不便阅读。本函数用 decodeURIComponent 完整解码（含 : / ? = 及中文等），还原为
+ * 人类可读形式。解码失败（非法序列如 %E4%00，或 % 后非 hex 如 "100%纯"）时保留原文。
+ * @param text 可能含百分号编码的文本
+ * @returns 解码后的可读文本；无法解码时返回原文
+ */
+export function decodeForDisplay(text: string): string {
+  try {
+    return decodeURIComponent(text);
+  } catch {
+    return text;
+  }
+}
+
+/**
  * 识别二维码文本的内容类型，按 url → email → tel → text 顺序判定。
  * 仅当内容整体严格匹配对应格式时才归类，否则降级为 text。
  * @param raw 解码出的原始文本
@@ -30,13 +48,13 @@ export function detectContentType(raw: string): ContentResult {
   const value = raw.trim();
   if (!value) return { type: 'text', value: '', href: '' };
 
-  if (URL_RE.test(value)) return { type: 'url', value, href: value };
+  if (URL_RE.test(value)) return { type: 'url', value: decodeForDisplay(value), href: value };
   if (EMAIL_RE.test(value)) return { type: 'email', value, href: `mailto:${value}` };
   if (TEL_RE.test(value)) {
     const digits = value.replace(/^tel:/i, '').replace(/[\s()-]/g, '');
     return { type: 'tel', value, href: `tel:${digits}` };
   }
-  return { type: 'text', value, href: '' };
+  return { type: 'text', value: decodeForDisplay(value), href: '' };
 }
 
 /** 解码前图像长边的最大像素，超过则等比缩放 */
