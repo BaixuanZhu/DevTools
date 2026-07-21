@@ -1,6 +1,6 @@
 ---
 import type { ToolMeta } from '../../data/tools';
-import { Star } from '@lucide/astro';
+import FavoriteButton from '../shell/FavoriteButton.vue';
 
 interface Props {
   tool: ToolMeta;
@@ -21,27 +21,5 @@ const { tool } = Astro.props;
     </div>
   </a>
 
-  <!-- 收藏星标按钮（常驻可见） -->
-  <button
-    x-cloak
-    class="absolute top-2 right-2 z-10 shrink-0 p-2 rounded-sm border-none bg-transparent cursor-pointer transition-[color] duration-150"
-    :class={`$store.favorites.isFavorite('${tool.path}') ? 'text-amber-500' : 'text-muted-foreground hover:text-amber-400'`}
-    :aria-label={`$store.favorites.isFavorite('${tool.path}') ? '取消收藏 ${tool.name}' : '收藏 ${tool.name}'`}
-    @click.prevent={`$store.favorites.toggle('${tool.path}', '${tool.name}', '${tool.icon}')`}
-  >
-    <!-- 实心星标（已收藏） -->
-    <Star
-      x-show={`$store.favorites.isFavorite('${tool.path}')`}
-      class="w-5 h-5"
-      fill="currentColor"
-      stroke-width={1}
-      aria-hidden="true"
-    />
-    <!-- 轮廓星标（未收藏） -->
-    <Star
-      x-show={`!$store.favorites.isFavorite('${tool.path}')`}
-      class="w-5 h-5"
-      aria-hidden="true"
-    />
-  </button>
+  <FavoriteButton client:visible tool={tool} />
 </div>
