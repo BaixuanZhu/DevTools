@@ -1,5 +1,14 @@
 <script setup lang="ts" generic="T extends string | number">
-import { RadioGroup, RadioGroupOption } from '@headlessui/vue';
+/**
+ * 单选按钮组（共享 ui，公共 API 冻结）。
+ *
+ * 底层由 @headlessui/vue RadioGroup/RadioGroupOption 迁移至 reka-ui
+ * RadioGroupRoot/RadioGroupItem。选中态改用 data-[state=checked] 表达，
+ * props/emits 与迁移前一致。
+ *
+ * @template T - 选项值类型，限定为 string | number
+ */
+import { RadioGroupRoot, RadioGroupItem } from 'reka-ui';
 
 /**
  * 单选按钮组选项。
@@ -40,26 +49,25 @@ const emit = defineEmits<{
 <template>
   <div class="flex items-center gap-2 flex-wrap">
     <span v-if="label" class="text-[0.8125rem] text-muted-foreground shrink-0" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
-    <RadioGroup :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" class="flex gap-1 flex-wrap">
-      <RadioGroupOption
+    <RadioGroupRoot :model-value="modelValue" @update:model-value="(v) => emit('update:modelValue', v as T)" class="flex gap-1 flex-wrap">
+      <RadioGroupItem
         v-for="option in options"
         :key="option.value"
-        v-slot="{ checked }"
         :value="option.value"
-        as="template"
+        as-child
       >
         <button
+          type="button"
           :class="[
             'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
-            checked
-              ? 'bg-primary border-primary text-white'
-              : 'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
+            'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-white',
+            'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
           ]"
         >
           {{ option.label }}
         </button>
-      </RadioGroupOption>
-    </RadioGroup>
+      </RadioGroupItem>
+    </RadioGroupRoot>
   </div>
 </template>
