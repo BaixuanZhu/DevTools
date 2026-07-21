@@ -271,7 +271,7 @@ onUnmounted(() => {
           v-for="stop in stops"
           :key="stop.id"
           class="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full border-2 border-white shadow cursor-pointer hover:scale-110 transition-transform"
-          :class="activeStopId === stop.id ? 'ring-2 ring-accent z-10' : 'z-0'"
+          :class="activeStopId === stop.id ? 'ring-2 ring-primary z-10' : 'z-0'"
           :style="{ left: `calc(${stop.position}% - 10px)`, backgroundColor: stop.color }"
           @mousedown="handleStopMouseDown(stop.id, $event)"
           @click.stop

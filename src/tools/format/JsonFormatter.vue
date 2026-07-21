@@ -442,7 +442,7 @@ onUnmounted(() => {
         validation.state === 'invalid'
           ? 'border-error'
           : isDragging
-            ? 'border-primary ring-2 ring-accent/20'
+            ? 'border-primary ring-2 ring-primary/20'
             : 'border-border'
       "
     >

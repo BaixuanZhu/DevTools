@@ -598,7 +598,7 @@ onUnmounted(() => {
               v-model="leftInput"
               ref="leftTextarea"
               class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
-              :class="leftDragging ? 'border-primary ring-2 ring-accent/20' : ''"
+              :class="leftDragging ? 'border-primary ring-2 ring-primary/20' : ''"
               placeholder="粘贴或输入原始 JSON..."
               spellcheck="false"
               aria-label="原始 JSON 输入"
@@ -627,7 +627,7 @@ onUnmounted(() => {
               v-model="rightInput"
               ref="rightTextarea"
               class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
-              :class="rightDragging ? 'border-primary ring-2 ring-accent/20' : ''"
+              :class="rightDragging ? 'border-primary ring-2 ring-primary/20' : ''"
               placeholder="粘贴或输入修改后 JSON..."
               spellcheck="false"
               aria-label="修改后 JSON 输入"
@@ -780,7 +780,7 @@ onUnmounted(() => {
                       'text-success bg-success/10': item.type === 'added',
                       'text-error bg-error/10': item.type === 'removed',
                       'text-primary bg-primary/10': item.type === 'modified',
-                      'text-muted-foreground bg-muted/10': item.type === 'unchanged',
+                      'text-muted-foreground bg-muted-foreground/10': item.type === 'unchanged',
                     }"
                   >
                     {{ item.type === 'added' ? '新增' : item.type === 'removed' ? '删除' : item.type === 'modified' ? '修改' : '一致' }}

@@ -147,7 +147,7 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'flex-1 px-3 py-1.5 text-xs font-medium rounded-sm border transition-colors cursor-pointer',
               activePlatform === cat.platform
-                ? 'bg-text text-surface border-text'
+                ? 'bg-foreground text-background border-foreground'
                 : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activePlatform = cat.platform"
@@ -192,13 +192,13 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'text-left px-3 py-2 text-xs rounded-sm border transition-colors cursor-pointer',
               selectedTemplate?.id === t.id
-                ? 'bg-text text-surface border-text'
+                ? 'bg-foreground text-background border-foreground'
                 : 'bg-card text-foreground border-border hover:bg-accent',
             ]"
             @click="selectTemplate(t)"
           >
             <span class="font-medium">{{ t.browser }}</span>
-            <span class="text-muted-foreground ml-1" :class="selectedTemplate?.id === t.id && 'text-surface/70'">{{ t.os }}</span>
+            <span class="text-muted-foreground ml-1" :class="selectedTemplate?.id === t.id && 'text-background/70'">{{ t.os }}</span>
           </button>
           <p v-if="!filteredTemplates.length" class="text-xs text-muted-foreground text-center py-4">暂无匹配模板</p>
         </div>
