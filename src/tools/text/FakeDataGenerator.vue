@@ -7,12 +7,12 @@
  */
 import { ref, computed } from 'vue';
 import {
-  Dialog,
-  DialogPanel,
+  DialogRoot,
+  DialogPortal,
+  DialogOverlay,
+  DialogContent,
   DialogTitle,
-  TransitionRoot,
-  TransitionChild,
-} from '@headlessui/vue';
+} from 'reka-ui';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
@@ -291,104 +291,84 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
     </div>
 
     <!-- 字段配置 Dialog -->
-    <TransitionRoot appear :show="dialogOpen" as="template">
-      <Dialog as="div" class="relative z-50" @close="dialogOpen = false">
-        <TransitionChild
-          as="template"
-          enter="ease-out duration-150"
-          enter-from="opacity-0"
-          enter-to="opacity-100"
-          leave="ease-in duration-150"
-          leave-from="opacity-100"
-          leave-to="opacity-0"
+    <DialogRoot v-model:open="dialogOpen">
+      <DialogPortal>
+        <DialogOverlay
+          class="fixed inset-0 bg-black/20 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
+        />
+        <DialogContent
+          :aria-describedby="undefined"
+          class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md rounded-md bg-card border border-border p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95"
         >
-          <div class="fixed inset-0 bg-black/20" aria-hidden="true" />
-        </TransitionChild>
+          <DialogTitle class="text-base font-semibold text-foreground">
+            编辑「{{ editingField.name }}」生成器
+          </DialogTitle>
 
-        <div class="fixed inset-0 overflow-y-auto">
-          <div class="flex min-h-full items-center justify-center p-4">
-            <TransitionChild
-              as="template"
-              enter="ease-out duration-150"
-              enter-from="opacity-0 scale-95"
-              enter-to="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leave-from="opacity-100 scale-100"
-              leave-to="opacity-0 scale-95"
-            >
-              <DialogPanel class="w-full max-w-md rounded-md bg-card border border-border p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <DialogTitle class="text-base font-semibold text-foreground">
-                  编辑「{{ editingField.name }}」生成器
-                </DialogTitle>
+          <div class="mt-4 space-y-4">
+            <!-- 列名 -->
+            <div>
+              <label class="block text-[0.8125rem] text-muted-foreground mb-1">列名</label>
+              <input
+                v-model="editingField.name"
+                type="text"
+                class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
+              />
+            </div>
 
-                <div class="mt-4 space-y-4">
-                  <!-- 列名 -->
-                  <div>
-                    <label class="block text-[0.8125rem] text-muted-foreground mb-1">列名</label>
-                    <input
-                      v-model="editingField.name"
-                      type="text"
-                      class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
-                    />
-                  </div>
+            <!-- 类型 -->
+            <div>
+              <label class="block text-[0.8125rem] text-muted-foreground mb-1">生成器类型</label>
+              <SelectListbox
+                :model-value="editingField.type"
+                :options="typeOptions"
+                @update:model-value="(v) => onDialogTypeChange(v as FieldType)"
+              />
+            </div>
 
-                  <!-- 类型 -->
-                  <div>
-                    <label class="block text-[0.8125rem] text-muted-foreground mb-1">生成器类型</label>
-                    <SelectListbox
-                      :model-value="editingField.type"
-                      :options="typeOptions"
-                      @update:model-value="(v) => onDialogTypeChange(v as FieldType)"
-                    />
-                  </div>
-
-                  <!-- 参数 -->
-                  <div v-if="dialogParamDefs.length" class="space-y-3">
-                    <label class="block text-[0.8125rem] text-muted-foreground">参数</label>
-                    <div
-                      v-for="def in dialogParamDefs"
-                      :key="def.key"
-                      class="flex items-center gap-3"
-                    >
-                      <span class="text-[0.8125rem] text-muted-foreground w-16 shrink-0">{{ def.label }}</span>
-                      <div v-if="def.type === 'select'" class="flex-1">
-                        <SelectListbox
-                          :model-value="String(editingField.params[def.key])"
-                          :options="def.options ?? []"
-                          @update:model-value="(v) => (editingField.params[def.key] = v)"
-                        />
-                      </div>
-                      <input
-                        v-else
-                        v-model="editingField.params[def.key]"
-                        :type="def.type"
-                        class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
-                      />
-                    </div>
-                  </div>
+            <!-- 参数 -->
+            <div v-if="dialogParamDefs.length" class="space-y-3">
+              <label class="block text-[0.8125rem] text-muted-foreground">参数</label>
+              <div
+                v-for="def in dialogParamDefs"
+                :key="def.key"
+                class="flex items-center gap-3"
+              >
+                <span class="text-[0.8125rem] text-muted-foreground w-16 shrink-0">{{ def.label }}</span>
+                <div v-if="def.type === 'select'" class="flex-1">
+                  <SelectListbox
+                    :model-value="String(editingField.params[def.key])"
+                    :options="def.options ?? []"
+                    @update:model-value="(v) => (editingField.params[def.key] = v)"
+                  />
                 </div>
-
-                <div class="mt-6 flex justify-end gap-2">
-                  <button
-                    type="button"
-                    class="px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
-                    @click="dialogOpen = false"
-                  >
-                    取消
-                  </button>
-                  <button
-                    type="button"
-                    class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
-                    @click="saveFieldConfig"
-                  >
-                    保存
-                  </button>
-                </div>
-              </DialogPanel>
-            </TransitionChild>
+                <input
+                  v-else
+                  v-model="editingField.params[def.key]"
+                  :type="def.type"
+                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </TransitionRoot>
+
+          <div class="mt-6 flex justify-end gap-2">
+            <button
+              type="button"
+              class="px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
+              @click="dialogOpen = false"
+            >
+              取消
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
+              @click="saveFieldConfig"
+            >
+              保存
+            </button>
+          </div>
+        </DialogContent>
+      </DialogPortal>
+    </DialogRoot>
   </div>
 </template>
