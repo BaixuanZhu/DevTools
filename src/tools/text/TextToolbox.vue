@@ -6,7 +6,7 @@
  * 点击变换按钮原地改写文本框内容，支持多步撤销/重做；统计实时更新。
  */
 import { ref, computed } from 'vue';
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import { CollapsibleRoot, CollapsibleTrigger, CollapsibleContent } from 'reka-ui';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import { useCopy } from '../../composables/useCopy';
@@ -41,6 +41,8 @@ const replace = ref('');
 const caseSensitive = ref(false);
 /** 查找替换是否使用正则。 */
 const useRegex = ref(false);
+/** 查找替换面板是否展开（取代 HeadlessUI Disclosure 的 open slot prop）。 */
+const findReplaceOpen = ref(false);
 /** 查找替换错误信息。 */
 const replaceError = ref('');
 
@@ -141,7 +143,8 @@ function handleReplace(): void {
     />
 
     <!-- 工具区：变换 + 操作 + 查找替换入口（位于输入框上方，图标 + tooltip） -->
-    <Disclosure as="div" v-slot="{ open }" class="flex flex-col gap-2">
+    <CollapsibleRoot v-model:open="findReplaceOpen" as-child>
+      <div class="flex flex-col gap-2">
       <div class="flex flex-wrap items-center gap-1.5 border border-border rounded-md p-3 bg-card">
         <!-- 大小写 -->
         <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9 font-mono font-semibold text-[0.9375rem]']" title="大写" aria-label="大写" @click="apply(toUpperCase)">A</button>
@@ -187,9 +190,11 @@ function handleReplace(): void {
         <CopyButton :text="text" />
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 查找替换（点击展开） -->
-        <DisclosureButton :class="[ICON_BTN_BASE, 'w-9 h-9', open ? 'bg-accent text-foreground' : '']" title="查找替换" aria-label="查找替换">
-          <Search :size="16" />
-        </DisclosureButton>
+        <CollapsibleTrigger as-child>
+          <button type="button" :class="[ICON_BTN_BASE, 'w-9 h-9', findReplaceOpen ? 'bg-accent text-foreground' : '']" title="查找替换" aria-label="查找替换">
+            <Search :size="16" />
+          </button>
+        </CollapsibleTrigger>
       </div>
 
       <transition
@@ -200,7 +205,7 @@ function handleReplace(): void {
         leave-from-class="opacity-100 translate-y-0"
         leave-to-class="opacity-0 -translate-y-1"
       >
-        <DisclosurePanel class="border border-border rounded-md p-4 bg-card flex flex-col gap-3">
+        <CollapsibleContent force-mount v-if="findReplaceOpen" class="border border-border rounded-md p-4 bg-card flex flex-col gap-3">
           <div class="flex flex-col sm:flex-row gap-2">
             <input
               v-model="find"
@@ -229,9 +234,10 @@ function handleReplace(): void {
             <button type="button" :class="BTN_PRIMARY_CLASS" class="ml-auto" @click="handleReplace">替换全部</button>
           </div>
           <p v-if="replaceError" class="text-xs text-error">{{ replaceError }}</p>
-        </DisclosurePanel>
+        </CollapsibleContent>
       </transition>
-    </Disclosure>
+      </div>
+    </CollapsibleRoot>
 
     <!-- 文本框 -->
     <div class="mt-4">
