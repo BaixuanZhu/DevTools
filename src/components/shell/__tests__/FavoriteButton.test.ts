@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import FavoriteButton from '../FavoriteButton.vue';
 import { favoritesStore } from '../../../stores/favorites';
 import { toastStore } from '../../../stores/toast';
@@ -18,6 +19,7 @@ describe('FavoriteButton.vue', () => {
 
   it('未收藏态：aria-label 为「收藏 …」，点击后加入收藏 + success toast', async () => {
     const wrapper = mount(FavoriteButton, { props: { tool } });
+    await nextTick();
     expect(wrapper.attributes('aria-label')).toBe('收藏 UUID 生成器');
     await wrapper.trigger('click');
     expect(favoritesStore.isFavorite(tool.path)).toBe(true);
@@ -27,6 +29,7 @@ describe('FavoriteButton.vue', () => {
   it('已收藏态：再次点击 → 取消收藏 + 「已取消收藏」toast', async () => {
     favoritesStore.list.value = [tool];
     const wrapper = mount(FavoriteButton, { props: { tool } });
+    await nextTick();
     expect(wrapper.attributes('aria-label')).toBe('取消收藏 UUID 生成器');
     await wrapper.trigger('click');
     expect(favoritesStore.isFavorite(tool.path)).toBe(false);

@@ -15,7 +15,6 @@ import { siGithub, siGitee } from 'simple-icons';
 import type { ToolMeta } from '../../data/tools';
 import { sidebarStore } from '../../stores/sidebar';
 import { themeStore } from '../../stores/theme';
-import { favoritesStore } from '../../stores/favorites';
 
 interface Props {
   /** 分类列表（顺序保持注册顺序） */
@@ -36,7 +35,6 @@ function onKeydown(e: KeyboardEvent): void {
 }
 onMounted(() => {
   themeStore.load();
-  favoritesStore.load();
   window.addEventListener('keydown', onKeydown);
 });
 onUnmounted(() => window.removeEventListener('keydown', onKeydown));
