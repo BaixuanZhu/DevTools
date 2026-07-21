@@ -70,7 +70,7 @@ const selectedLabel = computed(() => {
         <SelectContent
           position="popper"
           :side-offset="4"
-          class="z-10 max-h-60 min-w-[var(--reka-select-trigger-width)] overflow-auto rounded-sm bg-card border border-border py-1 text-[0.8125rem] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+          class="z-50 max-h-60 min-w-[var(--reka-select-trigger-width)] overflow-auto rounded-sm bg-card border border-border py-1 text-[0.8125rem] shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
         >
           <SelectViewport>
             <SelectItem
