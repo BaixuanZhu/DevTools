@@ -529,7 +529,7 @@ onUnmounted(() => {
               <textarea
                 ref="patternInput"
                 v-model="pattern"
-                class="w-full h-24 p-2 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+                class="w-full h-24 p-2 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
                 placeholder="输入正则表达式，如 \d+ 或 (?<year>\d{4})"
                 spellcheck="false"
                 aria-label="正则表达式输入"
@@ -540,7 +540,7 @@ onUnmounted(() => {
                 {{ compileError }}
               </div>
               <!-- 当前生效的字面量预览 -->
-              <div v-else class="mt-1 text-[0.75rem] text-muted font-mono break-all">
+              <div v-else class="mt-1 text-[0.75rem] text-muted-foreground font-mono break-all">
                 {{ regexLiteral }}
               </div>
             </div>
@@ -548,7 +548,7 @@ onUnmounted(() => {
 
           <!-- 标志位 -->
           <div class="border border-border rounded-sm bg-card p-3">
-            <div class="text-[0.8125rem] text-muted mb-2">标志位</div>
+            <div class="text-[0.8125rem] text-muted-foreground mb-2">标志位</div>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="fdef in FLAG_DEFS"
@@ -557,8 +557,8 @@ onUnmounted(() => {
                 :class="[
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-sm transition-[background-color,border-color,color] duration-150 cursor-pointer focus:outline-none',
                   flagState[fdef.flag]
-                    ? 'bg-accent text-white border-accent'
-                    : 'bg-card text-muted border-border hover:bg-hover hover:text-text',
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
                 ]"
                 :aria-pressed="flagState[fdef.flag]"
                 :title="fdef.hint"
@@ -572,13 +572,13 @@ onUnmounted(() => {
 
           <!-- 速查表 -->
           <div class="border border-border rounded-sm bg-card p-3">
-            <div class="text-[0.8125rem] text-muted mb-2">常用正则速查表（点击填入）</div>
+            <div class="text-[0.8125rem] text-muted-foreground mb-2">常用正则速查表（点击填入）</div>
             <div class="flex flex-wrap gap-2">
               <button
                 v-for="qr in QUICK_REGEX"
                 :key="qr.name"
                 type="button"
-                class="px-3 py-1.5 rounded-sm border border-border bg-card text-text text-sm hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150 cursor-pointer focus:outline-none"
+                class="px-3 py-1.5 rounded-sm border border-border bg-card text-foreground text-sm hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150 cursor-pointer focus:outline-none"
                 :title="qr.hint"
                 @click="applyQuickRegex(qr)"
               >
@@ -596,7 +596,7 @@ onUnmounted(() => {
           <CodePanel label="测试文本（实时高亮）">
             <textarea
               v-model="testText"
-              class="w-full h-44 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+              class="w-full h-44 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
               placeholder="输入或粘贴要测试的文本..."
               spellcheck="false"
               aria-label="测试文本输入"
@@ -606,14 +606,14 @@ onUnmounted(() => {
           <!-- 高亮预览 -->
           <div class="border border-border rounded-sm bg-card overflow-hidden">
             <div class="flex items-center justify-between px-4 py-1.5 border-b border-border">
-              <span class="text-[0.8125rem] text-muted">高亮预览</span>
-              <span class="text-[0.75rem] text-muted">
+              <span class="text-[0.8125rem] text-muted-foreground">高亮预览</span>
+              <span class="text-[0.75rem] text-muted-foreground">
                 {{ matches.length }} 个匹配<span v-if="truncated">（已截断）</span>
               </span>
             </div>
             <div class="p-3 max-h-60 overflow-auto">
               <!-- 加载中 -->
-              <div v-if="isLoading" class="text-sm text-muted py-4 text-center">
+              <div v-if="isLoading" class="text-sm text-muted-foreground py-4 text-center">
                 正在大文本中匹配...
               </div>
               <!-- 运行时错误 -->
@@ -623,11 +623,11 @@ onUnmounted(() => {
               <!-- 高亮分段 -->
               <pre
                 v-else
-                class="m-0 text-sm font-mono whitespace-pre-wrap break-all leading-relaxed text-text"
+                class="m-0 text-sm font-mono whitespace-pre-wrap break-all leading-relaxed text-foreground"
               ><span
                   v-for="(seg, i) in segments"
                   :key="i"
-                  :class="seg.matched ? 'bg-accent/20 text-accent rounded-sm px-0.5' : ''"
+                  :class="seg.matched ? 'bg-primary/20 text-primary rounded-sm px-0.5' : ''"
                 >{{ seg.text }}</span></pre>
             </div>
           </div>
@@ -640,11 +640,11 @@ onUnmounted(() => {
     <div class="mt-4">
       <div class="border border-border rounded-sm bg-card overflow-hidden">
         <div class="flex items-center justify-between px-4 py-1.5 border-b border-border">
-          <span class="text-[0.8125rem] text-muted">匹配详情</span>
+          <span class="text-[0.8125rem] text-muted-foreground">匹配详情</span>
           <div class="flex gap-1">
             <button
               type="button"
-              class="px-2 py-1 rounded-sm border border-border text-[0.75rem] text-muted hover:bg-hover hover:text-text transition-[background-color] duration-150 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-2 py-1 rounded-sm border border-border text-[0.75rem] text-muted-foreground hover:bg-accent hover:text-foreground transition-[background-color] duration-150 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="!pattern"
               title="复制正则字面量"
               @click="handleCopyRegex"
@@ -653,7 +653,7 @@ onUnmounted(() => {
             </button>
             <button
               type="button"
-              class="px-2 py-1 rounded-sm border border-border text-[0.75rem] text-muted hover:bg-hover hover:text-text transition-[background-color] duration-150 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              class="px-2 py-1 rounded-sm border border-border text-[0.75rem] text-muted-foreground hover:bg-accent hover:text-foreground transition-[background-color] duration-150 cursor-pointer focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="matches.length === 0 && !compileError && !runtimeError"
               title="复制匹配结果"
               @click="handleCopyResult"
@@ -666,7 +666,7 @@ onUnmounted(() => {
           <!-- 空状态 -->
           <div
             v-if="!compileError && !runtimeError && matches.length === 0"
-            class="text-sm text-muted py-6 text-center"
+            class="text-sm text-muted-foreground py-6 text-center"
           >
             暂无匹配
           </div>
@@ -678,9 +678,9 @@ onUnmounted(() => {
               class="px-4 py-2.5"
             >
               <div class="flex items-baseline gap-2 flex-wrap">
-                <span class="text-[0.75rem] text-muted font-mono shrink-0">#{{ i + 1 }}</span>
-                <span class="text-sm font-mono text-text break-all bg-accent/20 text-accent rounded-sm px-1">{{ m.match || '(空匹配)' }}</span>
-                <span class="text-[0.75rem] text-muted font-mono">{{ m.index }}-{{ m.end }}</span>
+                <span class="text-[0.75rem] text-muted-foreground font-mono shrink-0">#{{ i + 1 }}</span>
+                <span class="text-sm font-mono text-foreground break-all bg-primary/20 text-primary rounded-sm px-1">{{ m.match || '(空匹配)' }}</span>
+                <span class="text-[0.75rem] text-muted-foreground font-mono">{{ m.index }}-{{ m.end }}</span>
               </div>
               <!-- 捕获组 -->
               <div
@@ -690,18 +690,18 @@ onUnmounted(() => {
                 <span
                   v-for="(g, gi) in m.groups"
                   :key="`g-${gi}`"
-                  class="text-[0.75rem] font-mono text-muted"
+                  class="text-[0.75rem] font-mono text-muted-foreground"
                 >
                   ${{ gi + 1 }} =
-                  <span class="text-text">{{ g === undefined ? '(未参与)' : g === '' ? '(空串)' : g }}</span>
+                  <span class="text-foreground">{{ g === undefined ? '(未参与)' : g === '' ? '(空串)' : g }}</span>
                 </span>
                 <span
                   v-for="(v, k) in m.namedGroups"
                   :key="`n-${k}`"
-                  class="text-[0.75rem] font-mono text-muted"
+                  class="text-[0.75rem] font-mono text-muted-foreground"
                 >
                   {{ k }} =
-                  <span class="text-text">{{ v }}</span>
+                  <span class="text-foreground">{{ v }}</span>
                 </span>
               </div>
             </li>
@@ -712,12 +712,12 @@ onUnmounted(() => {
 
     <!-- 正则语法参考（全宽，与上方工作区等宽对齐） -->
     <section class="mt-6 pb-8">
-      <h2 class="text-sm font-semibold text-text mb-3">正则语法参考</h2>
+      <h2 class="text-sm font-semibold text-foreground mb-3">正则语法参考</h2>
 
       <!-- 概述 -->
       <div class="bg-card border border-border rounded-sm p-4 mb-4">
-        <p class="text-sm text-text m-0">
-          正则表达式由<strong>普通字符</strong>和<strong>元字符</strong>组成：普通字符匹配自身，元字符具有特殊含义。要匹配元字符的字面量，在前面加 <code class="font-mono text-accent">\</code> 转义。本工具支持全部标志位、命名捕获组与零宽断言等现代 ECMAScript 正则特性。
+        <p class="text-sm text-foreground m-0">
+          正则表达式由<strong>普通字符</strong>和<strong>元字符</strong>组成：普通字符匹配自身，元字符具有特殊含义。要匹配元字符的字面量，在前面加 <code class="font-mono text-primary">\</code> 转义。本工具支持全部标志位、命名捕获组与零宽断言等现代 ECMAScript 正则特性。
         </p>
       </div>
 
@@ -727,14 +727,14 @@ onUnmounted(() => {
         :key="group.title"
         class="bg-card border border-border rounded-sm p-4 mb-4"
       >
-        <h3 class="text-sm font-semibold text-text m-0 mb-3">{{ group.title }}</h3>
+        <h3 class="text-sm font-semibold text-foreground m-0 mb-3">{{ group.title }}</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-border">
-                <th class="text-left py-2 pr-4 font-medium text-muted">符号</th>
-                <th class="text-left py-2 pr-4 font-medium text-muted">含义</th>
-                <th class="text-left py-2 font-medium text-muted">示例</th>
+                <th class="text-left py-2 pr-4 font-medium text-muted-foreground">符号</th>
+                <th class="text-left py-2 pr-4 font-medium text-muted-foreground">含义</th>
+                <th class="text-left py-2 font-medium text-muted-foreground">示例</th>
               </tr>
             </thead>
             <tbody>
@@ -743,28 +743,28 @@ onUnmounted(() => {
                 :key="entry.symbol"
                 class="border-b border-border/50"
               >
-                <td class="py-2 pr-4 font-mono text-text font-medium whitespace-nowrap">{{ entry.symbol }}</td>
-                <td class="py-2 pr-4 text-text">{{ entry.meaning }}</td>
-                <td class="py-2 font-mono text-muted">{{ entry.example }}</td>
+                <td class="py-2 pr-4 font-mono text-foreground font-medium whitespace-nowrap">{{ entry.symbol }}</td>
+                <td class="py-2 pr-4 text-foreground">{{ entry.meaning }}</td>
+                <td class="py-2 font-mono text-muted-foreground">{{ entry.example }}</td>
               </tr>
             </tbody>
           </table>
         </div>
-        <p v-if="group.note" class="text-[0.8125rem] text-muted m-0 mt-3">
+        <p v-if="group.note" class="text-[0.8125rem] text-muted-foreground m-0 mt-3">
           {{ group.note }}
         </p>
       </div>
 
       <!-- 标志位速查（复用 FLAG_DEFS，呼应上方开关） -->
       <div class="bg-card border border-border rounded-sm p-4 mb-4">
-        <h3 class="text-sm font-semibold text-text m-0 mb-3">标志位速查（对应上方开关）</h3>
+        <h3 class="text-sm font-semibold text-foreground m-0 mb-3">标志位速查（对应上方开关）</h3>
         <div class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-border">
-                <th class="text-left py-2 pr-4 font-medium text-muted">标志</th>
-                <th class="text-left py-2 pr-4 font-medium text-muted">名称</th>
-                <th class="text-left py-2 font-medium text-muted">说明</th>
+                <th class="text-left py-2 pr-4 font-medium text-muted-foreground">标志</th>
+                <th class="text-left py-2 pr-4 font-medium text-muted-foreground">名称</th>
+                <th class="text-left py-2 font-medium text-muted-foreground">说明</th>
               </tr>
             </thead>
             <tbody>
@@ -773,9 +773,9 @@ onUnmounted(() => {
                 :key="fdef.flag"
                 class="border-b border-border/50"
               >
-                <td class="py-2 pr-4 font-mono text-accent font-semibold">{{ fdef.flag }}</td>
-                <td class="py-2 pr-4 text-text">{{ fdef.label }}</td>
-                <td class="py-2 text-muted">{{ fdef.hint }}</td>
+                <td class="py-2 pr-4 font-mono text-primary font-semibold">{{ fdef.flag }}</td>
+                <td class="py-2 pr-4 text-foreground">{{ fdef.label }}</td>
+                <td class="py-2 text-muted-foreground">{{ fdef.hint }}</td>
               </tr>
             </tbody>
           </table>

@@ -116,7 +116,7 @@ onMounted(() => {
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
       <template #actions>
         <div class="flex items-center gap-2 mr-auto">
-          <span class="text-[0.8125rem] text-muted">YAML 缩进</span>
+          <span class="text-[0.8125rem] text-muted-foreground">YAML 缩进</span>
           <div class="inline-flex rounded-sm border border-border overflow-hidden">
             <button
               v-for="opt in yamlIndentOptions"
@@ -125,8 +125,8 @@ onMounted(() => {
               :class="[
                 'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                 yamlIndent === opt.value
-                  ? 'bg-accent text-white'
-                  : 'bg-card text-muted hover:bg-hover hover:text-text',
+                  ? 'bg-primary text-white'
+                  : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
               ]"
               @click="yamlIndent = opt.value"
             >
@@ -140,7 +140,7 @@ onMounted(() => {
         <CodePanel label="TOML" show-clear show-copy :copy-text="leftValue" @clear="handleClear">
           <textarea
             v-model="leftValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="16"
             placeholder="输入 TOML 文本..."
             spellcheck="false"
@@ -153,7 +153,7 @@ onMounted(() => {
         <CodePanel label="YAML" show-clear show-copy :copy-text="rightValue" @clear="handleClear">
           <textarea
             v-model="rightValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="16"
             placeholder="输入 YAML 文本..."
             spellcheck="false"

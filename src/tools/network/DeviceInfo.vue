@@ -148,7 +148,7 @@ onMounted(() => { collectDeviceInfo(); });
               'flex-1 px-3 py-1.5 text-xs font-medium rounded-sm border transition-colors cursor-pointer',
               activePlatform === cat.platform
                 ? 'bg-text text-surface border-text'
-                : 'bg-card text-muted border-border hover:bg-hover hover:text-text',
+                : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activePlatform = cat.platform"
           >
@@ -162,8 +162,8 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'px-2.5 py-1 text-xs rounded-sm border transition-colors cursor-pointer',
               !activeBrowser
-                ? 'bg-accent text-white border-accent'
-                : 'bg-card text-muted border-border hover:bg-hover hover:text-text',
+                ? 'bg-primary text-white border-primary'
+                : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activeBrowser = ''"
           >
@@ -175,8 +175,8 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'px-2.5 py-1 text-xs rounded-sm border transition-colors cursor-pointer',
               activeBrowser === b
-                ? 'bg-accent text-white border-accent'
-                : 'bg-card text-muted border-border hover:bg-hover hover:text-text',
+                ? 'bg-primary text-white border-primary'
+                : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activeBrowser = b"
           >
@@ -193,14 +193,14 @@ onMounted(() => { collectDeviceInfo(); });
               'text-left px-3 py-2 text-xs rounded-sm border transition-colors cursor-pointer',
               selectedTemplate?.id === t.id
                 ? 'bg-text text-surface border-text'
-                : 'bg-card text-text border-border hover:bg-hover',
+                : 'bg-card text-foreground border-border hover:bg-accent',
             ]"
             @click="selectTemplate(t)"
           >
             <span class="font-medium">{{ t.browser }}</span>
-            <span class="text-muted ml-1" :class="selectedTemplate?.id === t.id && 'text-surface/70'">{{ t.os }}</span>
+            <span class="text-muted-foreground ml-1" :class="selectedTemplate?.id === t.id && 'text-surface/70'">{{ t.os }}</span>
           </button>
-          <p v-if="!filteredTemplates.length" class="text-xs text-muted text-center py-4">暂无匹配模板</p>
+          <p v-if="!filteredTemplates.length" class="text-xs text-muted-foreground text-center py-4">暂无匹配模板</p>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ onMounted(() => { collectDeviceInfo(); });
         <div v-if="selectedTemplate" class="mb-6">
           <div class="flex items-center gap-2 mb-3">
             <h3 class="m-0 text-sm font-semibold">{{ selectedTemplate.name }}</h3>
-            <span class="text-[0.6875rem] text-muted px-2 py-0.5 bg-hover rounded-sm">
+            <span class="text-[0.6875rem] text-muted-foreground px-2 py-0.5 bg-accent rounded-sm">
               {{ selectedTemplate.platform === 'desktop' ? '桌面端' : '移动端' }}
             </span>
           </div>
@@ -223,21 +223,21 @@ onMounted(() => { collectDeviceInfo(); });
               :key="item.label"
               class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card"
             >
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">{{ item.label }}</span>
-              <span class="text-sm text-text break-all">{{ item.value }}</span>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">{{ item.label }}</span>
+              <span class="text-sm text-foreground break-all">{{ item.value }}</span>
             </div>
           </div>
 
           <!-- UA 全文 -->
           <div class="p-3 border border-border rounded-sm bg-card mb-4">
-            <p class="m-0 text-xs font-mono text-text break-all leading-relaxed select-all">{{ selectedTemplate.ua }}</p>
+            <p class="m-0 text-xs font-mono text-foreground break-all leading-relaxed select-all">{{ selectedTemplate.ua }}</p>
           </div>
 
           <!-- 操作按钮 -->
           <div class="flex items-center gap-3">
             <CopyButton :text="selectedTemplate.ua" />
             <button
-              class="px-3 py-1.5 text-xs font-medium rounded-sm border border-border bg-card text-text hover:bg-hover transition-colors cursor-pointer"
+              class="px-3 py-1.5 text-xs font-medium rounded-sm border border-border bg-card text-foreground hover:bg-accent transition-colors cursor-pointer"
               @click="fillToCustom"
             >
               解析验证
@@ -246,7 +246,7 @@ onMounted(() => { collectDeviceInfo(); });
         </div>
 
         <!-- 未选中模板时的占位 -->
-        <div v-else class="flex items-center justify-center h-48 text-sm text-muted border border-dashed border-border rounded-sm mb-6">
+        <div v-else class="flex items-center justify-center h-48 text-sm text-muted-foreground border border-dashed border-border rounded-sm mb-6">
           从左侧选择一个 UA 模板
         </div>
 
@@ -255,7 +255,7 @@ onMounted(() => { collectDeviceInfo(); });
           <h3 class="m-0 mb-3 text-sm font-semibold">自定义 UA 解析</h3>
           <textarea
             v-model="customUA"
-            class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent mb-3"
+            class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary mb-3"
             rows="2"
             placeholder="粘贴 UserAgent 字符串进行解析..."
             @input="parseCustomUA"
@@ -270,8 +270,8 @@ onMounted(() => { collectDeviceInfo(); });
               :key="item.label"
               class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card"
             >
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">{{ item.label }}</span>
-              <span class="text-sm text-text break-all" :class="item.label === '错误' && 'text-error'">{{ item.value }}</span>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">{{ item.label }}</span>
+              <span class="text-sm text-foreground break-all" :class="item.label === '错误' && 'text-error'">{{ item.value }}</span>
             </div>
           </div>
         </div>
@@ -303,8 +303,8 @@ onMounted(() => { collectDeviceInfo(); });
               item.label === 'UserAgent' && 'col-span-2 max-sm:col-span-1',
             ]"
           >
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">{{ item.label }}</span>
-            <span :class="['text-sm text-text break-all', item.label === 'UserAgent' && 'font-mono text-xs']">{{ item.value }}</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">{{ item.label }}</span>
+            <span :class="['text-sm text-foreground break-all', item.label === 'UserAgent' && 'font-mono text-xs']">{{ item.value }}</span>
           </div>
         </div>
         <CopyButton :text="allInfoJson" />

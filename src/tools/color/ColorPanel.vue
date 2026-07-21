@@ -227,12 +227,12 @@ function reset(): void {
         aria-label="当前颜色预览"
       ></div>
       <div class="flex items-center gap-2 p-3 flex-wrap">
-        <label class="text-sm text-muted shrink-0" for="hex-input">HEX</label>
+        <label class="text-sm text-muted-foreground shrink-0" for="hex-input">HEX</label>
         <input
           id="hex-input"
           v-model="hexInput"
           type="text"
-          class="flex-1 min-w-35 px-2 py-1.5 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus:border-accent"
+          class="flex-1 min-w-35 px-2 py-1.5 border border-border rounded-sm bg-card text-foreground font-mono text-sm focus:outline-none focus:border-primary"
           placeholder="#3B82F6"
           spellcheck="false"
           aria-label="HEX 颜色输入"
@@ -249,7 +249,7 @@ function reset(): void {
         <CopyButton :text="currentHex" />
         <button
           type="button"
-          class="px-3 py-1.5 rounded-sm border border-border bg-card text-text text-sm hover:bg-hover transition-[background-color] duration-150 cursor-pointer focus:outline-none"
+          class="px-3 py-1.5 rounded-sm border border-border bg-card text-foreground text-sm hover:bg-accent transition-[background-color] duration-150 cursor-pointer focus:outline-none"
           @click="reset"
         >
           重置
@@ -264,20 +264,20 @@ function reset(): void {
     <div class="border border-border rounded-sm bg-card overflow-hidden mb-4">
       <!-- HEX 只读行 -->
       <div class="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        <span class="w-12 text-sm text-muted shrink-0">HEX</span>
-        <span class="flex-1 font-mono text-sm text-text">{{ currentHex }}</span>
+        <span class="w-12 text-sm text-muted-foreground shrink-0">HEX</span>
+        <span class="flex-1 font-mono text-sm text-foreground">{{ currentHex }}</span>
         <CopyButton :text="currentHex" size="sm" />
       </div>
       <!-- RGB -->
       <div class="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        <span class="w-12 text-sm text-muted shrink-0">RGB</span>
+        <span class="w-12 text-sm text-muted-foreground shrink-0">RGB</span>
         <div class="flex-1 flex items-center gap-1">
           <input
             v-model.number="rgbInput.r"
             type="number"
             min="0"
             max="255"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="R 通道"
             @change="commitRgb"
           />
@@ -286,7 +286,7 @@ function reset(): void {
             type="number"
             min="0"
             max="255"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="G 通道"
             @change="commitRgb"
           />
@@ -295,7 +295,7 @@ function reset(): void {
             type="number"
             min="0"
             max="255"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="B 通道"
             @change="commitRgb"
           />
@@ -304,14 +304,14 @@ function reset(): void {
       </div>
       <!-- HSL -->
       <div class="flex items-center gap-2 px-3 py-2 border-b border-border/50">
-        <span class="w-12 text-sm text-muted shrink-0">HSL</span>
+        <span class="w-12 text-sm text-muted-foreground shrink-0">HSL</span>
         <div class="flex-1 flex items-center gap-1">
           <input
             v-model.number="hslInput.h"
             type="number"
             min="0"
             max="360"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="H 色相"
             @change="commitHsl"
           />
@@ -320,7 +320,7 @@ function reset(): void {
             type="number"
             min="0"
             max="100"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="S 饱和度"
             @change="commitHsl"
           />
@@ -329,7 +329,7 @@ function reset(): void {
             type="number"
             min="0"
             max="100"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="L 亮度"
             @change="commitHsl"
           />
@@ -338,14 +338,14 @@ function reset(): void {
       </div>
       <!-- HSV -->
       <div class="flex items-center gap-2 px-3 py-2">
-        <span class="w-12 text-sm text-muted shrink-0">HSV</span>
+        <span class="w-12 text-sm text-muted-foreground shrink-0">HSV</span>
         <div class="flex-1 flex items-center gap-1">
           <input
             v-model.number="hsvInput.h"
             type="number"
             min="0"
             max="360"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="H 色相"
             @change="commitHsv"
           />
@@ -354,7 +354,7 @@ function reset(): void {
             type="number"
             min="0"
             max="100"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="S 饱和度"
             @change="commitHsv"
           />
@@ -363,7 +363,7 @@ function reset(): void {
             type="number"
             min="0"
             max="100"
-            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-text text-sm font-mono focus:outline-none focus:border-accent"
+            class="w-16 px-2 py-1 border border-border rounded-sm bg-card text-foreground text-sm font-mono focus:outline-none focus:border-primary"
             aria-label="V 明度"
             @change="commitHsv"
           />
@@ -374,19 +374,19 @@ function reset(): void {
 
     <!-- ③ WCAG 对比度检查 -->
     <div class="border border-border rounded-sm bg-card overflow-hidden mb-4">
-      <div class="px-3 py-1.5 border-b border-border text-[0.8125rem] text-muted">
+      <div class="px-3 py-1.5 border-b border-border text-[0.8125rem] text-muted-foreground">
         WCAG 对比度检查
       </div>
       <div class="p-3 flex flex-wrap items-center gap-3">
         <div class="flex items-center gap-2">
-          <span class="text-sm text-muted">前景</span>
+          <span class="text-sm text-muted-foreground">前景</span>
           <span
             class="w-7 h-7 rounded-sm border border-border"
             :style="{ backgroundColor: currentCss }"
           ></span>
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-sm text-muted">背景</span>
+          <span class="text-sm text-muted-foreground">背景</span>
           <span
             class="w-7 h-7 rounded-sm border border-border"
             :style="{ backgroundColor: bgCss }"
@@ -394,7 +394,7 @@ function reset(): void {
           <input
             v-model="bgHexInput"
             type="text"
-            class="w-24 px-2 py-1 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus:border-accent"
+            class="w-24 px-2 py-1 border border-border rounded-sm bg-card text-foreground font-mono text-sm focus:outline-none focus:border-primary"
             aria-label="背景色 HEX"
             @change="commitBg"
           />
@@ -412,8 +412,8 @@ function reset(): void {
       </div>
       <div v-else-if="ratio !== null && wcag" class="px-3 pb-3">
         <div class="flex items-baseline gap-2 mb-2">
-          <span class="text-2xl font-semibold text-text">{{ ratio.toFixed(2) }}</span>
-          <span class="text-sm text-muted">: 1</span>
+          <span class="text-2xl font-semibold text-foreground">{{ ratio.toFixed(2) }}</span>
+          <span class="text-sm text-muted-foreground">: 1</span>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3">
           <div
@@ -423,7 +423,7 @@ function reset(): void {
               'px-2 py-1.5 rounded-sm text-center text-[0.75rem] border',
               wcag[lvl.key]
                 ? 'border-success text-success'
-                : 'border-border text-muted',
+                : 'border-border text-muted-foreground',
             ]"
           >
             {{ wcag[lvl.key] ? '✅' : '❌' }} {{ lvl.label }}
@@ -441,7 +441,7 @@ function reset(): void {
 
     <!-- ④ 配色板 -->
     <div class="border border-border rounded-sm bg-card overflow-hidden">
-      <div class="px-3 py-1.5 border-b border-border text-[0.8125rem] text-muted">配色板</div>
+      <div class="px-3 py-1.5 border-b border-border text-[0.8125rem] text-muted-foreground">配色板</div>
       <div class="p-3">
         <div class="flex flex-wrap gap-2 mb-3">
           <button
@@ -451,8 +451,8 @@ function reset(): void {
             :class="[
               'px-3 py-1.5 rounded-sm border text-sm cursor-pointer transition-[background-color,border-color] duration-150 focus:outline-none',
               scheme === key
-                ? 'bg-accent text-white border-accent'
-                : 'bg-card text-muted border-border hover:bg-hover hover:text-text',
+                ? 'bg-primary text-white border-primary'
+                : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="scheme = key"
           >

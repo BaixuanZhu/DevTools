@@ -38,8 +38,8 @@ function handleChange(index: number) {
             'px-6 py-2 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
             selected
-              ? 'bg-accent text-white border-accent'
-              : 'bg-card text-text border-border hover:bg-hover',
+              ? 'bg-primary text-white border-primary'
+              : 'bg-card text-foreground border-border hover:bg-accent',
           ]"
         >
           {{ option.label }}

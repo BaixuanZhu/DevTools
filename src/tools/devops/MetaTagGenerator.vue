@@ -171,36 +171,36 @@ function handleClear(): void {
         <div class="bg-card border border-border rounded-lg p-6 space-y-4">
           <!-- 标题 -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-title">标题</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-title">标题</label>
             <input
               id="meta-title"
               v-model="form.title"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="页面标题"
             />
           </div>
 
           <!-- 描述 -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-desc">描述</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-desc">描述</label>
             <textarea
               id="meta-desc"
               v-model="form.description"
               rows="3"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm resize-y box-border focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm resize-y box-border focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="页面描述，建议 70-160 字"
             ></textarea>
           </div>
 
           <!-- 关键词 -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-keywords">关键词</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-keywords">关键词</label>
             <input
               id="meta-keywords"
               v-model="form.keywords"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="用逗号分隔，如：vue, 前端, 工具"
             />
             <div v-if="keywordChips.length" class="flex flex-wrap gap-1.5 mt-2">
@@ -215,12 +215,12 @@ function handleClear(): void {
 
           <!-- 规范 URL -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-canonical">规范 URL</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-canonical">规范 URL</label>
             <input
               id="meta-canonical"
               v-model="form.canonicalUrl"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="https://example.com/article"
             />
             <p v-if="urlHint" class="text-[0.8125rem] text-error m-0 mt-1">{{ urlHint }}</p>
@@ -228,24 +228,24 @@ function handleClear(): void {
 
           <!-- 预览图 URL -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-image">预览图 URL</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-image">预览图 URL</label>
             <input
               id="meta-image"
               v-model="form.imageUrl"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="https://example.com/og.png（建议 1200×630）"
             />
           </div>
 
           <!-- 图片 Alt -->
           <div>
-            <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-alt">图片 Alt</label>
+            <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-alt">图片 Alt</label>
             <input
               id="meta-alt"
               v-model="form.imageAlt"
               type="text"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="配图替代文本"
             />
           </div>
@@ -257,55 +257,55 @@ function handleClear(): void {
           <div v-if="showAdvanced" class="space-y-4 pt-2 border-t border-border">
             <!-- 站点名 -->
             <div>
-              <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-site">站点名称</label>
+              <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-site">站点名称</label>
               <input
                 id="meta-site"
                 v-model="form.siteName"
                 type="text"
-                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                 placeholder="og:site_name"
               />
             </div>
 
             <!-- og:type -->
             <div>
-              <span class="block mb-1 text-[0.8125rem] text-muted">og:type</span>
+              <span class="block mb-1 text-[0.8125rem] text-muted-foreground">og:type</span>
               <SelectListbox v-model="form.ogType" :options="ogTypeOptions" class="w-full" />
             </div>
 
             <!-- Twitter 卡片类型 -->
             <div>
-              <span class="block mb-1 text-[0.8125rem] text-muted">Twitter 卡片类型</span>
+              <span class="block mb-1 text-[0.8125rem] text-muted-foreground">Twitter 卡片类型</span>
               <SelectListbox v-model="form.twitterCard" :options="twitterCardOptions" class="w-full" />
             </div>
 
             <!-- twitter:site -->
             <div>
-              <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-tw-site">twitter:site</label>
+              <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-tw-site">twitter:site</label>
               <input
                 id="meta-tw-site"
                 v-model="form.twitterSite"
                 type="text"
-                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                 placeholder="@handle"
               />
             </div>
 
             <!-- twitter:creator -->
             <div>
-              <label class="block mb-1 text-[0.8125rem] text-muted" for="meta-tw-creator">twitter:creator</label>
+              <label class="block mb-1 text-[0.8125rem] text-muted-foreground" for="meta-tw-creator">twitter:creator</label>
               <input
                 id="meta-tw-creator"
                 v-model="form.twitterCreator"
                 type="text"
-                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                 placeholder="@author"
               />
             </div>
 
             <!-- JSON-LD 类型 -->
             <div>
-              <span class="block mb-1 text-[0.8125rem] text-muted">JSON-LD 类型</span>
+              <span class="block mb-1 text-[0.8125rem] text-muted-foreground">JSON-LD 类型</span>
               <SelectListbox v-model="form.jsonLdType" :options="jsonLdTypeOptions" class="w-full" />
             </div>
           </div>
@@ -314,7 +314,7 @@ function handleClear(): void {
           <div class="pt-2">
             <button
               type="button"
-              class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+              class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150"
               @click="handleClear"
             >
               清空
@@ -340,8 +340,8 @@ function handleClear(): void {
                 :class="[
                   'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                   platform === opt.key
-                    ? 'bg-accent text-white'
-                    : 'bg-card text-muted hover:bg-hover hover:text-text',
+                    ? 'bg-primary text-white'
+                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
                 ]"
                 @click="platform = opt.key"
               >
@@ -357,7 +357,7 @@ function handleClear(): void {
             <div class="flex justify-end mb-2">
               <button
                 type="button"
-                class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                 @click="handleCopyAll"
               >
                 复制全部
@@ -373,8 +373,8 @@ function handleClear(): void {
                 :class="[
                   'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                   codeType === opt.key
-                    ? 'bg-accent text-white'
-                    : 'bg-card text-muted hover:bg-hover hover:text-text',
+                    ? 'bg-primary text-white'
+                    : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
                 ]"
                 @click="codeType = opt.key"
               >
@@ -383,7 +383,7 @@ function handleClear(): void {
             </div>
 
             <CodePanel :label="codeLabel" :copy-text="activeCode" show-copy>
-              <pre class="w-full p-4 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ activeCode }}</pre>
+              <pre class="w-full p-4 bg-card text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ activeCode }}</pre>
             </CodePanel>
           </template>
         </ModeTabGroup>

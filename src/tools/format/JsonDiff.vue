@@ -571,14 +571,14 @@ onUnmounted(() => {
       <!-- 加载指示器 -->
       <span
         v-if="isLoading"
-        class="ml-auto text-[0.8125rem] text-muted inline-flex items-center gap-1"
+        class="ml-auto text-[0.8125rem] text-muted-foreground inline-flex items-center gap-1"
       >
         <span class="inline-block animate-spin">⟳</span> 对比中...
       </span>
     </div>
 
     <!-- 模式说明 -->
-    <p class="mb-4 text-[0.75rem] text-muted">
+    <p class="mb-4 text-[0.75rem] text-muted-foreground">
       <template v-if="diffMode === 'strict'">
         严格模式：格式化后按文本行逐行对比，类似 Git diff，适合检查格式或顺序变化。
       </template>
@@ -592,13 +592,13 @@ onUnmounted(() => {
       <!-- 左侧输入区 -->
       <template #input>
         <div>
-          <label class="block text-[0.8125rem] text-muted mb-1.5">原始 JSON</label>
+          <label class="block text-[0.8125rem] text-muted-foreground mb-1.5">原始 JSON</label>
           <div class="relative">
             <textarea
               v-model="leftInput"
               ref="leftTextarea"
-              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
-              :class="leftDragging ? 'border-accent ring-2 ring-accent/20' : ''"
+              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
+              :class="leftDragging ? 'border-primary ring-2 ring-accent/20' : ''"
               placeholder="粘贴或输入原始 JSON..."
               spellcheck="false"
               aria-label="原始 JSON 输入"
@@ -621,13 +621,13 @@ onUnmounted(() => {
       <!-- 右侧输入区 -->
       <template #output>
         <div>
-          <label class="block text-[0.8125rem] text-muted mb-1.5">修改后 JSON</label>
+          <label class="block text-[0.8125rem] text-muted-foreground mb-1.5">修改后 JSON</label>
           <div class="relative">
             <textarea
               v-model="rightInput"
               ref="rightTextarea"
-              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
-              :class="rightDragging ? 'border-accent ring-2 ring-accent/20' : ''"
+              class="w-full h-[calc(50vh-220px)] min-h-60 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
+              :class="rightDragging ? 'border-primary ring-2 ring-accent/20' : ''"
               placeholder="粘贴或输入修改后 JSON..."
               spellcheck="false"
               aria-label="修改后 JSON 输入"
@@ -661,7 +661,7 @@ onUnmounted(() => {
       </div>
 
       <!-- 完全一致时的提示 -->
-      <div v-if="isIdentical" class="p-4 border border-border rounded-sm bg-card text-text text-sm">
+      <div v-if="isIdentical" class="p-4 border border-border rounded-sm bg-card text-foreground text-sm">
         两份 JSON 完全一致，无差异
       </div>
 
@@ -671,7 +671,7 @@ onUnmounted(() => {
         <div
           class="border border-border rounded-sm bg-card overflow-hidden max-h-150"
         >
-          <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
+          <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted-foreground font-medium">
             原始版本（删除行）
           </div>
           <div
@@ -685,12 +685,12 @@ onUnmounted(() => {
                   v-for="(line, index) in (isExpanded ? strictResult.lines : strictResult.lines.slice(0, AUTO_FOLD_THRESHOLD))"
                   :key="`left-${index}`"
                   :class="{
-                    'bg-hover': line.type === 'removed',
+                    'bg-accent': line.type === 'removed',
                     'text-error': line.type === 'removed',
-                    'text-text': line.type === 'unchanged',
+                    'text-foreground': line.type === 'unchanged',
                   }"
                 >
-                  <td class="px-2 py-0.5 text-right text-muted text-[0.75rem] select-none w-12">
+                  <td class="px-2 py-0.5 text-right text-muted-foreground text-[0.75rem] select-none w-12">
                     {{ line.leftLineNo ?? '' }}
                   </td>
                   <td class="px-2 py-0.5 select-none w-6">
@@ -707,7 +707,7 @@ onUnmounted(() => {
         <div
           class="border border-border rounded-sm bg-card overflow-hidden max-h-150"
         >
-          <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium">
+          <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted-foreground font-medium">
             修改版本（新增行）
           </div>
           <div
@@ -721,12 +721,12 @@ onUnmounted(() => {
                   v-for="(line, index) in (isExpanded ? strictResult.lines : strictResult.lines.slice(0, AUTO_FOLD_THRESHOLD))"
                   :key="`right-${index}`"
                   :class="{
-                    'bg-hover': line.type === 'added',
+                    'bg-accent': line.type === 'added',
                     'text-success': line.type === 'added',
-                    'text-text': line.type === 'unchanged',
+                    'text-foreground': line.type === 'unchanged',
                   }"
                 >
-                  <td class="px-2 py-0.5 text-right text-muted text-[0.75rem] select-none w-12">
+                  <td class="px-2 py-0.5 text-right text-muted-foreground text-[0.75rem] select-none w-12">
                     {{ line.rightLineNo ?? '' }}
                   </td>
                   <td class="px-2 py-0.5 select-none w-6">
@@ -742,11 +742,11 @@ onUnmounted(() => {
 
       <!-- 语义模式：差异列表 -->
       <div v-else-if="diffMode === 'semantic' && semanticResult" class="border border-border rounded-sm bg-card overflow-hidden">
-        <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted font-medium flex items-center justify-between">
+        <div class="px-3 py-2 border-b border-border bg-muted/10 text-[0.8125rem] text-muted-foreground font-medium flex items-center justify-between">
           <span>差异列表</span>
           <button
             v-if="needsFold && !isExpanded"
-            class="px-2 py-1 text-[0.75rem] text-accent hover:text-accent/80 cursor-pointer"
+            class="px-2 py-1 text-[0.75rem] text-primary hover:text-primary/80 cursor-pointer"
             @click="handleExpandAll"
           >
             展开全部（{{ diffLines }} 行）
@@ -756,10 +756,10 @@ onUnmounted(() => {
           <table class="w-full border-collapse font-mono text-sm">
             <thead>
               <tr class="border-b border-border">
-                <th class="px-3 py-2 text-left text-[0.75rem] text-muted w-16">类型</th>
-                <th class="px-3 py-2 text-left text-[0.75rem] text-muted">路径</th>
-                <th class="px-3 py-2 text-left text-[0.75rem] text-muted w-1/3">旧值</th>
-                <th class="px-3 py-2 text-left text-[0.75rem] text-muted w-1/3">新值</th>
+                <th class="px-3 py-2 text-left text-[0.75rem] text-muted-foreground w-16">类型</th>
+                <th class="px-3 py-2 text-left text-[0.75rem] text-muted-foreground">路径</th>
+                <th class="px-3 py-2 text-left text-[0.75rem] text-muted-foreground w-1/3">旧值</th>
+                <th class="px-3 py-2 text-left text-[0.75rem] text-muted-foreground w-1/3">新值</th>
               </tr>
             </thead>
             <tbody>
@@ -768,9 +768,9 @@ onUnmounted(() => {
                 :key="index"
                 class="border-b border-border/50"
                 :class="{
-                  'bg-hover': item.type === 'added',
-                  'bg-hover': item.type === 'removed',
-                  'bg-hover': item.type === 'modified',
+                  'bg-accent': item.type === 'added',
+                  'bg-accent': item.type === 'removed',
+                  'bg-accent': item.type === 'modified',
                 }"
               >
                 <td class="px-3 py-2">
@@ -779,18 +779,18 @@ onUnmounted(() => {
                     :class="{
                       'text-success bg-success/10': item.type === 'added',
                       'text-error bg-error/10': item.type === 'removed',
-                      'text-accent bg-accent/10': item.type === 'modified',
-                      'text-muted bg-muted/10': item.type === 'unchanged',
+                      'text-primary bg-primary/10': item.type === 'modified',
+                      'text-muted-foreground bg-muted/10': item.type === 'unchanged',
                     }"
                   >
                     {{ item.type === 'added' ? '新增' : item.type === 'removed' ? '删除' : item.type === 'modified' ? '修改' : '一致' }}
                   </span>
                 </td>
-                <td class="px-3 py-2 text-text break-all">{{ item.path }}</td>
-                <td class="px-3 py-2 text-muted break-all">
+                <td class="px-3 py-2 text-foreground break-all">{{ item.path }}</td>
+                <td class="px-3 py-2 text-muted-foreground break-all">
                   {{ item.oldValue !== undefined ? JSON.stringify(item.oldValue) : '-' }}
                 </td>
-                <td class="px-3 py-2 text-text break-all">
+                <td class="px-3 py-2 text-foreground break-all">
                   {{ item.newValue !== undefined ? JSON.stringify(item.newValue) : '-' }}
                 </td>
               </tr>
@@ -807,18 +807,18 @@ onUnmounted(() => {
       >
         <div class="bg-card border border-border rounded-sm p-6 max-w-md">
           <h3 class="text-lg font-semibold mb-2">确认展开全部</h3>
-          <p class="text-sm text-muted mb-4">
+          <p class="text-sm text-muted-foreground mb-4">
             即将展开 {{ pendingExpandLines }} 行差异，可能会导致页面卡顿。是否继续？
           </p>
           <div class="flex gap-2 justify-end">
             <button
-              class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover"
+              class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent"
               @click="showExpandConfirm = false"
             >
               取消
             </button>
             <button
-              class="px-4 py-2 border border-accent rounded-sm bg-accent text-white text-[0.8125rem] cursor-pointer transition-[background-color] duration-150 hover:bg-accent/90"
+              class="px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[background-color] duration-150 hover:bg-primary/90"
               @click="confirmExpand"
             >
               确认展开
@@ -829,7 +829,7 @@ onUnmounted(() => {
     </div>
 
     <!-- 空状态提示 -->
-    <div v-else class="mt-6 p-8 border border-border rounded-sm bg-card text-center text-muted text-sm">
+    <div v-else class="mt-6 p-8 border border-border rounded-sm bg-card text-center text-muted-foreground text-sm">
       输入两份 JSON 后自动对比差异
     </div>
   </div>

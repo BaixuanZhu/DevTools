@@ -32,17 +32,17 @@ const selectedLabel = computed(() => {
 
 <template>
   <div class="relative">
-    <label v-if="label" class="block mb-1 text-[0.8125rem] text-muted font-sans">{{ label }}</label>
+    <label v-if="label" class="block mb-1 text-[0.8125rem] text-muted-foreground font-sans">{{ label }}</label>
     <Listbox v-model="model">
       <ListboxButton
         :class="[
-          'relative w-full px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-sans cursor-pointer flex items-center justify-center',
+          'relative w-full px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-sans cursor-pointer flex items-center justify-center',
           props.buttonClass,
         ]"
       >
         <span class="block truncate">{{ selectedLabel }}</span>
         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-          <ChevronDown class="h-4 w-4 text-muted" :size="16" aria-hidden="true" />
+          <ChevronDown class="h-4 w-4 text-muted-foreground" :size="16" aria-hidden="true" />
         </span>
       </ListboxButton>
       <ListboxOptions
@@ -54,11 +54,11 @@ const selectedLabel = computed(() => {
           :value="(option as any).key ?? option.value"
           :class="[
             'relative cursor-pointer select-none py-1.5 px-2',
-            'ui-active:bg-hover ui-active:text-text',
+            'ui-active:bg-accent ui-active:text-foreground',
           ]"
         >
-          <span class="flex items-center justify-center gap-1.5 truncate ui-selected:font-semibold ui-selected:text-accent">{{ option.label }}</span>
-          <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 ui-selected:text-accent">
+          <span class="flex items-center justify-center gap-1.5 truncate ui-selected:font-semibold ui-selected:text-primary">{{ option.label }}</span>
+          <span class="absolute inset-y-0 left-0 flex items-center pl-1.5 ui-selected:text-primary">
             <Check class="h-4 w-4 ui-selected:block hidden" :size="16" aria-hidden="true" />
           </span>
         </ListboxOption>

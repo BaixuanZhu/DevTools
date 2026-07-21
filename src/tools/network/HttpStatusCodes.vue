@@ -83,8 +83,8 @@ function getCategoryColor(category: StatusCategory): string {
         :class="[
           'px-3 py-1.5 text-[0.8125rem] rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150',
           activeCategory === 'all'
-            ? 'bg-accent text-white border-accent'
-            : 'bg-card text-muted border-border hover:bg-hover hover:border-accent hover:text-text',
+            ? 'bg-primary text-white border-primary'
+            : 'bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary hover:text-foreground',
         ]"
         @click="activeCategory = 'all'"
       >
@@ -96,8 +96,8 @@ function getCategoryColor(category: StatusCategory): string {
         :class="[
           'px-3 py-1.5 text-[0.8125rem] rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150',
           activeCategory === cat.key
-            ? 'bg-accent text-white border-accent'
-            : 'bg-card text-muted border-border hover:bg-hover hover:border-accent hover:text-text',
+            ? 'bg-primary text-white border-primary'
+            : 'bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary hover:text-foreground',
         ]"
         @click="activeCategory = cat.key"
       >
@@ -108,16 +108,16 @@ function getCategoryColor(category: StatusCategory): string {
     <!-- 搜索 + 操作栏 -->
     <div class="flex items-center gap-3 mb-4">
       <div class="flex-1 relative">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="搜索状态码或描述..."
-          class="w-full pl-10 pr-4 py-2 border border-border rounded-sm bg-surface text-text text-[0.8125rem] placeholder:text-muted/60 outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full pl-10 pr-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] placeholder:text-muted-foreground/60 outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
       <button
-        class="shrink-0 px-4 py-2 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:border-accent hover:text-text"
+        class="shrink-0 px-4 py-2 border border-border rounded-sm bg-card text-muted-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:border-primary hover:text-foreground"
         @click="handleClear"
       >
         清空
@@ -129,7 +129,7 @@ function getCategoryColor(category: StatusCategory): string {
     </div>
 
     <!-- 结果计数 -->
-    <p class="text-[0.8125rem] text-muted mb-3">
+    <p class="text-[0.8125rem] text-muted-foreground mb-3">
       共 {{ resultCount }} 个状态码
     </p>
 
@@ -141,11 +141,11 @@ function getCategoryColor(category: StatusCategory): string {
       <div
         v-for="status in filteredStatuses"
         :key="status.code"
-        class="flex items-start gap-4 px-4 py-3 border border-border rounded-sm bg-card transition-[border-color] duration-150 hover:border-accent"
+        class="flex items-start gap-4 px-4 py-3 border border-border rounded-sm bg-card transition-[border-color] duration-150 hover:border-primary"
       >
         <!-- 状态码 -->
         <div class="flex items-center gap-3 shrink-0">
-          <span class="text-lg font-mono font-bold text-text min-w-[40px]">{{ status.code }}</span>
+          <span class="text-lg font-mono font-bold text-foreground min-w-[40px]">{{ status.code }}</span>
           <span
             :class="['px-2 py-0.5 text-[0.6875rem] font-semibold rounded-sm', getCategoryColor(status.category)]"
           >
@@ -155,9 +155,9 @@ function getCategoryColor(category: StatusCategory): string {
 
         <!-- 名称和描述 -->
         <div class="flex-1 min-w-0">
-          <p class="text-[0.8125rem] font-medium text-text m-0 mb-0.5">{{ status.name }}</p>
-          <p class="text-[0.8125rem] text-muted m-0">{{ status.description }}</p>
-          <p v-if="status.spec" class="text-[0.6875rem] text-muted/60 m-0 mt-1">{{ status.spec }}</p>
+          <p class="text-[0.8125rem] font-medium text-foreground m-0 mb-0.5">{{ status.name }}</p>
+          <p class="text-[0.8125rem] text-muted-foreground m-0">{{ status.description }}</p>
+          <p v-if="status.spec" class="text-[0.6875rem] text-muted-foreground/60 m-0 mt-1">{{ status.spec }}</p>
         </div>
 
         <!-- 复制按钮 -->
@@ -171,9 +171,9 @@ function getCategoryColor(category: StatusCategory): string {
     <!-- 空状态 -->
     <div
       v-else
-      class="flex flex-col items-center justify-center py-12 text-muted"
+      class="flex flex-col items-center justify-center py-12 text-muted-foreground"
     >
-      <Search class="w-10 h-10 mb-3 text-muted/40" :stroke-width="1.5" />
+      <Search class="w-10 h-10 mb-3 text-muted-foreground/40" :stroke-width="1.5" />
       <p class="text-[0.8125rem] m-0">未找到匹配的状态码</p>
     </div>
   </div>

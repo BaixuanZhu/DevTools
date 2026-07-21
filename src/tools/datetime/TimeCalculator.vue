@@ -119,7 +119,7 @@ onMounted(() => {
     <!-- ═══ 时间差计算 ═══ -->
     <section class="mb-6 p-4 border border-border rounded-md bg-card">
       <div class="flex items-center justify-between mb-3">
-        <h2 class="text-sm font-semibold m-0 text-text flex items-center gap-2">
+        <h2 class="text-sm font-semibold m-0 text-foreground flex items-center gap-2">
           <span class="text-base">📏</span> 时间差计算
         </h2>
         <ClearButton @clear="clearDiff" />
@@ -128,14 +128,14 @@ onMounted(() => {
       <!-- 输入卡片区：只含头部 + 输入 + 操作行，高度固定，左右齐平 -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <!-- 时间点 A -->
-        <div class="bg-surface border border-border rounded-sm overflow-hidden">
+        <div class="bg-background border border-border rounded-sm overflow-hidden">
           <div class="px-3 py-2 border-b border-border bg-card">
-            <label class="text-[0.8125rem] text-muted font-medium">时间点 A</label>
+            <label class="text-[0.8125rem] text-muted-foreground font-medium">时间点 A</label>
           </div>
           <div class="px-3 py-3">
             <input
               v-model="inputA"
-              class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+              class="w-full bg-transparent border-0 p-0 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="时间戳或 yyyy/MM/dd HH:mm"
               :aria-describedby="errorA ? 'diff-error-a' : undefined"
             />
@@ -143,7 +143,7 @@ onMounted(() => {
           <div class="px-3 py-2 border-t border-border bg-card flex items-center justify-end gap-3">
             <button
               type="button"
-              class="text-xs text-muted bg-transparent cursor-pointer focus:outline-none focus:text-accent"
+              class="text-xs text-muted-foreground bg-transparent cursor-pointer focus:outline-none focus:text-primary"
               aria-label="打开日期时间选择器"
               @click="openPicker('a')"
             >
@@ -151,7 +151,7 @@ onMounted(() => {
             </button>
             <button
               type="button"
-              class="text-xs text-muted bg-transparent cursor-pointer focus:outline-none focus:text-accent"
+              class="text-xs text-muted-foreground bg-transparent cursor-pointer focus:outline-none focus:text-primary"
               @click="fillNow('a')"
             >
               现在
@@ -170,14 +170,14 @@ onMounted(() => {
         </div>
 
         <!-- 时间点 B -->
-        <div class="bg-surface border border-border rounded-sm overflow-hidden">
+        <div class="bg-background border border-border rounded-sm overflow-hidden">
           <div class="px-3 py-2 border-b border-border bg-card">
-            <label class="text-[0.8125rem] text-muted font-medium">时间点 B</label>
+            <label class="text-[0.8125rem] text-muted-foreground font-medium">时间点 B</label>
           </div>
           <div class="px-3 py-3">
             <input
               v-model="inputB"
-              class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+              class="w-full bg-transparent border-0 p-0 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
               placeholder="时间戳或 yyyy/MM/dd HH:mm"
               :aria-describedby="errorB ? 'diff-error-b' : undefined"
             />
@@ -185,7 +185,7 @@ onMounted(() => {
           <div class="px-3 py-2 border-t border-border bg-card flex items-center justify-end gap-3">
             <button
               type="button"
-              class="text-xs text-muted bg-transparent cursor-pointer focus:outline-none focus:text-accent"
+              class="text-xs text-muted-foreground bg-transparent cursor-pointer focus:outline-none focus:text-primary"
               aria-label="打开日期时间选择器"
               @click="openPicker('b')"
             >
@@ -193,7 +193,7 @@ onMounted(() => {
             </button>
             <button
               type="button"
-              class="text-xs text-muted bg-transparent cursor-pointer focus:outline-none focus:text-accent"
+              class="text-xs text-muted-foreground bg-transparent cursor-pointer focus:outline-none focus:text-primary"
               @click="fillNow('b')"
             >
               现在
@@ -223,14 +223,14 @@ onMounted(() => {
       </div>
 
       <!-- 时间差结果 -->
-      <div v-if="diffDisplay" class="flex items-center gap-3 px-4 py-3 mt-3 border border-border rounded-sm bg-surface">
-        <span class="text-xs font-semibold text-accent min-w-16 shrink-0">时间差</span>
-        <code class="flex-1 font-mono text-sm text-text select-all break-all">{{ diffDisplay }}</code>
+      <div v-if="diffDisplay" class="flex items-center gap-3 px-4 py-3 mt-3 border border-border rounded-sm bg-background">
+        <span class="text-xs font-semibold text-primary min-w-16 shrink-0">时间差</span>
+        <code class="flex-1 font-mono text-sm text-foreground select-all break-all">{{ diffDisplay }}</code>
         <CopyButton :text="diffDisplay" size="sm" />
       </div>
-      <div v-if="diffResult" class="flex items-center gap-3 px-4 py-2 mt-2 border border-border rounded-sm bg-surface">
-        <span class="text-xs font-semibold text-accent min-w-16 shrink-0">总秒数</span>
-        <code class="flex-1 font-mono text-sm text-text select-all">{{ diffResult.totalSeconds }}</code>
+      <div v-if="diffResult" class="flex items-center gap-3 px-4 py-2 mt-2 border border-border rounded-sm bg-background">
+        <span class="text-xs font-semibold text-primary min-w-16 shrink-0">总秒数</span>
+        <code class="flex-1 font-mono text-sm text-foreground select-all">{{ diffResult.totalSeconds }}</code>
         <CopyButton :text="String(diffResult.totalSeconds)" size="sm" />
       </div>
     </section>

@@ -387,7 +387,7 @@ onUnmounted(() => {
         <button
           type="button"
           :disabled="!canProcess || isProcessing"
-          class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="px-4 py-2 rounded-sm bg-primary text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           aria-label="开始混淆"
           @click="handleScramble"
         >
@@ -397,7 +397,7 @@ onUnmounted(() => {
         <button
           type="button"
           :disabled="!canProcess || isProcessing"
-          class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="px-4 py-2 rounded-sm bg-card border border-border text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           aria-label="开始还原"
           @click="handleRestore"
         >
@@ -407,7 +407,7 @@ onUnmounted(() => {
         <button
           type="button"
           :disabled="!displayUrl"
-          class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          class="px-4 py-2 rounded-sm bg-card border border-border text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           aria-label="下载结果"
           @click="handleDownload"
         >
@@ -434,8 +434,8 @@ onUnmounted(() => {
       >
         <template #default>
           <div class="flex flex-col items-center justify-center text-center">
-            <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
-            <div class="text-xs text-muted mt-1">支持任意图片格式，上限 50MB</div>
+            <div class="text-sm text-foreground">拖入图片 / 点击选择 / Ctrl+V 粘贴</div>
+            <div class="text-xs text-muted-foreground mt-1">支持任意图片格式，上限 50MB</div>
           </div>
         </template>
 
@@ -452,14 +452,14 @@ onUnmounted(() => {
 
       <!-- 当前图片状态 -->
       <div v-if="displayUrl" class="flex items-center gap-2 text-sm">
-        <span class="text-muted">状态</span>
+        <span class="text-muted-foreground">状态</span>
         <span
           class="px-2 py-0.5 rounded-sm text-[0.8125rem] font-medium"
           :class="
             displayLabel === 'original'
-              ? 'bg-card border border-border text-text'
+              ? 'bg-card border border-border text-foreground'
               : displayLabel === 'scrambled'
-                ? 'bg-accent/10 border border-accent/30 text-accent'
+                ? 'bg-primary/10 border border-primary/30 text-primary'
                 : 'bg-success/10 border border-success/30 text-success'
           "
         >
@@ -468,8 +468,8 @@ onUnmounted(() => {
       </div>
 
       <!-- 文件元信息区：放在 FileDropzone 外部，点击图片不会触发选择器 -->
-      <div v-if="displayUrl" class="flex flex-col gap-1.5 text-xs text-muted">
-        <div class="font-medium text-text break-all">{{ originalName }}</div>
+      <div v-if="displayUrl" class="flex flex-col gap-1.5 text-xs text-muted-foreground">
+        <div class="font-medium text-foreground break-all">{{ originalName }}</div>
         <div class="font-mono">{{ dimensions?.width }}×{{ dimensions?.height }}</div>
         <div class="font-mono">{{ formatBytes(currentSize) }}</div>
       </div>

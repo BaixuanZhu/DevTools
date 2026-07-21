@@ -85,7 +85,7 @@ async function copyAll() {
     <div class="border border-border rounded-md p-6 bg-card flex flex-col gap-4">
       <!-- 字符类型 Switches -->
       <div class="flex items-center gap-4 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">字符类型</span>
+        <span class="text-[0.8125rem] text-muted-foreground min-w-18 shrink-0">字符类型</span>
         <div class="flex items-center gap-3">
           <ToggleSwitch v-model="charTypes.uppercase" description="A-Z" />
           <ToggleSwitch v-model="charTypes.lowercase" description="a-z" />
@@ -95,22 +95,22 @@ async function copyAll() {
 
       <!-- 特殊字符 -->
       <div class="flex items-center gap-4 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-18 shrink-0">特殊字符</span>
+        <span class="text-[0.8125rem] text-muted-foreground min-w-18 shrink-0">特殊字符</span>
         <div class="flex items-center gap-2">
           <ToggleSwitch v-model="charTypes.special" description="特殊" />
           <input
             v-if="charTypes.special"
             v-model="customSpecial"
             type="text"
-            class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[260px]"
+            class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[260px]"
             placeholder="自定义特殊字符"
           />
         </div>
       </div>
 
       <!-- 字符池预览 -->
-      <div class="text-[0.75rem] text-muted">
-        字符池：<span class="text-accent font-mono">{{ charsetHint() }}</span>
+      <div class="text-[0.75rem] text-muted-foreground">
+        字符池：<span class="text-primary font-mono">{{ charsetHint() }}</span>
       </div>
 
       <!-- 输出格式 -->
@@ -131,25 +131,25 @@ async function copyAll() {
       <!-- 长度 + 数量 并排 -->
       <div class="flex items-center gap-4 flex-wrap">
         <div class="flex items-center gap-2">
-          <span class="text-[0.8125rem] text-muted">长度</span>
+          <span class="text-[0.8125rem] text-muted-foreground">长度</span>
           <input
             v-model.number="length"
             type="number"
             min="1"
             max="2048"
-            class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[72px]"
+            class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[72px]"
           />
         </div>
         <div class="flex items-center gap-2">
-          <span class="text-[0.8125rem] text-muted">数量</span>
+          <span class="text-[0.8125rem] text-muted-foreground">数量</span>
           <input
             v-model.number="count"
             type="number"
             min="1"
             max="500"
-            class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[72px]"
+            class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[72px]"
           />
-          <span class="text-[0.8125rem] text-muted">条</span>
+          <span class="text-[0.8125rem] text-muted-foreground">条</span>
         </div>
       </div>
 
@@ -158,14 +158,14 @@ async function copyAll() {
         <div class="flex gap-2">
           <button
             :disabled="!hasChecked || specialMissing"
-            class="px-6 py-2 bg-accent border border-accent text-white rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             @click="generate"
           >
             生成
           </button>
           <button
             :disabled="!hasChecked || specialMissing"
-            class="px-6 py-2 bg-surface border border-border text-text rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2 bg-background border border-border text-foreground rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
             @click="generate"
           >
             重新生成
@@ -179,14 +179,14 @@ async function copyAll() {
     <!-- 结果面板 -->
     <div class="mt-6">
       <div v-if="results.length === 0" class="border border-border rounded-md bg-card min-h-30 flex items-center justify-center">
-        <p class="text-muted text-[0.8125rem]">配置参数后点击「生成」</p>
+        <p class="text-muted-foreground text-[0.8125rem]">配置参数后点击「生成」</p>
       </div>
 
       <div v-else class="border border-border rounded-md bg-card overflow-hidden">
         <div class="flex items-center justify-between px-4 py-2 border-b border-border sticky top-0 bg-card z-10">
-          <span class="text-[0.8125rem] text-muted">共 {{ results.length }} 条</span>
+          <span class="text-[0.8125rem] text-muted-foreground">共 {{ results.length }} 条</span>
           <button
-            class="px-3 py-1 border border-border rounded-sm text-[0.8125rem] text-text cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+            class="px-3 py-1 border border-border rounded-sm text-[0.8125rem] text-foreground cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
             @click="copyAll"
           >
             复制全部
@@ -196,12 +196,12 @@ async function copyAll() {
           <div
             v-for="(str, idx) in results"
             :key="idx"
-            class="flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150 group"
+            class="flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150 group"
             @click="copySingle(str)"
           >
-            <span class="text-[0.75rem] text-muted min-w-8 text-right shrink-0">{{ idx + 1 }}</span>
-            <code class="text-[0.8125rem] font-mono text-text break-all flex-1">{{ str }}</code>
-            <span class="text-[0.75rem] text-muted opacity-0 group-hover:opacity-100 shrink-0 transition-[opacity] duration-150">复制</span>
+            <span class="text-[0.75rem] text-muted-foreground min-w-8 text-right shrink-0">{{ idx + 1 }}</span>
+            <code class="text-[0.8125rem] font-mono text-foreground break-all flex-1">{{ str }}</code>
+            <span class="text-[0.75rem] text-muted-foreground opacity-0 group-hover:opacity-100 shrink-0 transition-[opacity] duration-150">复制</span>
           </div>
         </div>
       </div>

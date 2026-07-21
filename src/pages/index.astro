@@ -40,24 +40,24 @@ const itemListJsonLd = {
     <!-- Hero Section -->
     <div class="text-center mb-10">
       <h1 class="text-4xl font-bold m-0 mb-3">在线工具箱</h1>
-      <p class="text-muted text-base m-0 mb-8">零门槛的浏览器端在线工具，即开即用</p>
+      <p class="text-muted-foreground text-base m-0 mb-8">零门槛的浏览器端在线工具，即开即用</p>
 
       <!-- Search Bar -->
       <div class="max-w-140 mx-auto mb-6">
-        <div class="flex items-center gap-2 px-5 py-3 border border-border rounded-lg bg-card transition-[border-color] duration-150 focus-within:border-accent">
-          <Search class="w-4 h-4 shrink-0 text-muted" />
+        <div class="flex items-center gap-2 px-5 py-3 border border-border rounded-lg bg-card transition-[border-color] duration-150 focus-within:border-primary">
+          <Search class="w-4 h-4 shrink-0 text-muted-foreground" />
           <input
             type="text"
             x-model="query"
             placeholder="搜索工具..."
-            class="flex-1 border-none outline-none text-base font-sans text-text bg-transparent placeholder:text-muted"
+            class="flex-1 border-none outline-none text-base font-sans text-foreground bg-transparent placeholder:text-muted-foreground"
             @input.debounce.150ms="handleSearch()"
           />
           <button
             x-show="query"
             x-cloak
             @click="query = ''; handleSearch()"
-            class="border-none bg-transparent cursor-pointer text-muted text-sm px-1 py-0.5 rounded-sm hover:text-text"
+            class="border-none bg-transparent cursor-pointer text-muted-foreground text-sm px-1 py-0.5 rounded-sm hover:text-foreground"
             aria-label="清除搜索"
           >
             <X class="w-4 h-4" />
@@ -82,7 +82,7 @@ const itemListJsonLd = {
       x-cloak
       class="text-center py-16"
     >
-      <p class="text-muted text-base m-0">没有找到匹配「<span x-text="query" class="text-text font-medium"></span>」的工具</p>
+      <p class="text-muted-foreground text-base m-0">没有找到匹配「<span x-text="query" class="text-foreground font-medium"></span>」的工具</p>
     </div>
   </div>
 

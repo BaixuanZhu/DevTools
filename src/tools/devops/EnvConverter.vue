@@ -161,7 +161,7 @@ const diagnosticsHint = computed(() => {
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
       <template #actions>
         <div class="flex items-center gap-2 mr-auto">
-          <span class="text-[0.8125rem] text-muted">JSON 格式</span>
+          <span class="text-[0.8125rem] text-muted-foreground">JSON 格式</span>
           <div class="inline-flex rounded-sm border border-border overflow-hidden">
             <button
               v-for="opt in jsonFormatOptions"
@@ -170,8 +170,8 @@ const diagnosticsHint = computed(() => {
               :class="[
                 'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                 jsonIndent === opt.value
-                  ? 'bg-accent text-white'
-                  : 'bg-card text-muted hover:bg-hover hover:text-text',
+                  ? 'bg-primary text-white'
+                  : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
               ]"
               @click="jsonIndent = opt.value"
             >
@@ -191,7 +191,7 @@ const diagnosticsHint = computed(() => {
         >
           <textarea
             v-model="leftValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="14"
             placeholder="输入 .env 文本..."
             spellcheck="false"
@@ -209,7 +209,7 @@ const diagnosticsHint = computed(() => {
         >
           <textarea
             v-model="rightValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="14"
             placeholder="输入 JSON 文本..."
             spellcheck="false"
@@ -220,7 +220,7 @@ const diagnosticsHint = computed(() => {
 
     <div class="mx-auto w-full max-w-[1600px] mt-4 text-center">
       <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0">{{ errorMsg }}</p>
-      <p v-if="diagnosticsHint" class="text-[0.75rem] text-muted m-0 mt-1">{{ diagnosticsHint }}</p>
+      <p v-if="diagnosticsHint" class="text-[0.75rem] text-muted-foreground m-0 mt-1">{{ diagnosticsHint }}</p>
     </div>
   </div>
 </template>

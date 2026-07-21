@@ -124,12 +124,12 @@ function formatTimestamp(iso: string): string {
         label="UUID 版本"
         :options="VERSION_OPTIONS as any"
       />
-      <p class="-mt-3 text-[0.75rem] text-muted leading-relaxed">{{ versionDescription }}</p>
+      <p class="-mt-3 text-[0.75rem] text-muted-foreground leading-relaxed">{{ versionDescription }}</p>
 
       <!-- V3/V5 命名空间区段 -->
       <template v-if="showNamespace">
         <div class="border-t border-border pt-4 -mx-0">
-          <p class="text-[0.8125rem] font-semibold text-text mb-3">命名空间参数</p>
+          <p class="text-[0.8125rem] font-semibold text-foreground mb-3">命名空间参数</p>
           <div class="flex flex-col gap-3">
             <SelectListbox
               v-model="namespacePreset"
@@ -137,24 +137,24 @@ function formatTimestamp(iso: string): string {
               :options="NAMESPACE_PRESET_OPTIONS as any"
             />
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">UUID</span>
+              <span class="text-[0.8125rem] text-muted-foreground min-w-12 shrink-0">UUID</span>
               <input
                 :value="namespaceUuid"
                 :readonly="namespacePreset !== 'custom'"
                 type="text"
                 :class="[
-                  'px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[300px]',
-                  namespacePreset !== 'custom' ? 'cursor-default text-muted' : '',
+                  'px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[300px]',
+                  namespacePreset !== 'custom' ? 'cursor-default text-muted-foreground' : '',
                 ]"
                 placeholder="命名空间 UUID"
               />
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">名称</span>
+              <span class="text-[0.8125rem] text-muted-foreground min-w-12 shrink-0">名称</span>
               <input
                 v-model="nameValue"
                 type="text"
-                class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[300px]"
+                class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[300px]"
                 placeholder="任意字符串"
               />
             </div>
@@ -178,24 +178,24 @@ function formatTimestamp(iso: string): string {
 
       <!-- 数量和生成按钮 -->
       <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-[0.8125rem] text-muted min-w-12 shrink-0">数量</span>
+        <span class="text-[0.8125rem] text-muted-foreground min-w-12 shrink-0">数量</span>
         <input
           v-model.number="count"
           type="number"
           min="1"
           max="500"
           :class="[
-            'px-2 py-1 border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-[128px]',
+            'px-2 py-1 border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-[128px]',
             countValid ? 'border-border' : 'border-error',
           ]"
           @blur="clampCount"
         />
-        <span class="text-[0.8125rem]" :class="countValid ? 'text-muted' : 'text-error'">条（1-500）</span>
+        <span class="text-[0.8125rem]" :class="countValid ? 'text-muted-foreground' : 'text-error'">条（1-500）</span>
       </div>
 
       <div class="flex gap-2">
         <button
-          class="px-4 py-2 bg-accent border border-accent text-white rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+          class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
           @click="generate"
         >
           生成
@@ -207,7 +207,7 @@ function formatTimestamp(iso: string): string {
     <div class="border border-border rounded-md bg-card mt-4 min-h-30">
       <div
         v-if="results.length === 0"
-        class="flex items-center justify-center h-30 text-muted text-sm"
+        class="flex items-center justify-center h-30 text-muted-foreground text-sm"
       >
         点击「生成」按钮查看结果
       </div>
@@ -215,9 +215,9 @@ function formatTimestamp(iso: string): string {
         <div
           class="flex justify-between items-center px-4 py-2 border-b border-border sticky top-0 bg-card rounded-t-md z-1"
         >
-          <span class="text-xs text-muted">共 {{ results.length }} 条</span>
+          <span class="text-xs text-muted-foreground">共 {{ results.length }} 条</span>
           <button
-            class="px-2 py-1 bg-surface border border-border text-text rounded-sm text-xs font-sans cursor-pointer hover:bg-hover hover:border-accent"
+            class="px-2 py-1 bg-background border border-border text-foreground rounded-sm text-xs font-sans cursor-pointer hover:bg-accent hover:border-primary"
             @click="copyAll"
           >
             复制全部
@@ -227,14 +227,14 @@ function formatTimestamp(iso: string): string {
           <div
             v-for="(uuid, i) in formattedResults"
             :key="i"
-            class="flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer hover:bg-hover transition-colors duration-150"
+            class="flex items-center gap-2 px-2 py-1 rounded-sm cursor-pointer hover:bg-accent transition-colors duration-150"
             @click="copySingle(uuid)"
           >
-            <span class="text-xs text-muted min-w-[24px] text-right shrink-0">{{ i + 1 }}</span>
-            <code class="flex-1 text-[0.8125rem] text-text break-all">
+            <span class="text-xs text-muted-foreground min-w-[24px] text-right shrink-0">{{ i + 1 }}</span>
+            <code class="flex-1 text-[0.8125rem] text-foreground break-all">
               {{ uuid }}
               <template v-if="enableConversion && formattedConverted[i]">
-                <span class="text-accent mx-1">→</span>
+                <span class="text-primary mx-1">→</span>
                 {{ formattedConverted[i] }}
               </template>
             </code>
@@ -245,67 +245,67 @@ function formatTimestamp(iso: string): string {
 
     <!-- UUID 解码 / 校验面板 -->
     <div class="border border-border rounded-md p-6 bg-card mt-4 flex flex-col gap-4">
-      <h2 class="text-[0.9375rem] font-semibold text-text m-0">UUID 解码 / 校验</h2>
+      <h2 class="text-[0.9375rem] font-semibold text-foreground m-0">UUID 解码 / 校验</h2>
       <input
         v-model="decodeInput"
         type="text"
-        class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-full"
+        class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-full"
         placeholder="粘贴 UUID 进行解析..."
       />
 
       <!-- 解码结果 -->
       <div
         v-if="decodeResult"
-        class="border border-border rounded-sm bg-surface px-3 py-2.5 flex flex-col gap-1.5"
+        class="border border-border rounded-sm bg-background px-3 py-2.5 flex flex-col gap-1.5"
       >
         <!-- 无效提示 -->
         <div v-if="!decodeResult.valid" class="flex items-center gap-2">
           <span class="inline-block w-1.5 h-1.5 rounded-full bg-error shrink-0" />
           <span class="text-[0.8125rem] text-error font-semibold">无效 UUID</span>
-          <span v-if="decodeResult.note" class="text-[0.8125rem] text-muted">{{ decodeResult.note }}</span>
+          <span v-if="decodeResult.note" class="text-[0.8125rem] text-muted-foreground">{{ decodeResult.note }}</span>
         </div>
 
         <!-- 有效 UUID 详情 -->
         <template v-if="decodeResult.valid">
           <div class="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1">
             <template v-if="decodeResult.version !== null">
-              <span class="text-[0.8125rem] text-muted">版本</span>
-              <span class="text-[0.8125rem] text-text font-mono">v{{ decodeResult.version }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">版本</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">v{{ decodeResult.version }}</span>
             </template>
 
             <template v-if="decodeResult.variant">
-              <span class="text-[0.8125rem] text-muted">变体</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.variant }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">变体</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.variant }}</span>
             </template>
 
             <template v-if="decodeResult.hashType">
-              <span class="text-[0.8125rem] text-muted">哈希算法</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.hashType }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">哈希算法</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.hashType }}</span>
             </template>
 
             <template v-if="decodeResult.timestamp">
-              <span class="text-[0.8125rem] text-muted">时间戳</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ formatTimestamp(decodeResult.timestamp) }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">时间戳</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ formatTimestamp(decodeResult.timestamp) }}</span>
             </template>
 
             <template v-if="decodeResult.unixTimestampMs !== null">
-              <span class="text-[0.8125rem] text-muted">Unix 毫秒</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.unixTimestampMs }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">Unix 毫秒</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.unixTimestampMs }}</span>
             </template>
 
             <template v-if="decodeResult.clockSequence !== null">
-              <span class="text-[0.8125rem] text-muted">时钟序列</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.clockSequence }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">时钟序列</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.clockSequence }}</span>
             </template>
 
             <template v-if="decodeResult.node">
-              <span class="text-[0.8125rem] text-muted">节点/MAC</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.node }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">节点/MAC</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.node }}</span>
             </template>
 
             <template v-if="decodeResult.note">
-              <span class="text-[0.8125rem] text-muted">备注</span>
-              <span class="text-[0.8125rem] text-text font-mono">{{ decodeResult.note }}</span>
+              <span class="text-[0.8125rem] text-muted-foreground">备注</span>
+              <span class="text-[0.8125rem] text-foreground font-mono">{{ decodeResult.note }}</span>
             </template>
           </div>
         </template>

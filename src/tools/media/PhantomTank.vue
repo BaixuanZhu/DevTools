@@ -432,8 +432,8 @@ onUnmounted(() => {
       >
         <template #default>
           <div class="flex flex-col items-center justify-center text-center">
-            <div class="text-sm text-text font-medium">图A · 表图（白底显示）</div>
-            <div class="text-xs text-muted mt-1">拖入 / 点击 / 粘贴</div>
+            <div class="text-sm text-foreground font-medium">图A · 表图（白底显示）</div>
+            <div class="text-xs text-muted-foreground mt-1">拖入 / 点击 / 粘贴</div>
           </div>
         </template>
         <template #file="{ file }">
@@ -444,7 +444,7 @@ onUnmounted(() => {
               :alt="file.name"
               class="max-h-72 w-full object-contain rounded-sm"
             />
-            <div class="text-xs text-muted mt-2 break-all">{{ file.name }}</div>
+            <div class="text-xs text-muted-foreground mt-2 break-all">{{ file.name }}</div>
           </div>
         </template>
       </FileDropzone>
@@ -461,8 +461,8 @@ onUnmounted(() => {
       >
         <template #default>
           <div class="flex flex-col items-center justify-center text-center">
-            <div class="text-sm text-text font-medium">图B · 里图（黑底显示）</div>
-            <div class="text-xs text-muted mt-1">拖入 / 点击 / 粘贴</div>
+            <div class="text-sm text-foreground font-medium">图B · 里图（黑底显示）</div>
+            <div class="text-xs text-muted-foreground mt-1">拖入 / 点击 / 粘贴</div>
           </div>
         </template>
         <template #file="{ file }">
@@ -473,7 +473,7 @@ onUnmounted(() => {
               :alt="file.name"
               class="max-h-72 w-full object-contain rounded-sm"
             />
-            <div class="text-xs text-muted mt-2 break-all">{{ file.name }}</div>
+            <div class="text-xs text-muted-foreground mt-2 break-all">{{ file.name }}</div>
           </div>
         </template>
       </FileDropzone>
@@ -484,7 +484,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="!hiddenBitmap"
-        class="px-3 py-1.5 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+        class="px-3 py-1.5 rounded-sm bg-card border border-border text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
         aria-label="从里图自动生成表图"
         title="用里图的反相自动生成表图"
         @click="generateAutoSurface"
@@ -493,7 +493,7 @@ onUnmounted(() => {
         从里图自动生成
       </button>
       <div class="flex items-center gap-2">
-        <span class="text-[0.8125rem] text-muted">里图暗化</span>
+        <span class="text-[0.8125rem] text-muted-foreground">里图暗化</span>
         <input
           v-model.number="darken"
           type="range"
@@ -504,9 +504,9 @@ onUnmounted(() => {
           class="w-40 accent-accent cursor-pointer disabled:cursor-not-allowed"
           aria-label="里图暗化强度"
         />
-        <span class="text-xs text-muted font-mono w-10">{{ darken }}%</span>
+        <span class="text-xs text-muted-foreground font-mono w-10">{{ darken }}%</span>
       </div>
-      <span v-if="sliderDisabled && surfaceSource === 'manual'" class="text-xs text-muted">
+      <span v-if="sliderDisabled && surfaceSource === 'manual'" class="text-xs text-muted-foreground">
         手动表图模式下不可调，点左侧按钮切回自动
       </span>
     </div>
@@ -516,7 +516,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="!canGenerate"
-        class="px-4 py-2 rounded-sm bg-accent text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        class="px-4 py-2 rounded-sm bg-primary text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         aria-label="生成幻影坦克"
         @click="handleGenerate"
       >
@@ -526,7 +526,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="!resultUrl"
-        class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        class="px-4 py-2 rounded-sm bg-card border border-border text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         aria-label="下载结果"
         @click="handleDownload"
       >
@@ -536,7 +536,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="!surfaceFile && !hiddenFile && !resultUrl"
-        class="px-4 py-2 rounded-sm bg-card border border-border text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        class="px-4 py-2 rounded-sm bg-card border border-border text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         aria-label="清空"
         @click="handleClear"
       >
@@ -560,7 +560,7 @@ onUnmounted(() => {
           class="max-h-120 w-full object-contain"
         />
       </div>
-      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
+      <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span class="font-mono">{{ dimensions?.width }}×{{ dimensions?.height }}</span>
         <span class="font-mono">{{ formatBytes(resultSize) }}</span>
         <span>切换上方背景可对比白底（图A）/ 黑底（图B）效果</span>

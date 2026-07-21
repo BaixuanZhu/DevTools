@@ -106,17 +106,17 @@ function handleClear(): void {
         <div class="bg-card border border-border rounded-lg p-6 space-y-6">
           <!-- 批量粘贴 -->
           <div class="border border-border rounded-md p-4 space-y-2">
-            <h3 class="text-sm font-semibold text-text m-0">批量粘贴 URL</h3>
-            <p class="text-[0.75rem] text-muted m-0">一行一个 URL，自动去重</p>
+            <h3 class="text-sm font-semibold text-foreground m-0">批量粘贴 URL</h3>
+            <p class="text-[0.75rem] text-muted-foreground m-0">一行一个 URL，自动去重</p>
             <textarea
               v-model="bulkText"
               rows="4"
-              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-text text-sm resize-y box-border focus:outline-none focus:border-accent transition-[border-color] duration-150"
+              class="w-full px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm resize-y box-border focus:outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="https://example.com/&#10;https://example.com/about"
             ></textarea>
             <button
               type="button"
-              class="px-4 py-2 text-sm border border-border rounded-sm bg-card text-text cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+              class="px-4 py-2 text-sm border border-border rounded-sm bg-card text-foreground cursor-pointer hover:bg-accent transition-[background-color] duration-150"
               @click="handleBulkImport"
             >解析并追加</button>
           </div>
@@ -132,12 +132,12 @@ function handleClear(): void {
                 <input
                   v-model="u.loc"
                   type="text"
-                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                   placeholder="https://example.com/page"
                 />
                 <button
                   type="button"
-                  class="px-2 py-2 text-[0.8125rem] text-muted border border-border rounded-sm bg-card cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                  class="px-2 py-2 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                   @click="removeUrl(u.id)"
                 >✕</button>
               </div>
@@ -145,19 +145,19 @@ function handleClear(): void {
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div>
-                  <label class="block mb-1 text-[0.75rem] text-muted">最后修改 lastmod</label>
+                  <label class="block mb-1 text-[0.75rem] text-muted-foreground">最后修改 lastmod</label>
                   <input
                     v-model="u.lastmod"
                     type="date"
-                    class="w-full px-2 py-1 border border-border rounded-sm bg-card text-text text-[0.8125rem] focus:outline-none focus:border-accent box-border"
+                    class="w-full px-2 py-1 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] focus:outline-none focus:border-primary box-border"
                   />
                 </div>
                 <div>
-                  <span class="block mb-1 text-[0.75rem] text-muted">频率 changefreq</span>
+                  <span class="block mb-1 text-[0.75rem] text-muted-foreground">频率 changefreq</span>
                   <SelectListbox v-model="u.changefreq" :options="changefreqOptions" class="w-full" />
                 </div>
                 <div>
-                  <span class="block mb-1 text-[0.75rem] text-muted">优先级 priority</span>
+                  <span class="block mb-1 text-[0.75rem] text-muted-foreground">优先级 priority</span>
                   <SelectListbox v-model="u.priority" :options="priorityOptions" class="w-full" />
                 </div>
               </div>
@@ -166,13 +166,13 @@ function handleClear(): void {
 
           <button
             type="button"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150"
             @click="addUrl"
           >+ 添加 URL</button>
 
           <button
             type="button"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150"
             @click="handleClear"
           >清空</button>
         </div>
@@ -187,7 +187,7 @@ function handleClear(): void {
           show-download
           @download="handleDownload"
         >
-          <pre class="w-full p-4 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ sitemapXml }}</pre>
+          <pre class="w-full p-4 bg-card text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ sitemapXml }}</pre>
         </CodePanel>
       </template>
     </ResponsiveWorkspace>

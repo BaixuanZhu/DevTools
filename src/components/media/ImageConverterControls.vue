@@ -69,7 +69,7 @@ const icoSize = computed<number>({
 
       <template v-if="!isIco">
         <div class="flex items-center gap-2" :class="qualityDisabled ? 'opacity-50' : ''">
-          <span class="text-[0.8125rem] text-muted">质量</span>
+          <span class="text-[0.8125rem] text-muted-foreground">质量</span>
           <input
             v-model.number="params.quality"
             type="range" min="10" max="100" step="1" aria-label="质量"
@@ -79,7 +79,7 @@ const icoSize = computed<number>({
         </div>
 
         <div class="flex items-center gap-2">
-          <span class="text-[0.8125rem] text-muted">尺寸</span>
+          <span class="text-[0.8125rem] text-muted-foreground">尺寸</span>
           <input
             v-model.number="params.scale"
             type="range" min="1" max="100" step="1" aria-label="尺寸"
@@ -89,7 +89,7 @@ const icoSize = computed<number>({
         </div>
       </template>
 
-      <label class="flex items-center gap-1.5 text-[0.8125rem] text-text cursor-pointer select-none">
+      <label class="flex items-center gap-1.5 text-[0.8125rem] text-foreground cursor-pointer select-none">
         <input v-model="params.eraseExif" type="checkbox" class="cursor-pointer accent-accent" />
         擦除隐私元数据
       </label>
@@ -100,7 +100,7 @@ const icoSize = computed<number>({
       <OptionRadioGroup v-model="icoSize" :options="icoSizeOptions" label="尺寸" inline-label />
       <OptionRadioGroup v-model="params.icoFit" :options="icoFitOptions" label="适配" inline-label />
       <div v-if="params.icoFit === 'cover'" class="flex items-center gap-2">
-        <span class="text-[0.8125rem] text-muted">锚点</span>
+        <span class="text-[0.8125rem] text-muted-foreground">锚点</span>
         <SelectListbox
           class="w-28" :model-value="params.icoAnchor" :options="icoAnchorOptions"
           @update:model-value="(v) => (params.icoAnchor = v as IcoAnchor)"
@@ -108,7 +108,7 @@ const icoSize = computed<number>({
       </div>
     </div>
 
-    <div class="min-h-5 text-[0.8125rem] text-muted">
+    <div class="min-h-5 text-[0.8125rem] text-muted-foreground">
       <p v-if="isIco" class="m-0">ICO 按所选尺寸封装；非正方形图按所选适配方式处理</p>
       <p v-else-if="hasItems && params.format === 'jpeg'" class="m-0">JPEG 不支持透明背景，透明区域将填充白色</p>
     </div>

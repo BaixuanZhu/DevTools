@@ -123,7 +123,7 @@ onUnmounted(() => {
 <template>
   <div
     class="relative border-2 border-dashed rounded-lg min-h-[400px] flex flex-col transition-[border-color,background-color] duration-150 cursor-pointer"
-    :class="[isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent']"
+    :class="[isDragging ? 'border-primary bg-accent' : 'border-border hover:border-primary']"
     @click="handleClick"
     @drop.prevent="handleDrop"
     @dragover.prevent="handleDragOver"
@@ -141,7 +141,7 @@ onUnmounted(() => {
     <button
       v-if="clearable && hasFile"
       type="button"
-      class="absolute top-3 right-3 z-10 p-1.5 rounded-sm text-muted hover:text-error hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer"
+      class="absolute top-3 right-3 z-10 p-1.5 rounded-sm text-muted-foreground hover:text-error hover:bg-accent transition-[color,background-color] duration-150 cursor-pointer"
       aria-label="删除已选文件"
       @click.stop="handleClear"
     >
@@ -154,8 +154,8 @@ onUnmounted(() => {
       class="flex-1 flex flex-col items-center justify-center w-full"
     >
       <slot>
-        <div class="text-sm text-text">拖入文件 / 点击选择</div>
-        <div v-if="accept" class="text-xs text-muted mt-1">支持 {{ accept }} 格式</div>
+        <div class="text-sm text-foreground">拖入文件 / 点击选择</div>
+        <div v-if="accept" class="text-xs text-muted-foreground mt-1">支持 {{ accept }} 格式</div>
       </slot>
     </div>
 
@@ -169,7 +169,7 @@ onUnmounted(() => {
         :file="modelValue"
         :clear="handleClear"
       >
-        <div class="text-sm text-text">{{ modelValue?.name }}</div>
+        <div class="text-sm text-foreground">{{ modelValue?.name }}</div>
       </slot>
     </div>
   </div>

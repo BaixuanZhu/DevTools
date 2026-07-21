@@ -311,10 +311,10 @@ watch(mode, (newMode) => {
     <template v-if="mode === 'parse'">
       <!-- Token 输入 -->
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入 JWT Token</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">输入 JWT Token</label>
         <textarea
           v-model="tokenInput"
-          class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="4"
           placeholder="粘贴 JWT Token..."
           @input="runParse()"
@@ -335,7 +335,7 @@ watch(mode, (newMode) => {
 
       <!-- 解析结果 Tab -->
       <div class="border border-border rounded-md bg-card overflow-hidden">
-        <div class="flex border-b border-border bg-hover">
+        <div class="flex border-b border-border bg-accent">
           <button
             v-for="tab in [
               { key: 'header' as const, label: 'Header', dot: 'bg-red-500' },
@@ -343,8 +343,8 @@ watch(mode, (newMode) => {
               { key: 'signature' as const, label: 'Signature', dot: 'bg-green-500' },
             ]"
             :key="tab.key"
-            class="flex-1 px-4 py-2 text-[0.8125rem] font-medium cursor-pointer border-none bg-transparent text-text hover:bg-hover transition-colors"
-            :class="parseResultTab === tab.key ? 'border-b-2 border-accent text-accent' : ''"
+            class="flex-1 px-4 py-2 text-[0.8125rem] font-medium cursor-pointer border-none bg-transparent text-foreground hover:bg-accent transition-colors"
+            :class="parseResultTab === tab.key ? 'border-b-2 border-primary text-primary' : ''"
             @click="parseResultTab = tab.key"
           >
             <span class="inline-block w-2 h-2 rounded-full mr-1.5" :class="tab.dot"></span>
@@ -356,7 +356,7 @@ watch(mode, (newMode) => {
           <template v-if="parsed && !parseError">
             <!-- Header Tab -->
             <div v-if="parseResultTab === 'header'">
-              <pre class="m-0 mb-3 px-4 py-2 bg-hover rounded-sm font-mono text-[0.8125rem] whitespace-pre-wrap break-all">{{ segmentJson(parsed.header) }}</pre>
+              <pre class="m-0 mb-3 px-4 py-2 bg-accent rounded-sm font-mono text-[0.8125rem] whitespace-pre-wrap break-all">{{ segmentJson(parsed.header) }}</pre>
               <CopyButton :text="segmentJson(parsed.header)" />
             </div>
 
@@ -365,22 +365,22 @@ watch(mode, (newMode) => {
               <!-- 标准声明 -->
               <div class="flex flex-col gap-1 mb-2">
                 <div v-for="(value, key) in standardClaims" :key="String(key)" class="flex items-baseline gap-4 py-1 border-b border-border last:border-b-0">
-                  <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-text">
+                  <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-foreground">
                     {{ key }}
-                    <span v-if="getClaimLabel(String(key))" class="text-[0.6875rem] font-normal text-muted ml-1">{{ getClaimLabel(String(key)) }}</span>
+                    <span v-if="getClaimLabel(String(key))" class="text-[0.6875rem] font-normal text-muted-foreground ml-1">{{ getClaimLabel(String(key)) }}</span>
                   </span>
-                  <span class="font-mono text-[0.8125rem] text-text break-all">{{ formatClaimValue(String(key), value) }}</span>
+                  <span class="font-mono text-[0.8125rem] text-foreground break-all">{{ formatClaimValue(String(key), value) }}</span>
                 </div>
               </div>
 
               <!-- 自定义声明 -->
               <template v-if="hasCustomClaims">
                 <div class="border-t border-border my-2"></div>
-                <div class="text-[0.75rem] font-semibold text-muted mb-2">自定义声明</div>
+                <div class="text-[0.75rem] font-semibold text-muted-foreground mb-2">自定义声明</div>
                 <div class="flex flex-col gap-1 mb-2">
                   <div v-for="(value, key) in customClaims" :key="String(key)" class="py-1 border-b border-border last:border-b-0">
                     <div class="flex items-baseline gap-4">
-                      <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-text">
+                      <span class="font-mono text-[0.8125rem] font-semibold min-w-30 text-foreground">
                         {{ key }}
                       </span>
 
@@ -388,21 +388,21 @@ watch(mode, (newMode) => {
                       <div v-if="isJsonValue(value)" class="flex-1 min-w-0">
                         <button
                           v-if="isComplexJson(value)"
-                          class="text-[0.6875rem] text-accent hover:underline mr-2 cursor-pointer bg-transparent border-none p-0"
+                          class="text-[0.6875rem] text-primary hover:underline mr-2 cursor-pointer bg-transparent border-none p-0"
                           @click="toggleExpand(String(key))"
                         >
                           {{ expandedClaims.has(String(key)) ? '收起' : '展开' }}
                         </button>
-                        <pre v-if="expandedClaims.has(String(key))" class="m-0 px-3 py-1.5 bg-hover rounded-sm font-mono text-[0.8125rem] whitespace-pre-wrap break-all mt-1">{{ formatJsonPretty(value) }}</pre>
-                        <span v-else class="font-mono text-[0.8125rem] text-text break-all">{{ formatJsonPreview(value) }}</span>
+                        <pre v-if="expandedClaims.has(String(key))" class="m-0 px-3 py-1.5 bg-accent rounded-sm font-mono text-[0.8125rem] whitespace-pre-wrap break-all mt-1">{{ formatJsonPretty(value) }}</pre>
+                        <span v-else class="font-mono text-[0.8125rem] text-foreground break-all">{{ formatJsonPreview(value) }}</span>
                       </div>
 
                       <!-- 简单值 -->
-                      <span v-else class="font-mono text-[0.8125rem] text-text break-all">{{ formatClaimValue(String(key), value) }}</span>
+                      <span v-else class="font-mono text-[0.8125rem] text-foreground break-all">{{ formatClaimValue(String(key), value) }}</span>
                     </div>
 
                     <!-- 时间戳提示 -->
-                    <div v-if="getTimestampHint(String(key), value)" class="text-[0.6875rem] text-muted mt-0.5 ml-34">
+                    <div v-if="getTimestampHint(String(key), value)" class="text-[0.6875rem] text-muted-foreground mt-0.5 ml-34">
                       {{ getTimestampHint(String(key), value) }}
                     </div>
                   </div>
@@ -414,20 +414,20 @@ watch(mode, (newMode) => {
 
             <!-- Signature Tab -->
             <div v-else-if="parseResultTab === 'signature'">
-              <code class="block font-mono text-[0.8125rem] break-all text-text mb-3">{{ parsed.signature }}</code>
+              <code class="block font-mono text-[0.8125rem] break-all text-foreground mb-3">{{ parsed.signature }}</code>
               <CopyButton :text="parsed.signature" />
             </div>
           </template>
 
           <template v-else>
-            <div class="text-muted text-sm text-center py-8">粘贴 JWT Token 开始解析</div>
+            <div class="text-muted-foreground text-sm text-center py-8">粘贴 JWT Token 开始解析</div>
           </template>
         </div>
       </div>
 
       <!-- 验证签名面板 -->
       <div class="border-t border-border pt-4 mt-4">
-        <h3 class="text-[0.8125rem] text-muted font-medium">验证签名</h3>
+        <h3 class="text-[0.8125rem] text-muted-foreground font-medium">验证签名</h3>
         <div class="pt-2">
           <div class="flex flex-col gap-3">
             <SelectListbox
@@ -437,16 +437,16 @@ watch(mode, (newMode) => {
             />
 
             <div class="flex flex-col gap-1">
-              <label class="block text-[0.8125rem] text-muted font-medium mb-1">密钥</label>
+              <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">密钥</label>
               <div class="flex gap-2">
                 <input
                   v-model="verifySecret"
                   :type="verifySecretVisible ? 'text' : 'password'"
                   placeholder="输入 HMAC 密钥"
-                  class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+                  class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-foreground focus:outline-none focus:border-primary"
                 />
                 <button
-                  class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
+                  class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-foreground hover:bg-accent"
                   @click="verifySecretVisible = !verifySecretVisible"
                 >
                   {{ verifySecretVisible ? '隐藏' : '显示' }}
@@ -456,7 +456,7 @@ watch(mode, (newMode) => {
 
             <button
               class="self-start px-4 py-1.5 rounded-sm text-[0.8125rem] font-semibold cursor-pointer border-none text-white"
-              :class="verifySecret && !verifyLoading ? 'bg-accent hover:opacity-90' : 'bg-gray-400 cursor-not-allowed'"
+              :class="verifySecret && !verifyLoading ? 'bg-primary hover:opacity-90' : 'bg-gray-400 cursor-not-allowed'"
               :disabled="!verifySecret || verifyLoading"
               @click="handleVerify"
             >
@@ -481,22 +481,22 @@ watch(mode, (newMode) => {
         />
 
         <div class="flex flex-col gap-1">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-1">HMAC 密钥 <span class="text-error">*</span></label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">HMAC 密钥 <span class="text-error">*</span></label>
           <div class="flex gap-2">
             <input
               v-model="encodeSecret"
               :type="encodeSecretVisible ? 'text' : 'password'"
               placeholder="输入 HMAC 密钥"
-              class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+              class="flex-1 px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-foreground focus:outline-none focus:border-primary"
             />
             <button
-              class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
+              class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-foreground hover:bg-accent"
               @click="encodeSecretVisible = !encodeSecretVisible"
             >
               {{ encodeSecretVisible ? '隐藏' : '显示' }}
             </button>
             <button
-              class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-text hover:bg-hover"
+              class="px-2.5 py-1.5 border border-border rounded-sm text-[0.75rem] cursor-pointer bg-card text-foreground hover:bg-accent"
               @click="encodeSecret = generateRandomSecret()"
             >
               随机生成
@@ -510,27 +510,27 @@ watch(mode, (newMode) => {
         <div class="text-sm font-semibold mb-3">标准声明（可选）</div>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div v-for="label in ['iss', 'sub', 'aud', 'jti']" :key="label" class="flex flex-col gap-1">
-            <label class="text-[0.8125rem] text-muted font-medium">
+            <label class="text-[0.8125rem] text-muted-foreground font-medium">
               {{ label }}
-              <span class="text-[0.6875rem] text-muted ml-1">{{ JWT_CLAIM_LABELS[label] }}</span>
+              <span class="text-[0.6875rem] text-muted-foreground ml-1">{{ JWT_CLAIM_LABELS[label] }}</span>
             </label>
             <input
               v-model="quickClaims[label]"
               type="text"
               :placeholder="`输入 ${label}`"
-              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-foreground focus:outline-none focus:border-primary"
             />
           </div>
           <div v-for="label in ['iat', 'exp', 'nbf']" :key="label" class="flex flex-col gap-1">
-            <label class="text-[0.8125rem] text-muted font-medium">
+            <label class="text-[0.8125rem] text-muted-foreground font-medium">
               {{ label }}
-              <span class="text-[0.6875rem] text-muted ml-1">{{ JWT_CLAIM_LABELS[label] }}</span>
+              <span class="text-[0.6875rem] text-muted-foreground ml-1">{{ JWT_CLAIM_LABELS[label] }}</span>
             </label>
             <input
               v-model="quickClaims[label]"
               type="text"
               placeholder="Unix 时间戳"
-              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-text focus:outline-none focus:border-accent"
+              class="px-3 py-1.5 border border-border rounded-sm text-[0.8125rem] font-mono bg-card text-foreground focus:outline-none focus:border-primary"
             />
           </div>
         </div>
@@ -538,10 +538,10 @@ watch(mode, (newMode) => {
 
       <!-- 自定义 Payload JSON -->
       <div class="mb-4">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">自定义 Payload（JSON 对象，可选）</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">自定义 Payload（JSON 对象，可选）</label>
         <textarea
           v-model="customPayloadJson"
-          class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-[0.8125rem] font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="4"
           placeholder='{"role": "admin", "permissions": ["read", "write"]}'
         ></textarea>
@@ -550,7 +550,7 @@ watch(mode, (newMode) => {
       <!-- 操作按钮 -->
       <div class="flex gap-2 items-center mb-4">
         <button
-          class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+          class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
           @click="handleEncode"
         >生成 Token</button>
         <ClearButton @clear="handleClearEncode" />
@@ -566,7 +566,7 @@ watch(mode, (newMode) => {
           <CopyButton :text="encodedToken" />
         </div>
         <div class="border border-border rounded-md p-4 bg-card">
-          <code class="font-mono text-[0.8125rem] break-all text-text">{{ encodedToken }}</code>
+          <code class="font-mono text-[0.8125rem] break-all text-foreground">{{ encodedToken }}</code>
         </div>
       </div>
     </template>

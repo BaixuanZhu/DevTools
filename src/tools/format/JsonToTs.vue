@@ -254,11 +254,11 @@ onUnmounted(() => {
     <!-- 根类型名配置 -->
     <div class="flex flex-wrap items-center gap-3 mb-4">
       <div class="flex items-center gap-2">
-        <label class="text-[0.8125rem] text-muted">根类型名:</label>
+        <label class="text-[0.8125rem] text-muted-foreground">根类型名:</label>
         <input
           v-model="rootName"
           type="text"
-          class="px-3 py-1.5 w-40 border border-border rounded-sm bg-card text-text font-mono text-sm focus:outline-none focus:border-accent"
+          class="px-3 py-1.5 w-40 border border-border rounded-sm bg-card text-foreground font-mono text-sm focus:outline-none focus:border-primary"
           placeholder="RootObject"
           spellcheck="false"
           aria-label="根类型名"
@@ -279,7 +279,7 @@ onUnmounted(() => {
           <textarea
             ref="inputTextarea"
             v-model="inputText"
-            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+            class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
             placeholder="粘贴或输入 JSON 数据..."
             spellcheck="false"
             aria-label="JSON 输入"
@@ -295,7 +295,7 @@ onUnmounted(() => {
           <!-- 加载中 -->
           <div
             v-if="isLoading"
-            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted-foreground text-sm"
           >
             正在转换...
           </div>
@@ -313,13 +313,13 @@ onUnmounted(() => {
             v-else-if="outputText"
             class="w-full h-[calc(100vh-280px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
           >
-            <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed text-text">{{ outputText }}</pre>
+            <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{{ outputText }}</pre>
           </div>
 
           <!-- 空状态 -->
           <div
             v-else
-            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-280px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted-foreground text-sm"
           >
             输入 JSON 数据后将自动生成 TypeScript 类型
           </div>

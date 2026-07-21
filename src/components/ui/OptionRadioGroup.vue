@@ -39,7 +39,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted shrink-0" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
+    <span v-if="label" class="text-[0.8125rem] text-muted-foreground shrink-0" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
     <RadioGroup :model-value="modelValue" @update:model-value="emit('update:modelValue', $event)" class="flex gap-1 flex-wrap">
       <RadioGroupOption
         v-for="option in options"
@@ -53,8 +53,8 @@ const emit = defineEmits<{
             'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
             checked
-              ? 'bg-accent border-accent text-white'
-              : 'bg-surface border-border text-text hover:bg-hover hover:border-accent',
+              ? 'bg-primary border-primary text-white'
+              : 'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
           ]"
         >
           {{ option.label }}

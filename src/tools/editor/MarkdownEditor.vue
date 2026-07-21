@@ -89,13 +89,13 @@ function hello() {
 const viewBtnBase = 'w-8 h-8 flex items-center justify-center rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150';
 
 /** 视图模式 - 选中态 */
-const activeView = 'bg-accent border-accent text-white';
+const activeView = 'bg-primary border-primary text-white';
 
 /** 视图模式 - 未选中态 */
-const inactiveView = 'bg-card border-border text-muted hover:bg-hover hover:text-text';
+const inactiveView = 'bg-card border-border text-muted-foreground hover:bg-accent hover:text-foreground';
 
 /** 工具按钮样式（无激活态） */
-const toolBtn = 'w-8 h-8 flex items-center justify-center rounded-sm border border-border bg-card text-muted cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text';
+const toolBtn = 'w-8 h-8 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground';
 
 // ---- 状态 ----
 
@@ -406,7 +406,7 @@ onMounted(() => {
           :class="[
             viewBtnBase,
             syncScroll
-              ? 'bg-accent/10 border-accent/30 text-accent'
+              ? 'bg-primary/10 border-primary/30 text-primary'
               : inactiveView,
           ]"
           title="同步滚动"
@@ -423,19 +423,19 @@ onMounted(() => {
           <MenuItems class="absolute right-0 z-10 mt-1 w-28 origin-top-right rounded-sm bg-card border border-border py-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
                 @click="handleExportMd"
               >Markdown</button>
             </MenuItem>
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
                 @click="handleExportHtml"
               >HTML</button>
             </MenuItem>
             <MenuItem v-slot="{ active }">
               <button
-                :class="[active ? 'bg-hover' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-text font-sans']"
+                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
                 @click="handleExportPdf"
               >PDF</button>
             </MenuItem>
@@ -449,7 +449,7 @@ onMounted(() => {
       <textarea
         ref="editorRef"
         v-model="markdownSource"
-        class="w-full h-[calc(100vh-300px)] min-h-96 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+        class="w-full h-[calc(100vh-300px)] min-h-96 p-4 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
         spellcheck="false"
         aria-label="Markdown 编辑区"
         @keydown="handleKeydown"
@@ -474,7 +474,7 @@ onMounted(() => {
         <textarea
           ref="editorRef"
           v-model="markdownSource"
-          class="w-full h-[calc(100vh-340px)] min-h-80 p-4 border border-border rounded-sm bg-card text-text font-mono text-sm resize-none focus:outline-none focus:border-accent"
+          class="w-full h-[calc(100vh-340px)] min-h-80 p-4 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-none focus:outline-none focus:border-primary"
           spellcheck="false"
           aria-label="Markdown 编辑区"
           @keydown="handleKeydown"

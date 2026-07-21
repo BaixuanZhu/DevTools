@@ -199,7 +199,7 @@ onUnmounted(() => {
     <!-- 大小警告 -->
     <div
       v-if="sizeWarning === 'warning'"
-      class="mb-4 px-4 py-2 border border-accent/30 rounded-sm bg-accent/5 text-sm text-accent"
+      class="mb-4 px-4 py-2 border border-primary/30 rounded-sm bg-primary/5 text-sm text-primary"
     >
       ⚠ 数据量超过 5MB，可能导致浏览器卡顿
     </div>
@@ -212,8 +212,8 @@ onUnmounted(() => {
         :disabled="isFormatting"
         :title="isFormatting ? '美化中' : '美化'"
         aria-label="美化"
-        class="w-9 h-9 flex items-center justify-center rounded-sm border transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="isFormatting ? 'border-accent text-accent' : 'border-border bg-card text-muted'"
+        class="w-9 h-9 flex items-center justify-center rounded-sm border transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="isFormatting ? 'border-primary text-primary' : 'border-border bg-card text-muted-foreground'"
         @click="handleFormat"
       >
         <!-- 美化中：旋转 loader -->
@@ -230,14 +230,14 @@ onUnmounted(() => {
         type="button"
         title="清空"
         aria-label="清空"
-        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
         @click="handleClear"
       >
         <Trash2 :size="16" />
       </button>
 
       <!-- 行号开关：label 紧贴开关 -->
-      <div class="ml-auto flex items-center gap-2 text-[0.8125rem] text-muted">
+      <div class="ml-auto flex items-center gap-2 text-[0.8125rem] text-muted-foreground">
         <span>行号</span>
         <ToggleSwitch v-model="showLineNumbers" :show-status="false" />
       </div>
@@ -252,7 +252,7 @@ onUnmounted(() => {
       <div
         v-if="showLineNumbers"
         aria-hidden="true"
-        class="flex-none select-none overflow-hidden bg-hover text-muted border-r border-border"
+        class="flex-none select-none overflow-hidden bg-accent text-muted-foreground border-r border-border"
       >
         <div :style="{ transform: `translateY(${-scrollTop}px)` }" class="pt-4 pb-4 text-right">
           <div
@@ -266,7 +266,7 @@ onUnmounted(() => {
       <textarea
         ref="textareaRef"
         v-model="inputText"
-        class="flex-1 min-w-0 p-4 bg-card text-text font-mono text-sm leading-6 whitespace-pre resize-none focus:outline-none"
+        class="flex-1 min-w-0 p-4 bg-card text-foreground font-mono text-sm leading-6 whitespace-pre resize-none focus:outline-none"
         placeholder="粘贴或输入 TOML 数据，自动校验语法..."
         spellcheck="false"
         aria-label="TOML 输入"

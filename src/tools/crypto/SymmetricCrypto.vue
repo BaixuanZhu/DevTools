@@ -161,24 +161,24 @@ function handleClear() {
 
     <div class="mb-4">
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">{{
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">{{
             mode === 'encrypt' ? '明文' : '密文'
           }}</label>
         <textarea v-if="mode === 'encrypt'" v-model="plaintext"
-                  class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+                  class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
                   rows="4" placeholder="输入要加密的文本"></textarea>
         <textarea v-else v-model="ciphertext"
-                  class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+                  class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
                   rows="4" :placeholder="ciphertextPlaceholder"></textarea>
       </div>
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">密码</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">密码</label>
         <div class="flex gap-2">
           <input v-model="password" type="password"
-                 class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
+                 class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card box-border focus:outline-none focus:border-primary"
                  placeholder="输入加密密码"/>
           <button
-              class="px-3 py-2 border border-border rounded-sm bg-card text-text text-[0.75rem] font-sans cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+              class="px-3 py-2 border border-border rounded-sm bg-card text-foreground text-[0.75rem] font-sans cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
               @click="generatePassword">
             生成
           </button>
@@ -188,7 +188,7 @@ function handleClear() {
       <!-- 操作按钮行 -->
       <div class="flex gap-2 items-center mb-4">
         <button
-            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="isProcessing" @click="execute">
           {{ isProcessing ? '处理中...' : (mode === 'encrypt' ? '加密' : '解密') }}
         </button>
@@ -205,15 +205,15 @@ function handleClear() {
           <CopyButton :text="output" />
         </div>
         <div class="border border-border rounded-md p-4 bg-card">
-          <code class="font-mono text-[0.8125rem] break-all text-text">{{ output }}</code>
+          <code class="font-mono text-[0.8125rem] break-all text-foreground">{{ output }}</code>
         </div>
       </div>
     </div>
 
     <div class="border-t border-border pt-4 mt-4">
-      <h3 class="text-[0.8125rem] text-muted font-medium">算法说明</h3>
+      <h3 class="text-[0.8125rem] text-muted-foreground font-medium">算法说明</h3>
       <div class="pt-2">
-        <p class="text-[0.8125rem] text-muted m-0 leading-relaxed">
+        <p class="text-[0.8125rem] text-muted-foreground m-0 leading-relaxed">
           当前算法：<strong>{{ currentAlgo.label }}</strong>，密钥长度：<strong>{{ keyLength }} 位</strong>。
           密码通过 PBKDF2（100000 次迭代，SHA-256）派生为加密密钥。
           二进制格式：{{ binaryFormatDesc }}。

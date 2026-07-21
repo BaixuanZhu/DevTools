@@ -39,9 +39,9 @@ async function handleCopy() {
       sizeClasses[size],
       'flex items-center justify-center',
       'rounded-sm border',
-      'bg-card text-muted',
+      'bg-card text-muted-foreground',
       'transition-[background-color,border-color,color] duration-150',
-      'hover:bg-hover hover:text-text',
+      'hover:bg-accent hover:text-foreground',
       'disabled:opacity-50 disabled:cursor-not-allowed',
       copied ? 'border-success text-success' : 'border-border',
     ]"

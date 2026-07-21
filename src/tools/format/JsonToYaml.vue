@@ -216,7 +216,7 @@ onUnmounted(() => {
           <textarea
             ref="inputTextarea"
             v-model="inputText"
-            class="w-full h-[calc(100vh-240px)] min-h-80 p-3 border border-border rounded-sm bg-card text-text font-mono text-sm resize-y focus:outline-none focus:border-accent"
+            class="w-full h-[calc(100vh-240px)] min-h-80 p-3 border border-border rounded-sm bg-card text-foreground font-mono text-sm resize-y focus:outline-none focus:border-primary"
             placeholder="粘贴或输入 JSON 数据..."
             spellcheck="false"
             aria-label="JSON 输入"
@@ -232,7 +232,7 @@ onUnmounted(() => {
           <!-- 加载中 -->
           <div
             v-if="isLoading"
-            class="w-full h-[calc(100vh-240px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-240px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted-foreground text-sm"
           >
             正在转换...
           </div>
@@ -250,13 +250,13 @@ onUnmounted(() => {
             v-else-if="outputText"
             class="w-full h-[calc(100vh-240px)] min-h-80 p-3 border border-border rounded-sm bg-card overflow-auto"
           >
-            <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed text-text">{{ outputText }}</pre>
+            <pre class="m-0 text-sm font-mono whitespace-pre-wrap leading-relaxed text-foreground">{{ outputText }}</pre>
           </div>
 
           <!-- 空状态 -->
           <div
             v-else
-            class="w-full h-[calc(100vh-240px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted text-sm"
+            class="w-full h-[calc(100vh-240px)] min-h-80 flex items-center justify-center border border-border rounded-sm bg-card text-muted-foreground text-sm"
           >
             输入 JSON 数据后将自动转换为 YAML
           </div>

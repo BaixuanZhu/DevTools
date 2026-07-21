@@ -60,11 +60,11 @@ const stats = computed(() => computeStats(text.value));
 
 /** Primary 按钮（替换全部）的 Tailwind class。 */
 const BTN_PRIMARY_CLASS =
-  'px-4 py-2 border border-accent rounded-sm bg-accent text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
+  'px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
 
 /** 工具栏图标按钮基础 class，与 CopyButton 风格一致；尺寸由各按钮追加。 */
 const ICON_BTN_BASE =
-  'flex items-center justify-center rounded-sm border border-border bg-card text-muted cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text disabled:opacity-50 disabled:cursor-not-allowed';
+  'flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed';
 
 /** 同步撤销/重做按钮可用状态。 */
 function syncHistoryFlags(): void {
@@ -187,7 +187,7 @@ function handleReplace(): void {
         <CopyButton :text="text" />
         <span class="mx-0.5 h-6 w-px self-center bg-border" aria-hidden="true"></span>
         <!-- 查找替换（点击展开） -->
-        <DisclosureButton :class="[ICON_BTN_BASE, 'w-9 h-9', open ? 'bg-hover text-text' : '']" title="查找替换" aria-label="查找替换">
+        <DisclosureButton :class="[ICON_BTN_BASE, 'w-9 h-9', open ? 'bg-accent text-foreground' : '']" title="查找替换" aria-label="查找替换">
           <Search :size="16" />
         </DisclosureButton>
       </div>
@@ -205,24 +205,24 @@ function handleReplace(): void {
             <input
               v-model="find"
               type="text"
-              class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent box-border"
+              class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm font-mono focus:outline-none focus:border-primary box-border"
               placeholder="查找内容"
               aria-label="查找内容"
             />
             <input
               v-model="replace"
               type="text"
-              class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent box-border"
+              class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm font-mono focus:outline-none focus:border-primary box-border"
               placeholder="替换为"
               aria-label="替换内容"
             />
           </div>
           <div class="flex flex-wrap items-center gap-4">
-            <label class="flex items-center gap-1.5 text-sm text-text cursor-pointer select-none">
+            <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer select-none">
               <input v-model="caseSensitive" type="checkbox" class="cursor-pointer" />
               区分大小写
             </label>
-            <label class="flex items-center gap-1.5 text-sm text-text cursor-pointer select-none">
+            <label class="flex items-center gap-1.5 text-sm text-foreground cursor-pointer select-none">
               <input v-model="useRegex" type="checkbox" class="cursor-pointer" />
               使用正则
             </label>
@@ -238,11 +238,11 @@ function handleReplace(): void {
       <textarea
         v-model="text"
         rows="10"
-        class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent resize-y box-border"
+        class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm font-mono focus:outline-none focus:border-primary resize-y box-border"
         placeholder="粘贴或输入文本..."
         aria-label="文本内容"
       ></textarea>
-      <p class="mt-1.5 text-xs text-muted">
+      <p class="mt-1.5 text-xs text-muted-foreground">
         字数 {{ stats.charsNoSpace }} · 字符 {{ stats.chars }} · 字节 {{ stats.bytes }} · 行 {{ stats.lines }}
       </p>
     </div>

@@ -171,12 +171,12 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
 
     <!-- 快速模板 -->
     <div class="border border-border rounded-md p-4 bg-card flex items-center gap-2 flex-wrap">
-      <span class="text-[0.8125rem] text-muted">快速模板</span>
+      <span class="text-[0.8125rem] text-muted-foreground">快速模板</span>
       <button
         v-for="(preset, idx) in QUICK_PRESETS"
         :key="idx"
         type="button"
-        class="px-3 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+        class="px-3 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
         @click="applyPreset(idx)"
       >
         {{ preset.label }}
@@ -186,10 +186,10 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
     <!-- 字段配置区 -->
     <div class="mt-4 border border-border rounded-md bg-card overflow-hidden">
       <div class="flex items-center justify-between px-4 py-2 border-b border-border">
-        <span class="text-[0.8125rem] text-muted">字段配置</span>
+        <span class="text-[0.8125rem] text-muted-foreground">字段配置</span>
         <button
           type="button"
-          class="px-3 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+          class="px-3 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
           @click="addField"
         >
           + 添加字段
@@ -207,13 +207,13 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
             <input
               v-model="field.name"
               type="text"
-              class="flex-1 min-w-30 px-3 h-8 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+              class="flex-1 min-w-30 px-3 h-8 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
               placeholder="列名"
               aria-label="列名"
             />
             <button
               type="button"
-              class="shrink-0 flex items-center gap-1 px-2 h-8 w-28 border border-border rounded-sm bg-surface text-muted text-[0.8125rem] cursor-pointer hover:bg-hover hover:text-text hover:border-accent transition-[background-color,border-color,color] duration-150"
+              class="shrink-0 flex items-center gap-1 px-2 h-8 w-28 border border-border rounded-sm bg-background text-muted-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:text-foreground hover:border-primary transition-[background-color,border-color,color] duration-150"
               :title="`配置 ${getTypeMeta(field.type).label} 生成器`"
               @click="openFieldDialog(field)"
             >
@@ -222,7 +222,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
             </button>
             <button
               type="button"
-              class="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm border border-border bg-card text-muted cursor-pointer hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 flex items-center justify-center w-8 h-8 rounded-sm border border-border bg-card text-muted-foreground cursor-pointer hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
               title="删除字段"
               aria-label="删除字段"
               @click="removeField(field.rowId)"
@@ -237,26 +237,26 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
     <!-- 生成控制 -->
     <div class="mt-4 flex items-center gap-3 flex-wrap">
       <div class="flex items-center gap-2">
-        <span class="text-[0.8125rem] text-muted">条数</span>
+        <span class="text-[0.8125rem] text-muted-foreground">条数</span>
         <input
           v-model.number="count"
           type="number"
           min="1"
           max="500"
-          class="px-2 py-1 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-20"
+          class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-20"
           @blur="clampCount"
         />
       </div>
       <button
         type="button"
-        class="px-6 py-2 bg-accent border border-accent text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
+        class="px-6 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
         @click="generate"
       >
         生成
       </button>
       <button
         type="button"
-        class="px-6 py-2 bg-surface border border-border text-text rounded-sm text-[0.8125rem] cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+        class="px-6 py-2 bg-background border border-border text-foreground rounded-sm text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
         @click="clearResult"
       >
         清空
@@ -267,7 +267,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
     <!-- 结果区 -->
     <div class="mt-6">
       <div v-if="!output" class="border border-border rounded-md bg-card min-h-30 flex items-center justify-center">
-        <p class="text-muted text-[0.8125rem]">配置字段后点击「生成」</p>
+        <p class="text-muted-foreground text-[0.8125rem]">配置字段后点击「生成」</p>
       </div>
       <div v-else class="border border-border rounded-md bg-card overflow-hidden">
         <div class="flex items-center justify-between px-4 py-2 border-b border-border">
@@ -276,7 +276,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
             :options="[{ value: 'json', label: 'JSON' }, { value: 'csv', label: 'CSV' }]"
           />
           <div class="flex items-center gap-2">
-            <span class="text-[0.75rem] text-muted">{{ records.length }} 条记录</span>
+            <span class="text-[0.75rem] text-muted-foreground">{{ records.length }} 条记录</span>
             <CopyButton :text="output" />
           </div>
         </div>
@@ -284,7 +284,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
           readonly
           :value="output"
           rows="14"
-          class="w-full px-3 py-2 bg-background text-text text-[0.8125rem] font-mono outline-none resize-y box-border"
+          class="w-full px-3 py-2 bg-background text-foreground text-[0.8125rem] font-mono outline-none resize-y box-border"
           aria-label="生成结果"
         ></textarea>
       </div>
@@ -317,24 +317,24 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel class="w-full max-w-md rounded-md bg-card border border-border p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-                <DialogTitle class="text-base font-semibold text-text">
+                <DialogTitle class="text-base font-semibold text-foreground">
                   编辑「{{ editingField.name }}」生成器
                 </DialogTitle>
 
                 <div class="mt-4 space-y-4">
                   <!-- 列名 -->
                   <div>
-                    <label class="block text-[0.8125rem] text-muted mb-1">列名</label>
+                    <label class="block text-[0.8125rem] text-muted-foreground mb-1">列名</label>
                     <input
                       v-model="editingField.name"
                       type="text"
-                      class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+                      class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
                     />
                   </div>
 
                   <!-- 类型 -->
                   <div>
-                    <label class="block text-[0.8125rem] text-muted mb-1">生成器类型</label>
+                    <label class="block text-[0.8125rem] text-muted-foreground mb-1">生成器类型</label>
                     <SelectListbox
                       :model-value="editingField.type"
                       :options="typeOptions"
@@ -344,13 +344,13 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
 
                   <!-- 参数 -->
                   <div v-if="dialogParamDefs.length" class="space-y-3">
-                    <label class="block text-[0.8125rem] text-muted">参数</label>
+                    <label class="block text-[0.8125rem] text-muted-foreground">参数</label>
                     <div
                       v-for="def in dialogParamDefs"
                       :key="def.key"
                       class="flex items-center gap-3"
                     >
-                      <span class="text-[0.8125rem] text-muted w-16 shrink-0">{{ def.label }}</span>
+                      <span class="text-[0.8125rem] text-muted-foreground w-16 shrink-0">{{ def.label }}</span>
                       <div v-if="def.type === 'select'" class="flex-1">
                         <SelectListbox
                           :model-value="String(editingField.params[def.key])"
@@ -362,7 +362,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
                         v-else
                         v-model="editingField.params[def.key]"
                         :type="def.type"
-                        class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-text text-[0.8125rem] font-mono outline-none focus:border-accent transition-[border-color] duration-150"
+                        class="flex-1 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary transition-[border-color] duration-150"
                       />
                     </div>
                   </div>
@@ -371,14 +371,14 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
                 <div class="mt-6 flex justify-end gap-2">
                   <button
                     type="button"
-                    class="px-4 py-2 border border-border rounded-sm bg-surface text-text text-[0.8125rem] cursor-pointer hover:bg-hover hover:border-accent transition-[background-color,border-color] duration-150"
+                    class="px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] cursor-pointer hover:bg-accent hover:border-primary transition-[background-color,border-color] duration-150"
                     @click="dialogOpen = false"
                   >
                     取消
                   </button>
                   <button
                     type="button"
-                    class="px-4 py-2 bg-accent border border-accent text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
+                    class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
                     @click="saveFieldConfig"
                   >
                     保存

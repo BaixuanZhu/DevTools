@@ -196,17 +196,17 @@ onUnmounted(() => {
     <section class="mb-6 p-4 border border-border rounded-sm bg-card">
       <div class="flex flex-wrap items-center gap-4 mb-4">
         <div>
-          <label class="block text-xs text-muted mb-1.5">渐变类型</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">渐变类型</label>
           <select
             v-model="type"
-            class="px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
           >
             <option v-for="t in GRADIENT_TYPES" :key="t.value" :value="t.value">{{ t.label }}</option>
           </select>
         </div>
 
         <div v-if="type === 'linear' || type === 'conic'">
-          <label class="block text-xs text-muted mb-1.5">角度（{{ normalizeAngle(angle) }}°）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">角度（{{ normalizeAngle(angle) }}°）</label>
           <input
             v-model.number="angle"
             type="range"
@@ -217,10 +217,10 @@ onUnmounted(() => {
         </div>
 
         <div v-if="type === 'radial'">
-          <label class="block text-xs text-muted mb-1.5">形状</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">形状</label>
           <select
             v-model="shape"
-            class="px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
           >
             <option value="ellipse">ellipse</option>
             <option value="circle">circle</option>
@@ -228,24 +228,24 @@ onUnmounted(() => {
         </div>
 
         <div v-if="type === 'radial' || type === 'conic'">
-          <label class="block text-xs text-muted mb-1.5">中心 X（%）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">中心 X（%）</label>
           <input
             v-model.number="centerX"
             type="number"
             min="0"
             max="100"
-            class="w-20 px-2 py-2 border border-border rounded-sm bg-background text-text text-sm"
+            class="w-20 px-2 py-2 border border-border rounded-sm bg-background text-foreground text-sm"
           />
         </div>
 
         <div v-if="type === 'radial' || type === 'conic'">
-          <label class="block text-xs text-muted mb-1.5">中心 Y（%）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">中心 Y（%）</label>
           <input
             v-model.number="centerY"
             type="number"
             min="0"
             max="100"
-            class="w-20 px-2 py-2 border border-border rounded-sm bg-background text-text text-sm"
+            class="w-20 px-2 py-2 border border-border rounded-sm bg-background text-foreground text-sm"
           />
         </div>
       </div>
@@ -277,15 +277,15 @@ onUnmounted(() => {
           @click.stop
         />
       </div>
-      <p class="mt-2 text-xs text-muted">点击轨道新增色标，拖动调整位置，点击下方删除按钮移除。</p>
+      <p class="mt-2 text-xs text-muted-foreground">点击轨道新增色标，拖动调整位置，点击下方删除按钮移除。</p>
     </section>
 
     <!-- 当前色标编辑 -->
     <section v-if="activeStop" class="mb-6 p-4 border border-border rounded-sm bg-card">
-      <h3 class="text-sm font-semibold text-text mb-4">当前色标</h3>
+      <h3 class="text-sm font-semibold text-foreground mb-4">当前色标</h3>
       <div class="flex flex-wrap items-center gap-4">
         <div>
-          <label class="block text-xs text-muted mb-1.5">颜色</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">颜色</label>
           <div class="flex items-center gap-2">
             <input
               :value="activeStop.color"
@@ -296,7 +296,7 @@ onUnmounted(() => {
             <input
               :value="activeStop.color"
               type="text"
-              class="w-28 px-3 py-2 border rounded-sm bg-background text-text text-sm"
+              class="w-28 px-3 py-2 border rounded-sm bg-background text-foreground text-sm"
               :class="colorError ? 'border-error' : 'border-border'"
               @input="handleColorInput"
             />
@@ -305,20 +305,20 @@ onUnmounted(() => {
         </div>
 
         <div>
-          <label class="block text-xs text-muted mb-1.5">位置（%）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">位置（%）</label>
           <input
             :value="activeStop.position"
             type="number"
             min="0"
             max="100"
-            class="w-24 px-3 py-2 border border-border rounded-sm bg-background text-text text-sm"
+            class="w-24 px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm"
             @input="handlePositionInput"
           />
         </div>
 
         <button
           type="button"
-          class="self-end px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+          class="self-end px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
           :disabled="stops.length <= 2"
           @click="handleDeleteStop(activeStop.id)"
         >
@@ -329,13 +329,13 @@ onUnmounted(() => {
 
     <!-- 预设 -->
     <section class="mb-6">
-      <h3 class="text-sm font-semibold text-text mb-3">预设渐变</h3>
+      <h3 class="text-sm font-semibold text-foreground mb-3">预设渐变</h3>
       <div class="flex flex-wrap gap-3">
         <button
           v-for="(preset, index) in GRADIENT_PRESETS"
           :key="preset.name"
           type="button"
-          class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+          class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
           @click="handlePreset(index)"
         >
           {{ preset.name }}
@@ -345,22 +345,22 @@ onUnmounted(() => {
 
     <!-- 生成的 CSS -->
     <section class="mb-6">
-      <label class="block text-xs text-muted mb-1.5">生成的 CSS</label>
-      <pre class="p-4 border border-border rounded-sm bg-card text-sm text-text font-mono overflow-x-auto">{{ generatedCss }}</pre>
+      <label class="block text-xs text-muted-foreground mb-1.5">生成的 CSS</label>
+      <pre class="p-4 border border-border rounded-sm bg-card text-sm text-foreground font-mono overflow-x-auto">{{ generatedCss }}</pre>
     </section>
 
     <!-- 操作栏 -->
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+        class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
         @click="handleClear"
       >
         清空
       </button>
       <button
         type="button"
-        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+        class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
         @click="handleCopyCss"
       >
         复制 CSS

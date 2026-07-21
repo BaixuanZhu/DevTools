@@ -274,10 +274,10 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 
     <!-- 文本输入 -->
     <div class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">输入文本</label>
+      <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">输入文本</label>
       <textarea
         v-model="inputText"
-        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
         rows="4"
         placeholder="输入要计算哈希的文本"
         @input="clearFile()"
@@ -286,10 +286,10 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 
     <!-- 文件上传拖拽区域 -->
     <div class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">或上传文件</label>
+      <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">或上传文件</label>
       <div
-        class="border-dashed border-2 border-border rounded-md p-5 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
-        :class="{ 'border-accent bg-hover': isDragging }"
+        class="border-dashed border-2 border-border rounded-md p-5 text-center cursor-pointer hover:border-primary hover:bg-accent transition-[border-color,background-color] duration-150"
+        :class="{ 'border-primary bg-accent': isDragging }"
         @dragover.prevent="isDragging = true"
         @dragleave="isDragging = false"
         @drop.prevent="handleDrop"
@@ -297,17 +297,17 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
       >
         <input ref="fileInputRef" type="file" class="hidden" @change="handleFileInput" />
         <template v-if="fileMeta">
-          <span class="text-[0.8125rem] text-text">📄 {{ fileMeta.name }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
+          <span class="text-[0.8125rem] text-foreground">📄 {{ fileMeta.name }} · {{ fileMeta.mime }} · {{ fileMeta.size }}</span>
         </template>
         <template v-else>
-          <span class="text-muted text-sm">拖拽文件到这里或点击选择</span>
+          <span class="text-muted-foreground text-sm">拖拽文件到这里或点击选择</span>
         </template>
       </div>
     </div>
 
     <!-- 算法选择 -->
     <div class="mb-3">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1">哈希算法</label>
+      <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">哈希算法</label>
       <div class="flex gap-1 flex-wrap">
         <button
           v-for="algo in HASH_ALGORITHMS"
@@ -316,8 +316,8 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
             'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
             selectedAlgorithms.includes(algo)
-              ? 'bg-accent border-accent text-white'
-              : 'bg-surface border-border text-text hover:bg-hover hover:border-accent',
+              ? 'bg-primary border-primary text-white'
+              : 'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
           ]"
           :aria-pressed="selectedAlgorithms.includes(algo)"
           @click="toggleAlgorithm(algo)"
@@ -353,7 +353,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
       <!-- 空状态 -->
       <div
         v-if="!hasResults && !errorMsg && !isProcessing"
-        class="border border-border rounded-md p-6 bg-card text-center text-muted text-sm"
+        class="border border-border rounded-md p-6 bg-card text-center text-muted-foreground text-sm"
       >
         输入文本或上传文件后自动计算哈希值
       </div>
@@ -361,7 +361,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
       <!-- 计算中 -->
       <div
         v-if="isProcessing"
-        class="border border-border rounded-md p-4 bg-card text-center text-muted text-sm"
+        class="border border-border rounded-md p-4 bg-card text-center text-muted-foreground text-sm"
       >
         计算中...
       </div>
@@ -376,8 +376,8 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
           :key="algo"
           class="flex items-center gap-4 px-4 py-2.5 border-b border-border last:border-b-0"
         >
-          <span class="text-xs font-semibold text-accent min-w-15">{{ algo }}</span>
-          <code class="flex-1 font-mono text-[0.8125rem] break-all text-text">{{ hash }}</code>
+          <span class="text-xs font-semibold text-primary min-w-15">{{ algo }}</span>
+          <code class="flex-1 font-mono text-[0.8125rem] break-all text-foreground">{{ hash }}</code>
           <CopyButton :text="hash" />
         </div>
       </div>
@@ -385,16 +385,16 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 
     <!-- HMAC 区块 -->
     <div class="border-t border-border mt-6 pt-6">
-      <h2 class="text-base font-semibold text-text mb-1">HMAC 签名</h2>
-      <p class="text-[0.8125rem] text-muted mb-3">带密钥哈希，适用于 API 签名与 Webhook 校验。填入待验签名即可比对验证。</p>
+      <h2 class="text-base font-semibold text-foreground mb-1">HMAC 签名</h2>
+      <p class="text-[0.8125rem] text-muted-foreground mb-3">带密钥哈希，适用于 API 签名与 Webhook 校验。填入待验签名即可比对验证。</p>
 
       <!-- 密钥输入 + 密钥编码 -->
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">密钥</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">密钥</label>
         <div class="flex gap-2 items-start">
           <textarea
             v-model="hmacKey"
-            class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="2"
             placeholder="输入 HMAC 密钥"
           ></textarea>
@@ -408,10 +408,10 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 
       <!-- 消息输入 -->
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">消息</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">消息</label>
         <textarea
           v-model="hmacMessage"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="3"
           placeholder="输入要签名的消息（如请求体）"
         ></textarea>
@@ -443,11 +443,11 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
           v-if="hmacDisplayValue"
           class="border border-border rounded-md bg-card px-4 py-2.5"
         >
-          <code class="font-mono text-[0.8125rem] break-all text-text">{{ hmacDisplayValue }}</code>
+          <code class="font-mono text-[0.8125rem] break-all text-foreground">{{ hmacDisplayValue }}</code>
         </div>
         <div
           v-else
-          class="border border-border rounded-md p-4 bg-card text-center text-muted text-sm"
+          class="border border-border rounded-md p-4 bg-card text-center text-muted-foreground text-sm"
         >
           输入密钥和消息后自动计算 HMAC 值
         </div>
@@ -455,11 +455,11 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
 
       <!-- 验证签名 -->
       <div class="mb-4">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">验证签名（可选）</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">验证签名（可选）</label>
         <div class="flex gap-2 items-start mb-2">
           <input
             v-model="verifySignature"
-            class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
+            class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card box-border focus:outline-none focus:border-primary"
             placeholder="粘贴待验证的签名"
           />
           <SelectListbox

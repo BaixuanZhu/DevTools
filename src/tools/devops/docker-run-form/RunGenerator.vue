@@ -187,42 +187,42 @@ watch(
       <!-- 镜像与名称 -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block mb-1 text-[0.8125rem] text-muted">镜像名称 *</label>
+          <label class="block mb-1 text-[0.8125rem] text-muted-foreground">镜像名称 *</label>
           <input
             v-model="formState.image"
             type="text"
             placeholder="如 nginx"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
           />
         </div>
         <div>
-          <label class="block mb-1 text-[0.8125rem] text-muted">标签</label>
+          <label class="block mb-1 text-[0.8125rem] text-muted-foreground">标签</label>
           <input
             v-model="formState.tag"
             type="text"
             placeholder="latest"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
           />
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block mb-1 text-[0.8125rem] text-muted">容器名称 --name</label>
+          <label class="block mb-1 text-[0.8125rem] text-muted-foreground">容器名称 --name</label>
           <input
             v-model="formState.name"
             type="text"
             placeholder="my-container"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
           />
         </div>
         <div>
-          <label class="block mb-1 text-[0.8125rem] text-muted">工作目录 -w</label>
+          <label class="block mb-1 text-[0.8125rem] text-muted-foreground">工作目录 -w</label>
           <input
             v-model="formState.workdir"
             type="text"
             placeholder="/app"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
           />
         </div>
       </div>
@@ -243,12 +243,12 @@ watch(
 
       <!-- 自定义网络名称 -->
       <div v-if="formState.network === 'custom'">
-        <label class="block mb-1 text-[0.8125rem] text-muted">自定义网络名称</label>
+        <label class="block mb-1 text-[0.8125rem] text-muted-foreground">自定义网络名称</label>
         <input
           v-model="formState.networkName"
           type="text"
           placeholder="如 my-net（需先通过 docker network create 创建）"
-          class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
 
@@ -261,7 +261,7 @@ watch(
 
       <!-- 端口映射 -->
       <div>
-        <label class="block mb-2 text-[0.8125rem] text-muted">端口映射 -p</label>
+        <label class="block mb-2 text-[0.8125rem] text-muted-foreground">端口映射 -p</label>
         <div class="flex flex-col gap-2">
           <div
             v-for="port in identifiedPorts"
@@ -272,14 +272,14 @@ watch(
               v-model="port.host"
               type="text"
               placeholder="主机端口"
-              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
-            <span class="text-muted">:</span>
+            <span class="text-muted-foreground">:</span>
             <input
               v-model="port.container"
               type="text"
               placeholder="容器端口"
-              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
             <SelectListbox
               v-model="port.protocol"
@@ -289,7 +289,7 @@ watch(
             />
             <button
               type="button"
-              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
               @click="removePort(port.id)"
             >
               删除
@@ -298,7 +298,7 @@ watch(
         </div>
         <button
           type="button"
-          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
           @click="addPort"
         >
           + 添加端口
@@ -307,7 +307,7 @@ watch(
 
       <!-- 环境变量 -->
       <div>
-        <label class="block mb-2 text-[0.8125rem] text-muted">环境变量 -e</label>
+        <label class="block mb-2 text-[0.8125rem] text-muted-foreground">环境变量 -e</label>
         <div class="flex flex-col gap-2">
           <div
             v-for="env in identifiedEnvs"
@@ -318,18 +318,18 @@ watch(
               v-model="env.key"
               type="text"
               placeholder="KEY"
-              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
-            <span class="text-muted">=</span>
+            <span class="text-muted-foreground">=</span>
             <input
               v-model="env.value"
               type="text"
               placeholder="value"
-              class="flex-2 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-2 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
             <button
               type="button"
-              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
               @click="removeEnv(env.id)"
             >
               删除
@@ -338,7 +338,7 @@ watch(
         </div>
         <button
           type="button"
-          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
           @click="addEnv"
         >
           + 添加环境变量
@@ -347,7 +347,7 @@ watch(
 
       <!-- 挂载卷 -->
       <div>
-        <label class="block mb-2 text-[0.8125rem] text-muted">挂载卷 -v</label>
+        <label class="block mb-2 text-[0.8125rem] text-muted-foreground">挂载卷 -v</label>
         <div class="flex flex-col gap-2">
           <div
             v-for="vol in identifiedVolumes"
@@ -358,14 +358,14 @@ watch(
               v-model="vol.host"
               type="text"
               placeholder="主机路径"
-              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
-            <span class="text-muted">:</span>
+            <span class="text-muted-foreground">:</span>
             <input
               v-model="vol.container"
               type="text"
               placeholder="容器路径"
-              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+              class="flex-1 min-w-0 h-9 px-3 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
             />
             <SelectListbox
               v-model="vol.mode"
@@ -375,7 +375,7 @@ watch(
             />
             <button
               type="button"
-              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+              class="shrink-0 h-9 px-3 inline-flex items-center text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
               @click="removeVolume(vol.id)"
             >
               删除
@@ -384,7 +384,7 @@ watch(
         </div>
         <button
           type="button"
-          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted border border-border rounded-sm bg-card hover:bg-hover hover:text-text transition-[background-color,color] duration-150"
+          class="mt-2 px-3 py-1.5 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card hover:bg-accent hover:text-foreground transition-[background-color,color] duration-150"
           @click="addVolume"
         >
           + 添加挂载卷
@@ -393,12 +393,12 @@ watch(
 
       <!-- 额外参数 -->
       <div>
-        <label class="block mb-1 text-[0.8125rem] text-muted">镜像后的额外参数</label>
+        <label class="block mb-1 text-[0.8125rem] text-muted-foreground">镜像后的额外参数</label>
         <input
           v-model="formState.extraArgs"
           type="text"
           placeholder="如 bash 或 nginx -g 'daemon off;'"
-          class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
     </div>
@@ -414,11 +414,11 @@ watch(
       <div class="px-4 py-3 min-h-24">
         <pre
           v-if="!showEmptyHint"
-          class="m-0 font-mono text-sm text-text whitespace-pre-wrap break-all"
+          class="m-0 font-mono text-sm text-foreground whitespace-pre-wrap break-all"
         >{{ command }}</pre>
         <p
           v-else
-          class="m-0 text-[0.8125rem] text-muted"
+          class="m-0 text-[0.8125rem] text-muted-foreground"
         >
           请输入镜像名称以生成命令
         </p>

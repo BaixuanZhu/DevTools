@@ -347,7 +347,7 @@ onUnmounted(() => {
     <!-- 大小警告 -->
     <div
       v-if="sizeWarning === 'warning'"
-      class="mb-4 px-4 py-2 border border-accent/30 rounded-sm bg-accent/5 text-sm text-accent"
+      class="mb-4 px-4 py-2 border border-primary/30 rounded-sm bg-primary/5 text-sm text-primary"
     >
       ⚠ 数据量超过 5MB，可能导致浏览器卡顿
     </div>
@@ -360,8 +360,8 @@ onUnmounted(() => {
         :disabled="isFormatting"
         :title="isFormatting ? '美化中' : '美化'"
         aria-label="美化"
-        class="w-9 h-9 flex items-center justify-center rounded-sm border transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
-        :class="isFormatting ? 'border-accent text-accent' : 'border-border bg-card text-muted'"
+        class="w-9 h-9 flex items-center justify-center rounded-sm border transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+        :class="isFormatting ? 'border-primary text-primary' : 'border-border bg-card text-muted-foreground'"
         @click="handleFormat"
       >
         <!-- 美化中：旋转 loader -->
@@ -376,7 +376,7 @@ onUnmounted(() => {
         :disabled="isFormatting"
         title="压缩"
         aria-label="压缩"
-        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text disabled:opacity-50 disabled:cursor-not-allowed"
+        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
         @click="handleMinify"
       >
         <Minimize2 :size="16" />
@@ -384,7 +384,7 @@ onUnmounted(() => {
 
       <!-- 缩进 -->
       <div class="flex items-center gap-1.5 ml-1">
-        <span class="text-[0.8125rem] text-muted">缩进</span>
+        <span class="text-[0.8125rem] text-muted-foreground">缩进</span>
         <SelectListbox
           v-model="indent"
           :options="INDENT_OPTIONS"
@@ -397,7 +397,7 @@ onUnmounted(() => {
         type="button"
         title="上传文件"
         aria-label="上传文件"
-        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+        class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
         @click="fileInputRef?.click()"
       >
         <FolderUp :size="16" />
@@ -412,14 +412,14 @@ onUnmounted(() => {
           type="button"
           title="清空"
           aria-label="清空"
-          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border bg-card text-muted-foreground transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
         @click="handleClear"
       >
         <Trash2 :size="16" />
       </button>
 
         <!-- 行号开关 -->
-        <div class="flex items-center gap-2 text-[0.8125rem] text-muted">
+        <div class="flex items-center gap-2 text-[0.8125rem] text-muted-foreground">
           <span>行号</span>
           <ToggleSwitch v-model="showLineNumbers" :show-status="false" />
         </div>
@@ -442,7 +442,7 @@ onUnmounted(() => {
         validation.state === 'invalid'
           ? 'border-error'
           : isDragging
-            ? 'border-accent ring-2 ring-accent/20'
+            ? 'border-primary ring-2 ring-accent/20'
             : 'border-border'
       "
     >
@@ -450,7 +450,7 @@ onUnmounted(() => {
       <div
         v-if="showLineNumbers"
         aria-hidden="true"
-        class="flex-none select-none overflow-hidden bg-hover text-muted border-r border-border"
+        class="flex-none select-none overflow-hidden bg-accent text-muted-foreground border-r border-border"
       >
         <div :style="{ transform: `translateY(${-scrollTop}px)` }" class="pt-4 pb-4 text-right">
           <div
@@ -514,7 +514,7 @@ onUnmounted(() => {
     <!-- 统计信息 -->
     <div
       v-if="stats && validation.state === 'valid'"
-      class="mt-1.5 text-[0.75rem] text-muted font-sans"
+      class="mt-1.5 text-[0.75rem] text-muted-foreground font-sans"
     >
       {{ statsText }}
     </div>

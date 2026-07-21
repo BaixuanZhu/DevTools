@@ -22,7 +22,7 @@ import { CircleCheck, CircleX } from '@lucide/astro';
   <template x-for="toast in $store.toast.items" :key="toast.id">
     <div
       :class="toast.type === 'success' ? 'border-border' : 'border-error/20'"
-      class="flex items-center gap-3 px-5 py-3.5 rounded-lg border shadow-lg bg-card text-text text-sm font-sans min-w-48 max-w-sm"
+      class="flex items-center gap-3 px-5 py-3.5 rounded-lg border shadow-lg bg-card text-foreground text-sm font-sans min-w-48 max-w-sm"
       role="status"
       aria-live="polite"
       x-transition:enter="transition ease-out duration-300"

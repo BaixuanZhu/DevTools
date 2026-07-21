@@ -180,8 +180,8 @@ function handleClear() {
         <!-- 文件上传区域 -->
         <div class="mb-3">
           <div
-            class="border-dashed border-2 border-border rounded-md p-4 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
-            :class="{ 'border-accent bg-hover': isDragging }"
+            class="border-dashed border-2 border-border rounded-md p-4 text-center cursor-pointer hover:border-primary hover:bg-accent transition-[border-color,background-color] duration-150"
+            :class="{ 'border-primary bg-accent': isDragging }"
             @dragover.prevent="isDragging = true"
             @dragleave="isDragging = false"
             @drop.prevent="handleDrop"
@@ -189,11 +189,11 @@ function handleClear() {
           >
             <input ref="fileInputRef" type="file" class="hidden" @change="handleFileChange" />
             <template v-if="fileName">
-              <span class="text-[0.8125rem] text-text">📄 {{ fileName }}（{{ formatFileSize(fileSize) }}）</span>
+              <span class="text-[0.8125rem] text-foreground">📄 {{ fileName }}（{{ formatFileSize(fileSize) }}）</span>
             </template>
             <template v-else>
-              <span class="text-muted text-sm">拖拽文件到这里或点击上传</span>
-              <span class="text-muted text-[0.75rem] block mt-1">支持最大 {{ formatFileSize(FILE_SIZE_LIMIT) }} 的任意文件</span>
+              <span class="text-muted-foreground text-sm">拖拽文件到这里或点击上传</span>
+              <span class="text-muted-foreground text-[0.75rem] block mt-1">支持最大 {{ formatFileSize(FILE_SIZE_LIMIT) }} 的任意文件</span>
             </template>
           </div>
         </div>
@@ -201,7 +201,7 @@ function handleClear() {
         <!-- Data URI 前缀开关 -->
         <div class="mb-3 flex items-center gap-2 flex-wrap">
           <ToggleSwitch v-model="includeDataUri" label="包含 Data URI 前缀" />
-          <span class="text-muted text-[0.75rem]">
+          <span class="text-muted-foreground text-[0.75rem]">
             开启后输出 <code>data:{{ effectiveMime }};base64,...</code> 格式
           </span>
         </div>
@@ -211,7 +211,7 @@ function handleClear() {
         </div>
 
         <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0 mt-3">{{ errorMsg }}</p>
-        <p v-if="isProcessing" class="text-muted text-[0.8125rem] m-0 mt-3">
+        <p v-if="isProcessing" class="text-muted-foreground text-[0.8125rem] m-0 mt-3">
           编码中 {{ Math.round(progress * 100) }}%...
         </p>
       </template>
@@ -221,44 +221,44 @@ function handleClear() {
           <!-- 文件元信息 -->
           <div class="flex flex-col gap-1.5 mb-4">
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-20">文件名：</span>
-              <span class="text-text break-all">{{ fileName }}</span>
+              <span class="text-muted-foreground min-w-20">文件名：</span>
+              <span class="text-foreground break-all">{{ fileName }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-20">原始大小：</span>
-              <span class="text-text">{{ formatFileSize(fileSize) }}</span>
+              <span class="text-muted-foreground min-w-20">原始大小：</span>
+              <span class="text-foreground">{{ formatFileSize(fileSize) }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-20">MIME 类型：</span>
-              <span class="text-text">{{ effectiveMime }}</span>
+              <span class="text-muted-foreground min-w-20">MIME 类型：</span>
+              <span class="text-foreground">{{ effectiveMime }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-20">Base64 长度：</span>
-              <span class="text-text">{{ base64Length.toLocaleString() }} 字符</span>
+              <span class="text-muted-foreground min-w-20">Base64 长度：</span>
+              <span class="text-foreground">{{ base64Length.toLocaleString() }} 字符</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-20">编码后大小：</span>
-              <span class="text-text">{{ formatFileSize(encodedSize) }}（约膨胀 {{ inflatePercent }}%）</span>
+              <span class="text-muted-foreground min-w-20">编码后大小：</span>
+              <span class="text-foreground">{{ formatFileSize(encodedSize) }}（约膨胀 {{ inflatePercent }}%）</span>
             </div>
           </div>
 
-          <p class="text-muted text-[0.75rem] m-0 mb-3">
+          <p class="text-muted-foreground text-[0.75rem] m-0 mb-3">
             为避免大字符串阻塞页面，结果不直接显示。请复制或下载查看完整内容。
           </p>
 
           <div class="flex gap-2">
             <button
-              class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
               @click="handleCopy"
             >复制完整结果</button>
             <button
-              class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
               @click="handleDownloadTxt"
             >下载为 .txt</button>
           </div>
         </div>
 
-        <div v-else class="text-muted text-sm py-8 text-center">
+        <div v-else class="text-muted-foreground text-sm py-8 text-center">
           上传文件后将自动编码为 Base64
         </div>
       </template>

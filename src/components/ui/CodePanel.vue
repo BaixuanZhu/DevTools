@@ -12,11 +12,11 @@
  * @example
  * ```vue
  * <CodePanel label="JSON 输入" showClear @clear="handleClear">
- *   <textarea v-model="input" class="w-full h-80 p-3 bg-card text-text font-mono text-sm" />
+ *   <textarea v-model="input" class="w-full h-80 p-3 bg-card text-foreground font-mono text-sm" />
  * </CodePanel>
  *
  * <CodePanel label="输出结果" showCopy showDownload :copyText="output" @download="handleDownload">
- *   <pre class="w-full h-80 p-3 bg-card text-text font-mono text-sm">{{ output }}</pre>
+ *   <pre class="w-full h-80 p-3 bg-card text-foreground font-mono text-sm">{{ output }}</pre>
  * </CodePanel>
  * ```
  */
@@ -73,7 +73,7 @@ function handleClear(): void {
     >
       <label
         v-if="label"
-        class="text-[0.8125rem] text-muted"
+        class="text-[0.8125rem] text-muted-foreground"
       >
         {{ label }}
       </label>
@@ -90,7 +90,7 @@ function handleClear(): void {
           :class="[
             copied
               ? 'border-success text-success bg-card'
-              : 'border-border text-muted bg-card hover:bg-hover hover:text-text',
+              : 'border-border text-muted-foreground bg-card hover:bg-accent hover:text-foreground',
             (!copyText || disabled) && 'opacity-50 cursor-not-allowed',
           ]"
           :disabled="!copyText || disabled"
@@ -116,7 +116,7 @@ function handleClear(): void {
         <button
           v-if="showDownload"
           type="button"
-          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
           :class="(!copyText || disabled) && 'opacity-50 cursor-not-allowed'"
           :disabled="!copyText || disabled"
           title="下载"
@@ -129,7 +129,7 @@ function handleClear(): void {
         <button
           v-if="showClear"
           type="button"
-          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
           :class="disabled && 'opacity-50 cursor-not-allowed'"
           :disabled="disabled"
           title="清空"

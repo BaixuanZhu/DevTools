@@ -1,26 +1,51 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-@theme {
-  /* Colors — 暖色调中性色 + 单一强调色 */
-  --color-surface: #faf9f7;
-  --color-text: #1a1a1a;
-  --color-muted: #6b7280;
-  --color-border: #e5e2dd;
-  --color-accent: #e8590c;
-  --color-card: #ffffff;
-  --color-hover: #f3f1ee;
-  --color-error: #dc2626;
-  --color-success: #16a34a;
+/* ============ 语义层：浅色 + 暗色两组 ============ */
+:root {
+  --background: #faf9f7;            /* 原 --color-surface，页面底 */
+  --foreground: #1a1a1a;            /* 原 --color-text，主文字 */
+  --card: #ffffff;                  /* 卡片/壳层底 */
+  --primary: #e8590c;               /* 原 --color-accent，品牌橙（主操作色） */
+  --border: #e5e2dd;                /* 边框/分割线 */
+  --muted: #f3f1ee;                 /* 次要背景 */
+  --muted-foreground: #6b7280;      /* 原 text-muted，次要文字 */
+  --accent: #f3f1ee;                /* shadcn 语义：悬停/次要底色（原 --color-hover） */
+  --destructive: #dc2626;           /* 原 --color-error */
+  --success: #16a34a;               /* 成功色（项目保留，不改 destructive） */
+  --radius: 0.25rem;
+}
+.dark {
+  --background: #161514;
+  --foreground: #f3f1ee;
+  --card: #1f1e1c;
+  --primary: #f97316;
+  --border: #2a2826;
+  --muted: #2a2826;
+  --muted-foreground: #a1a1aa;
+  --accent: #2a2826;
+  --destructive: #ef4444;
+  --success: #22c55e;
+}
 
-  /* Fonts */
+/* ============ 映射层：注入 Tailwind 命名空间 ============ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-error: var(--destructive);     /* 兼容：旧 text-error 指向 destructive */
+  --radius-sm: calc(var(--radius));
+  --radius-md: calc(var(--radius) * 2);
+  --radius-lg: calc(var(--radius) * 3);
   --font-sans: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace,
-    monospace;
-
-  /* Border radius */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
 }
 
 /* Alpine cloak — 避免未初始化时闪烁 */

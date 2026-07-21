@@ -170,10 +170,10 @@ const allJsonLd: object[] = [
         </button>
         <a
           href="/"
-          class="group flex items-center gap-1.5 text-lg font-semibold text-text hover:text-accent transition-[color] duration-150"
+          class="group flex items-center gap-1.5 text-lg font-semibold text-foreground hover:text-primary transition-[color] duration-150"
           aria-label="DevTools 首页"
         >
-          <Wrench class="w-6 h-6 text-violet-600 group-hover:text-accent group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" />
+          <Wrench class="w-6 h-6 text-violet-600 group-hover:text-primary group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" />
           <span>DevTools</span>
         </a>
       </div>
@@ -187,7 +187,7 @@ const allJsonLd: object[] = [
           <!-- 收藏夹入口（桌面显示文字，移动端仅图标） -->
           <a
             href="/favorites"
-            class="flex items-center gap-1.5 h-9 px-2 max-md:px-1.5 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 focus:outline-none"
+            class="flex items-center gap-1.5 h-9 px-2 max-md:px-1.5 rounded-sm text-muted-foreground hover:text-primary hover:bg-accent transition-[color,background-color] duration-150 focus:outline-none"
             aria-label="我的收藏"
           >
             <Star class="w-5 h-5" />
@@ -196,7 +196,7 @@ const allJsonLd: object[] = [
 
           <!-- 暗色模式按钮（仅 UI 预留） -->
           <button
-            class="flex items-center justify-center w-9 h-9 rounded-sm text-muted hover:text-accent hover:bg-hover transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
+            class="flex items-center justify-center w-9 h-9 rounded-sm text-muted-foreground hover:text-primary hover:bg-accent transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
             aria-label="切换暗色模式（即将支持）"
             @click="$store.toast.success('暗色模式即将支持，敬请期待')"
           >
@@ -205,7 +205,7 @@ const allJsonLd: object[] = [
         </div>
 
         <!-- 个人主页入口组（简化样式） -->
-        <div class="flex items-center gap-2 text-text">
+        <div class="flex items-center gap-2 text-foreground">
 
           <!-- Gitee 链接 -->
           <a
@@ -253,15 +253,15 @@ const allJsonLd: object[] = [
         <div class="flex-1 sidebar-nav-scroll overflow-y-auto py-2">
           {categories.map((category) => (
             <div>
-              <h3 class="text-xs font-semibold text-muted px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
+              <h3 class="text-xs font-semibold text-muted-foreground px-4 py-4 pb-1 uppercase tracking-wider">{category}</h3>
               <ul class="list-none m-0 p-0">
                 {toolsByCategory[category].map((tool) => (
                   <li>
                     <a
                       href={tool.path}
                       class:list={[
-                        'flex items-center gap-2 px-4 py-2 text-sm text-text transition-[background-color] duration-150 hover:bg-hover focus:outline-none',
-                        currentPath === tool.path && 'bg-hover text-accent font-medium',
+                        'flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-[background-color] duration-150 hover:bg-accent focus:outline-none',
+                        currentPath === tool.path && 'bg-accent text-primary font-medium',
                       ]}
                     >
                       <span class="text-base w-6 text-center shrink-0">{tool.icon}</span>
@@ -295,15 +295,15 @@ const allJsonLd: object[] = [
         <slot />
         {faqs.length > 0 && (
           <section class="mt-12 pt-8 border-t border-border">
-            <h2 class="text-lg font-semibold text-text mb-4">常见问题</h2>
+            <h2 class="text-lg font-semibold text-foreground mb-4">常见问题</h2>
             <div class="space-y-0 divide-y divide-border">
               {faqs.map((faq) => (
                 <details class="group py-4" open>
-                  <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-text hover:text-accent transition-[color] duration-150 list-none">
-                    <span class="[&_code]:bg-hover [&_code]:text-text [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-text [&_strong]:font-semibold" set:html={faq.question} />
-                    <ChevronDown class="h-4 w-4 shrink-0 text-muted transition-transform duration-150 group-open:rotate-180" />
+                  <summary class="flex items-center justify-between cursor-pointer text-[0.8125rem] text-foreground hover:text-primary transition-[color] duration-150 list-none">
+                    <span class="[&_code]:bg-accent [&_code]:text-foreground [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-foreground [&_strong]:font-semibold" set:html={faq.question} />
+                    <ChevronDown class="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-150 group-open:rotate-180" />
                   </summary>
-                  <div class="pt-2 text-[0.8125rem] text-muted leading-relaxed [&_code]:bg-hover [&_code]:text-text [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-text [&_strong]:font-semibold" set:html={faq.answer} />
+                  <div class="pt-2 text-[0.8125rem] text-muted-foreground leading-relaxed [&_code]:bg-accent [&_code]:text-foreground [&_code]:font-mono [&_code]:text-xs [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded-sm [&_strong]:text-foreground [&_strong]:font-semibold" set:html={faq.answer} />
                 </details>
               ))}
             </div>
@@ -311,7 +311,7 @@ const allJsonLd: object[] = [
         )}
         {relatedToolIds.length > 0 && (
           <section class="mt-12 pt-8 border-t border-border">
-            <h2 class="text-lg font-semibold text-text mb-4">相关工具</h2>
+            <h2 class="text-lg font-semibold text-foreground mb-4">相关工具</h2>
             <RelatedTools toolIds={relatedToolIds} />
           </section>
         )}

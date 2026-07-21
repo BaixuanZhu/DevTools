@@ -129,24 +129,24 @@ function handleClear(): void {
                 <input
                   v-model="group.userAgents[0]"
                   type="text"
-                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                   placeholder="User-agent（* 表示所有爬虫）"
                 />
                 <button
                   type="button"
-                  class="px-3 py-2 text-[0.8125rem] text-error border border-border rounded-sm bg-card cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                  class="px-3 py-2 text-[0.8125rem] text-error border border-border rounded-sm bg-card cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                   @click="removeGroup(group.id)"
                 >删除组</button>
               </div>
-              <p class="text-[0.75rem] text-muted m-0">
-                <code class="bg-hover px-1 py-0.5 rounded-sm">*</code> 匹配所有搜索引擎爬虫，是站点默认规则
+              <p class="text-[0.75rem] text-muted-foreground m-0">
+                <code class="bg-accent px-1 py-0.5 rounded-sm">*</code> 匹配所有搜索引擎爬虫，是站点默认规则
               </p>
 
               <!-- 该组的路径规则 -->
               <div v-for="rule in group.rules" :key="rule.id" class="flex items-center gap-2">
                 <select
                   v-model="rule.type"
-                  class="px-2 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent"
+                  class="px-2 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary"
                 >
                   <option value="disallow">Disallow</option>
                   <option value="allow">Allow</option>
@@ -154,24 +154,24 @@ function handleClear(): void {
                 <input
                   v-model="rule.path"
                   type="text"
-                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                  class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                   placeholder="/private/"
                 />
                 <button
                   type="button"
-                  class="px-2 py-2 text-[0.8125rem] text-muted border border-border rounded-sm bg-card cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                  class="px-2 py-2 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                   @click="removeRule(group, rule.id)"
                 >✕</button>
               </div>
               <div class="flex gap-2">
                 <button
                   type="button"
-                  class="px-3 py-1.5 text-[0.8125rem] border border-border rounded-sm bg-card text-text cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                  class="px-3 py-1.5 text-[0.8125rem] border border-border rounded-sm bg-card text-foreground cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                   @click="addRule(group, 'disallow')"
                 >+ Disallow</button>
                 <button
                   type="button"
-                  class="px-3 py-1.5 text-[0.8125rem] border border-border rounded-sm bg-card text-text cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                  class="px-3 py-1.5 text-[0.8125rem] border border-border rounded-sm bg-card text-foreground cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                   @click="addRule(group, 'allow')"
                 >+ Allow</button>
               </div>
@@ -180,22 +180,22 @@ function handleClear(): void {
 
           <button
             type="button"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150"
             @click="addGroup"
           >+ 添加规则组</button>
 
           <!-- AI 爬虫一键拦截 -->
           <div class="border border-border rounded-md p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-text m-0">🤖 AI 爬虫一键拦截</h3>
+              <h3 class="text-sm font-semibold text-foreground m-0">🤖 AI 爬虫一键拦截</h3>
               <button
                 type="button"
-                class="text-[0.8125rem] text-accent cursor-pointer bg-transparent border-none"
+                class="text-[0.8125rem] text-primary cursor-pointer bg-transparent border-none"
                 @click="toggleAllAi"
               >{{ allAiBlocked ? '全部解除' : '拦截所有' }}</button>
             </div>
-            <p class="text-[0.75rem] text-muted m-0">
-              勾选即为该爬虫生成 <code class="bg-hover px-1 py-0.5 rounded-sm">Disallow: /</code>，禁止抓取整站
+            <p class="text-[0.75rem] text-muted-foreground m-0">
+              勾选即为该爬虫生成 <code class="bg-accent px-1 py-0.5 rounded-sm">Disallow: /</code>，禁止抓取整站
             </p>
             <div class="flex flex-col gap-2">
               <div
@@ -203,7 +203,7 @@ function handleClear(): void {
                 :key="c.userAgent"
                 class="flex items-center justify-between gap-3"
               >
-                <span class="text-[0.8125rem] text-text">{{ c.userAgent }} · {{ c.vendor }}</span>
+                <span class="text-[0.8125rem] text-foreground">{{ c.userAgent }} · {{ c.vendor }}</span>
                 <ToggleSwitch
                   :model-value="aiSelected.has(c.userAgent)"
                   :show-status="false"
@@ -215,18 +215,18 @@ function handleClear(): void {
 
           <!-- Sitemap 引用 -->
           <div class="border border-border rounded-md p-4 space-y-2">
-            <h3 class="text-sm font-semibold text-text m-0">Sitemap 引用</h3>
-            <p class="text-[0.75rem] text-muted m-0">告知搜索引擎你的 sitemap.xml 位置</p>
+            <h3 class="text-sm font-semibold text-foreground m-0">Sitemap 引用</h3>
+            <p class="text-[0.75rem] text-muted-foreground m-0">告知搜索引擎你的 sitemap.xml 位置</p>
             <div v-for="(s, idx) in sitemaps" :key="idx" class="flex items-center gap-2">
               <input
                 :value="s"
                 type="text"
                 readonly
-                class="flex-1 px-3 py-2 border border-border rounded-sm bg-hover text-text text-sm"
+                class="flex-1 px-3 py-2 border border-border rounded-sm bg-accent text-foreground text-sm"
               />
               <button
                 type="button"
-                class="px-2 py-2 text-[0.8125rem] text-muted border border-border rounded-sm bg-card cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                class="px-2 py-2 text-[0.8125rem] text-muted-foreground border border-border rounded-sm bg-card cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                 @click="removeSitemap(idx)"
               >✕</button>
             </div>
@@ -234,13 +234,13 @@ function handleClear(): void {
               <input
                 v-model="newSitemap"
                 type="text"
-                class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent transition-[border-color] duration-150"
+                class="flex-1 px-3 py-2 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary transition-[border-color] duration-150"
                 placeholder="https://example.com/sitemap.xml"
                 @keydown.enter.prevent="addSitemap"
               />
               <button
                 type="button"
-                class="px-3 py-2 text-sm border border-border rounded-sm bg-card text-text cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+                class="px-3 py-2 text-sm border border-border rounded-sm bg-card text-foreground cursor-pointer hover:bg-accent transition-[background-color] duration-150"
                 @click="addSitemap"
               >添加</button>
             </div>
@@ -248,7 +248,7 @@ function handleClear(): void {
 
           <button
             type="button"
-            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-text text-sm cursor-pointer hover:bg-hover transition-[background-color] duration-150"
+            class="w-full px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm cursor-pointer hover:bg-accent transition-[background-color] duration-150"
             @click="handleClear"
           >清空</button>
         </div>
@@ -263,7 +263,7 @@ function handleClear(): void {
           show-download
           @download="handleDownload"
         >
-          <pre class="w-full p-4 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ robotsText }}</pre>
+          <pre class="w-full p-4 bg-card text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all">{{ robotsText }}</pre>
         </CodePanel>
       </template>
     </ResponsiveWorkspace>

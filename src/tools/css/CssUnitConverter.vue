@@ -142,43 +142,43 @@ onMounted(() => {
 
     <!-- 基准设置 -->
     <section class="mb-6 p-4 border border-border rounded-sm bg-card">
-      <h2 class="text-sm font-semibold text-text mb-4">基准设置</h2>
+      <h2 class="text-sm font-semibold text-foreground mb-4">基准设置</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs text-muted mb-1.5">根字号（px）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">根字号（px）</label>
           <input
             v-model.number="rootFontSize"
             type="number"
             min="1"
             aria-invalid="!!baseErrors.rootFontSize"
             :aria-describedby="baseErrors.rootFontSize ? 'root-font-size-error' : undefined"
-            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
             @input="handleBaseInput"
           />
           <p v-if="baseErrors.rootFontSize" id="root-font-size-error" class="mt-1.5 text-xs text-error">{{ baseErrors.rootFontSize }}</p>
         </div>
         <div>
-          <label class="block text-xs text-muted mb-1.5">设计稿宽度（px）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">设计稿宽度（px）</label>
           <input
             v-model.number="designWidth"
             type="number"
             min="1"
             aria-invalid="!!baseErrors.designWidth"
             :aria-describedby="baseErrors.designWidth ? 'design-width-error' : undefined"
-            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
             @input="handleBaseInput"
           />
           <p v-if="baseErrors.designWidth" id="design-width-error" class="mt-1.5 text-xs text-error">{{ baseErrors.designWidth }}</p>
         </div>
         <div>
-          <label class="block text-xs text-muted mb-1.5">视口高度（px）</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">视口高度（px）</label>
           <input
             v-model.number="viewportHeight"
             type="number"
             min="1"
             aria-invalid="!!baseErrors.viewportHeight"
             :aria-describedby="baseErrors.viewportHeight ? 'viewport-height-error' : undefined"
-            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
             @input="handleBaseInput"
           />
           <p v-if="baseErrors.viewportHeight" id="viewport-height-error" class="mt-1.5 text-xs text-error">{{ baseErrors.viewportHeight }}</p>
@@ -188,21 +188,21 @@ onMounted(() => {
 
     <!-- 转换输入 -->
     <section class="mb-6">
-      <h2 class="text-sm font-semibold text-text mb-4">转换输入（修改任意一项，其余联动）</h2>
+      <h2 class="text-sm font-semibold text-foreground mb-4">转换输入（修改任意一项，其余联动）</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div
           v-for="unit in UNIT_ORDER"
           :key="unit"
           class="p-3 border border-border bg-card rounded-sm"
         >
-          <label class="block text-xs text-muted mb-1.5">{{ UNIT_LABELS[unit] }}</label>
+          <label class="block text-xs text-muted-foreground mb-1.5">{{ UNIT_LABELS[unit] }}</label>
           <input
             :value="values[unit]"
             type="text"
             inputmode="decimal"
             :aria-invalid="!!errors[unit]"
             :aria-describedby="errors[unit] ? `${unit}-error` : undefined"
-            class="w-full px-3 py-2 border rounded-sm bg-background text-text text-sm focus:outline-none focus:border-accent"
+            class="w-full px-3 py-2 border rounded-sm bg-background text-foreground text-sm focus:outline-none focus:border-primary"
             :class="errors[unit] ? 'border-error' : 'border-border'"
             @input="handleInput(unit, $event)"
           />
@@ -215,14 +215,14 @@ onMounted(() => {
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+        class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
         @click="handleClear"
       >
         清空
       </button>
       <button
         type="button"
-        class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+        class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
         :disabled="!copyText"
         @click="handleCopyAll"
       >

@@ -8,13 +8,13 @@ const SITE = {
   policeUrl: 'http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=45010702002442', // 留空则不显示
 };
 const year = new Date().getFullYear();
-const linkCls = 'text-[0.8125rem] text-muted hover:text-accent transition-[color] duration-150';
+const linkCls = 'text-[0.8125rem] text-muted-foreground hover:text-primary transition-[color] duration-150';
 ---
 
 <footer class="px-6 py-5 border-t border-border bg-card">
   <div class="max-w-3xl mx-auto flex flex-col items-center gap-2 text-center">
     <!-- 版权行 -->
-    <p class="m-0 text-[0.8125rem] text-muted">&copy; {year} {SITE.copyrightName}</p>
+    <p class="m-0 text-[0.8125rem] text-muted-foreground">&copy; {year} {SITE.copyrightName}</p>
 
     <!-- 链接行 -->
     <nav class="flex items-center justify-center flex-wrap gap-4">

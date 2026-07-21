@@ -244,24 +244,24 @@ function handleClear() {
     <div class="mb-4">
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
-          <label class="block text-[0.8125rem] text-muted font-medium">公钥</label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium">公钥</label>
           <CopyButton v-if="publicKeyText" :text="publicKeyText" />
         </div>
         <textarea
           v-model="publicKeyText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="3"
           placeholder="130 字符十六进制公钥（以 04 开头）"
         ></textarea>
       </div>
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
-          <label class="block text-[0.8125rem] text-muted font-medium">私钥</label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium">私钥</label>
           <CopyButton v-if="privateKeyText" :text="privateKeyText" />
         </div>
         <textarea
           v-model="privateKeyText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="3"
           placeholder="64 字符十六进制私钥"
         ></textarea>
@@ -271,7 +271,7 @@ function handleClear() {
     <!-- 操作按钮行 -->
     <div class="flex gap-2 items-center mb-4">
       <button
-        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="isProcessing"
         @click="handleAction"
       >
@@ -283,10 +283,10 @@ function handleClear() {
     <!-- 操作模式输入区域 -->
     <div v-if="mode !== 'generate'" class="mb-4">
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">{{ inputLabel }}</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">{{ inputLabel }}</label>
         <textarea
           v-model="inputText"
-          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
           rows="4"
           :placeholder="inputPlaceholder"
         ></textarea>
@@ -303,15 +303,15 @@ function handleClear() {
         <CopyButton :text="outputText" />
       </div>
       <div class="border border-border rounded-md p-4 bg-card">
-        <code class="font-mono text-[0.8125rem] break-all text-text">{{ outputText }}</code>
+        <code class="font-mono text-[0.8125rem] break-all text-foreground">{{ outputText }}</code>
       </div>
     </div>
 
     <!-- 算法说明 -->
     <div class="border-t border-border pt-4">
-      <h3 class="text-[0.8125rem] text-muted font-medium">算法说明</h3>
+      <h3 class="text-[0.8125rem] text-muted-foreground font-medium">算法说明</h3>
       <div class="pt-2">
-        <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
+        <div class="text-[0.8125rem] text-muted-foreground leading-relaxed space-y-2">
           <p class="m-0">
             <strong>SM2</strong>：中国国密非对称加密算法（GM/T 0003-2012），基于 256 位 SM2 椭圆曲线。
             支持公钥加密与私钥解密，密钥为原始十六进制格式。

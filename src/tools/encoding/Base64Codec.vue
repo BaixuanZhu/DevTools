@@ -95,7 +95,7 @@ function handleClear() {
     <CodePanel label="输入" show-copy :copy-text="input">
       <textarea
         v-model="input"
-        class="w-full h-60 p-4 bg-card text-text font-mono text-sm resize-y box-border focus:outline-none"
+        class="w-full h-60 p-4 bg-card text-foreground font-mono text-sm resize-y box-border focus:outline-none"
         placeholder="输入要编码的文本或要解码的 Base64 字符串"
       ></textarea>
     </CodePanel>
@@ -103,15 +103,15 @@ function handleClear() {
     <!-- 操作栏：编码/解码/互换/清空 + 解码选项合并为单一区域 -->
     <div class="flex flex-wrap gap-2 items-center mt-3">
       <button
-        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
+        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
         @click="executeEncode"
       >编码</button>
       <button
-        class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
+        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
         @click="executeDecode"
       >解码</button>
       <button
-        class="flex items-center gap-1.5 px-4 py-2 border border-border rounded-sm bg-card text-muted text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+        class="flex items-center gap-1.5 px-4 py-2 border border-border rounded-sm bg-card text-muted-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
         @click="handleSwap"
       >
         <span>⇄</span>
@@ -133,7 +133,7 @@ function handleClear() {
     <CodePanel label="输出" show-copy :copy-text="output" class="mt-3">
       <div
         v-if="output"
-        class="w-full h-60 p-4 m-0 bg-card text-text font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+        class="w-full h-60 p-4 m-0 bg-card text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
       >{{ output }}</div>
       <div
         v-else-if="errorMsg"
@@ -141,7 +141,7 @@ function handleClear() {
       >{{ errorMsg }}</div>
       <div
         v-else
-        class="w-full h-60 p-4 m-0 bg-card text-muted font-mono text-sm"
+        class="w-full h-60 p-4 m-0 bg-card text-muted-foreground font-mono text-sm"
       >点击「编码」或「解码」查看结果</div>
     </CodePanel>
   </div>

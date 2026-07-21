@@ -286,14 +286,14 @@ parseExpression();
                   'transition-[background-color,border-color] duration-150',
                   'focus:outline-none',
                   selected
-                    ? 'border-accent border-b-card bg-accent/5'
-                    : 'border-transparent bg-transparent hover:bg-hover',
+                    ? 'border-primary border-b-card bg-primary/5'
+                    : 'border-transparent bg-transparent hover:bg-accent',
                 ]"
               >
-                <span class="text-[0.8125rem] font-medium" :class="selected ? 'text-accent' : 'text-text'">
+                <span class="text-[0.8125rem] font-medium" :class="selected ? 'text-primary' : 'text-foreground'">
                   {{ config.label }}
                 </span>
-                <code class="text-[0.6875rem] font-mono" :class="selected ? 'text-accent' : 'text-muted'">
+                <code class="text-[0.6875rem] font-mono" :class="selected ? 'text-primary' : 'text-muted-foreground'">
                   {{ fieldValuePreview[config.key] }}
                 </code>
               </button>
@@ -312,8 +312,8 @@ parseExpression();
                       'gap-3 px-3 py-2 rounded-md border cursor-pointer',
                       'transition-[background-color] duration-150',
                       fields[config.key].mode === mode
-                        ? 'border-border bg-accent/5'
-                        : 'border-border bg-card hover:bg-hover',
+                        ? 'border-border bg-primary/5'
+                        : 'border-border bg-card hover:bg-accent',
                     ]"
                 >
                   <!-- 左列：Checkbox + 模式标签 -->
@@ -323,7 +323,7 @@ parseExpression();
                           'w-3.5 h-3.5 rounded-[3px] border flex items-center justify-center shrink-0',
                           'transition-[border-color,background-color] duration-150',
                           fields[config.key].mode === mode
-                            ? 'border-accent bg-accent'
+                            ? 'border-primary bg-primary'
                             : 'border-border',
                         ]"
                     >
@@ -335,7 +335,7 @@ parseExpression();
                     <span
                         :class="[
                           'text-sm font-medium whitespace-nowrap',
-                          fields[config.key].mode === mode ? 'text-accent' : 'text-muted',
+                          fields[config.key].mode === mode ? 'text-primary' : 'text-muted-foreground',
                         ]"
                     >
                       {{ getModeLabel(config.key, mode) }}
@@ -349,27 +349,27 @@ parseExpression();
                       @click.stop
                   >
                     <!-- every 模式 -->
-                    <div v-if="mode === 'every'" class="text-sm text-muted">
+                    <div v-if="mode === 'every'" class="text-sm text-muted-foreground">
                       {{ getModeLabel(config.key, 'every') }}
                     </div>
 
                     <!-- range 模式 -->
                     <div v-else-if="mode === 'range'" class="flex items-center gap-2">
-                      <span class="text-sm text-muted shrink-0">从</span>
+                      <span class="text-sm text-muted-foreground shrink-0">从</span>
                       <input
                           type="text"
                           :value="fields[config.key].rangeStart ?? ''"
                           :aria-label="`${config.label}范围起始值`"
-                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                           placeholder="0"
                           @input="fields[config.key].rangeStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
                       />
-                      <span class="text-muted text-sm">到</span>
+                      <span class="text-muted-foreground text-sm">到</span>
                       <input
                           type="text"
                           :value="fields[config.key].rangeEnd ?? ''"
                           :aria-label="`${config.label}范围结束值`"
-                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                           placeholder="0"
                           @input="fields[config.key].rangeEnd = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'range')"
                       />
@@ -378,27 +378,27 @@ parseExpression();
                     <!-- step 模式 -->
                     <div v-else-if="mode === 'step'" class="flex items-center gap-2 flex-wrap">
                       <div class="flex items-center gap-2">
-                        <span class="text-sm text-muted shrink-0">从</span>
+                        <span class="text-sm text-muted-foreground shrink-0">从</span>
                         <input
                             type="text"
                             :value="fields[config.key].stepStart ?? ''"
                             :aria-label="`${config.label}步长起始值`"
-                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                             placeholder="0"
                             @input="fields[config.key].stepStart = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
                         />
-                        <span class="text-sm text-muted shrink-0">开始，每隔</span>
+                        <span class="text-sm text-muted-foreground shrink-0">开始，每隔</span>
                       </div>
                       <div class="flex items-center gap-2">
                         <input
                             type="text"
                             :value="fields[config.key].stepInterval ?? ''"
                             :aria-label="`${config.label}步长间隔`"
-                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                             placeholder="1"
                             @input="fields[config.key].stepInterval = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'step')"
                         />
-                        <span class="text-sm text-muted shrink-0">{{ config.label }}</span>
+                        <span class="text-sm text-muted-foreground shrink-0">{{ config.label }}</span>
                       </div>
                     </div>
 
@@ -414,8 +414,8 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i - 1)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
                             {{ i - 1 }}
@@ -433,8 +433,8 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i - 1)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
                             {{ i - 1 }}
@@ -452,8 +452,8 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
                             {{ i }}
@@ -471,8 +471,8 @@ parseExpression();
                               :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
                             {{ MONTH_NAMES[i - 1] }}
@@ -490,8 +490,8 @@ parseExpression();
                               :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(idx)
-                                  ? 'bg-accent text-white border-accent'
-                                  : 'bg-surface text-text border-border hover:bg-hover',
+                                  ? 'bg-primary text-white border-primary'
+                                  : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
                             {{ name }}
@@ -505,7 +505,7 @@ parseExpression();
                             type="text"
                             :value="fields[config.key].specificValues?.join(',') ?? ''"
                             :aria-label="`${config.label}指定值`"
-                            class="w-full px-3 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                            class="w-full px-3 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                             placeholder="逗号分隔，如 2024,2025,2026"
                             @input="handleSpecificInput(config.key, config, $event); activateMode(config.key, 'specific')"
                         />
@@ -513,48 +513,48 @@ parseExpression();
                     </div>
 
                     <!-- lastDay 模式 (L) -->
-                    <div v-else-if="mode === 'lastDay'" class="text-sm text-muted">
+                    <div v-else-if="mode === 'lastDay'" class="text-sm text-muted-foreground">
                       每月最后一天 (L)
                     </div>
 
                     <!-- lastNDay 模式 (L-N) -->
                     <div v-else-if="mode === 'lastNDay'" class="flex items-center gap-2">
-                      <span class="text-sm text-muted shrink-0">倒数第</span>
+                      <span class="text-sm text-muted-foreground shrink-0">倒数第</span>
                       <input
                           type="text"
                           :value="fields[config.key].lastN ?? ''"
                           aria-label="倒数天数"
-                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                           @input="fields[config.key].lastN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'lastNDay')"
                       />
-                      <span class="text-sm text-muted shrink-0">天</span>
+                      <span class="text-sm text-muted-foreground shrink-0">天</span>
                     </div>
 
                     <!-- nearWeekday 模式 (W) -->
                     <div v-else-if="mode === 'nearWeekday'" class="flex items-center gap-2">
-                      <span class="text-sm text-muted shrink-0">每月第</span>
+                      <span class="text-sm text-muted-foreground shrink-0">每月第</span>
                       <input
                           type="text"
                           :value="fields[config.key].nearWDay ?? ''"
                           aria-label="最近工作日的日期"
-                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                           @input="fields[config.key].nearWDay = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nearWeekday')"
                       />
-                      <span class="text-sm text-muted shrink-0">日最近的工作日 (W)</span>
+                      <span class="text-sm text-muted-foreground shrink-0">日最近的工作日 (W)</span>
                     </div>
 
                     <!-- lastWeekday 模式 (LW) -->
-                    <div v-else-if="mode === 'lastWeekday'" class="text-sm text-muted">
+                    <div v-else-if="mode === 'lastWeekday'" class="text-sm text-muted-foreground">
                       每月最后一个工作日 (LW)
                     </div>
 
                     <!-- lastN 模式 (最后一个周X) -->
                     <div v-else-if="mode === 'lastN'" class="flex items-center gap-2">
-                      <span class="text-sm text-muted shrink-0">最后一个</span>
+                      <span class="text-sm text-muted-foreground shrink-0">最后一个</span>
                       <select
                           :value="fields[config.key].nthDayWeekday ?? 0"
                           aria-label="星期几"
-                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
+                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-foreground bg-card focus:outline-none focus:border-primary"
                           @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'lastN')"
                       >
                         <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
@@ -563,19 +563,19 @@ parseExpression();
 
                     <!-- nthDay 模式 (第N个周X) -->
                     <div v-else-if="mode === 'nthDay'" class="flex items-center gap-2 flex-wrap">
-                      <span class="text-sm text-muted shrink-0">第</span>
+                      <span class="text-sm text-muted-foreground shrink-0">第</span>
                       <input
                           type="text"
                           :value="fields[config.key].nthDayN ?? ''"
                           aria-label="第几个"
-                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-text bg-card focus:outline-none focus:border-accent"
+                          class="w-20 px-2 py-1.5 border border-border rounded-sm text-sm font-mono text-foreground bg-card focus:outline-none focus:border-primary"
                           @input="fields[config.key].nthDayN = toNum(($event.target as HTMLInputElement).value); activateMode(config.key, 'nthDay')"
                       />
-                      <span class="text-sm text-muted shrink-0">个</span>
+                      <span class="text-sm text-muted-foreground shrink-0">个</span>
                       <select
                           :value="fields[config.key].nthDayWeekday ?? 0"
                           aria-label="星期几"
-                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-text bg-card focus:outline-none focus:border-accent"
+                          class="px-2 py-1.5 border border-border rounded-sm text-sm font-sans text-foreground bg-card focus:outline-none focus:border-primary"
                           @change="fields[config.key].nthDayWeekday = toNum(($event.target as HTMLSelectElement).value); activateMode(config.key, 'nthDay')"
                       >
                         <option v-for="(name, idx) in WEEKDAY_NAMES" :key="idx" :value="idx">{{ name }}</option>
@@ -583,7 +583,7 @@ parseExpression();
                     </div>
 
                     <!-- 兜底 -->
-                    <div v-else class="text-sm text-muted"></div>
+                    <div v-else class="text-sm text-muted-foreground"></div>
                   </div>
                 </div>
               </div>
@@ -597,14 +597,14 @@ parseExpression();
     <section class="mt-6 px-4" aria-labelledby="expression-label">
       <div class="max-w-5xl mx-auto">
         <!-- 输入行 -->
-        <label id="expression-label" for="cron-expression" class="block text-[0.8125rem] text-muted font-medium mb-1">
+        <label id="expression-label" for="cron-expression" class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">
           Cron 表达式
         </label>
         <div class="flex gap-2">
           <input
               id="cron-expression"
               v-model="expression"
-              class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card box-border focus:outline-none focus:border-accent"
+              class="flex-1 px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card box-border focus:outline-none focus:border-primary"
               placeholder="*/5 * * * *"
           />
           <CopyButton :text="expression"/>
@@ -616,12 +616,12 @@ parseExpression();
 
         <!-- 模板按钮 -->
         <div class="mt-4">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-2">常用模板</label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-2">常用模板</label>
           <div class="flex flex-wrap gap-2">
             <button
                 v-for="template in CRON_TEMPLATES"
                 :key="template.expression"
-                class="px-3 py-1.5 border border-border rounded-sm bg-surface text-muted text-xs font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-hover hover:text-text"
+                class="px-3 py-1.5 border border-border rounded-sm bg-background text-muted-foreground text-xs font-sans cursor-pointer transition-[background-color,color,border-color] duration-150 hover:bg-accent hover:text-foreground"
                 @click="handleTemplate(template)"
             >
               {{ template.label }}
@@ -635,17 +635,17 @@ parseExpression();
     <section class="mt-6 px-4">
       <div class="max-w-5xl mx-auto">
         <div v-if="executions.length">
-          <h3 class="text-sm font-semibold mb-2 text-text">下次执行时间</h3>
+          <h3 class="text-sm font-semibold mb-2 text-foreground">下次执行时间</h3>
           <ol class="flex flex-col gap-1 list-none m-0 p-0" aria-label="执行时间列表">
             <li
                 v-for="(time, index) in executions"
                 :key="index"
                 class="flex items-center gap-3 px-4 py-2 border border-border rounded-sm bg-card"
             >
-              <span class="text-xs font-semibold text-accent min-w-8 shrink-0">
+              <span class="text-xs font-semibold text-primary min-w-8 shrink-0">
                 #{{ index + 1 }}
               </span>
-              <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">
+              <code class="flex-1 font-mono text-[0.8125rem] text-foreground select-all">
                 {{ time }}
               </code>
             </li>
@@ -655,7 +655,7 @@ parseExpression();
             v-else-if="!errorMsg"
             class="px-4 py-6 border border-border rounded-sm bg-card text-center"
         >
-          <p class="text-muted text-sm m-0">输入有效的 Cron 表达式以查看执行时间</p>
+          <p class="text-muted-foreground text-sm m-0">输入有效的 Cron 表达式以查看执行时间</p>
         </div>
       </div>
     </section>
@@ -663,90 +663,90 @@ parseExpression();
     <!-- 语法说明（独立全宽模块） -->
     <section class="mt-6 px-4 pb-8">
       <div class="max-w-5xl mx-auto">
-        <h2 class="text-sm font-semibold text-text mb-3">Cron 语法说明</h2>
+        <h2 class="text-sm font-semibold text-foreground mb-3">Cron 语法说明</h2>
         <div>
           <!-- 概述 -->
           <div class="bg-card border border-border rounded-sm p-4 mb-4">
-            <p class="text-sm text-text m-0 mb-3">
+            <p class="text-sm text-foreground m-0 mb-3">
               Cron 表达式由 <strong>5 ~ 7 个字段</strong>组成，以空格分隔。本工具支持标准 5 字段格式（Unix
               Cron）以及带秒和年的扩展格式（Quartz Cron）。
             </p>
-            <p class="text-sm text-text m-0">
-              当<strong>秒字段为 <code class="font-mono text-accent">*</code></strong>时，表达式自动省略秒字段（显示 5 或
-              6 字段）；当<strong>年字段为 <code class="font-mono text-accent">*</code></strong>时，自动省略年字段，保持表达式简洁。
+            <p class="text-sm text-foreground m-0">
+              当<strong>秒字段为 <code class="font-mono text-primary">*</code></strong>时，表达式自动省略秒字段（显示 5 或
+              6 字段）；当<strong>年字段为 <code class="font-mono text-primary">*</code></strong>时，自动省略年字段，保持表达式简洁。
             </p>
           </div>
 
           <!-- 字段表格 -->
           <div class="bg-card border border-border rounded-sm p-4 mb-4">
-            <h3 class="text-sm font-semibold text-text m-0 mb-3">字段定义</h3>
+            <h3 class="text-sm font-semibold text-foreground m-0 mb-3">字段定义</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
                 <tr class="border-b border-border">
-                  <th class="text-left py-2 pr-4 font-medium text-muted">字段</th>
-                  <th class="text-left py-2 pr-4 font-medium text-muted">必填</th>
-                  <th class="text-left py-2 pr-4 font-medium text-muted">允许值</th>
-                  <th class="text-left py-2 pr-4 font-medium text-muted">特殊字符</th>
-                  <th class="text-left py-2 font-medium text-muted">说明</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted-foreground">字段</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted-foreground">必填</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted-foreground">允许值</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted-foreground">特殊字符</th>
+                  <th class="text-left py-2 font-medium text-muted-foreground">说明</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">秒</td>
-                  <td class="py-2 pr-4 text-muted">可选</td>
-                  <td class="py-2 pr-4 font-mono text-text">0 ~ 59</td>
-                  <td class="py-2 pr-4 text-muted">—</td>
-                  <td class="py-2 text-muted">省略时默认为 <code class="font-mono text-accent">*</code></td>
+                  <td class="py-2 pr-4 font-mono text-foreground">秒</td>
+                  <td class="py-2 pr-4 text-muted-foreground">可选</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 ~ 59</td>
+                  <td class="py-2 pr-4 text-muted-foreground">—</td>
+                  <td class="py-2 text-muted-foreground">省略时默认为 <code class="font-mono text-primary">*</code></td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">分</td>
-                  <td class="py-2 pr-4 text-muted">必填</td>
-                  <td class="py-2 pr-4 font-mono text-text">0 ~ 59</td>
-                  <td class="py-2 pr-4 text-muted">—</td>
-                  <td class="py-2 text-muted">每分钟的第几分执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">分</td>
+                  <td class="py-2 pr-4 text-muted-foreground">必填</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 ~ 59</td>
+                  <td class="py-2 pr-4 text-muted-foreground">—</td>
+                  <td class="py-2 text-muted-foreground">每分钟的第几分执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">时</td>
-                  <td class="py-2 pr-4 text-muted">必填</td>
-                  <td class="py-2 pr-4 font-mono text-text">0 ~ 23</td>
-                  <td class="py-2 pr-4 text-muted">—</td>
-                  <td class="py-2 text-muted">24 小时制</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">时</td>
+                  <td class="py-2 pr-4 text-muted-foreground">必填</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 ~ 23</td>
+                  <td class="py-2 pr-4 text-muted-foreground">—</td>
+                  <td class="py-2 text-muted-foreground">24 小时制</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">日</td>
-                  <td class="py-2 pr-4 text-muted">必填</td>
-                  <td class="py-2 pr-4 font-mono text-text">1 ~ 31</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">日</td>
+                  <td class="py-2 pr-4 text-muted-foreground">必填</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">1 ~ 31</td>
                   <td class="py-2 pr-4">
-                    <code class="font-mono text-accent text-xs">L</code>
-                    <code class="font-mono text-accent text-xs ml-1">W</code>
-                    <code class="font-mono text-accent text-xs ml-1">LW</code>
+                    <code class="font-mono text-primary text-xs">L</code>
+                    <code class="font-mono text-primary text-xs ml-1">W</code>
+                    <code class="font-mono text-primary text-xs ml-1">LW</code>
                   </td>
-                  <td class="py-2 text-muted">每月第几天</td>
+                  <td class="py-2 text-muted-foreground">每月第几天</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">月</td>
-                  <td class="py-2 pr-4 text-muted">必填</td>
-                  <td class="py-2 pr-4 font-mono text-text">1 ~ 12</td>
-                  <td class="py-2 pr-4 text-muted">—</td>
-                  <td class="py-2 text-muted">月份，1 = 一月</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">月</td>
+                  <td class="py-2 pr-4 text-muted-foreground">必填</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">1 ~ 12</td>
+                  <td class="py-2 pr-4 text-muted-foreground">—</td>
+                  <td class="py-2 text-muted-foreground">月份，1 = 一月</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">周</td>
-                  <td class="py-2 pr-4 text-muted">必填</td>
-                  <td class="py-2 pr-4 font-mono text-text">0 ~ 6</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">周</td>
+                  <td class="py-2 pr-4 text-muted-foreground">必填</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 ~ 6</td>
                   <td class="py-2 pr-4">
-                    <code class="font-mono text-accent text-xs">L</code>
-                    <code class="font-mono text-accent text-xs ml-1">#</code>
+                    <code class="font-mono text-primary text-xs">L</code>
+                    <code class="font-mono text-primary text-xs ml-1">#</code>
                   </td>
-                  <td class="py-2 text-muted">0 = 周日，1 = 周一</td>
+                  <td class="py-2 text-muted-foreground">0 = 周日，1 = 周一</td>
                 </tr>
                 <tr>
-                  <td class="py-2 pr-4 font-mono text-text">年</td>
-                  <td class="py-2 pr-4 text-muted">可选</td>
-                  <td class="py-2 pr-4 font-mono text-text">1970 ~ 2099</td>
-                  <td class="py-2 pr-4 text-muted">—</td>
-                  <td class="py-2 text-muted">省略时默认为 <code class="font-mono text-accent">*</code></td>
+                  <td class="py-2 pr-4 font-mono text-foreground">年</td>
+                  <td class="py-2 pr-4 text-muted-foreground">可选</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">1970 ~ 2099</td>
+                  <td class="py-2 pr-4 text-muted-foreground">—</td>
+                  <td class="py-2 text-muted-foreground">省略时默认为 <code class="font-mono text-primary">*</code></td>
                 </tr>
                 </tbody>
               </table>
@@ -755,40 +755,40 @@ parseExpression();
 
           <!-- 通配符 -->
           <div class="bg-card border border-border rounded-sm p-4 mb-4">
-            <h3 class="text-sm font-semibold text-text m-0 mb-3">通配符说明</h3>
+            <h3 class="text-sm font-semibold text-foreground m-0 mb-3">通配符说明</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">*</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">*</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">匹配任意值</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">匹配任意值</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     表示该字段的每一个有效值都匹配，如分字段的 <code class="font-mono">*</code> 表示每分钟。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">-</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">-</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">指定范围</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">指定范围</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     如 <code class="font-mono">1-5</code> 表示 1、2、3、4、5。必须满足 起始 &le; 结束。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">,</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">,</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">指定多个值</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">指定多个值</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     如 <code class="font-mono">1,3,5</code> 表示 1、3、5 三个值，值的顺序不影响结果。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">/</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">/</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">指定步长</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">指定步长</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     如 <code class="font-mono">0/5</code> 表示从 0 开始每 5 个单位（0, 5, 10...）。<code class="font-mono">*/5</code>
                     等价于 <code class="font-mono">0/5</code>。
                   </p>
@@ -799,50 +799,50 @@ parseExpression();
 
           <!-- 特殊字符说明 -->
           <div class="bg-card border border-border rounded-sm p-4 mb-4">
-            <h3 class="text-sm font-semibold text-text m-0 mb-3">特殊字符说明</h3>
+            <h3 class="text-sm font-semibold text-foreground m-0 mb-3">特殊字符说明</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">L</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">L</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">最后 (Last)</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">最后 (Last)</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     日字段：表示月末最后一天。周字段：表示该星期最后一次出现，如 <code class="font-mono">5L</code> = 最后一个周五。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">W</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">W</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">最近工作日</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">最近工作日</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     仅日字段。如 <code class="font-mono">15W</code> 表示离 15 号最近的工作日。若 15 号是周六则取周五 14
                     号，是周日则取周一 16 号。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">LW</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">LW</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">最后工作日</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">最后工作日</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     仅日字段。表示每月最后一个工作日（周一至周五）。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">L-N</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">L-N</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">倒数第 N 天</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">倒数第 N 天</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     仅日字段。如 <code class="font-mono">L-3</code> 表示月末倒数第 3 天。
                   </p>
                 </div>
               </div>
               <div class="flex items-start gap-3">
-                <code class="shrink-0 font-mono text-accent bg-surface px-2 py-1 rounded-sm text-sm">#</code>
+                <code class="shrink-0 font-mono text-primary bg-background px-2 py-1 rounded-sm text-sm">#</code>
                 <div>
-                  <p class="text-sm font-medium text-text m-0">第 N 个星期 X</p>
-                  <p class="text-[0.8125rem] text-muted m-0 mt-0.5">
+                  <p class="text-sm font-medium text-foreground m-0">第 N 个星期 X</p>
+                  <p class="text-[0.8125rem] text-muted-foreground m-0 mt-0.5">
                     仅周字段。格式 <code class="font-mono">X#N</code>，如 <code class="font-mono">1#3</code> = 第 3 个周一。N
                     范围 1~5。
                   </p>
@@ -850,8 +850,8 @@ parseExpression();
               </div>
             </div>
             <div class="mt-4 pt-3 border-t border-border/50">
-              <p class="text-[0.8125rem] text-muted m-0">
-                <strong class="text-text">可用范围：</strong>
+              <p class="text-[0.8125rem] text-muted-foreground m-0">
+                <strong class="text-foreground">可用范围：</strong>
                 <code class="font-mono text-xs">L</code>、<code class="font-mono text-xs">W</code>、<code
                   class="font-mono text-xs">LW</code>、<code class="font-mono text-xs">L-N</code> 仅日字段；
                 <code class="font-mono text-xs">L</code>、<code class="font-mono text-xs">#</code> 仅周字段。
@@ -861,22 +861,22 @@ parseExpression();
 
           <!-- 注意事项 -->
           <div class="bg-card border border-border rounded-sm p-4 mb-4">
-            <h3 class="text-sm font-semibold text-text m-0 mb-3">注意事项</h3>
-            <ul class="text-sm text-muted m-0 pl-4 space-y-2">
+            <h3 class="text-sm font-semibold text-foreground m-0 mb-3">注意事项</h3>
+            <ul class="text-sm text-muted-foreground m-0 pl-4 space-y-2">
               <li>
-                <strong class="text-text">日字段与周字段的关系</strong>：两者是"与"的关系（同时满足）。例如 <code
+                <strong class="text-foreground">日字段与周字段的关系</strong>：两者是"与"的关系（同时满足）。例如 <code
                   class="font-mono">0 0 1 * 1</code> 表示"每月 1 日且是周一"才执行，而不是"每月 1 日或周一"。
               </li>
               <li>
-                <strong class="text-text">周字段的 0 与 7</strong>：在标准 Cron 中，0 和 7 都表示周日。本工具统一使用 0
+                <strong class="text-foreground">周字段的 0 与 7</strong>：在标准 Cron 中，0 和 7 都表示周日。本工具统一使用 0
                 表示周日。
               </li>
               <li>
-                <strong class="text-text">月天数不一致</strong>：例如指定每月 31 日执行，则 2 月、4 月、6 月等只有 30
+                <strong class="text-foreground">月天数不一致</strong>：例如指定每月 31 日执行，则 2 月、4 月、6 月等只有 30
                 天的月份不会触发。
               </li>
               <li>
-                <strong class="text-text">步长起始值</strong>：<code class="font-mono">1/5</code> 与 <code
+                <strong class="text-foreground">步长起始值</strong>：<code class="font-mono">1/5</code> 与 <code
                   class="font-mono">0/5</code> 不同，前者产生 1, 6, 11...，后者产生 0, 5, 10...。
               </li>
             </ul>
@@ -884,71 +884,71 @@ parseExpression();
 
           <!-- 常用示例 -->
           <div class="bg-card border border-border rounded-sm p-4">
-            <h3 class="text-sm font-semibold text-text m-0 mb-3">常用示例</h3>
+            <h3 class="text-sm font-semibold text-foreground m-0 mb-3">常用示例</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-sm">
                 <thead>
                 <tr class="border-b border-border">
-                  <th class="text-left py-2 pr-4 font-medium text-muted">表达式</th>
-                  <th class="text-left py-2 font-medium text-muted">含义</th>
+                  <th class="text-left py-2 pr-4 font-medium text-muted-foreground">表达式</th>
+                  <th class="text-left py-2 font-medium text-muted-foreground">含义</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 * * *</td>
-                  <td class="py-2 text-muted">每天零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 * * *</td>
+                  <td class="py-2 text-muted-foreground">每天零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">*/5 * * * *</td>
-                  <td class="py-2 text-muted">每 5 分钟执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">*/5 * * * *</td>
+                  <td class="py-2 text-muted-foreground">每 5 分钟执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 9 * * 1-5</td>
-                  <td class="py-2 text-muted">工作日每天 9 点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 9 * * 1-5</td>
+                  <td class="py-2 text-muted-foreground">工作日每天 9 点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 1 * *</td>
-                  <td class="py-2 text-muted">每月 1 日零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 1 * *</td>
+                  <td class="py-2 text-muted-foreground">每月 1 日零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 * * 0</td>
-                  <td class="py-2 text-muted">每周日零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 * * 0</td>
+                  <td class="py-2 text-muted-foreground">每周日零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 1 1 *</td>
-                  <td class="py-2 text-muted">每年 1 月 1 日零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 1 1 *</td>
+                  <td class="py-2 text-muted-foreground">每年 1 月 1 日零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">30 2 * * *</td>
-                  <td class="py-2 text-muted">每天凌晨 2:30 执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">30 2 * * *</td>
+                  <td class="py-2 text-muted-foreground">每天凌晨 2:30 执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 */6 * * *</td>
-                  <td class="py-2 text-muted">每 6 小时执行一次</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 */6 * * *</td>
+                  <td class="py-2 text-muted-foreground">每 6 小时执行一次</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 9,18 * * *</td>
-                  <td class="py-2 text-muted">每天 9 点和 18 点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 9,18 * * *</td>
+                  <td class="py-2 text-muted-foreground">每天 9 点和 18 点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 * * 1</td>
-                  <td class="py-2 text-muted">每周一零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 * * 1</td>
+                  <td class="py-2 text-muted-foreground">每周一零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 L * *</td>
-                  <td class="py-2 text-muted">每月最后一天零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 L * *</td>
+                  <td class="py-2 text-muted-foreground">每月最后一天零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 1W * *</td>
-                  <td class="py-2 text-muted">每月 1 号最近工作日零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 1W * *</td>
+                  <td class="py-2 text-muted-foreground">每月 1 号最近工作日零点执行</td>
                 </tr>
                 <tr class="border-b border-border/50">
-                  <td class="py-2 pr-4 font-mono text-text">0 0 * * 1#2</td>
-                  <td class="py-2 text-muted">每月第 2 个周一零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 * * 1#2</td>
+                  <td class="py-2 text-muted-foreground">每月第 2 个周一零点执行</td>
                 </tr>
                 <tr>
-                  <td class="py-2 pr-4 font-mono text-text">0 0 LW * *</td>
-                  <td class="py-2 text-muted">每月最后一个工作日零点执行</td>
+                  <td class="py-2 pr-4 font-mono text-foreground">0 0 LW * *</td>
+                  <td class="py-2 text-muted-foreground">每月最后一个工作日零点执行</td>
                 </tr>
                 </tbody>
               </table>

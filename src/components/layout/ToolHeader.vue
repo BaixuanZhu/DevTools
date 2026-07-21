@@ -22,11 +22,11 @@ const emit = defineEmits<{
   <div class="flex items-start justify-between gap-4 mb-6">
     <div>
       <h1 class="text-xl font-semibold m-0">{{ title }}</h1>
-      <p class="mt-1 text-sm text-muted m-0">{{ description }}</p>
+      <p class="mt-1 text-sm text-muted-foreground m-0">{{ description }}</p>
     </div>
     <button
       v-if="props.showExample"
-      class="shrink-0 px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+      class="shrink-0 px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary"
       @click="emit('example')"
     >
       填入示例

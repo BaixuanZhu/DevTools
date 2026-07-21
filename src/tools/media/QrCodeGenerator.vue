@@ -190,7 +190,7 @@ onMounted(() => {
 
     <!-- 输入区 -->
     <div class="mb-4">
-      <label for="qr-text-input" class="block text-[0.8125rem] text-muted font-medium mb-1">
+      <label for="qr-text-input" class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">
         输入文本
       </label>
       <textarea
@@ -198,10 +198,10 @@ onMounted(() => {
         ref="textInputRef"
         v-model="text"
         rows="3"
-        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+        class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
         placeholder="输入要编码的文本，例如网址、文字、WiFi 信息等"
       ></textarea>
-      <p class="text-[0.75rem] text-muted mt-1">字符数：{{ text.length }}</p>
+      <p class="text-[0.75rem] text-muted-foreground mt-1">字符数：{{ text.length }}</p>
     </div>
 
     <!-- 配置卡 -->
@@ -211,12 +211,12 @@ onMounted(() => {
       <!-- 容错级别 -->
       <div>
         <OptionRadioGroup v-model="errorLevel" label="容错级别" :options="errorLevelOptions" />
-        <p class="text-[0.75rem] text-muted mt-1.5">{{ currentLevelDescription }}</p>
+        <p class="text-[0.75rem] text-muted-foreground mt-1.5">{{ currentLevelDescription }}</p>
       </div>
 
       <!-- 颜色（两列） -->
       <div>
-        <span class="block text-[0.8125rem] text-muted font-medium mb-1.5">颜色</span>
+        <span class="block text-[0.8125rem] text-muted-foreground font-medium mb-1.5">颜色</span>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <ColorInput v-model="foreground" label="前景色" />
           <ColorInput v-model="background" label="背景色" />
@@ -240,13 +240,13 @@ onMounted(() => {
       <!-- 空 / 加载 / 错误 / 预览 -->
       <div
         v-if="!text.trim()"
-        class="flex items-center justify-center h-[280px] text-muted text-sm"
+        class="flex items-center justify-center h-[280px] text-muted-foreground text-sm"
       >
         输入文本后自动生成二维码
       </div>
       <div
         v-else-if="isGenerating"
-        class="flex items-center justify-center h-[280px] text-muted text-sm"
+        class="flex items-center justify-center h-[280px] text-muted-foreground text-sm"
       >
         生成中...
       </div>
@@ -271,7 +271,7 @@ onMounted(() => {
               class="block [image-rendering:pixelated]"
             />
           </div>
-          <span class="text-[0.75rem] text-muted">{{ s }}×{{ s }}</span>
+          <span class="text-[0.75rem] text-muted-foreground">{{ s }}×{{ s }}</span>
         </div>
       </div>
     </div>
@@ -281,14 +281,14 @@ onMounted(() => {
       <div class="flex items-center justify-between gap-2 px-4 py-2 border-b border-border flex-wrap">
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-sm font-medium">下载</span>
-          <span class="text-[0.75rem] text-muted">导出 {{ downloadSize }}×{{ downloadSize }}px</span>
+          <span class="text-[0.75rem] text-muted-foreground">导出 {{ downloadSize }}×{{ downloadSize }}px</span>
         </div>
       </div>
 
       <div class="p-6 flex flex-col gap-4">
         <!-- 下载尺寸 -->
         <div>
-          <label for="qr-download-size-input" class="block text-[0.8125rem] text-muted font-medium mb-1.5">
+          <label for="qr-download-size-input" class="block text-[0.8125rem] text-muted-foreground font-medium mb-1.5">
             尺寸：{{ downloadSize }}px
           </label>
           <div class="flex items-center gap-3">
@@ -308,7 +308,7 @@ onMounted(() => {
               :max="QR_DOWNLOAD_MAX_SIZE"
               step="128"
               v-model.number="downloadSize"
-              class="px-2 py-1 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono outline-none focus:border-accent w-22"
+              class="px-2 py-1 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono outline-none focus:border-primary w-22"
             />
           </div>
         </div>
@@ -320,9 +320,9 @@ onMounted(() => {
             type="button"
             :class="[
               'w-9 h-9 flex items-center justify-center rounded-sm border',
-              'bg-card text-muted',
+              'bg-card text-muted-foreground',
               'transition-[background-color,border-color,color] duration-150',
-              'hover:bg-hover hover:text-text',
+              'hover:bg-accent hover:text-foreground',
               svgCopied ? 'border-success text-success' : 'border-border',
             ]"
             :disabled="!text.trim()"
@@ -341,7 +341,7 @@ onMounted(() => {
           <button
             v-if="text.trim()"
             type="button"
-            class="px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1.5 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
             @click="downloadPng"
           >
             下载 PNG
@@ -349,7 +349,7 @@ onMounted(() => {
           <button
             v-if="text.trim()"
             type="button"
-            class="px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1.5 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
             @click="downloadSvg"
           >
             下载 SVG

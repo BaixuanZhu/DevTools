@@ -286,16 +286,16 @@ onMounted(() => {
           <!-- 选项列表 -->
           <div class="flex flex-col gap-2">
             <div class="flex items-center justify-between">
-              <span class="text-[0.8125rem] text-muted">选项（{{ items.length }}/{{ MAX_ITEMS }}）</span>
+              <span class="text-[0.8125rem] text-muted-foreground">选项（{{ items.length }}/{{ MAX_ITEMS }}）</span>
               <button
-                class="text-[0.8125rem] text-accent hover:underline cursor-pointer bg-transparent border-0 p-0"
+                class="text-[0.8125rem] text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
                 @click="addItem"
               >
                 + 添加选项
               </button>
             </div>
             <!-- 列标题：对齐下方输入框 -->
-            <div v-if="items.length > 0" class="flex items-center gap-2 text-[0.75rem] text-muted">
+            <div v-if="items.length > 0" class="flex items-center gap-2 text-[0.75rem] text-muted-foreground">
               <span class="flex-1 min-w-0">选项名称</span>
               <span class="w-16 text-center">权重</span>
               <span class="shrink-0 w-7"></span>
@@ -309,7 +309,7 @@ onMounted(() => {
                 v-model="item.text"
                 type="text"
                 placeholder="选项名称"
-                class="flex-1 min-w-0 px-2 py-1.5 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent"
+                class="flex-1 min-w-0 px-2 py-1.5 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary"
               />
               <input
                 v-model.number="item.weight"
@@ -317,11 +317,11 @@ onMounted(() => {
                 min="1"
                 step="1"
                 title="权重"
-                class="w-16 px-2 py-1.5 border border-border rounded-sm bg-card text-text text-sm focus:outline-none focus:border-accent"
+                class="w-16 px-2 py-1.5 border border-border rounded-sm bg-card text-foreground text-sm focus:outline-none focus:border-primary"
                 @blur="normalizeItemWeight(index)"
               />
               <button
-                class="shrink-0 px-2 py-1.5 text-muted hover:text-text cursor-pointer bg-transparent border-0"
+                class="shrink-0 px-2 py-1.5 text-muted-foreground hover:text-foreground cursor-pointer bg-transparent border-0"
                 title="删除"
                 @click="removeItem(index)"
               >
@@ -332,15 +332,15 @@ onMounted(() => {
 
           <!-- 批量导入 -->
           <div class="flex flex-col gap-2">
-            <span class="text-[0.8125rem] text-muted">批量导入（每行一个，格式：选项名,权重）</span>
+            <span class="text-[0.8125rem] text-muted-foreground">批量导入（每行一个，格式：选项名,权重）</span>
             <textarea
               v-model="batchText"
               rows="4"
               placeholder="每行一个选项，逗号后可选填权重（默认 1）&#10;一等奖,1&#10;二等奖,3&#10;谢谢参与"
-              class="w-full px-2 py-1.5 border border-border rounded-sm bg-card text-text text-sm font-mono resize-y focus:outline-none focus:border-accent"
+              class="w-full px-2 py-1.5 border border-border rounded-sm bg-card text-foreground text-sm font-mono resize-y focus:outline-none focus:border-primary"
             ></textarea>
             <button
-              class="self-start px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+              class="self-start px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary"
               @click="importBatch"
             >
               导入
@@ -353,9 +353,9 @@ onMounted(() => {
           <!-- 已中奖列表 -->
           <div v-if="noRepeat && wonItems.length > 0" class="flex flex-col gap-2">
             <div class="flex items-center justify-between">
-              <span class="text-[0.8125rem] text-muted">已中奖（{{ wonItems.length }}）</span>
+              <span class="text-[0.8125rem] text-muted-foreground">已中奖（{{ wonItems.length }}）</span>
               <button
-                class="text-[0.8125rem] text-accent hover:underline cursor-pointer bg-transparent border-0 p-0"
+                class="text-[0.8125rem] text-primary hover:underline cursor-pointer bg-transparent border-0 p-0"
                 @click="resetWon"
               >
                 全部重置
@@ -368,7 +368,7 @@ onMounted(() => {
             >
               <span class="truncate">{{ won.text }}</span>
               <button
-                class="shrink-0 text-[0.8125rem] text-accent hover:underline cursor-pointer bg-transparent border-0 p-0 ml-2"
+                class="shrink-0 text-[0.8125rem] text-primary hover:underline cursor-pointer bg-transparent border-0 p-0 ml-2"
                 @click="restoreWon(index)"
               >
                 恢复
@@ -381,13 +381,13 @@ onMounted(() => {
       <template #actions>
         <div class="flex flex-wrap items-center gap-2 w-full">
           <button
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary"
             @click="clearAll"
           >
             清空
           </button>
           <button
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent"
+            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary"
             @click="copyShareLink"
           >
             {{ linkCopied ? '已复制' : '复制分享链接' }}
@@ -410,14 +410,14 @@ onMounted(() => {
             ></canvas>
           </div>
           <button
-            class="px-8 py-2.5 rounded-sm bg-accent text-white text-sm font-medium cursor-pointer transition-opacity duration-150 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="px-8 py-2.5 rounded-sm bg-primary text-white text-sm font-medium cursor-pointer transition-opacity duration-150 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="spinning || validItems().length < 2"
             @click="spin"
           >
             {{ spinning ? '旋转中…' : '开始' }}
           </button>
           <p v-if="result" class="text-base">
-            🎉 中奖：<strong class="text-accent">{{ result }}</strong>
+            🎉 中奖：<strong class="text-primary">{{ result }}</strong>
           </p>
         </div>
       </template>

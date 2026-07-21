@@ -283,7 +283,7 @@ const unifiedResultFields = computed(() => {
     <!-- ═══ 实时时钟区 ═══ -->
     <section class="mb-6 p-4 border border-border rounded-md bg-card">
       <div class="flex items-center gap-3 mb-3 flex-wrap">
-        <h2 class="text-sm font-semibold m-0 text-text flex items-center gap-2">
+        <h2 class="text-sm font-semibold m-0 text-foreground flex items-center gap-2">
           <span class="text-base">⏱</span> 当前时间
         </h2>
         <SelectListbox
@@ -297,10 +297,10 @@ const unifiedResultFields = computed(() => {
         <div
           v-for="field in liveClockFields"
           :key="field.label"
-          class="flex items-center gap-3 px-3 py-1 rounded-sm transition-colors duration-100 hover:bg-hover"
+          class="flex items-center gap-3 px-3 py-1 rounded-sm transition-colors duration-100 hover:bg-accent"
         >
-          <span class="text-xs font-semibold text-accent min-w-18 shrink-0">{{ field.label }}</span>
-          <code class="flex-1 font-mono text-[0.8125rem] text-text select-all">{{ isMounted ? field.value : '-' }}</code>
+          <span class="text-xs font-semibold text-primary min-w-18 shrink-0">{{ field.label }}</span>
+          <code class="flex-1 font-mono text-[0.8125rem] text-foreground select-all">{{ isMounted ? field.value : '-' }}</code>
           <CopyButton
             :text="field.value"
             size="sm"
@@ -314,7 +314,7 @@ const unifiedResultFields = computed(() => {
       <template #input>
         <section class="p-4 border border-border rounded-md bg-card">
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-sm font-semibold m-0 text-text">转换源</h2>
+            <h2 class="text-sm font-semibold m-0 text-foreground">转换源</h2>
             <ClearButton @clear="clearAll" />
           </div>
 
@@ -324,7 +324,7 @@ const unifiedResultFields = computed(() => {
               v-for="opt in QUICK_TIME_OPTIONS"
               :key="opt.key"
               type="button"
-              class="px-2.5 py-1 border border-border rounded-sm bg-surface text-muted text-xs font-sans cursor-pointer transition-colors duration-100 focus:outline-none focus:text-accent focus:border-accent"
+              class="px-2.5 py-1 border border-border rounded-sm bg-background text-muted-foreground text-xs font-sans cursor-pointer transition-colors duration-100 focus:outline-none focus:text-primary focus:border-primary"
               @click="handleQuickTime(opt.key)"
             >
               {{ opt.label }}
@@ -334,14 +334,14 @@ const unifiedResultFields = computed(() => {
           <!-- 双源卡片区 -->
           <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 items-center">
             <!-- Unix 时间戳卡片 -->
-            <div class="bg-surface border border-border rounded-sm overflow-hidden">
+            <div class="bg-background border border-border rounded-sm overflow-hidden">
               <div class="px-3 py-2 border-b border-border bg-card">
-                <label class="block text-[0.8125rem] text-muted font-medium">Unix 时间戳</label>
+                <label class="block text-[0.8125rem] text-muted-foreground font-medium">Unix 时间戳</label>
               </div>
               <div class="px-3 py-3">
                 <input
                   v-model="timestampInput"
-                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                   placeholder="秒或毫秒"
                   :aria-describedby="tsErrorMsg ? 'ts-error' : undefined"
                 />
@@ -351,17 +351,17 @@ const unifiedResultFields = computed(() => {
             </div>
 
             <!-- 中间占位/同步指示 -->
-            <div class="justify-self-center text-muted text-xs font-sans select-none hidden md:block">⇄</div>
+            <div class="justify-self-center text-muted-foreground text-xs font-sans select-none hidden md:block">⇄</div>
 
             <!-- 日期时间卡片 -->
-            <div class="bg-surface border border-border rounded-sm overflow-hidden">
+            <div class="bg-background border border-border rounded-sm overflow-hidden">
               <div class="px-3 py-2 border-b border-border bg-card">
-                <label class="block text-[0.8125rem] text-muted font-medium">日期时间</label>
+                <label class="block text-[0.8125rem] text-muted-foreground font-medium">日期时间</label>
               </div>
               <div class="px-3 py-3">
                 <input
                   v-model="dateInput"
-                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-text placeholder:text-muted focus:outline-none"
+                  class="w-full bg-transparent border-0 p-0 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                   placeholder="yyyy/MM/dd HH:mm:ss"
                   :aria-describedby="dateErrorMsg ? 'date-error' : undefined"
                 />
@@ -369,7 +369,7 @@ const unifiedResultFields = computed(() => {
               <div class="px-3 py-2 border-t border-border bg-card flex gap-2 min-h-8">
                 <button
                   type="button"
-                  class="text-xs text-muted bg-transparent focus:outline-none focus:text-accent"
+                  class="text-xs text-muted-foreground bg-transparent focus:outline-none focus:text-primary"
                   aria-label="打开日期选择器"
                   @click="openDatePicker"
                 >
@@ -417,7 +417,7 @@ const unifiedResultFields = computed(() => {
         <section>
           <div class="flex flex-col gap-1">
             <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xs font-semibold text-muted m-0 uppercase tracking-wide">转换结果</h3>
+              <h3 class="text-xs font-semibold text-muted-foreground m-0 uppercase tracking-wide">转换结果</h3>
               <SelectListbox
                 v-model="convertTimezone"
                 :options="TIMEZONES"
@@ -426,10 +426,10 @@ const unifiedResultFields = computed(() => {
             </div>
 
             <div class="flex items-center gap-2 mb-2 flex-wrap">
-              <span class="text-xs text-muted shrink-0">自定义格式：</span>
+              <span class="text-xs text-muted-foreground shrink-0">自定义格式：</span>
               <input
                 v-model="customFormatStr"
-                class="flex-1 min-w-0 px-2 py-1 border border-border rounded-sm text-xs font-mono text-text bg-surface box-border focus:outline-none focus:border-accent"
+                class="flex-1 min-w-0 px-2 py-1 border border-border rounded-sm text-xs font-mono text-foreground bg-background box-border focus:outline-none focus:border-primary"
                 placeholder="YYYY-MM-DD HH:mm:ss"
               />
             </div>
@@ -440,8 +440,8 @@ const unifiedResultFields = computed(() => {
                 :key="field.label"
                 class="flex items-center gap-3 px-4 py-2 border border-border rounded-sm bg-card"
               >
-                <span class="text-xs font-semibold text-accent min-w-20 shrink-0">{{ field.label }}</span>
-                <code class="flex-1 font-mono text-[0.8125rem] text-text select-all break-all">{{ field.value }}</code>
+                <span class="text-xs font-semibold text-primary min-w-20 shrink-0">{{ field.label }}</span>
+                <code class="flex-1 font-mono text-[0.8125rem] text-foreground select-all break-all">{{ field.value }}</code>
                 <CopyButton
                   :text="field.value"
                   size="sm"
@@ -450,7 +450,7 @@ const unifiedResultFields = computed(() => {
             </template>
 
             <div v-else class="flex items-center justify-center px-4 py-8 border border-border rounded-sm bg-card">
-              <p class="text-muted text-[0.8125rem] m-0">在左侧输入时间戳或日期以查看转换结果</p>
+              <p class="text-muted-foreground text-[0.8125rem] m-0">在左侧输入时间戳或日期以查看转换结果</p>
             </div>
           </div>
         </section>

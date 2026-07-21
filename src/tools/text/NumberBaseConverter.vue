@@ -151,11 +151,11 @@ watch(sourceBase, handleBaseChange);
       />
 
       <div>
-        <label class="block text-[0.8125rem] text-muted mb-1.5">输入数字（每行一个）</label>
+        <label class="block text-[0.8125rem] text-muted-foreground mb-1.5">输入数字（每行一个）</label>
         <textarea
             v-model="inputText"
             rows="6"
-            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-text text-sm font-mono focus:outline-none focus:border-accent resize-y"
+            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm font-mono focus:outline-none focus:border-primary resize-y"
             placeholder="在此逐行输入数字..."
         />
         <p v-if="hasErrors" class="mt-1.5 text-xs text-error">部分行包含无效字符，请检查当前进制。</p>
@@ -164,14 +164,14 @@ watch(sourceBase, handleBaseChange);
       <div class="flex gap-2">
         <button
             type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150"
+            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
             @click="handleClear"
         >
           清空
         </button>
         <button
             type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-text text-sm hover:bg-hover transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="validResults.length === 0"
             @click="handleCopyAll"
         >
@@ -184,33 +184,33 @@ watch(sourceBase, handleBaseChange);
     <div class="border border-border rounded-md bg-card mt-6 overflow-hidden">
       <div
           v-if="lineResults.length === 0"
-          class="min-h-30 flex items-center justify-center text-muted text-sm"
+          class="min-h-30 flex items-center justify-center text-muted-foreground text-sm"
       >
         输入数字后将自动显示转换结果
       </div>
 
       <table v-else class="w-full text-left text-sm">
-        <thead class="bg-surface border-b border-border sticky top-0">
+        <thead class="bg-background border-b border-border sticky top-0">
         <tr>
-          <th class="px-4 py-2 text-xs text-muted font-medium w-14">行号</th>
-          <th class="px-4 py-2 text-xs text-muted font-medium">二进制</th>
-          <th class="px-4 py-2 text-xs text-muted font-medium">八进制</th>
-          <th class="px-4 py-2 text-xs text-muted font-medium">十进制</th>
-          <th class="px-4 py-2 text-xs text-muted font-medium">十六进制</th>
+          <th class="px-4 py-2 text-xs text-muted-foreground font-medium w-14">行号</th>
+          <th class="px-4 py-2 text-xs text-muted-foreground font-medium">二进制</th>
+          <th class="px-4 py-2 text-xs text-muted-foreground font-medium">八进制</th>
+          <th class="px-4 py-2 text-xs text-muted-foreground font-medium">十进制</th>
+          <th class="px-4 py-2 text-xs text-muted-foreground font-medium">十六进制</th>
         </tr>
         </thead>
         <tbody>
         <tr
             v-for="result in lineResults"
             :key="result.lineNumber"
-            class="border-b border-border last:border-b-0 cursor-pointer hover:bg-hover transition-colors duration-150"
-            :class="selectedLine === result.lineNumber ? 'bg-hover' : ''"
+            class="border-b border-border last:border-b-0 cursor-pointer hover:bg-accent transition-colors duration-150"
+            :class="selectedLine === result.lineNumber ? 'bg-accent' : ''"
             @click="selectLine(result.lineNumber)"
         >
-          <td class="px-4 py-2 text-xs text-muted">{{ result.lineNumber }}</td>
+          <td class="px-4 py-2 text-xs text-muted-foreground">{{ result.lineNumber }}</td>
           <td
               v-if="result.parsed"
-              class="px-4 py-2 font-mono text-text break-all"
+              class="px-4 py-2 font-mono text-foreground break-all"
           >
             {{ result.converted!.binary }}
           </td>
@@ -218,9 +218,9 @@ watch(sourceBase, handleBaseChange);
             {{ result.error }}
           </td>
           <template v-if="result.parsed">
-            <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.octal }}</td>
-            <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.decimal }}</td>
-            <td class="px-4 py-2 font-mono text-text break-all">{{ result.converted!.hex }}</td>
+            <td class="px-4 py-2 font-mono text-foreground break-all">{{ result.converted!.octal }}</td>
+            <td class="px-4 py-2 font-mono text-foreground break-all">{{ result.converted!.decimal }}</td>
+            <td class="px-4 py-2 font-mono text-foreground break-all">{{ result.converted!.hex }}</td>
           </template>
         </tr>
         </tbody>
@@ -232,10 +232,10 @@ watch(sourceBase, handleBaseChange);
         v-if="selectedResult"
         class="border border-border rounded-md p-6 bg-card mt-4"
     >
-      <h2 class="text-sm font-semibold text-text mb-3">
+      <h2 class="text-sm font-semibold text-foreground mb-3">
         第 {{ selectedResult!.lineNumber }} 行二进制位图
       </h2>
-      <div class="font-mono text-sm text-text break-all leading-relaxed">
+      <div class="font-mono text-sm text-foreground break-all leading-relaxed">
         {{ binaryPreviewValue(selectedResult!.parsed!.value, selectedResult!.parsed!.negative) }}
       </div>
     </div>

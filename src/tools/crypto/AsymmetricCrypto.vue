@@ -445,24 +445,24 @@ function handleClear() {
     <div class="mb-4">
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
-          <label class="block text-[0.8125rem] text-muted font-medium">公钥</label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium">公钥</label>
           <CopyButton v-if="publicKeyText" :text="publicKeyText" size="md"/>
         </div>
         <textarea
             v-model="publicKeyText"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="5"
             placeholder="公钥将显示在这里，或粘贴已有公钥"
         ></textarea>
       </div>
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
-          <label class="block text-[0.8125rem] text-muted font-medium">私钥</label>
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium">私钥</label>
           <CopyButton v-if="privateKeyText" :text="privateKeyText" size="md"/>
         </div>
         <textarea
             v-model="privateKeyText"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="5"
             placeholder="私钥将显示在这里，或粘贴已有私钥"
         ></textarea>
@@ -472,7 +472,7 @@ function handleClear() {
     <!-- 操作按钮行 -->
     <div class="flex gap-2 items-center mb-4">
       <button
-          class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
           :disabled="isProcessing || isDisabled"
           @click="handleAction"
       >
@@ -493,10 +493,10 @@ function handleClear() {
     <!-- 操作模式输入区域（仅非生成模式显示） -->
     <div v-if="mode !== 'generate'" class="mb-4">
       <div class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">{{ inputLabel }}</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">{{ inputLabel }}</label>
         <textarea
             v-model="inputText"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="4"
             :placeholder="inputPlaceholder"
         ></textarea>
@@ -504,10 +504,10 @@ function handleClear() {
 
       <!-- 验签模式额外需要签名输入 -->
       <div v-if="mode === 'verify'" class="mb-3">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">签名</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">签名</label>
         <textarea
             v-model="signatureText"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="3"
             :placeholder="`输入 ${dataFormat === 'base64' ? 'Base64' : 'Hex'} 编码的签名`"
         ></textarea>
@@ -529,7 +529,7 @@ function handleClear() {
       >
         <code
             class="font-mono text-[0.8125rem] break-all"
-            :class="outputText.startsWith('✓') ? 'text-success' : outputText.startsWith('✗') ? 'text-error' : 'text-text'"
+            :class="outputText.startsWith('✓') ? 'text-success' : outputText.startsWith('✗') ? 'text-error' : 'text-foreground'"
         >
           {{ outputText }}
         </code>
@@ -538,9 +538,9 @@ function handleClear() {
 
     <!-- 算法说明 -->
     <div class="border-t border-border pt-4">
-      <h3 class="text-[0.8125rem] text-muted font-medium">算法说明</h3>
+      <h3 class="text-[0.8125rem] text-muted-foreground font-medium">算法说明</h3>
       <div class="pt-2">
-        <div class="text-[0.8125rem] text-muted leading-relaxed space-y-2">
+        <div class="text-[0.8125rem] text-muted-foreground leading-relaxed space-y-2">
           <p class="m-0">
             <strong>RSA-OAEP</strong>：基于 RSA 的加密算法，使用公钥加密、私钥解密。支持 2048/3072/4096 位密钥长度和
             SHA-256/384/512 哈希。

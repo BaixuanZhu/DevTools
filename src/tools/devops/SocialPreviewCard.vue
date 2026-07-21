@@ -72,18 +72,18 @@ function onImgError(): void {
     <!-- Facebook：域名 + 大图 + 标题 + 描述 + 底栏 favicon 圆点 + siteName -->
     <div v-if="platform === 'facebook'" class="max-w-[500px]">
       <div class="text-[0.6875rem] text-[#65676b] uppercase tracking-wide truncate">{{ hostname }}</div>
-      <div v-if="hasImage" class="aspect-[16/9] w-full bg-hover overflow-hidden mt-1.5">
+      <div v-if="hasImage" class="aspect-[16/9] w-full bg-accent overflow-hidden mt-1.5">
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
-      <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted mt-1.5">
+      <div v-else class="aspect-[16/9] w-full bg-accent flex flex-col items-center justify-center gap-2 text-muted-foreground mt-1.5">
         <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
-      <div class="bg-hover px-3 pt-2.5 pb-3">
-        <div class="text-[1.0625rem] font-bold leading-snug break-words" :class="isTitlePlaceholder ? 'text-muted' : 'text-text'">{{ titleText }}</div>
+      <div class="bg-accent px-3 pt-2.5 pb-3">
+        <div class="text-[1.0625rem] font-bold leading-snug break-words" :class="isTitlePlaceholder ? 'text-muted-foreground' : 'text-foreground'">{{ titleText }}</div>
         <p class="text-[0.8125rem] text-[#65676b] leading-snug m-0 mt-1 line-clamp-2 break-words">{{ descText }}</p>
         <div class="flex items-center gap-2 mt-2">
-          <span class="inline-block w-3.5 h-3.5 rounded-full bg-accent shrink-0"></span>
+          <span class="inline-block w-3.5 h-3.5 rounded-full bg-primary shrink-0"></span>
           <span class="text-[0.75rem] text-[#65676b] truncate">{{ siteText }}</span>
         </div>
       </div>
@@ -91,16 +91,16 @@ function onImgError(): void {
 
     <!-- X (Twitter) summary_large_image：大图 + 域名 + 标题 + 描述 -->
     <div v-else-if="platform === 'x'" class="max-w-[500px]">
-      <div v-if="hasImage" class="aspect-[16/9] w-full bg-hover overflow-hidden rounded-t-sm">
+      <div v-if="hasImage" class="aspect-[16/9] w-full bg-accent overflow-hidden rounded-t-sm">
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
-      <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted rounded-t-sm">
+      <div v-else class="aspect-[16/9] w-full bg-accent flex flex-col items-center justify-center gap-2 text-muted-foreground rounded-t-sm">
         <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
       <div class="border border-border border-t-0 rounded-b-sm px-3 py-2">
         <div class="text-[0.75rem] text-[#536471] truncate">{{ hostname }}</div>
-        <div class="text-[0.9375rem] font-bold leading-snug break-words mt-0.5" :class="isTitlePlaceholder ? 'text-muted' : 'text-text'">{{ titleText }}</div>
+        <div class="text-[0.9375rem] font-bold leading-snug break-words mt-0.5" :class="isTitlePlaceholder ? 'text-muted-foreground' : 'text-foreground'">{{ titleText }}</div>
         <p class="text-[0.8125rem] text-[#536471] leading-snug m-0 mt-0.5 line-clamp-2 break-words">{{ descText }}</p>
       </div>
     </div>
@@ -109,10 +109,10 @@ function onImgError(): void {
     <div v-else-if="platform === 'wechat'" class="max-w-[420px]">
       <div class="flex bg-[#f7f7f7] rounded-lg overflow-hidden p-3 gap-3">
         <div class="flex-1 min-w-0 pr-1">
-          <div class="text-[0.9375rem] font-semibold leading-snug text-text line-clamp-2 break-words">{{ titleText }}</div>
+          <div class="text-[0.9375rem] font-semibold leading-snug text-foreground line-clamp-2 break-words">{{ titleText }}</div>
           <p class="text-[0.8125rem] text-[#888888] leading-snug m-0 mt-1.5 truncate break-words">{{ descText }}</p>
         </div>
-        <div class="w-20 h-20 shrink-0 bg-hover overflow-hidden flex items-center justify-center text-muted">
+        <div class="w-20 h-20 shrink-0 bg-accent overflow-hidden flex items-center justify-center text-muted-foreground">
           <img v-if="hasImage" :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
           <Image v-else :size="22" :stroke-width="1.6" />
         </div>
@@ -121,16 +121,16 @@ function onImgError(): void {
 
     <!-- LinkedIn：大图 + 标题 + 描述 + 域名，紧凑 -->
     <div v-else-if="platform === 'linkedin'" class="max-w-[500px]">
-      <div v-if="hasImage" class="aspect-[16/9] w-full bg-hover overflow-hidden">
+      <div v-if="hasImage" class="aspect-[16/9] w-full bg-accent overflow-hidden">
         <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
       </div>
-      <div v-else class="aspect-[16/9] w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted">
+      <div v-else class="aspect-[16/9] w-full bg-accent flex flex-col items-center justify-center gap-2 text-muted-foreground">
         <Image :size="28" :stroke-width="1.6" />
         <span class="text-[0.75rem]">暂无预览图</span>
       </div>
       <div class="border border-border border-t-0 px-3 py-2">
         <div class="text-[0.75rem] text-[#00000099] truncate">{{ hostname }}</div>
-        <div class="text-[0.9375rem] font-semibold leading-snug break-words mt-0.5" :class="isTitlePlaceholder ? 'text-muted' : 'text-text'">{{ titleText }}</div>
+        <div class="text-[0.9375rem] font-semibold leading-snug break-words mt-0.5" :class="isTitlePlaceholder ? 'text-muted-foreground' : 'text-foreground'">{{ titleText }}</div>
         <p class="text-[0.8125rem] text-[#00000099] leading-snug m-0 mt-0.5 line-clamp-2 break-words">{{ descText }}</p>
       </div>
     </div>
@@ -143,10 +143,10 @@ function onImgError(): void {
           <div class="text-[0.9375rem] font-semibold text-[#38a1db] leading-snug break-words mt-1">{{ titleText }}</div>
           <p class="text-[0.8125rem] text-[#707579] leading-snug m-0 mt-1 break-words line-clamp-2">{{ descText }}</p>
         </div>
-        <div v-if="hasImage" class="aspect-[16/9] w-full bg-hover overflow-hidden mt-2.5">
+        <div v-if="hasImage" class="aspect-[16/9] w-full bg-accent overflow-hidden mt-2.5">
           <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
         </div>
-        <div v-else class="h-32 w-full bg-hover flex flex-col items-center justify-center gap-2 text-muted mt-2.5">
+        <div v-else class="h-32 w-full bg-accent flex flex-col items-center justify-center gap-2 text-muted-foreground mt-2.5">
           <Image :size="28" :stroke-width="1.6" />
           <span class="text-[0.75rem]">暂无预览图</span>
         </div>
@@ -158,7 +158,7 @@ function onImgError(): void {
       <div class="border-l-4 border-[#1d9bd1] pl-3 py-1">
         <div class="text-[0.9375rem] font-bold text-[#1d9bd1] leading-snug break-words">{{ titleText }}</div>
         <p class="text-[0.8125rem] text-[#1d1c1d] leading-snug m-0 mt-1 break-words line-clamp-2">{{ descText }}</p>
-        <div v-if="hasImage" class="mt-2 max-h-50 overflow-hidden rounded-sm bg-hover">
+        <div v-if="hasImage" class="mt-2 max-h-50 overflow-hidden rounded-sm bg-accent">
           <img :src="data.imageUrl" :alt="imgAlt" loading="lazy" class="w-full h-full object-cover" @error="onImgError" />
         </div>
         <div class="text-[0.75rem] text-[#616061] truncate mt-2">{{ hostname }}</div>

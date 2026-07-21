@@ -96,21 +96,21 @@ watch([startIP, endIP], () => {
     <!-- 输入区域 -->
     <div class="grid grid-cols-2 gap-3 mb-3 max-sm:grid-cols-1">
       <div>
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">起始 IP 地址</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">起始 IP 地址</label>
         <input
           v-model="startIP"
           type="text"
           placeholder="如 192.168.0.0"
-          class="w-full px-4 py-2 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
       <div>
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">结束 IP 地址</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">结束 IP 地址</label>
         <input
           v-model="endIP"
           type="text"
           placeholder="如 192.168.1.255"
-          class="w-full px-4 py-2 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
     </div>
@@ -128,20 +128,20 @@ watch([startIP, endIP], () => {
       <!-- 摘要卡片 -->
       <div class="grid grid-cols-4 gap-2 max-sm:grid-cols-2">
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">起始 IP</span>
-          <span class="text-sm text-text font-mono">{{ rangeResult.startIP }}</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">起始 IP</span>
+          <span class="text-sm text-foreground font-mono">{{ rangeResult.startIP }}</span>
         </div>
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">结束 IP</span>
-          <span class="text-sm text-text font-mono">{{ rangeResult.endIP }}</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">结束 IP</span>
+          <span class="text-sm text-foreground font-mono">{{ rangeResult.endIP }}</span>
         </div>
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">IP 总数</span>
-          <span class="text-sm text-text font-mono">{{ formatNumber(rangeResult.totalIPs) }}</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">IP 总数</span>
+          <span class="text-sm text-foreground font-mono">{{ formatNumber(rangeResult.totalIPs) }}</span>
         </div>
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">CIDR 块数</span>
-          <span class="text-sm text-text font-mono">{{ rangeResult.cidrs.length }}</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">CIDR 块数</span>
+          <span class="text-sm text-foreground font-mono">{{ rangeResult.cidrs.length }}</span>
         </div>
       </div>
 
@@ -149,16 +149,16 @@ watch([startIP, endIP], () => {
       <div class="border border-border rounded-md bg-card">
         <!-- 列表头 -->
         <div class="flex items-center justify-between px-4 py-2 border-b border-border">
-          <span class="text-[0.8125rem] font-semibold text-text">CIDR 块列表</span>
+          <span class="text-[0.8125rem] font-semibold text-foreground">CIDR 块列表</span>
           <CopyButton :text="allCidrsText" />
         </div>
 
         <!-- 列表表头 -->
-        <div class="grid grid-cols-[28px_1fr_1fr_auto_auto] items-center gap-4 px-4 py-1.5 border-b border-border bg-surface">
-          <span class="text-[0.6875rem] font-semibold text-muted">#</span>
-          <span class="text-[0.6875rem] font-semibold text-muted">CIDR 表示法</span>
-          <span class="text-[0.6875rem] font-semibold text-muted">子网掩码</span>
-          <span class="text-[0.6875rem] font-semibold text-muted text-right">IP 数量</span>
+        <div class="grid grid-cols-[28px_1fr_1fr_auto_auto] items-center gap-4 px-4 py-1.5 border-b border-border bg-background">
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground">#</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground">CIDR 表示法</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground">子网掩码</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground text-right">IP 数量</span>
           <span class="min-w-12"></span>
         </div>
 
@@ -167,19 +167,19 @@ watch([startIP, endIP], () => {
           <div
             v-for="(block, index) in rangeResult.cidrs"
             :key="index"
-            class="grid grid-cols-[28px_1fr_1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-b border-border last:border-b-0 hover:bg-hover transition-[background-color] duration-150"
+            class="grid grid-cols-[28px_1fr_1fr_auto_auto] items-center gap-4 px-4 py-2.5 border-b border-border last:border-b-0 hover:bg-accent transition-[background-color] duration-150"
           >
             <!-- 序号 -->
-            <span class="text-xs text-muted text-right">{{ index + 1 }}</span>
+            <span class="text-xs text-muted-foreground text-right">{{ index + 1 }}</span>
 
             <!-- CIDR 表示法 -->
-            <code class="text-[0.8125rem] text-text font-mono font-semibold">{{ block.cidr }}</code>
+            <code class="text-[0.8125rem] text-foreground font-mono font-semibold">{{ block.cidr }}</code>
 
             <!-- 子网掩码 -->
-            <code class="text-[0.8125rem] text-muted font-mono">{{ formatIPv4(prefixToMask(block.prefix)) }}</code>
+            <code class="text-[0.8125rem] text-muted-foreground font-mono">{{ formatIPv4(prefixToMask(block.prefix)) }}</code>
 
             <!-- 主机数 -->
-            <span class="text-[0.8125rem] text-muted text-right">{{ formatNumber(block.hostCount) }} 个 IP</span>
+            <span class="text-[0.8125rem] text-muted-foreground text-right">{{ formatNumber(block.hostCount) }} 个 IP</span>
 
             <!-- 复制单个 -->
             <CopyButton :text="block.cidr" />

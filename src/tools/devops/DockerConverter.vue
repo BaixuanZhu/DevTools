@@ -142,7 +142,7 @@ const unsupportedHint = computed(() => unsupportedCount.value > 0
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
       <template #actions>
         <button
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-sm bg-card text-muted text-[0.8125rem] cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+          class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-sm bg-card text-muted-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
           @click="handleSwap"
         >
           <span>⇄</span>
@@ -160,7 +160,7 @@ const unsupportedHint = computed(() => unsupportedCount.value > 0
         >
           <textarea
             v-model="leftValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="12"
             placeholder="输入 docker run 命令..."
             spellcheck="false"
@@ -178,7 +178,7 @@ const unsupportedHint = computed(() => unsupportedCount.value > 0
         >
           <textarea
             v-model="rightValue"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="12"
             placeholder="输入 docker compose 配置..."
             spellcheck="false"
@@ -189,7 +189,7 @@ const unsupportedHint = computed(() => unsupportedCount.value > 0
 
     <div class="mx-auto w-full max-w-[1600px] mt-4 text-center">
       <p v-if="errorMsg" class="text-error text-[0.8125rem] m-0">{{ errorMsg }}</p>
-      <p v-if="unsupportedHint" class="text-[0.75rem] text-muted m-0 mt-1">{{ unsupportedHint }}</p>
+      <p v-if="unsupportedHint" class="text-[0.75rem] text-muted-foreground m-0 mt-1">{{ unsupportedHint }}</p>
     </div>
   </div>
 </template>

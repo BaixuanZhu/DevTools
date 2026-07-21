@@ -28,27 +28,27 @@ const groupedFlags = computed(() => {
       :key="group.category"
       class="mb-6"
     >
-      <h3 class="text-[0.8125rem] font-medium text-muted mb-2">{{ group.category }}</h3>
+      <h3 class="text-[0.8125rem] font-medium text-muted-foreground mb-2">{{ group.category }}</h3>
 
       <div class="border border-border rounded-sm overflow-hidden">
         <table class="w-full border-collapse">
           <thead>
-            <tr class="bg-hover border-b border-border">
-              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted w-1/4">Flag</th>
-              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted w-1/3">说明</th>
-              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted">示例</th>
-              <th class="px-4 py-2 text-right text-[0.8125rem] font-medium text-muted w-16">操作</th>
+            <tr class="bg-accent border-b border-border">
+              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted-foreground w-1/4">Flag</th>
+              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted-foreground w-1/3">说明</th>
+              <th class="px-4 py-2 text-left text-[0.8125rem] font-medium text-muted-foreground">示例</th>
+              <th class="px-4 py-2 text-right text-[0.8125rem] font-medium text-muted-foreground w-16">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="item in group.items"
               :key="item.flag"
-              class="border-b border-border last:border-b-0 bg-card transition-[background-color] duration-150 hover:bg-hover"
+              class="border-b border-border last:border-b-0 bg-card transition-[background-color] duration-150 hover:bg-accent"
             >
-              <td class="px-4 py-2.5 font-mono text-sm text-text align-top">{{ item.flag }}</td>
-              <td class="px-4 py-2.5 text-[0.8125rem] text-text align-top">{{ item.description }}</td>
-              <td class="px-4 py-2.5 font-mono text-sm text-muted align-top whitespace-pre-wrap break-all">{{ item.example }}</td>
+              <td class="px-4 py-2.5 font-mono text-sm text-foreground align-top">{{ item.flag }}</td>
+              <td class="px-4 py-2.5 text-[0.8125rem] text-foreground align-top">{{ item.description }}</td>
+              <td class="px-4 py-2.5 font-mono text-sm text-muted-foreground align-top whitespace-pre-wrap break-all">{{ item.example }}</td>
               <td class="px-4 py-2.5 text-right align-top">
                 <CopyButton
                   :text="item.example"

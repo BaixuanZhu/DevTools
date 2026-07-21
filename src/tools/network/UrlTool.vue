@@ -18,11 +18,11 @@ const DEFAULT_INPUT = 'https://example.com/search?q=你好世界&lang=zh-CN';
 
 /** Primary 按钮 class */
 const BTN_PRIMARY_CLASS =
-  'px-4 py-2 border border-accent rounded-sm bg-accent text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
+  'px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
 
 /** 次要按钮 class */
 const BTN_SECONDARY_CLASS =
-  'px-3 py-1.5 border border-border rounded-sm bg-card text-text text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-hover hover:border-accent';
+  'px-3 py-1.5 border border-border rounded-sm bg-card text-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color] duration-150 hover:bg-accent hover:border-primary';
 
 const input = ref(DEFAULT_INPUT);
 const currentAction = ref<'encode' | 'decode'>('encode');
@@ -115,13 +115,13 @@ function applyParams() {
 
     <!-- 输入层 -->
     <div class="mb-4">
-      <label class="block text-[0.8125rem] text-muted font-medium mb-1.5">URL</label>
+      <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1.5">URL</label>
       <div class="flex items-start gap-3">
         <textarea
           v-model="input"
           rows="2"
           placeholder="输入 URL，如 https://example.com/search?q=test"
-          class="flex-1 px-4 py-2.5 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-accent resize-none"
+          class="flex-1 px-4 py-2.5 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-primary resize-none"
         ></textarea>
         <ClearButton @clear="handleClear" />
       </div>
@@ -149,35 +149,35 @@ function applyParams() {
       <div v-if="currentAction === 'encode'" class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted">URL 组件编码</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground">URL 组件编码</span>
             <CopyButton :text="encodeResult?.component.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult?.component.value ?? '' }}</code>
+          <code class="block px-3 py-2 bg-background border border-border rounded-sm text-xs text-foreground font-mono break-all">{{ encodeResult?.component.value ?? '' }}</code>
         </div>
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted">URL 整体编码</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground">URL 整体编码</span>
             <CopyButton :text="encodeResult?.full.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ encodeResult?.full.value ?? '' }}</code>
+          <code class="block px-3 py-2 bg-background border border-border rounded-sm text-xs text-foreground font-mono break-all">{{ encodeResult?.full.value ?? '' }}</code>
         </div>
       </div>
 
       <div v-else class="flex flex-col gap-3">
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted">URL 组件解码</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground">URL 组件解码</span>
             <CopyButton :text="decodeResult?.component.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult?.component.value ?? '' }}</code>
+          <code class="block px-3 py-2 bg-background border border-border rounded-sm text-xs text-foreground font-mono break-all">{{ decodeResult?.component.value ?? '' }}</code>
           <p v-if="decodeResult?.component.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.component.error }}</p>
         </div>
         <div class="flex flex-col gap-1">
           <div class="flex items-center justify-between">
-            <span class="text-[0.6875rem] font-semibold text-muted">URL 整体解码</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground">URL 整体解码</span>
             <CopyButton :text="decodeResult?.full.value ?? ''" size="sm" />
           </div>
-          <code class="block px-3 py-2 bg-surface border border-border rounded-sm text-xs text-text font-mono break-all">{{ decodeResult?.full.value ?? '' }}</code>
+          <code class="block px-3 py-2 bg-background border border-border rounded-sm text-xs text-foreground font-mono break-all">{{ decodeResult?.full.value ?? '' }}</code>
           <p v-if="decodeResult?.full.error" class="text-error text-[0.75rem] m-0">{{ decodeResult.full.error }}</p>
         </div>
       </div>
@@ -185,7 +185,7 @@ function applyParams() {
 
     <!-- 结构化解析层 -->
     <div class="p-4 border border-border rounded-sm bg-card">
-      <h3 class="text-[0.8125rem] text-muted font-medium mb-3">结构化解析</h3>
+      <h3 class="text-[0.8125rem] text-muted-foreground font-medium mb-3">结构化解析</h3>
 
       <p v-if="parseError" class="text-error text-[0.8125rem] m-0 mb-3">{{ parseError }}</p>
 
@@ -202,11 +202,11 @@ function applyParams() {
               { label: 'Hash', value: parsed.hash || '-' },
             ]"
             :key="item.label"
-            class="flex flex-col gap-1 px-3 py-2 border border-border rounded-sm bg-surface"
+            class="flex flex-col gap-1 px-3 py-2 border border-border rounded-sm bg-background"
           >
-            <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">{{ item.label }}</span>
+            <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">{{ item.label }}</span>
             <div class="flex items-center gap-2">
-              <code class="text-xs text-text font-mono break-all flex-1">{{ item.value }}</code>
+              <code class="text-xs text-foreground font-mono break-all flex-1">{{ item.value }}</code>
               <CopyButton v-if="item.value !== '-'" :text="item.value" size="sm" />
             </div>
           </div>
@@ -214,11 +214,11 @@ function applyParams() {
 
         <div>
           <div class="flex items-center justify-between mb-2">
-            <h4 class="text-[0.75rem] font-semibold text-muted uppercase tracking-wide">Query 参数</h4>
+            <h4 class="text-[0.75rem] font-semibold text-muted-foreground uppercase tracking-wide">Query 参数</h4>
             <button type="button" :class="BTN_SECONDARY_CLASS" @click="addParam">+ 添加</button>
           </div>
 
-          <div v-if="params.length === 0" class="text-[0.8125rem] text-muted">暂无 query 参数</div>
+          <div v-if="params.length === 0" class="text-[0.8125rem] text-muted-foreground">暂无 query 参数</div>
 
           <div v-else class="flex flex-col gap-2">
             <div v-for="(_, index) in params" :key="index" class="flex items-center gap-2">
@@ -226,17 +226,17 @@ function applyParams() {
                 v-model="params[index].key"
                 type="text"
                 placeholder="key"
-                class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 outline-none focus:border-accent"
+                class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 outline-none focus:border-primary"
               />
               <input
                 v-model="params[index].value"
                 type="text"
                 placeholder="value"
-                class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 outline-none focus:border-accent"
+                class="flex-1 min-w-0 px-3 py-1.5 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 outline-none focus:border-primary"
               />
               <button
                 type="button"
-                class="px-2 py-1.5 text-[0.75rem] rounded-sm border border-border bg-card text-error hover:bg-hover transition-colors"
+                class="px-2 py-1.5 text-[0.75rem] rounded-sm border border-border bg-card text-error hover:bg-accent transition-colors"
                 @click="removeParam(index)"
               >
                 删除

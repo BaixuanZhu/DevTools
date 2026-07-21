@@ -155,8 +155,8 @@ function handleDownload() {
         <!-- 文件上传区域 -->
         <div class="mb-3">
           <div
-            class="border-dashed border-2 border-border rounded-md p-4 text-center cursor-pointer hover:border-accent hover:bg-hover transition-[border-color,background-color] duration-150"
-            :class="{ 'border-accent bg-hover': isDragging }"
+            class="border-dashed border-2 border-border rounded-md p-4 text-center cursor-pointer hover:border-primary hover:bg-accent transition-[border-color,background-color] duration-150"
+            :class="{ 'border-primary bg-accent': isDragging }"
             @dragover.prevent="isDragging = true"
             @dragleave="isDragging = false"
             @drop.prevent="handleDrop"
@@ -164,37 +164,37 @@ function handleDownload() {
           >
             <input ref="fileInputRef" type="file" accept=".txt" class="hidden" @change="handleFile" />
             <template v-if="fileName">
-              <span class="text-[0.8125rem] text-text">📄 {{ fileName }}</span>
+              <span class="text-[0.8125rem] text-foreground">📄 {{ fileName }}</span>
             </template>
             <template v-else>
-              <span class="text-muted text-sm">拖拽 txt 文件到这里或点击上传</span>
-              <span class="text-muted text-[0.75rem] block mt-1">支持最大 40MB 的 txt 文件</span>
+              <span class="text-muted-foreground text-sm">拖拽 txt 文件到这里或点击上传</span>
+              <span class="text-muted-foreground text-[0.75rem] block mt-1">支持最大 40MB 的 txt 文件</span>
             </template>
           </div>
         </div>
 
-        <div class="text-center text-muted text-sm my-1">— 或 —</div>
+        <div class="text-center text-muted-foreground text-sm my-1">— 或 —</div>
 
         <!-- Base64 输入 -->
         <div class="mb-3">
-          <label class="block text-[0.8125rem] text-muted font-medium mb-1">
+          <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">
             Base64 字符串
           </label>
           <textarea
             v-model="input"
-            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-text bg-card resize-y box-border focus:outline-none focus:border-accent"
+            class="w-full px-4 py-2 border border-border rounded-sm text-sm font-mono text-foreground bg-card resize-y box-border focus:outline-none focus:border-primary"
             rows="6"
             placeholder="粘贴 Base64 字符串或 data:image/...;base64,... 格式"
           ></textarea>
         </div>
 
-        <p class="text-muted text-[0.75rem] m-0 mb-3">
+        <p class="text-muted-foreground text-[0.75rem] m-0 mb-3">
           提示：粘贴过大的 Base64 字符串可能导致页面响应缓慢，建议上传 txt 文件替代
         </p>
 
         <div class="flex gap-2 items-center">
           <button
-            class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
             :disabled="isLoading"
             @click="decode"
           >
@@ -208,7 +208,7 @@ function handleDownload() {
 
       <template #output>
         <div v-if="result">
-          <div class="mb-3 p-3 border border-border rounded-sm bg-hover">
+          <div class="mb-3 p-3 border border-border rounded-sm bg-accent">
             <img
               :src="result.objectUrl"
               alt="解码图片"
@@ -218,22 +218,22 @@ function handleDownload() {
 
           <div class="flex flex-col gap-1.5 mb-3">
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-15">尺寸：</span>
-              <span class="text-text">{{ result.width }} × {{ result.height }}</span>
+              <span class="text-muted-foreground min-w-15">尺寸：</span>
+              <span class="text-foreground">{{ result.width }} × {{ result.height }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-15">大小：</span>
-              <span class="text-text">{{ result.sizeFormatted }}</span>
+              <span class="text-muted-foreground min-w-15">大小：</span>
+              <span class="text-foreground">{{ result.sizeFormatted }}</span>
             </div>
             <div class="flex items-center gap-2 text-[0.8125rem]">
-              <span class="text-muted min-w-15">格式：</span>
-              <span class="text-text">{{ result.mimeType }}</span>
+              <span class="text-muted-foreground min-w-15">格式：</span>
+              <span class="text-foreground">{{ result.mimeType }}</span>
             </div>
           </div>
 
           <div class="flex gap-2 items-center">
             <button
-              class="px-4 py-2 bg-accent text-white border border-accent rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
               @click="handleDownload"
             >
               下载图片
@@ -245,7 +245,7 @@ function handleDownload() {
           </div>
         </div>
 
-        <div v-else class="text-muted text-sm py-8 text-center">
+        <div v-else class="text-muted-foreground text-sm py-8 text-center">
           输入 Base64 字符串后点击「解析图片」查看结果
         </div>
       </template>

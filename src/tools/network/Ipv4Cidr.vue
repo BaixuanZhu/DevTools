@@ -78,14 +78,14 @@ watch(cidrInput, (val) => {
     />
 
     <!-- CIDR 术语说明 -->
-    <div class="mb-5 px-4 py-3 border border-border rounded-sm bg-card text-[0.8125rem] text-muted leading-relaxed">
+    <div class="mb-5 px-4 py-3 border border-border rounded-sm bg-card text-[0.8125rem] text-muted-foreground leading-relaxed">
       <p class="m-0 mb-2">
-        <strong class="text-text">CIDR</strong>（Classless Inter-Domain Routing，无类别域间路由）是一种用
-        <code class="px-1 py-0.5 bg-surface rounded-sm font-mono text-[0.75rem] text-accent">IP地址/前缀长度</code>
+        <strong class="text-foreground">CIDR</strong>（Classless Inter-Domain Routing，无类别域间路由）是一种用
+        <code class="px-1 py-0.5 bg-background rounded-sm font-mono text-[0.75rem] text-primary">IP地址/前缀长度</code>
         表示子网的方式。前缀长度表示网络位有多少位，剩余的则是主机位。
       </p>
       <p class="m-0">
-        例如 <code class="px-1 py-0.5 bg-surface rounded-sm font-mono text-[0.75rem] text-accent">192.168.1.0/24</code>
+        例如 <code class="px-1 py-0.5 bg-background rounded-sm font-mono text-[0.75rem] text-primary">192.168.1.0/24</code>
         表示前 24 位是网络地址（对应子网掩码 255.255.255.0），剩余 8 位用于主机寻址，可用主机数为 254。
         前缀越小子网越大：/16 可容纳 65534 台主机，/28 仅 14 台。
       </p>
@@ -94,12 +94,12 @@ watch(cidrInput, (val) => {
     <!-- 输入区域 -->
     <div class="flex items-start gap-3 mb-3">
       <div class="flex-1">
-        <label class="block text-[0.8125rem] text-muted font-medium mb-1">CIDR 地址</label>
+        <label class="block text-[0.8125rem] text-muted-foreground font-medium mb-1">CIDR 地址</label>
         <input
           v-model="cidrInput"
           type="text"
           placeholder="输入 CIDR 地址，如 192.168.1.0/24"
-          class="w-full px-4 py-2 border border-border rounded-sm bg-surface text-text text-[0.8125rem] font-mono placeholder:text-muted/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-accent"
+          class="w-full px-4 py-2 border border-border rounded-sm bg-background text-foreground text-[0.8125rem] font-mono placeholder:text-muted-foreground/60 placeholder:font-sans outline-none transition-[border-color] duration-150 focus:border-primary"
         />
       </div>
       <ClearButton @clear="handleClear" class="mt-6" />
@@ -114,69 +114,69 @@ watch(cidrInput, (val) => {
       <div class="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
         <!-- 网络地址 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">网络地址</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">网络地址</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.networkAddress }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.networkAddress }}</span>
             <CopyButton :text="subnetInfo.networkAddress" />
           </div>
         </div>
 
         <!-- 广播地址 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">广播地址</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">广播地址</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.broadcastAddress }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.broadcastAddress }}</span>
             <CopyButton :text="subnetInfo.broadcastAddress" />
           </div>
         </div>
 
         <!-- 子网掩码 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">子网掩码</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.subnetMask }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.subnetMask }}</span>
             <CopyButton :text="subnetInfo.subnetMask" />
           </div>
         </div>
 
         <!-- 通配符掩码 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">通配符掩码</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">通配符掩码</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.wildcardMask }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.wildcardMask }}</span>
             <CopyButton :text="subnetInfo.wildcardMask" />
           </div>
         </div>
 
         <!-- 第一个可用主机 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">第一个可用主机</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">第一个可用主机</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.firstHost }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.firstHost }}</span>
             <CopyButton :text="subnetInfo.firstHost" />
           </div>
         </div>
 
         <!-- 最后一个可用主机 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">最后一个可用主机</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">最后一个可用主机</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.lastHost }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.lastHost }}</span>
             <CopyButton :text="subnetInfo.lastHost" />
           </div>
         </div>
 
         <!-- 可用主机数 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">可用主机数</span>
-          <span class="text-sm text-text font-mono">{{ formatNumber(subnetInfo.usableHosts) }}</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">可用主机数</span>
+          <span class="text-sm text-foreground font-mono">{{ formatNumber(subnetInfo.usableHosts) }}</span>
         </div>
 
         <!-- IP 范围 -->
         <div class="flex flex-col gap-1 px-4 py-2.5 border border-border rounded-sm bg-card">
-          <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">IP 范围</span>
+          <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">IP 范围</span>
           <div class="flex items-center gap-2">
-            <span class="text-sm text-text font-mono">{{ subnetInfo.ipRange }}</span>
+            <span class="text-sm text-foreground font-mono">{{ subnetInfo.ipRange }}</span>
             <CopyButton :text="subnetInfo.ipRange" />
           </div>
         </div>
@@ -184,24 +184,24 @@ watch(cidrInput, (val) => {
 
       <!-- 二进制表示 -->
       <div class="border-t border-border pt-4">
-        <h3 class="text-[0.8125rem] text-muted font-medium">二进制表示</h3>
+        <h3 class="text-[0.8125rem] text-muted-foreground font-medium">二进制表示</h3>
         <div class="pt-2">
           <div class="grid grid-cols-1 gap-2">
             <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">网络地址</span>
-              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.networkBinary }}</code>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">网络地址</span>
+              <code class="text-xs text-foreground font-mono break-all">{{ subnetInfo.networkBinary }}</code>
             </div>
             <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</span>
-              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.maskBinary }}</code>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">子网掩码</span>
+              <code class="text-xs text-foreground font-mono break-all">{{ subnetInfo.maskBinary }}</code>
             </div>
             <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">通配符掩码</span>
-              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.wildcardBinary }}</code>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">通配符掩码</span>
+              <code class="text-xs text-foreground font-mono break-all">{{ subnetInfo.wildcardBinary }}</code>
             </div>
             <div class="flex flex-col gap-1 px-4 py-2 border border-border rounded-sm bg-card">
-              <span class="text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">广播地址</span>
-              <code class="text-xs text-text font-mono break-all">{{ subnetInfo.broadcastBinary }}</code>
+              <span class="text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">广播地址</span>
+              <code class="text-xs text-foreground font-mono break-all">{{ subnetInfo.broadcastBinary }}</code>
             </div>
           </div>
         </div>
@@ -209,16 +209,16 @@ watch(cidrInput, (val) => {
 
       <!-- CIDR 前缀长度参考 -->
       <div class="border-t border-border pt-4">
-        <h3 class="text-[0.8125rem] text-muted font-medium">CIDR 前缀长度参考</h3>
+        <h3 class="text-[0.8125rem] text-muted-foreground font-medium">CIDR 前缀长度参考</h3>
         <div class="pt-2">
           <div class="overflow-x-auto">
             <table class="w-full text-[0.8125rem]">
               <thead>
                 <tr class="border-b border-border text-left">
-                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">前缀</th>
-                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide">子网掩码</th>
-                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">可用主机</th>
-                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted uppercase tracking-wide text-right">总 IP 数</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">前缀</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide">子网掩码</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide text-right">可用主机</th>
+                  <th class="px-3 py-2 text-[0.6875rem] font-semibold text-muted-foreground uppercase tracking-wide text-right">总 IP 数</th>
                 </tr>
               </thead>
               <tbody>
@@ -228,14 +228,14 @@ watch(cidrInput, (val) => {
                   :class="[
                     'border-b border-border last:border-b-0 transition-[background-color] duration-150',
                     subnetInfo && row.prefix === subnetInfo.prefix
-                      ? 'bg-accent/5'
-                      : 'hover:bg-hover',
+                      ? 'bg-primary/5'
+                      : 'hover:bg-accent',
                   ]"
                 >
-                  <td class="px-3 py-1.5 font-mono font-semibold text-accent">/{{ row.prefix }}</td>
-                  <td class="px-3 py-1.5 font-mono text-text">{{ row.mask }}</td>
-                  <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.hosts) }}</td>
-                  <td class="px-3 py-1.5 text-right font-mono text-text">{{ formatNumber(row.total) }}</td>
+                  <td class="px-3 py-1.5 font-mono font-semibold text-primary">/{{ row.prefix }}</td>
+                  <td class="px-3 py-1.5 font-mono text-foreground">{{ row.mask }}</td>
+                  <td class="px-3 py-1.5 text-right font-mono text-foreground">{{ formatNumber(row.hosts) }}</td>
+                  <td class="px-3 py-1.5 text-right font-mono text-foreground">{{ formatNumber(row.total) }}</td>
                 </tr>
               </tbody>
             </table>

@@ -129,7 +129,7 @@ onBeforeUnmount(() => {
     <!-- 输入区：点击/拖拽/粘贴三合一 -->
     <div
       class="border-2 border-dashed rounded-md p-8 text-center cursor-pointer transition-[border-color,background-color] duration-150"
-      :class="isDragging ? 'border-accent bg-hover' : 'border-border bg-card hover:border-accent'"
+      :class="isDragging ? 'border-primary bg-accent' : 'border-border bg-card hover:border-primary'"
       role="button"
       tabindex="0"
       aria-label="点击选择、拖拽或 Ctrl+V 粘贴二维码图片"
@@ -141,8 +141,8 @@ onBeforeUnmount(() => {
       @drop.prevent="handleDrop"
     >
       <div class="text-4xl mb-3">📷</div>
-      <p class="text-sm text-text m-0">拖拽图片到这里，或点击选择</p>
-      <p class="text-[0.75rem] text-muted mt-1 m-0">也可按 Ctrl+V 粘贴截图</p>
+      <p class="text-sm text-foreground m-0">拖拽图片到这里，或点击选择</p>
+      <p class="text-[0.75rem] text-muted-foreground mt-1 m-0">也可按 Ctrl+V 粘贴截图</p>
       <input
         ref="fileInputRef"
         type="file"
@@ -153,7 +153,7 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- 处理中 -->
-    <div v-if="isProcessing" class="mt-4 text-sm text-muted text-center">
+    <div v-if="isProcessing" class="mt-4 text-sm text-muted-foreground text-center">
       识别中...
     </div>
 
@@ -181,7 +181,7 @@ onBeforeUnmount(() => {
 
         <!-- 文本结果 -->
         <div class="flex-1 min-w-[200px]">
-          <p class="text-[0.75rem] text-muted m-0 mb-1">
+          <p class="text-[0.75rem] text-muted-foreground m-0 mb-1">
             类型：{{ result ? { url: 'URL', email: '邮箱', tel: '电话', text: '文本' }[result.type] : '—' }}
           </p>
           <div class="flex items-start gap-2 flex-wrap">
@@ -190,13 +190,13 @@ onBeforeUnmount(() => {
               :href="result.href"
               target="_blank"
               rel="noopener noreferrer"
-              class="font-mono text-sm text-accent break-all hover:underline"
+              class="font-mono text-sm text-primary break-all hover:underline"
             >{{ result.value }}</a>
             <span
               v-else-if="result"
-              class="font-mono text-sm text-text break-all whitespace-pre-wrap"
+              class="font-mono text-sm text-foreground break-all whitespace-pre-wrap"
             >{{ result.value }}</span>
-            <span v-else class="text-sm text-muted">（未识别到内容）</span>
+            <span v-else class="text-sm text-muted-foreground">（未识别到内容）</span>
           </div>
         </div>
       </div>

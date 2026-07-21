@@ -19,14 +19,14 @@ const emit = defineEmits<{
 
 <template>
   <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted min-w-18 shrink-0">{{ label }}</span>
+    <span v-if="label" class="text-[0.8125rem] text-muted-foreground min-w-18 shrink-0">{{ label }}</span>
     <Switch
       :model-value="modelValue"
       @update:model-value="emit('update:modelValue', $event)"
       :class="[
         'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-[background-color] duration-150',
         'focus:outline-none',
-        modelValue ? 'bg-accent' : 'bg-border',
+        modelValue ? 'bg-primary' : 'bg-border',
       ]"
     >
       <span
@@ -36,6 +36,6 @@ const emit = defineEmits<{
         ]"
       />
     </Switch>
-    <span v-if="showStatus" class="text-[0.8125rem] text-muted">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
+    <span v-if="showStatus" class="text-[0.8125rem] text-muted-foreground">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
   </div>
 </template>

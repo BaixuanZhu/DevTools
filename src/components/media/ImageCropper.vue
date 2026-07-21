@@ -325,7 +325,7 @@ function handleCancel(): void {
     <div class="flex flex-col gap-4">
       <!-- 比例预设 -->
       <section class="flex flex-col gap-2">
-        <h3 class="text-[0.8125rem] font-semibold text-text">裁切比例</h3>
+        <h3 class="text-[0.8125rem] font-semibold text-foreground">裁切比例</h3>
         <OptionRadioGroup
           v-model="aspectPreset"
           :options="ASPECT_OPTIONS"
@@ -335,14 +335,14 @@ function handleCancel(): void {
 
       <!-- 旋转/翻转 -->
       <section class="flex flex-col gap-2">
-        <h3 class="text-[0.8125rem] font-semibold text-text">旋转与翻转</h3>
+        <h3 class="text-[0.8125rem] font-semibold text-foreground">旋转与翻转</h3>
         <div class="flex items-center gap-2 flex-wrap">
           <!-- 左转 -->
           <button
             type="button"
             title="向左旋转"
             aria-label="向左旋转"
-            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
             @click="rotateLeft"
           >
             <RotateCcw :size="16" />
@@ -352,7 +352,7 @@ function handleCancel(): void {
             type="button"
             title="向右旋转"
             aria-label="向右旋转"
-            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
             @click="rotateRight"
           >
             <RotateCw :size="16" />
@@ -362,7 +362,7 @@ function handleCancel(): void {
             type="button"
             title="水平翻转"
             aria-label="水平翻转"
-            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
             @click="flipH"
           >
             <FlipHorizontal2 :size="16" />
@@ -372,7 +372,7 @@ function handleCancel(): void {
             type="button"
             title="垂直翻转"
             aria-label="垂直翻转"
-            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted bg-card transition-[background-color,border-color,color] duration-150 hover:bg-hover hover:text-text"
+            class="w-9 h-9 flex items-center justify-center rounded-sm border border-border text-muted-foreground bg-card transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
             @click="flipV"
           >
             <FlipVertical2 :size="16" />
@@ -385,25 +385,25 @@ function handleCancel(): void {
         <ToggleSwitch v-model="customSizeEnabled" label="指定输出尺寸" />
         <div v-if="customSizeEnabled" class="flex items-center gap-3 flex-wrap">
           <div class="flex items-center gap-2">
-            <span class="text-[0.8125rem] text-muted">宽</span>
+            <span class="text-[0.8125rem] text-muted-foreground">宽</span>
             <input
               v-model.number="customWidth"
               type="number"
               min="1"
               placeholder="宽度"
               aria-label="输出宽度"
-              class="bg-card text-text border border-border rounded-sm px-3 py-2 font-mono text-sm w-24 focus:border-accent focus:outline-none"
+              class="bg-card text-foreground border border-border rounded-sm px-3 py-2 font-mono text-sm w-24 focus:border-primary focus:outline-none"
             />
           </div>
           <div class="flex items-center gap-2">
-            <span class="text-[0.8125rem] text-muted">高</span>
+            <span class="text-[0.8125rem] text-muted-foreground">高</span>
             <input
               v-model.number="customHeight"
               type="number"
               min="1"
               placeholder="高度"
               aria-label="输出高度"
-              class="bg-card text-text border border-border rounded-sm px-3 py-2 font-mono text-sm w-24 focus:border-accent focus:outline-none"
+              class="bg-card text-foreground border border-border rounded-sm px-3 py-2 font-mono text-sm w-24 focus:border-primary focus:outline-none"
             />
           </div>
         </div>
@@ -414,7 +414,7 @@ function handleCancel(): void {
     <div class="flex items-center gap-3 pt-2 border-t border-border">
       <button
         type="button"
-        class="bg-accent text-white rounded-sm px-4 py-2 transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="bg-primary text-white rounded-sm px-4 py-2 transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="isProcessing"
         @click="handleCrop"
       >
@@ -422,7 +422,7 @@ function handleCancel(): void {
       </button>
       <button
         type="button"
-        class="bg-card text-text border border-border rounded-sm px-4 py-2 transition-[background-color] duration-150 hover:bg-hover"
+        class="bg-card text-foreground border border-border rounded-sm px-4 py-2 transition-[background-color] duration-150 hover:bg-accent"
         :disabled="isProcessing"
         @click="handleCancel"
       >

@@ -135,18 +135,18 @@ onUnmounted(() => {
     <div class="flex items-center justify-between gap-2 mb-3">
       <button
         type="button" :disabled="pendingCount === 0"
-        class="px-4 py-1.5 text-[0.8125rem] rounded-sm bg-accent text-white transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-1.5 text-[0.8125rem] rounded-sm bg-primary text-white transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
         @click="batch.convert()"
       >转换{{ pendingCount > 0 ? ` (${pendingCount})` : '' }}</button>
       <div class="flex items-center gap-2">
         <button
           type="button" :disabled="doneCount === 0"
-          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-foreground bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
           @click="downloadAll"
         >保存所有</button>
         <button
           type="button" :disabled="items.length === 0"
-          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-text bg-card hover:bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-3 py-1.5 text-[0.8125rem] rounded-sm border border-border text-foreground bg-card hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
           @click="batch.clearAll()"
         >清空</button>
       </div>
@@ -156,11 +156,11 @@ onUnmounted(() => {
     <div
       v-if="items.length === 0"
       class="border-2 border-dashed rounded-lg p-10 min-h-60 flex flex-col items-center justify-center text-center cursor-pointer transition-[border-color] duration-150"
-      :class="isDragging ? 'border-accent bg-hover' : 'border-border hover:border-accent'"
+      :class="isDragging ? 'border-primary bg-accent' : 'border-border hover:border-primary'"
       @click="pick" @drop="onDrop" @dragover="onDragOver" @dragleave="onDragLeave"
     >
-      <div class="text-sm text-text">拖入图片 / 点击选择 / Ctrl+V 粘贴（最多 30 张）</div>
-      <div class="text-xs text-muted mt-1">支持 PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF，单张上限 50MB</div>
+      <div class="text-sm text-foreground">拖入图片 / 点击选择 / Ctrl+V 粘贴（最多 30 张）</div>
+      <div class="text-xs text-muted-foreground mt-1">支持 PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF，单张上限 50MB</div>
     </div>
 
     <div v-else class="flex flex-col gap-2" @drop="onDrop" @dragover="onDragOver" @dragleave="onDragLeave">
@@ -174,8 +174,8 @@ onUnmounted(() => {
       />
       <button
         type="button"
-        class="border-2 border-dashed border-border rounded-sm py-3 text-[0.8125rem] text-muted hover:border-accent hover:text-text transition-[border-color,color] duration-150"
-        :class="isDragging ? 'border-accent text-text' : ''"
+        class="border-2 border-dashed border-border rounded-sm py-3 text-[0.8125rem] text-muted-foreground hover:border-primary hover:text-foreground transition-[border-color,color] duration-150"
+        :class="isDragging ? 'border-primary text-foreground' : ''"
         @click="pick"
       >+ 添加图片（拖入 / 点击 / Ctrl+V）</button>
     </div>
