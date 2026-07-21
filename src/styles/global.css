@@ -82,20 +82,20 @@
 
 .chip-default {
   background-color: var(--color-card);
-  color: var(--color-muted);
+  color: var(--color-muted-foreground);
   border-color: var(--color-border);
 }
 
 .chip-default:hover {
-  background-color: var(--color-hover);
-  color: var(--color-text);
+  background-color: var(--color-accent);
+  color: var(--color-foreground);
   border-color: var(--color-border);
 }
 
 .chip-active {
-  background-color: var(--color-text);
-  color: var(--color-surface);
-  border-color: var(--color-text);
+  background-color: var(--color-foreground);
+  color: var(--color-background);
+  border-color: var(--color-foreground);
 }
 
 .chip-active:hover {

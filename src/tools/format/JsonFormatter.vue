@@ -480,7 +480,7 @@ onUnmounted(() => {
           v-model="inputText"
           wrap="off"
           class="absolute inset-0 w-full h-full p-4 bg-transparent text-transparent resize-none focus:outline-none font-mono text-sm leading-6 whitespace-pre"
-          :style="{ caretColor: 'var(--color-text)' }"
+          :style="{ caretColor: 'var(--color-foreground)' }"
           placeholder="粘贴或输入 JSON 数据，自动校验与高亮，支持拖拽 .json 文件..."
           spellcheck="false"
           aria-label="JSON 输入"
@@ -525,25 +525,25 @@ onUnmounted(() => {
 <style>
 /* Prism.js JSON 语法高亮自定义样式（匹配项目设计令牌） */
 .json-highlight .token.property {
-  color: var(--color-text);
+  color: var(--color-foreground);
 }
 .json-highlight .token.string {
   color: var(--color-success);
 }
 .json-highlight .token.number {
-  color: var(--color-accent);
+  color: var(--color-primary);
 }
 .json-highlight .token.boolean,
 .json-highlight .token.keyword {
-  color: var(--color-muted);
+  color: var(--color-muted-foreground);
 }
 .json-highlight .token.null {
-  color: var(--color-muted);
+  color: var(--color-muted-foreground);
 }
 .json-highlight .token.punctuation {
   color: var(--color-border);
 }
 .json-highlight .token.operator {
-  color: var(--color-text);
+  color: var(--color-foreground);
 }
 </style>

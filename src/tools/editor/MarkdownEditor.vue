@@ -500,7 +500,7 @@ onMounted(() => {
 /* Markdown 预览区排版样式 */
 .md-preview {
   line-height: 1.7;
-  color: var(--color-text);
+  color: var(--color-foreground);
   word-wrap: break-word;
 }
 .md-preview h1 { font-size: 1.75rem; font-weight: 600; margin: 1.5rem 0 0.75rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--color-border); }
@@ -508,20 +508,20 @@ onMounted(() => {
 .md-preview h3 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; }
 .md-preview h4, .md-preview h5, .md-preview h6 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.375rem; }
 .md-preview p { margin: 0.5rem 0; }
-.md-preview a { color: var(--color-accent); text-decoration: none; }
+.md-preview a { color: var(--color-primary); text-decoration: none; }
 .md-preview a:hover { text-decoration: underline; }
 .md-preview strong { font-weight: 600; }
 .md-preview em { font-style: italic; }
 .md-preview del { text-decoration: line-through; }
 .md-preview code {
-  background: var(--color-hover);
+  background: var(--color-accent);
   padding: 0.15rem 0.35rem;
   border-radius: 3px;
   font-size: 0.875rem;
   font-family: var(--font-mono);
 }
 .md-preview pre {
-  background: var(--color-hover);
+  background: var(--color-accent);
   padding: 1rem;
   border-radius: 4px;
   overflow-x: auto;
@@ -533,19 +533,19 @@ onMounted(() => {
   font-size: 0.875rem;
 }
 .md-preview blockquote {
-  border-left: 3px solid var(--color-accent);
+  border-left: 3px solid var(--color-primary);
   margin: 0.75rem 0;
   padding: 0.5rem 1rem;
-  background: var(--color-hover);
-  color: var(--color-muted);
+  background: var(--color-accent);
+  color: var(--color-muted-foreground);
 }
 .md-preview ul, .md-preview ol { padding-left: 1.5rem; margin: 0.5rem 0; }
 .md-preview li { margin: 0.25rem 0; }
 .md-preview li input[type="checkbox"] { margin-right: 0.5rem; }
 .md-preview table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; }
 .md-preview th, .md-preview td { border: 1px solid var(--color-border); padding: 0.5rem 0.75rem; text-align: left; }
-.md-preview th { background: var(--color-hover); font-weight: 600; }
-.md-preview tr:nth-child(even) { background: var(--color-surface); }
+.md-preview th { background: var(--color-accent); font-weight: 600; }
+.md-preview tr:nth-child(even) { background: var(--color-background); }
 .md-preview img { max-width: 100%; border-radius: 4px; }
 .md-preview hr { border: none; border-top: 1px solid var(--color-border); margin: 1rem 0; }
 
@@ -553,14 +553,14 @@ onMounted(() => {
 .md-preview .token.comment,
 .md-preview .token.prolog,
 .md-preview .token.doctype,
-.md-preview .token.cdata { color: var(--color-muted); }
+.md-preview .token.cdata { color: var(--color-muted-foreground); }
 .md-preview .token.punctuation { color: var(--color-border); }
 .md-preview .token.property,
 .md-preview .token.tag,
 .md-preview .token.boolean,
 .md-preview .token.number,
 .md-preview .token.constant,
-.md-preview .token.symbol { color: var(--color-accent); }
+.md-preview .token.symbol { color: var(--color-primary); }
 .md-preview .token.selector,
 .md-preview .token.attr-name,
 .md-preview .token.string,
@@ -568,7 +568,7 @@ onMounted(() => {
 .md-preview .token.builtin { color: var(--color-success); }
 .md-preview .token.operator,
 .md-preview .token.entity,
-.md-preview .token.url { color: var(--color-text); }
+.md-preview .token.url { color: var(--color-foreground); }
 .md-preview .token.atrule,
 .md-preview .token.attr-value,
 .md-preview .token.keyword { color: #7c3aed; }
@@ -576,7 +576,7 @@ onMounted(() => {
 .md-preview .token.class-name { color: #2563eb; }
 .md-preview .token.regex,
 .md-preview .token.important,
-.md-preview .token.variable { color: var(--color-accent); }
+.md-preview .token.variable { color: var(--color-primary); }
 
 /* 打印样式 */
 @media print {

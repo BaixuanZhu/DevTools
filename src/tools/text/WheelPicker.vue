@@ -401,7 +401,7 @@ onMounted(() => {
             <!-- 指针：悬于转盘上方外侧，尖端指向圆盘顶部边缘，不遮挡盘内文本 -->
             <div
               class="absolute left-1/2 -top-5 -translate-x-1/2 z-10"
-              style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 18px solid var(--color-accent, #ef4444);"
+              style="width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 18px solid var(--color-primary, #ef4444);"
             ></div>
             <canvas
               ref="canvasRef"
