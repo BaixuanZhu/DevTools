@@ -6,7 +6,7 @@
  * 本岛通过 [data-search-grid] [data-id] 切换 DOM display 完成客户端过滤，
  * 过滤逻辑复用 searchStore.filterTools 纯函数。
  */
-import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Search, X } from '@lucide/vue';
 import { searchStore, filterTools } from '../../stores/search';
 import { tools } from '../../data/tools';

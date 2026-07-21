@@ -54,5 +54,5 @@ function clearAll(): void {
   save();
 }
 
-/** 收藏全局单例 store（替代 Alpine `$store.favorites`） */
+/** 收藏全局单例 store（替代 Alpine favorites store） */
 export const favoritesStore = { list, load, save, isFavorite, toggle, clearAll };

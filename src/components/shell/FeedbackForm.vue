@@ -32,7 +32,7 @@ function submit(): void {
 </script>
 
 <template>
-  <form class="space-y-5" @submit.prevent="submit">
+  <form class="space-y-5" novalidate @submit.prevent="submit">
     <div>
       <label for="feedback-type" class="block text-sm font-medium text-foreground mb-1.5">反馈类型</label>
       <select
@@ -57,6 +57,7 @@ function submit(): void {
         v-model="content"
         placeholder="请描述你的建议或遇到的问题..."
         rows="6"
+        required
         class="w-full px-3 py-2.5 border border-border rounded-sm bg-card text-foreground text-base font-sans transition-[border-color] duration-150 focus:border-primary focus:outline-none resize-y min-h-40 placeholder:text-muted-foreground"
       ></textarea>
     </div>

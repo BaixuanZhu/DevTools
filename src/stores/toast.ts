@@ -47,5 +47,5 @@ function remove(id: number): void {
   items.value = items.value.filter((t) => t.id !== id);
 }
 
-/** toast 全局单例 store（替代 Alpine `$store.toast`） */
+/** toast 全局单例 store（替代 Alpine toast store） */
 export const toastStore = { items, show, success, error, remove };
