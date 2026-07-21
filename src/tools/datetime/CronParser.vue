@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, watch, computed, nextTick} from 'vue';
-import {TabGroup, TabList, Tab, TabPanels, TabPanel} from '@headlessui/vue';
+import {TabsRoot, TabsList, TabsTrigger, TabsContent} from 'reka-ui';
 import { Check } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 
@@ -272,36 +272,36 @@ parseExpression();
     <!-- 构建器（全宽） -->
     <section class="mt-6 px-4">
       <div class="max-w-5xl mx-auto">
-        <TabGroup
-            as="div"
-            class="border border-border rounded-lg bg-card overflow-hidden"
-            :selected-index="FIELD_KEYS.indexOf(activeFieldTab)"
-            @change="(i: number) => activeFieldTab = FIELD_KEYS[i]"
+        <TabsRoot
+            as-child
+            :model-value="activeFieldTab"
+            @update:model-value="(v) => activeFieldTab = v as keyof CronFields7"
         >
-          <TabList class="flex gap-1 px-2 pt-2 pb-0 border-b border-border">
-            <Tab v-for="config in FIELD_CONFIGS" :key="config.key" v-slot="{ selected }" as="template">
+          <div class="border border-border rounded-lg bg-card overflow-hidden">
+          <TabsList class="flex gap-1 px-2 pt-2 pb-0 border-b border-border">
+            <TabsTrigger v-for="config in FIELD_CONFIGS" :key="config.key" :value="config.key" as-child>
               <button
+                  type="button"
                   :class="[
                   'flex flex-col items-center gap-0.5 px-3 py-2 border border-solid rounded-t-md cursor-pointer min-w-12 -mb-px relative z-10',
                   'transition-[background-color,border-color] duration-150',
                   'focus:outline-none',
-                  selected
-                    ? 'border-primary border-b-card bg-primary/5'
-                    : 'border-transparent bg-transparent hover:bg-accent',
+                  'data-[state=active]:border-primary data-[state=active]:border-b-card data-[state=active]:bg-primary/5',
+                  'border-transparent bg-transparent hover:bg-accent',
                 ]"
               >
-                <span class="text-[0.8125rem] font-medium" :class="selected ? 'text-primary' : 'text-foreground'">
+                <span class="text-[0.8125rem] font-medium data-[state=active]:text-primary text-foreground">
                   {{ config.label }}
                 </span>
-                <code class="text-[0.6875rem] font-mono" :class="selected ? 'text-primary' : 'text-muted-foreground'">
+                <code class="text-[0.6875rem] font-mono data-[state=active]:text-primary text-muted-foreground">
                   {{ fieldValuePreview[config.key] }}
                 </code>
               </button>
-            </Tab>
-          </TabList>
+            </TabsTrigger>
+          </TabsList>
 
-          <TabPanels class="p-4 h-160">
-            <TabPanel class="h-full" v-for="config in FIELD_CONFIGS" :key="config.key">
+          <div class="p-4 h-160">
+            <TabsContent force-mount class="h-full data-[state=inactive]:hidden" v-for="config in FIELD_CONFIGS" :key="config.key" :value="config.key">
               <div class="flex flex-col gap-1.5 h-full overflow-y-auto">
                 <div
                     v-for="mode in config.modes"
@@ -587,9 +587,10 @@ parseExpression();
                   </div>
                 </div>
               </div>
-            </TabPanel>
-          </TabPanels>
-        </TabGroup>
+            </TabsContent>
+          </div>
+          </div>
+        </TabsRoot>
       </div>
     </section>
 
