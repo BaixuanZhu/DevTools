@@ -617,15 +617,6 @@ export function getToolsByCategory(): Record<ToolCategory, ToolMeta[]> {
   );
 }
 
-/** 搜索工具（匹配名称和描述，大小写不敏感） */
-export function searchTools(query: string): ToolMeta[] {
-  const q = query.toLowerCase().trim();
-  if (!q) return tools;
-  return tools.filter(
-    (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q),
-  );
-}
-
 /** 获取所有分类（去重，保持注册顺序） */
 export function getCategories(): ToolCategory[] {
   const seen = new Set<ToolCategory>();
