@@ -3,7 +3,7 @@ import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
 import Breadcrumb from '../components/layout/Breadcrumb.astro';
 import RelatedTools from '../components/layout/RelatedTools.astro';
-import Toast from '../components/layout/Toast.astro';
+import ToastContainer from '../components/shell/ToastContainer.vue';
 import Shell from '../components/shell/Shell.vue';
 import { ChevronDown } from '@lucide/astro';
 import { getToolsByCategory, getCategories, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
@@ -189,6 +189,6 @@ const allJsonLd: object[] = [
     </div>
   </Shell>
 
-  <!-- Alpine Toast（Task 3 替换为 <ToastContainer client:load />） -->
-  <Toast />
+  <!-- Toast 通知（全局单岛，消费 toastStore + 兼容 legacy toast 事件） -->
+  <ToastContainer client:load />
 </Layout>

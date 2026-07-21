@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue';
 import { copyToClipboard } from '../utils/shared/clipboard';
+import { toastStore } from '../stores/toast';
 
 export interface UseCopyOptions {
   /** 复制成功后状态保持时长，默认 1500ms */
@@ -37,7 +38,7 @@ export function useCopy(options?: UseCopyOptions): UseCopyResult {
         copied.value = false;
       }, duration);
     } else {
-      document.dispatchEvent(new CustomEvent('toast', { detail: { message: errorMessage } }));
+      toastStore.show(errorMessage, 'error');
     }
   }
 

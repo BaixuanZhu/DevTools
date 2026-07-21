@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Mock } from 'vitest';
 import { useCopy } from '../useCopy';
+import { toastStore } from '../../stores/toast';
 
 describe('useCopy', () => {
   beforeEach(() => {
@@ -10,9 +11,7 @@ describe('useCopy', () => {
         writeText: vi.fn(),
       },
     });
-    vi.stubGlobal('document', {
-      dispatchEvent: vi.fn(),
-    });
+    toastStore.items.value.forEach((t) => toastStore.remove(t.id));
   });
 
   afterEach(() => {
@@ -38,32 +37,28 @@ describe('useCopy', () => {
     expect(copied.value).toBe(false);
   });
 
-  it('复制失败时 copied 保持 false 并 dispatch toast', async () => {
-    const dispatchEventSpy = vi.spyOn(document, 'dispatchEvent');
+  it('复制失败时 copied 保持 false 并 toast error', async () => {
     (navigator.clipboard.writeText as Mock).mockRejectedValue(new Error('fail'));
 
     const { copied, copy } = useCopy();
     await copy('hello');
 
     expect(copied.value).toBe(false);
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-    const dispatchedEvent = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
-    expect(dispatchedEvent.type).toBe('toast');
-    expect(dispatchedEvent.detail).toEqual({ message: '复制失败，请重试' });
+    expect(
+      toastStore.items.value.some((t) => t.type === 'error' && t.message === '复制失败，请重试'),
+    ).toBe(true);
   });
 
   it('支持自定义失败文案', async () => {
-    const dispatchEventSpy = vi.spyOn(document, 'dispatchEvent');
     (navigator.clipboard.writeText as Mock).mockRejectedValue(new Error('fail'));
 
     const { copied, copy } = useCopy({ errorMessage: '自定义失败' });
     await copy('hello');
 
     expect(copied.value).toBe(false);
-    expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-    const dispatchedEvent = dispatchEventSpy.mock.calls[0][0] as CustomEvent;
-    expect(dispatchedEvent.type).toBe('toast');
-    expect(dispatchedEvent.detail).toEqual({ message: '自定义失败' });
+    expect(
+      toastStore.items.value.some((t) => t.type === 'error' && t.message === '自定义失败'),
+    ).toBe(true);
   });
 
   it('多次点击重置计时器', async () => {

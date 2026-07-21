@@ -7,7 +7,7 @@
  */
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
-import Toast from '../components/layout/Toast.astro';
+import ToastContainer from '../components/shell/ToastContainer.vue';
 import { Code } from '@lucide/astro';
 
 interface Props {
@@ -68,6 +68,6 @@ const { title, description } = Astro.props;
     <Footer />
   </div>
 
-  <!-- Alpine Toast -->
-  <Toast />
+  <!-- Toast 通知（全局单岛，消费 toastStore + 兼容 legacy toast 事件） -->
+  <ToastContainer client:load />
 </Layout>

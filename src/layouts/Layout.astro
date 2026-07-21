@@ -149,10 +149,4 @@ if (jsonLd) {
   Alpine.store('favorites').load();
 
   Alpine.start();
-
-  // 桥接 DOM CustomEvent → Alpine toast store
-  document.addEventListener('toast', ((e: CustomEvent) => {
-    const { type = 'success', message } = e.detail || {};
-    if (message) Alpine.store('toast').add(type, message);
-  }) as EventListener);
 </script>
