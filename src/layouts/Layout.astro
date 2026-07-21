@@ -53,6 +53,16 @@ if (jsonLd) {
         href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap"
       />
     </noscript>
+    <!-- 首帧前同步设置暗色 class，避免 FOUC（localStorage 读取须容错） -->
+    <script is:inline>
+      (function () {
+        try {
+          if (localStorage.getItem('devtools-theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <title>{title}</title>
   </head>
   <body class="bg-background text-foreground font-sans text-base leading-normal antialiased">
