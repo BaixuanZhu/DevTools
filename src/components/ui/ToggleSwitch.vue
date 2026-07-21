@@ -2,7 +2,7 @@
 /**
  * 开关切换组件（共享 ui，27 个调用方公共 API 冻结）。
  *
- * 底层由 @headlessui/vue Switch 迁移至 reka-ui SwitchRoot/SwitchThumb。
+ * 底层由 Headless UI Switch 迁移至 reka-ui SwitchRoot/SwitchThumb。
  * 行为/外观/props/emits 与迁移前一致：modelValue 双向绑定、可选 label 与状态文字。
  */
 import { SwitchRoot, SwitchThumb } from 'reka-ui';

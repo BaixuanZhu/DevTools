@@ -2,7 +2,7 @@
 /**
  * 下拉选择框（共享 ui，公共 API 冻结）。
  *
- * 底层由 @headlessui/vue Listbox 迁移至 reka-ui Select（portal 化）。
+ * 底层由 Headless UI Listbox 迁移至 reka-ui Select（portal 化）。
  * 迁移同时修复历史 ui-active/ui-selected 死类名（Tailwind v4 未注册）：
  * 选中态走 data-[state=checked] + SelectItemIndicator（对勾），键盘高亮走 data-[highlighted]。
  * 值解析兼容历史 (option.key ?? option.value)。

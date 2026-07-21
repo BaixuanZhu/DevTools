@@ -2,7 +2,7 @@
 /**
  * 模式 Tab 组（共享 ui，公共 API 冻结；6 个工具消费）。
  *
- * 底层由 @headlessui/vue Tab（index 制）迁移至 reka-ui Tabs（value 制）。
+ * 底层由 Headless UI Tab（index 制）迁移至 reka-ui Tabs（value 制）。
  * value 制直接消费 string key，省去 index↔key 转换。所有面板 force-mount +
  * data-[state=inactive]:hidden，复刻迁移前「全部挂载、非选中隐藏」行为。
  */

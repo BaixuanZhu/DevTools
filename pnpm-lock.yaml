@@ -11,9 +11,6 @@ importers:
       '@astrojs/vue':
         specifier: ^6.0.1
         version: 6.0.1(@types/node@24.12.4)(astro@6.4.2(@types/node@24.12.4)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.61.0)(yaml@2.9.0))(jiti@2.7.0)(lightningcss@1.32.0)(vue@3.5.35(typescript@6.0.3))(yaml@2.9.0)
-      '@headlessui/vue':
-        specifier: ^1.7.23
-        version: 1.7.23(vue@3.5.35(typescript@6.0.3))
       '@jsquash/avif':
         specifier: ^2.1.1
         version: 2.1.1
@@ -571,12 +568,6 @@ packages:
 
   '@floating-ui/vue@1.1.11':
     resolution: {integrity: sha512-HzHKCNVxnGS35r9fCHBc3+uCnjw9IWIlCPL683cGgM9Kgj2BiAl8x1mS7vtvP6F9S/e/q4O6MApwSHj8hNLGfw==}
-
-  '@headlessui/vue@1.7.23':
-    resolution: {integrity: sha512-JzdCNqurrtuu0YW6QaDtR2PIYCKPUWq28csDyMvN4zmGccmE7lz40Is6hc3LA4HFeCI7sekZ/PQMTNmn9I/4Wg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      vue: ^3.2.0
 
   '@img/colour@1.1.0':
     resolution: {integrity: sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ==}
@@ -3523,11 +3514,6 @@ snapshots:
     transitivePeerDependencies:
       - '@vue/composition-api'
       - vue
-
-  '@headlessui/vue@1.7.23(vue@3.5.35(typescript@6.0.3))':
-    dependencies:
-      '@tanstack/vue-virtual': 3.13.28(vue@3.5.35(typescript@6.0.3))
-      vue: 3.5.35(typescript@6.0.3)
 
   '@img/colour@1.1.0':
     optional: true

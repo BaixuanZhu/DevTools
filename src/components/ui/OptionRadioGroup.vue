@@ -2,7 +2,7 @@
 /**
  * 单选按钮组（共享 ui，公共 API 冻结）。
  *
- * 底层由 @headlessui/vue RadioGroup/RadioGroupOption 迁移至 reka-ui
+ * 底层由 Headless UI RadioGroup/RadioGroupOption 迁移至 reka-ui
  * RadioGroupRoot/RadioGroupItem。选中态改用 data-[state=checked] 表达，
  * props/emits 与迁移前一致。
  *
