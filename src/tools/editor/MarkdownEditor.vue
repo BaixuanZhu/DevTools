@@ -6,7 +6,7 @@
  * 提供图标化工具栏辅助语法插入，支持导出 .md / .html / .pdf。
  */
 import { ref, computed, nextTick, onMounted } from 'vue';
-import { Menu, MenuButton, MenuItems, MenuItem } from '@headlessui/vue';
+import { DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem } from 'reka-ui';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
@@ -416,31 +416,30 @@ onMounted(() => {
         </button>
 
         <!-- 导出下拉菜单 -->
-        <Menu as="div" class="relative">
-          <MenuButton :class="toolBtn" title="导出">
-            <Download :size="16" />
-          </MenuButton>
-          <MenuItems class="absolute right-0 z-10 mt-1 w-28 origin-top-right rounded-sm bg-card border border-border py-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-            <MenuItem v-slot="{ active }">
-              <button
-                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
-                @click="handleExportMd"
-              >Markdown</button>
-            </MenuItem>
-            <MenuItem v-slot="{ active }">
-              <button
-                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
-                @click="handleExportHtml"
-              >HTML</button>
-            </MenuItem>
-            <MenuItem v-slot="{ active }">
-              <button
-                :class="[active ? 'bg-accent' : '', 'block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans']"
-                @click="handleExportPdf"
-              >PDF</button>
-            </MenuItem>
-          </MenuItems>
-        </Menu>
+        <DropdownMenuRoot>
+          <DropdownMenuTrigger as-child>
+            <button type="button" :class="toolBtn" title="导出" aria-label="导出">
+              <Download :size="16" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuPortal>
+            <DropdownMenuContent
+              align="end"
+              :side-offset="4"
+              class="z-10 min-w-28 rounded-sm bg-card border border-border py-1 shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+            >
+              <DropdownMenuItem as-child>
+                <button type="button" class="block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans data-[highlighted]:bg-accent" @click="handleExportMd">Markdown</button>
+              </DropdownMenuItem>
+              <DropdownMenuItem as-child>
+                <button type="button" class="block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans data-[highlighted]:bg-accent" @click="handleExportHtml">HTML</button>
+              </DropdownMenuItem>
+              <DropdownMenuItem as-child>
+                <button type="button" class="block w-full px-3 py-1.5 text-center text-[0.8125rem] text-foreground font-sans data-[highlighted]:bg-accent" @click="handleExportPdf">PDF</button>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenuRoot>
       </div>
     </div>
 
