@@ -30,24 +30,3 @@ declare module 'des.js' {
   export const CBC: Mode;
   export { DES, EDE };
 }
-
-/** Alpine.js — 轻量级前端响应式框架 */
-declare module 'alpinejs' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  type StoreData = Record<string, any>;
-
-  interface Alpine {
-    /** 注册全局 store，传入 data 时创建，不传时获取 */
-    store(name: string, data?: StoreData): StoreData;
-    /** 启动 Alpine */
-    start(): void;
-  }
-
-  const Alpine: Alpine;
-  export default Alpine;
-}
-
-/** 扩展 Window 接口以支持 Alpine.js */
-interface Window {
-  Alpine: import('alpinejs').Alpine;
-}
