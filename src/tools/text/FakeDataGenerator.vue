@@ -294,11 +294,12 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
     <DialogRoot v-model:open="dialogOpen">
       <DialogPortal>
         <DialogOverlay
+          aria-hidden="true"
           class="fixed inset-0 bg-black/20 z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0"
         />
         <DialogContent
           :aria-describedby="undefined"
-          class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md rounded-md bg-card border border-border p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95"
+          class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md max-h-[90vh] overflow-y-auto rounded-md bg-card border border-border p-6 shadow-[0_2px_8px_rgba(0,0,0,0.06)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95"
         >
           <DialogTitle class="text-base font-semibold text-foreground">
             编辑「{{ editingField.name }}」生成器
