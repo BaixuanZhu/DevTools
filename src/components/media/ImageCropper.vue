@@ -25,6 +25,7 @@ import {
   type CropOutputType,
 } from '../../utils/media/image-crop';
 import { RotateCcw, RotateCw, FlipHorizontal2, FlipVertical2 } from '@lucide/vue';
+import { toastStore } from '../../stores/toast';
 
 // ==================== 类型 ====================
 
@@ -160,7 +161,7 @@ async function initCropper(): Promise<void> {
     // 应用当前比例预设
     applyAspectRatio();
   } catch {
-    dispatchToast('裁切器初始化失败，请刷新页面重试');
+    toastStore.show('裁切器初始化失败，请刷新页面重试');
   }
 }
 
@@ -248,14 +249,6 @@ function flipV(): void {
 // ==================== 导出 ====================
 
 /**
- * 触发全局 Toast 通知。
- * @param message 提示消息
- */
-function dispatchToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
-
-/**
  * 确认裁切：导出 canvas 并转换为多种形态后 emit 'crop'。
  */
 async function handleCrop(): Promise<void> {
@@ -295,7 +288,7 @@ async function handleCrop(): Promise<void> {
       height: canvas.height,
     });
   } catch (e) {
-    dispatchToast(e instanceof Error ? e.message : '裁切导出失败，请重试');
+    toastStore.show(e instanceof Error ? e.message : '裁切导出失败，请重试');
   } finally {
     isProcessing.value = false;
   }

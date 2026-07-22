@@ -11,6 +11,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { Check, Copy } from '@lucide/vue';
 import { useCopy } from '../../composables/useCopy';
+import { toastStore } from '../../stores/toast';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
 import ColorInput from '../../components/ui/ColorInput.vue';
@@ -112,11 +113,6 @@ watch(downloadSize, (v) => {
   if (v > QR_DOWNLOAD_MAX_SIZE) downloadSize.value = QR_DOWNLOAD_MAX_SIZE;
 });
 
-/** 触发全局 toast 通知 */
-function showToast(type: 'success' | 'error', message: string) {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { type, message } }));
-}
-
 /** 下载 PNG 格式（按 downloadSize 生成） */
 async function downloadPng() {
   if (!text.value.trim()) return;
@@ -128,9 +124,9 @@ async function downloadPng() {
       background: background.value,
     });
     downloadFile(url, `qrcode-${Date.now()}.png`);
-    showToast('success', '已下载 PNG');
+    toastStore.show('已下载 PNG');
   } catch (e: unknown) {
-    showToast('error', e instanceof Error ? e.message : '下载失败');
+    toastStore.error(e instanceof Error ? e.message : '下载失败');
   }
 }
 
@@ -146,9 +142,9 @@ async function downloadSvg() {
     });
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     downloadFile(blob, `qrcode-${Date.now()}.svg`);
-    showToast('success', '已下载 SVG');
+    toastStore.show('已下载 SVG');
   } catch (e: unknown) {
-    showToast('error', e instanceof Error ? e.message : '下载失败');
+    toastStore.error(e instanceof Error ? e.message : '下载失败');
   }
 }
 

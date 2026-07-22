@@ -35,6 +35,7 @@ import {
   PARAMS_KEY,
 } from '../../utils/media/scramble-meta';
 import { isPng, writeTextChunk } from '../../utils/media/png-metadata';
+import { toastStore } from '../../stores/toast';
 
 /** 上传文件大小上限（50MB） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
@@ -72,14 +73,6 @@ const originalName = ref('');
 /** 当前展示图大小 */
 const currentSize = ref(0);
 const dimensions = ref<{ width: number; height: number } | null>(null);
-
-/**
- * 派发全局 toast 通知（由 Alpine 侧 Layout 捕获并展示）。
- * @param message 通知文本
- */
-function dispatchToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
 
 /** 当前置乱参数（由各表单控件派生） */
 const params = computed<ScrambleParams>(() => ({
@@ -159,7 +152,7 @@ async function imageDataToUrl(
     return { url: URL.createObjectURL(embeddedBlob), size: embeddedBlob.size };
   } catch {
     // 元数据注入失败：降级用未嵌入 blob，提示用户保留完整文件名兜底还原
-    dispatchToast('元数据写入失败，请保留完整下载文件名以便还原');
+    toastStore.show('元数据写入失败，请保留完整下载文件名以便还原');
     return { url: URL.createObjectURL(blob), size: blob.size };
   }
 }
@@ -219,7 +212,7 @@ async function processFile(file: File): Promise<void> {
     seed.value = detected.seed;
     displayLabel.value = 'scrambled';
     await runProcess('restore');
-    dispatchToast('已识别参数并自动还原');
+    toastStore.show('已识别参数并自动还原');
   } else {
     // 未命中：当新图处理，清空 seed（置乱时自动生成）
     seed.value = '';
@@ -349,7 +342,7 @@ function handleDownload(): void {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  dispatchToast('已开始下载');
+  toastStore.show('已开始下载');
 }
 
 /** 清空：释放资源、重置所有参数到默认值（种子清空，等待下次混淆时自动生成）。 */

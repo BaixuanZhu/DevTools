@@ -10,6 +10,7 @@
  */
 import { ref, computed, watch, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
+import { toastStore } from '../../stores/toast';
 import CopyButton from '../../components/ui/CopyButton.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import {
@@ -64,11 +65,6 @@ function syncGutter(): void {
   if (textareaRef.value) scrollTop.value = textareaRef.value.scrollTop;
 }
 
-/** 派发 toast 通知（与 Alpine Toast 系统对接） */
-function notifyToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
-
 /** 执行实时校验（同步） */
 function validateNow(): void {
   if (!inputText.value.trim()) {
@@ -105,10 +101,10 @@ function scheduleValidate(): void {
 function applyFormatResult(result: TomlStringResult): void {
   if (result.ok) {
     inputText.value = result.result;
-    notifyToast('已美化');
+    toastStore.show('已美化');
   } else {
     validation.value = { state: 'invalid', message: result.error };
-    notifyToast(result.error);
+    toastStore.show(result.error);
   }
 }
 
@@ -126,14 +122,14 @@ function initWorker(): void {
     isFormatting.value = false;
     const msg = 'Worker 执行出错，请重试';
     validation.value = { state: 'invalid', message: msg };
-    notifyToast(msg);
+    toastStore.show(msg);
   };
 }
 
 /** 美化：解析后重新序列化，原地替换输入框内容 */
 function handleFormat(): void {
   if (!inputText.value.trim()) {
-    notifyToast('请输入 TOML 数据');
+    toastStore.show('请输入 TOML 数据');
     return;
   }
 
@@ -144,7 +140,7 @@ function handleFormat(): void {
       state: 'invalid',
       message: '数据量超过 10MB 限制，无法处理。请减小输入数据。',
     };
-    notifyToast('数据量超过 10MB 限制');
+    toastStore.show('数据量超过 10MB 限制');
     return;
   }
 

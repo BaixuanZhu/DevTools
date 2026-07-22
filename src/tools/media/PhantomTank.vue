@@ -19,6 +19,7 @@ import FileDropzone from '../../components/ui/FileDropzone.vue';
 import { formatBytes } from '../../utils/shared/format';
 import { checkCanvasLimits } from '../../utils/media/image-convert';
 import { createPhantomTank, generateSurfaceFromHidden } from '../../utils/media/phantom-tank';
+import { toastStore } from '../../stores/toast';
 
 /** 上传文件大小上限（50MB） */
 const FILE_SIZE_LIMIT = 50 * 1024 * 1024;
@@ -93,14 +94,6 @@ const canGenerate = computed(() => {
   if (surfaceSource.value === 'auto') return autoSurface.value !== null;
   return surfaceBitmap.value !== null;
 });
-
-/**
- * 派发全局 toast 通知（由 Alpine 侧 Layout 捕获并展示）。
- * @param message 通知文本
- */
-function dispatchToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
 
 /**
  * 预览容器样式：根据背景模式返回纯色或棋盘格背景。
@@ -389,7 +382,7 @@ function handleDownload(): void {
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
-  dispatchToast('已开始下载');
+  toastStore.show('已开始下载');
 }
 
 /** 清空：释放全部资源并重置到初始状态。 */

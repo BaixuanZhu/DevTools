@@ -32,6 +32,7 @@ import {
   type WorkerResponse,
 } from '../../utils/format/json-formatter';
 import { LoaderCircle, Sparkles, Minimize2, FolderUp, Trash2, Check, TriangleAlert } from '@lucide/vue';
+import { toastStore } from '../../stores/toast';
 
 /** 实时校验防抖延迟（毫秒） */
 const DEBOUNCE_MS = 300;
@@ -119,11 +120,6 @@ function syncScroll(): void {
   }
 }
 
-/** 派发 toast 通知（与 Alpine Toast 系统对接） */
-function notifyToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
-
 /** 将分析结果应用到校验状态 + 统计 */
 function applyAnalysis(result: AnalysisResult): void {
   if (result.ok) {
@@ -173,17 +169,17 @@ function scheduleValidate(): void {
 function applyFormatResult(result: OperationResult): void {
   if (result.ok) {
     inputText.value = result.result;
-    notifyToast('已完成');
+    toastStore.show('已完成');
   } else {
     validation.value = { state: 'invalid', message: result.error };
-    notifyToast(result.error);
+    toastStore.show(result.error);
   }
 }
 
 /** 美化：解析后按当前缩进重新序列化，原地替换输入框内容 */
 function handleFormat(): void {
   if (!inputText.value.trim()) {
-    notifyToast('请输入 JSON 数据');
+    toastStore.show('请输入 JSON 数据');
     return;
   }
   const sizeStatus = checkInputSize(inputText.value);
@@ -193,7 +189,7 @@ function handleFormat(): void {
       state: 'invalid',
       message: '数据量超过 10MB 限制，无法处理。请减小输入数据。',
     };
-    notifyToast('数据量超过 10MB 限制');
+    toastStore.show('数据量超过 10MB 限制');
     return;
   }
   const size = new TextEncoder().encode(inputText.value).length;
@@ -207,7 +203,7 @@ function handleFormat(): void {
 /** 压缩：解析后序列化为最小体积，原地替换输入框内容 */
 function handleMinify(): void {
   if (!inputText.value.trim()) {
-    notifyToast('请输入 JSON 数据');
+    toastStore.show('请输入 JSON 数据');
     return;
   }
   const sizeStatus = checkInputSize(inputText.value);
@@ -217,7 +213,7 @@ function handleMinify(): void {
       state: 'invalid',
       message: '数据量超过 10MB 限制，无法处理。请减小输入数据。',
     };
-    notifyToast('数据量超过 10MB 限制');
+    toastStore.show('数据量超过 10MB 限制');
     return;
   }
   const size = new TextEncoder().encode(inputText.value).length;
@@ -250,7 +246,7 @@ function initWorker(): void {
         state: 'invalid',
         message: `JSON 语法错误：${response.error}`,
       };
-      notifyToast(`JSON 语法错误：${response.error}`);
+      toastStore.show(`JSON 语法错误：${response.error}`);
       return;
     }
     const indentStr = indent.value === 'tab' ? '\t' : indent.value;
@@ -258,12 +254,12 @@ function initWorker(): void {
       workerMode === 'format'
         ? JSON.stringify(response.parsed, null, indentStr)
         : JSON.stringify(response.parsed);
-    notifyToast('已完成');
+    toastStore.show('已完成');
   };
   worker.onerror = () => {
     isFormatting.value = false;
     validation.value = { state: 'invalid', message: 'Worker 执行出错，请重试' };
-    notifyToast('Worker 执行出错，请重试');
+    toastStore.show('Worker 执行出错，请重试');
   };
 }
 

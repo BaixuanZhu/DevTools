@@ -6,11 +6,12 @@
  * 右栏输入测试文本，实时高亮所有匹配并列出每个匹配的区间与捕获组。
  *
  * 大文本（>50KB）通过 Web Worker 异步匹配，避免灾难性正则阻塞主线程。
- * 错误以中文内联显示，复制/清空通过 CustomEvent('toast') 反馈。
+ * 错误以中文内联显示，复制/清空通过 toastStore 反馈。
  */
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
+import { toastStore } from '../../stores/toast';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import {
   compileRegex,
@@ -444,14 +445,14 @@ function handleClear(): void {
 async function handleCopyRegex(): Promise<void> {
   if (!pattern.value) return;
   const ok = await copyText(regexLiteral.value);
-  notifyCopy(ok, '已复制正则字面量', '复制失败，请重试');
+  toastStore.show(ok ? '已复制正则字面量' : '复制失败，请重试');
 }
 
 /** 复制匹配结果摘要到剪贴板 */
 async function handleCopyResult(): Promise<void> {
   if (matches.value.length === 0 && !compileError.value && !runtimeError.value) return;
   const ok = await copyText(resultSummary.value);
-  notifyCopy(ok, '已复制匹配结果', '复制失败，请重试');
+  toastStore.show(ok ? '已复制匹配结果' : '复制失败，请重试');
 }
 
 // ---- 工具 ----
@@ -476,13 +477,6 @@ async function copyText(text: string): Promise<boolean> {
       return false;
     }
   }
-}
-
-/** 派发 toast 通知（与项目 Alpine Toast 系统对接） */
-function notifyCopy(ok: boolean, successMsg: string, errorMsg: string): void {
-  document.dispatchEvent(
-    new CustomEvent('toast', { detail: { message: ok ? successMsg : errorMsg } }),
-  );
 }
 
 // ---- 监听 ----

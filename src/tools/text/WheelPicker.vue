@@ -10,6 +10,7 @@ import { ref, onMounted, watch, nextTick } from 'vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import { useCopy } from '../../composables/useCopy';
+import { toastStore } from '../../stores/toast';
 import {
   type WheelItem,
   MAX_ITEMS,
@@ -30,15 +31,10 @@ const items = ref<WheelItem[]>(DEFAULT_ITEMS.map((it) => ({ ...it })));
 /** 批量导入文本框内容 */
 const batchText = ref('');
 
-/** 触发全局 toast 通知 */
-function showToast(message: string): void {
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message } }));
-}
-
 /** 新增一个空选项 */
 function addItem(): void {
   if (items.value.length >= MAX_ITEMS) {
-    showToast(`选项数量已达上限 ${MAX_ITEMS} 个`);
+    toastStore.show(`选项数量已达上限 ${MAX_ITEMS} 个`);
     return;
   }
   items.value.push({ text: '', weight: 1 });
@@ -58,7 +54,7 @@ function normalizeItemWeight(index: number): void {
 function importBatch(): void {
   const parsed = parseBatch(batchText.value);
   if (parsed.length === 0) {
-    showToast('没有可导入的选项');
+    toastStore.show('没有可导入的选项');
     return;
   }
   const existing = new Set(items.value.map((it) => it.text));
@@ -71,7 +67,7 @@ function importBatch(): void {
     added++;
   }
   batchText.value = '';
-  showToast(added > 0 ? `已导入 ${added} 个选项` : '选项已存在，未新增');
+  toastStore.show(added > 0 ? `已导入 ${added} 个选项` : '选项已存在，未新增');
 }
 
 /** 不重复抽取开关，默认关闭 */
@@ -126,16 +122,16 @@ const SHARE_URL_MAX = 2000;
 async function copyShareLink(): Promise<void> {
   const list = validItems();
   if (list.length < 2) {
-    showToast('请先添加至少 2 个选项');
+    toastStore.show('请先添加至少 2 个选项');
     return;
   }
   const data = encodeShare(list);
   const url = `${window.location.origin}${window.location.pathname}?data=${data}`;
   if (url.length > SHARE_URL_MAX) {
-    showToast('选项过多，链接可能在部分平台被截断');
+    toastStore.show('选项过多，链接可能在部分平台被截断');
   }
   await copyLink(url);
-  if (linkCopied.value) showToast('分享链接已复制');
+  if (linkCopied.value) toastStore.show('分享链接已复制');
 }
 
 /** 从 URL ?data= 直接解码加载（失败则静默回退默认示例） */
@@ -149,7 +145,7 @@ function loadFromUrl(): void {
     wonItems.value = [];
     result.value = '';
   } catch {
-    showToast('分享链接无效，已载入默认示例');
+    toastStore.show('分享链接无效，已载入默认示例');
   }
 }
 
