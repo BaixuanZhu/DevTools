@@ -23,6 +23,7 @@ import {
   type KeyEncoding,
 } from '../../utils/crypto/asymmetric';
 import type {OutputFormat} from '../../utils/shared/array-buffer';
+import { toastStore } from '../../stores/toast';
 
 type OperationMode = 'generate' | 'encrypt' | 'decrypt' | 'sign' | 'verify';
 
@@ -240,7 +241,7 @@ async function handleGenerateKeys() {
     publicKeyText.value = await exportKeyString(keyPair.publicKey, pubFormat, keyEncoding.value);
     privateKeyText.value = await exportKeyString(keyPair.privateKey, privFormat, keyEncoding.value);
 
-    document.dispatchEvent(new CustomEvent('toast', {detail: {message: '密钥对生成成功'}}));
+    toastStore.show('密钥对生成成功');
   } catch (err) {
     errorMsg.value = err instanceof Error ? err.message : '生成密钥对失败';
   } finally {
@@ -343,7 +344,7 @@ async function execute() {
         );
         outputText.value = isValid ? '✓ 签名有效' : '✗ 签名无效';
         if (isValid) {
-          document.dispatchEvent(new CustomEvent('toast', {detail: {message: '签名验证通过'}}));
+          toastStore.show('签名验证通过');
         }
         break;
       }

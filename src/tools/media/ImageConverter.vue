@@ -14,6 +14,7 @@ import ImageCropper, { type CropResult } from '../../components/media/ImageCropp
 import { useImageBatch, type ConvertParams } from '../../composables/useImageBatch';
 import { checkCanvasLimits, DEFAULT_QUALITY } from '../../utils/media/image-convert';
 import { DEFAULT_ICO_SIZE } from '../../utils/media/encoders/ico';
+import { toastStore } from '../../stores/toast';
 
 const params = reactive<ConvertParams>({
   format: 'webp',
@@ -99,7 +100,7 @@ async function onCropDone(result: CropResult): Promise<void> {
   const limit = checkCanvasLimits(bitmap.width, bitmap.height);
   if (!limit.ok) {
     bitmap.close?.();
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: limit.error } }));
+    toastStore.show(limit.error);
     return;
   }
   await batch.replaceWithCrop(id, result.blob, bitmap, result.width, result.height);
@@ -108,7 +109,7 @@ async function onCropDone(result: CropResult): Promise<void> {
 
 function downloadAll(): void {
   void batch.downloadAllZip();
-  document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已开始打包下载' } }));
+  toastStore.show('已开始打包下载');
 }
 
 onMounted(() => window.addEventListener('paste', onPaste));

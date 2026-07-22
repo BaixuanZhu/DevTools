@@ -28,6 +28,7 @@ import {
   exportPdf,
 } from '../../utils/editor/markdown-export';
 import { Columns2, SquarePen, Eye, Bold, Italic, Code, Link, Terminal, RefreshCw, Download } from '@lucide/vue';
+import { toastStore } from '../../stores/toast';
 
 // ---- 常量 ----
 
@@ -282,9 +283,9 @@ function handleClear(): void {
 function handleExportMd(): void {
   try {
     exportMarkdown(markdownSource.value);
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 Markdown 文件' } }));
+    toastStore.show('已导出 Markdown 文件');
   } catch {
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+    toastStore.error('导出失败，请重试');
   }
 }
 
@@ -292,9 +293,9 @@ function handleExportMd(): void {
 function handleExportHtml(): void {
   try {
     exportHtml(renderedHtml.value);
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '已导出 HTML 文件' } }));
+    toastStore.show('已导出 HTML 文件');
   } catch {
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+    toastStore.error('导出失败，请重试');
   }
 }
 
@@ -303,7 +304,7 @@ function handleExportPdf(): void {
   try {
     exportPdf();
   } catch {
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '导出失败，请重试', type: 'error' } }));
+    toastStore.error('导出失败，请重试');
   }
 }
 

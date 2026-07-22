@@ -17,6 +17,7 @@ import {
   type SM2CipherMode,
 } from '../../utils/crypto/sm2';
 import type { OutputFormat } from '../../utils/shared/array-buffer';
+import { toastStore } from '../../stores/toast';
 
 /** 操作模式 */
 type OperationMode = 'generate' | 'encrypt' | 'decrypt';
@@ -123,7 +124,7 @@ function handleGenerateKeys() {
     const keyPair = generateSM2KeyPair();
     publicKeyText.value = keyPair.publicKey;
     privateKeyText.value = keyPair.privateKey;
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '密钥对生成成功' } }));
+    toastStore.show('密钥对生成成功');
   } catch (err) {
     errorMsg.value = err instanceof Error ? err.message : '生成密钥对失败';
   } finally {
