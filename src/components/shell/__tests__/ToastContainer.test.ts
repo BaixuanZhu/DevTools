@@ -5,7 +5,7 @@ import { nextTick } from 'vue';
 import ToastContainer from '../ToastContainer.vue';
 import { toastStore } from '../../../stores/toast';
 
-// 自动卸载 wrapper，避免 document 级监听跨用例污染
+// 自动卸载 wrapper，避免跨用例污染
 enableAutoUnmount(afterEach);
 
 describe('ToastContainer.vue', () => {
@@ -21,22 +21,11 @@ describe('ToastContainer.vue', () => {
     expect(wrapper.text()).toContain('保存成功');
   });
 
-  it('兼容 shim：document CustomEvent("toast") → toastStore.show()', async () => {
+  it('error 类型通知渲染错误样式', async () => {
+    toastStore.show('操作失败', 'error');
     const wrapper = mount(ToastContainer);
     await nextTick();
-    document.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', message: ' shim 兼容' } }));
-    await nextTick();
-    expect(wrapper.text()).toContain('shim 兼容');
-    expect(toastStore.items.value.some((t) => t.type === 'error')).toBe(true);
-    wrapper.unmount();
-  });
-
-  it('卸载后移除 shim 监听', async () => {
-    const wrapper = mount(ToastContainer);
-    await nextTick();
-    wrapper.unmount();
-    const before = toastStore.items.value.length;
-    document.dispatchEvent(new CustomEvent('toast', { detail: { message: '卸载后不应出现' } }));
-    expect(toastStore.items.value.length).toBe(before);
+    expect(wrapper.text()).toContain('操作失败');
+    expect(wrapper.html()).toContain('border-error/20');
   });
 });

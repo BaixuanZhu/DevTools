@@ -3,25 +3,12 @@
  * Toast 通知容器（全局单岛，client:load）。
  *
  * 渲染 toastStore.items 队列，成功/失败用 lucide 图标 + TransitionGroup 动画。
- * 兼容 shim：阶段 1 过渡期，把遗留 `document` CustomEvent('toast')
- * 转发到 toastStore，使未迁移的工具本地 showToast 助手继续工作。
- * 阶段 3 迁移完所有工具后移除该 shim。
+ * 生产者一律直接调用 toastStore.show()/error()（13 处 CustomEvent 桥接已于阶段 3 清零）。
  */
-import { onMounted, onUnmounted } from 'vue';
 import { CircleCheck, CircleX } from '@lucide/vue';
-import { toastStore, type ToastType } from '../../stores/toast';
+import { toastStore } from '../../stores/toast';
 
 const { items } = toastStore;
-
-/** 遗留 toast 事件 → toastStore 桥接（阶段 3 移除） */
-function legacyBridge(e: Event): void {
-  const detail = (e as CustomEvent).detail || {};
-  if (detail.message) {
-    toastStore.show(String(detail.message), (detail.type as ToastType) || 'success');
-  }
-}
-onMounted(() => document.addEventListener('toast', legacyBridge as EventListener));
-onUnmounted(() => document.removeEventListener('toast', legacyBridge as EventListener));
 </script>
 
 <template>

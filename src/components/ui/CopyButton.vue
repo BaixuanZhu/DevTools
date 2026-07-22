@@ -6,7 +6,7 @@ interface Props {
   /** 要复制的文本 */
   text: string;
   /** 按钮尺寸，默认 md */
-  size: 'sm' | 'md';
+  size?: 'sm' | 'md';
 }
 
 const props = withDefaults(defineProps<Props>(), {
