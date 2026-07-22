@@ -106,9 +106,9 @@ Light surfaces with a subtle warm tint carry 90% of the viewport. A single satur
 The system rejects everything PRODUCT.md calls out: login walls, multi-step flows, loading spinners, unnecessary navigation depth. A tool page loads and the cursor is already in the input field.
 
 **Key Characteristics:**
-- `bg-surface`（#faf9f7）铺底，`text-accent` / `border-accent`（#e8590c）每屏占比 ≤ 10%
+- `bg-background`（#faf9f7）铺底，`text-primary` / `border-primary`（#e8590c）每屏占比 ≤ 10%
 - 触感明确：边框定义形状，150ms transition 确认动作
-- 无阴影层级：tonal layering（`bg-card` on `bg-surface`，`bg-hover` 悬停）
+- 无阴影层级：tonal layering（`bg-card` on `bg-background`，`bg-accent` 悬停）
 - 零摩擦交互：页面加载后输入框自动聚焦，结果实时更新，无需提交按钮
 - 单一无衬线字体（`font-sans`）+ `font-mono` 专用于代码区域
 
@@ -147,16 +147,16 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 本节定义如何将设计系统落地到代码。
 
 **组件库选型：**
-- 优先使用 @headlessui/vue 组件（TabGroup / Switch / Listbox / Disclosure / Dialog / Popover 等），不要手写或引入其他 UI 框架
+- 可访问交互原语使用 reka-ui（Tabs / Switch / Select / RadioGroup / Collapsible / Dialog / DropdownMenu 等），不要手写或引入其他 UI 框架；shadcn-vue 预制件可按 `components.json`（无 `@/` 别名）`add` 后改相对路径引入
 - `src/components/ui/` 下已有封装组件优先复用：ToggleSwitch、SelectListbox、ModeTabGroup、OptionRadioGroup、CopyButton、ClearButton、ColorInput、CodePanel
-- Headless UI 无法覆盖的交互需求，使用 Vue 3 Composition API 自行实现，保持无障碍（ARIA、键盘导航、focus 管理）
+- reka-ui 无法覆盖的交互需求，使用 Vue 3 Composition API 自行实现，保持无障碍（ARIA、键盘导航、focus 管理）
 
 **样式实现：**
 - 统一使用 Tailwind utility class，禁止内联 style、禁止引入额外 CSS 框架
 - 消费设计令牌（`global.css` @theme 中定义的令牌），避免硬编码数值
 - 每个可交互元素必须覆盖 hover / focus / active / disabled 状态
 
-**Focus 样式约束：** `input`、`textarea` 等文本输入元素使用 `focus:outline-none focus:border-accent` 表示焦点状态。其他交互元素（按钮、开关、下拉选择等）使用 `focus:outline-none` 移除默认 outline，通过背景色变化或 Headless UI 的内置 focus 管理处理焦点。不使用 `focus:ring` 或 `focus:border-accent`。
+**Focus 样式约束：** `input`、`textarea` 等文本输入元素使用 `focus:outline-none focus:border-primary` 表示焦点状态。其他交互元素（按钮、开关、下拉选择等）使用 `focus:outline-none` 移除默认 outline，通过背景色变化或 reka-ui 原语的内置 focus 管理处理焦点。不使用 `focus:ring`。
 
 **工具页面组件模式：** 工具 Vue 组件（`.vue` 文件）使用 `<script setup lang="ts">` + Composition API，导入布局组件，输入即输出（无需"运行"按钮，耗时操作除外）。使用 `ResponsiveWorkspace` 组件统一管理宽度约束：单列工具用 `vertical` 模式（720px），双栏工具用 `horizontal` 模式（1600px）。未使用 ResponsiveWorkspace 的工具通过 `<div class="max-w-[720px]">` 或 `<div class="mx-auto max-w-[1600px]">` 自行控制宽度。
 
@@ -164,31 +164,29 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 
 ## 2. Colors
 
-**The Shelf Rule.** 中性色承载 90% 的面。accent（#e8590c）仅出现在交互元素的活跃态：聚焦输入框、活跃标签页、选中筛选、悬停 Logo。稀缺即力量。任一屏幕超过 10% 的橙色即为异常。
+**The Shelf Rule.** 中性色承载 90% 的面。primary（#e8590c）仅出现在交互元素的活跃态：聚焦输入框、活跃标签页、选中筛选、悬停 Logo。稀缺即力量。任一屏幕超过 10% 的橙色即为异常。
 
-### Neutral
+**令牌体系（2026-07 重构）：** 设计令牌定义于 `src/styles/global.css`，采用 shadcn 语义的双层结构——`:root` / `.dark` 两组 CSS 变量（语义层）经 `@theme inline` 映射进 Tailwind 命名空间（映射层）。组件只消费语义类名，切换 `<html class="dark">` 即整站换主题。**语义对齐 shadcn 约定：`primary` = 品牌橙（主操作色），`accent` = 悬停/次要底色（灰）**——与重构前的旧命名（accent=橙、hover=灰）相反，引用旧文档时注意。
 
-| 语义 | 色值 | Tailwind Utility | 使用范围 |
-|------|------|-----------------|---------|
-| 页面底色 | #faf9f7 | `bg-surface` | 所有页面的 `<body>` 底色 |
-| 卡片/Header 底 | #ffffff | `bg-card` | 卡片、Sidebar、Header、Footer 的背景 |
-| 主文字 | #1a1a1a | `text-text` | 正文、标题、输入内容。从不使用纯黑 |
-| 次要文字/禁用 | #6b7280 | `text-muted` | 辅助说明、placeholder、侧栏分组标题、禁用态文字 |
-| 边框/分割线 | #e5e2dd | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
-| 悬停底色 | #f3f1ee | `bg-hover` | 按钮、卡片、侧栏项的悬停底色，比 surface 深一阶 |
+### Neutral + Primary（浅色 / 暗色双组）
 
-### Accent
-
-| 语义 | 色值 | Tailwind Utility | 使用范围 |
-|------|------|-----------------|---------|
-| 强调色 | #e8590c | `text-accent` `bg-accent` `border-accent` | 仅交互元素活跃态。从不作为大面积底色 |
+| 语义 | 浅色 | 暗色 | Tailwind Utility | 使用范围 |
+|------|------|------|-----------------|---------|
+| 页面底色 | #faf9f7 | #161514 | `bg-background` | 所有页面的 `<body>` 底色 |
+| 卡片/Header 底 | #ffffff | #1f1e1c | `bg-card` | 卡片、Sidebar、Header、Footer 的背景 |
+| 主文字 | #1a1a1a | #f3f1ee | `text-foreground` | 正文、标题、输入内容。从不使用纯黑 |
+| 次要文字/禁用 | #6b7280 | #a1a1aa | `text-muted-foreground` | 辅助说明、placeholder、侧栏分组标题、禁用态文字 |
+| 次要背景 | #f3f1ee | #2a2826 | `bg-muted` | 需要比卡片浅一阶的填充区 |
+| 边框/分割线 | #e5e2dd | #2a2826 | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
+| 悬停底色 | #f3f1ee | #2a2826 | `bg-accent` | 按钮、卡片、侧栏项的悬停底色，比 background 深一阶 |
+| 强调色（品牌橙） | #e8590c | #f97316 | `text-primary` `bg-primary` `border-primary` | 仅交互元素活跃态。从不作为大面积底色 |
 
 ### Semantic
 
-| 语义 | 色值 | Tailwind Utility | 使用范围 |
-|------|------|-----------------|---------|
-| 错误 | #dc2626 | `text-error` | 仅文字，不做底色 |
-| 成功 | #16a34a | `text-success` | 仅文字，不做底色（如复制确认） |
+| 语义 | 浅色 | 暗色 | Tailwind Utility | 使用范围 |
+|------|------|------|-----------------|---------|
+| 错误 | #dc2626 | #ef4444 | `text-error`（兼容别名，指向 destructive） | 仅文字，不做底色 |
+| 成功 | #16a34a | #22c55e | `text-success` | 仅文字，不做底色（如复制确认） |
 
 ---
 
@@ -202,7 +200,7 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 | Tool Title | Noto Sans SC | `font-sans font-semibold text-xl leading-tight` | 工具页标题 |
 | Body | Noto Sans SC | `font-sans font-normal text-base leading-normal` | 描述、标签、通用文字。最大行宽 65–75ch |
 | Label | Noto Sans SC | `font-sans font-medium text-[0.8125rem]` | 按钮文字、字段标签、卡片描述、筛选芯片 |
-| Sidebar Heading | Noto Sans SC | `font-sans font-semibold text-xs uppercase tracking-wider text-muted` | 侧栏分组标题 |
+| Sidebar Heading | Noto Sans SC | `font-sans font-semibold text-xs uppercase tracking-wider text-muted-foreground` | 侧栏分组标题 |
 | Mono | JetBrains Mono | `font-mono font-normal text-sm` | 代码输入/输出区域、hash 结果、编码字符串 |
 
 ### Border Radius
@@ -230,26 +228,26 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 
 ## 4. Elevation
 
-Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐落在 `bg-surface`（#faf9f7）上，悬停态切换为 `bg-hover`（#f3f1ee）。投影仅用于需要从背景浮出的功能性浮层。
+Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐落在 `bg-background`（#faf9f7）上，悬停态切换为 `bg-accent`（#f3f1ee）。投影仅用于需要从背景浮出的功能性浮层。
 
 **The Minimal Shadow Rule.** 静态内容区域不使用投影。投影仅用于浮层组件（下拉菜单、Toast 通知、弹出面板）和工具卡片悬停态，且必须保持 imperceptible（`shadow-sm` 或 `shadow-[0_2px_8px_rgba(0,0,0,0.06)]`）。内容卡片、按钮、输入框等常规元素不使用投影。
 
-**Dark Mode: Not Supported.** 当前设计有意只支持暖调浅色主题。warm-ivory 底色是刻意的设计身份标识，不做暗色模式。如未来需要支持，应作为独立项目在 PRODUCT.md 中声明后再启动。
+**Dark Mode: Supported（2026-07 起）。** 暖调浅色仍是默认与设计身份；暗色通过 `.dark` 组 token 实现（见 §Colors），由 Header 的暗色按钮切换（`themeStore`，选择持久化于 localStorage）。全局壳层（Header/Sidebar/Toast/卡片）与所有消费语义 token 的组件自动适配；**不使用 token 而硬编码颜色的组件在暗色下属于缺陷**，应改消费 token。个别工具的暗色对比度深度校验为持续跟进项，发现具体问题进行具体修复。
 
 ---
 
 ## 5. Components
 
-组件精确而克制。边框定义形状，padding 留出呼吸空间，状态切换统一 150ms ease。每个可交互元素都有 hover 响应。每个聚焦输入框都获得 `border-accent`。主要操作按钮应覆盖 complete 状态矩阵（default / hover / active / disabled），辅助组件（开关、选择器等）至少覆盖 default / hover。
+组件精确而克制。边框定义形状，padding 留出呼吸空间，状态切换统一 150ms ease。每个可交互元素都有 hover 响应。每个聚焦输入框都获得 `border-primary`。主要操作按钮应覆盖 complete 状态矩阵（default / hover / active / disabled），辅助组件（开关、选择器等）至少覆盖 default / hover。
 
 ### Buttons
 
 | 状态 | Primary | Ghost |
 |------|---------|-------|
-| Default | `bg-accent text-white rounded-sm px-4 py-2` | `bg-card text-text border border-border rounded-sm px-4 py-2` |
-| Hover | 不变色 | `hover:bg-hover` |
+| Default | `bg-primary text-white rounded-sm px-4 py-2` | `bg-card text-foreground border border-border rounded-sm px-4 py-2` |
+| Hover | 不变色 | `hover:bg-accent` |
 | Focus | 无（按钮不显示 focus 样式） | 同 Primary |
-| Active (pressed) | `active:brightness-90` | `active:bg-hover/80` |
+| Active (pressed) | `active:brightness-90` | `active:bg-accent/80` |
 | Disabled | `opacity-50 cursor-not-allowed`（覆盖所有状态） | 同 Primary |
 | Copied | — | Ghost 按钮 `border-success text-success` 持续 1.5s，显示"已复制" |
 
@@ -260,9 +258,9 @@ Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐
 
 | 状态 | Class |
 |------|-------|
-| Default | `bg-card border border-border rounded-lg px-4 py-1 text-muted` |
-| Active | `bg-accent text-white rounded-lg px-4 py-1`（border 随 bg 同色） |
-| Hover（inactive） | `hover:bg-hover hover:text-text` |
+| Default | `bg-card border border-border rounded-lg px-4 py-1 text-muted-foreground` |
+| Active | `bg-primary text-white rounded-lg px-4 py-1`（border 随 bg 同色） |
+| Hover（inactive） | `hover:bg-accent hover:text-foreground` |
 | Disabled | `opacity-50 cursor-not-allowed pointer-events-none` |
 
 ### Category Chips（全局筛选，CSS 组件）
@@ -274,19 +272,19 @@ Pill 形状（`rounded-full`），`border: 1.5px solid transparent`，活跃态 
 | 状态 | Class |
 |------|-------|
 | Default | `bg-card border border-border rounded-lg p-6` |
-| Hover | `hover:border-accent hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` |
+| Hover | `hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` |
 | Focus | 无（卡片不显示 focus 样式） |
 
-Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.9375rem]`）和 description（`text-[0.8125rem] text-muted`）右。
+Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.9375rem]`）和 description（`text-[0.8125rem] text-muted-foreground`）右。
 
 ### Inputs / Textareas
 
 | 状态 | Class |
 |------|-------|
-| Editable | `bg-card text-text border border-border rounded-sm px-4 py-2 font-mono text-sm` |
-| Read-only | `bg-hover text-text border border-border rounded-sm px-4 py-2 font-mono text-sm` |
-| Focus | `focus:border-accent focus:outline-none`，无 glow |
-| Disabled | `bg-surface opacity-60 cursor-not-allowed` |
+| Editable | `bg-card text-foreground border border-border rounded-sm px-4 py-2 font-mono text-sm` |
+| Read-only | `bg-accent text-foreground border border-border rounded-sm px-4 py-2 font-mono text-sm` |
+| Focus | `focus:border-primary focus:outline-none`，无 glow |
+| Disabled | `bg-background opacity-60 cursor-not-allowed` |
 | Error | 输入框 `border-error`；下方显示 `text-[0.8125rem] text-error` 错误消息 |
 
 错误消息与输入框的间距：`mt-1`（4px）。
@@ -296,8 +294,8 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | 状态 | Class |
 |------|-------|
 | Container | `bg-card border border-border rounded-md px-4 py-2 flex gap-2` |
-| Focus（容器） | `focus-within:border-accent transition-[border-color] duration-150` |
-| Input | 占位文本 `text-muted`，输入文字 `text-text`，无边框、无 outline |
+| Focus（容器） | `focus-within:border-primary transition-[border-color] duration-150` |
+| Input | 占位文本 `text-muted-foreground`，输入文字 `text-foreground`，无边框、无 outline |
 
 ### Sidebar Navigation
 
@@ -306,11 +304,11 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | Container（桌面） | `sidebar w-60 shrink-0 border-r border-border bg-card flex flex-col`（静态 flex 列，无 `fixed`） |
 | Container（移动） | `position: fixed`，`top: 57px; height: calc(100dvh - 57px); transform: translateX(-100%)`，`.sidebar-open` 时 `translateX(0)` |
 | Nav scroll | `flex-1 sidebar-nav-scroll overflow-y-auto py-2`（导航区独立滚动，隐藏滚动条见 §Sidebar Scroll） |
-| Group headings | `font-semibold text-xs uppercase tracking-wider text-muted px-4 py-4 pb-1` |
+| Group headings | `font-semibold text-xs uppercase tracking-wider text-muted-foreground px-4 py-4 pb-1` |
 | Nav links | `flex items-center gap-2 px-4 py-2 text-sm` |
-| Active link | `bg-hover text-accent font-medium` |
-| Hover | `hover:bg-hover` |
-| Overlay（移动） | `.sidebar-overlay fixed inset-0 bg-black/30 z-[99]`，`top: 57px`；显隐由 Alpine `x-show` 跟随 `sidebar-toggle`/`sidebar-close` 事件（响应式 `show` 变量），点击或 Esc 关闭 |
+| Active link | `bg-accent text-primary font-medium` |
+| Hover | `hover:bg-accent` |
+| Overlay（移动） | `.sidebar-overlay fixed inset-0 bg-black/30 z-[99]`，`top: 57px`；显隐由 `sidebarStore.isOpen` 驱动（Shell.vue 内 `<Transition>`），点击或 Esc 关闭 |
 
 ### Header
 
@@ -319,9 +317,9 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | Container | `flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0`（通栏，作为 `#app` flex 子项天然钉顶，无需 `sticky`） |
 | Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（收藏夹 · 暗色模式 · Gitee · GitHub） |
 | Logo | `group flex items-center gap-1.5 text-lg font-semibold`，全断点常驻；图标 `text-violet-600`，hover `-rotate-12` |
-| 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，`@click` 触发 `sidebar-toggle` |
-| 收藏夹入口 | 桌面：`h-9 px-2` 文本 + Star 图标，文本为「我的收藏」；移动端（`max-md:`）仅显示图标，`px-1.5`。链接到 `/favorites`，hover `text-accent bg-hover` |
-| 暗色模式按钮 | 同收藏夹按钮样式，当前为 UI 预留（Toast 提示"即将支持"） |
+| 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，点击调用 `sidebarStore.toggle()` |
+| 收藏夹入口 | 桌面：`h-9 px-2` 文本 + Star 图标，文本为「我的收藏」；移动端（`max-md:`）仅显示图标，`px-1.5`。链接到 `/favorites`，hover `text-primary bg-accent` |
+| 暗色模式按钮 | 同收藏夹按钮样式，点击调用 `themeStore.toggle()` 切换浅色/暗色（持久化于 localStorage） |
 | Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 
 ### Tool Header
@@ -330,8 +328,8 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 |------|-------|
 | Layout | `flex justify-between items-start`，标题 + 描述 左，示例按钮 右 |
 | Title | `font-semibold text-xl` |
-| Description | `text-sm text-muted mt-1` |
-| Example button | Ghost 风格，`hover:border-accent` |
+| Description | `text-sm text-muted-foreground mt-1` |
+| Example button | Ghost 风格，`hover:border-primary` |
 
 ### Footer
 
@@ -341,7 +339,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 |------|-------|
 | Container | `bg-card border-t border-border px-6 py-5` |
 | 内容包裹 | `max-w-3xl mx-auto flex flex-col items-center gap-2 text-center` |
-| 版权行 / 链接行 / 备案行 | `text-[0.8125rem] text-muted`，链接 `hover:text-accent` |
+| 版权行 / 链接行 / 备案行 | `text-[0.8125rem] text-muted-foreground`，链接 `hover:text-primary` |
 | 备案行 | ICP / 公安备案号通过组件顶部 `SITE` 常量配置，留空则不渲染；公安备案前缀盾牌图标（内联 SVG 占位，未来替换为官方国徽） |
 
 ### Toast Notification
@@ -367,14 +365,14 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 ### OptionRadioGroup
 
-基于 Headless UI 的单选按钮组组件，用于在一组互斥选项中选择一个（如哈希算法选择、输出格式选择）。
+基于 reka-ui RadioGroup 的单选按钮组组件，用于在一组互斥选项中选择一个（如哈希算法选择、输出格式选择）。
 
 | 元素 | 描述 |
 |------|------|
 | 容器 | `flex flex-wrap gap-2` 横向排列 |
-| 选项按钮 | `px-3 py-1.5 rounded-sm border border-border text-sm`，默认 `text-muted bg-card` |
-| 选中态 | `bg-accent text-white border-accent` |
-| Hover | `hover:bg-hover` |
+| 选项按钮 | `px-3 py-1.5 rounded-sm border border-border text-sm`，默认 `text-muted-foreground bg-card` |
+| 选中态 | `bg-primary text-white border-primary` |
+| Hover | `hover:bg-accent` |
 
 ### CodePanel
 
@@ -382,7 +380,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 | 元素 | 描述 |
 |------|------|
-| 容器 | `bg-hover border border-border rounded-sm overflow-hidden` |
+| 容器 | `bg-accent border border-border rounded-sm overflow-hidden` |
 | 标题栏 | `flex items-center justify-between px-4 py-2 border-b border-border bg-card` |
 | 代码区域 | `p-4 font-mono text-sm overflow-auto whitespace-pre-wrap break-all` |
 
@@ -392,9 +390,9 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 
 | 状态 | 类名 | 样式 |
 |------|------|------|
-| 默认 | `.chip-default` | `bg-card border border-border rounded-full px-4 py-1.5 text-muted` |
+| 默认 | `.chip-default` | `bg-card border border-border rounded-full px-4 py-1.5 text-muted-foreground` |
 | 活跃 | `.chip-active` | `bg-text text-surface border-transparent` |
-| Hover | `.chip-default:hover` | `bg-hover text-text` |
+| Hover | `.chip-default:hover` | `bg-accent text-foreground` |
 
 ### Sidebar Scroll
 
@@ -407,8 +405,8 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 ### Do:
 - **Do** focus the main input field on page load so the user can start typing immediately.
 - **Do** show results in real-time as the user types, with no submit button required (unless the operation is destructive or slow).
-- **Do** use `bg-surface`（#faf9f7）as the page surface and `bg-card`（#ffffff）for raised surfaces (cards, sidebar, header).
-- **Do** use `text-accent` / `border-accent`（#e8590c）only on interactive elements in active state. Its rarity is its strength.
+- **Do** use `bg-background`（#faf9f7）as the page surface and `bg-card`（#ffffff）for raised surfaces (cards, sidebar, header).
+- **Do** use `text-primary` / `border-primary`（#e8590c）only on interactive elements in active state. Its rarity is its strength.
 - **Do** cap code field body text at 65 to 75ch for readability.
 - **Do** use 150ms ease transitions for all state changes (`transition-[border-color]` etc.). Fast enough to feel responsive, slow enough to perceive.
 - **Do** keep standard tool pages self-contained at max-width 720px; wide tools (JSON, editors, diffs) may extend to 1600px with dual-column layout for code editing/comparison.
@@ -418,7 +416,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 - **Don't** use a dark theme with blue/cyan neon accents. This is the first training-data reflex for "dev tools" and it is prohibited.
 - **Don't** use glassmorphism, gradient text (background-clip: text), or side-stripe borders greater than 1px as colored accents.
 - **Don't** add login walls, onboarding flows, multi-step wizards, or loading spinners. From PRODUCT.md anti-references: forced login, complex flows, and anything that makes the user wait are prohibited.
-- **Don't** use `accent` as a background fill for large areas (`bg-accent` on full-width sections). It is a signal, not a surface.
+- **Don't** use `accent` as a background fill for large areas (`bg-primary` on full-width sections). It is a signal, not a surface.
 - **Don't** add shadows to resting content areas. The tool card `hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` and floating layer components (dropdowns, toasts) are exceptions.
 - **Don't** animate layout properties or add ambient/choreographed animations. Motion serves feedback only.
 - **Don't** use identical card grids with the same-sized cards repeated endlessly without visual differentiation.

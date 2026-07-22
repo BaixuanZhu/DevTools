@@ -74,8 +74,8 @@ pnpm astro check      # 运行 Astro TypeScript 类型检查
 - **Framework:** Astro 6 + Vue 3（@astrojs/vue）
 - **UI:** Vue 3 `<script setup lang="ts">` + Composition API（交互型组件）
 - **Language:** TypeScript（strict 模式，继承 astro/tsconfigs/strict）
-- **Styling:** Tailwind CSS v4 — 令牌定义于 `src/styles/global.css` 的 `@theme` 块，组件通过 utility class 消费
-- **UI Components:** @headlessui/vue — 无样式可访问组件（Tab、Switch、Listbox、Disclosure 等），用 Tailwind class 定制外观
+- **Styling:** Tailwind CSS v4 — 令牌定义于 `src/styles/global.css`（`:root`/`.dark` 双组变量 + `@theme inline` 映射），组件通过 utility class 消费
+- **UI Components:** reka-ui — 无样式可访问原语（Tabs、Switch、Select、Collapsible、Dialog、DropdownMenu 等），用 Tailwind class 定制外观；shadcn-vue 已初始化（`components.json`，无 `@/` 别名，组件 import 一律相对路径）
 - **Package Manager:** pnpm
 - **Node:** >=22.12.0
 
@@ -88,12 +88,14 @@ src/
 ├── tools/       # 工具页面（按分类组织子目录：encoding/、crypto/、datetime/ 等）
 ├── components/  # 可复用 UI 组件（.vue 交互型 + .astro 纯展示）
 │   ├── ui/          # 通用交互组件（ToggleSwitch、SelectListbox 等）
-│   └── layout/      # 布局组件（ToolHeader、Breadcrumb、RelatedTools、ResponsiveWorkspace）
+│   ├── layout/      # 布局组件（ToolHeader、Breadcrumb、RelatedTools、ResponsiveWorkspace）
+│   └── shell/       # 全局壳层组件（Shell、ToastContainer、FavoriteButton、SearchPanel、FeedbackForm）
 ├── composables/ # Vue 组合式函数（如 useCopy），供多个工具组件复用
+├── stores/      # 模块级 reactive store（toast、sidebar、favorites、search、theme），跨 island 共享单例
 ├── data/        # 工具注册表（tools.ts、tool-faqs.ts）
 ├── utils/       # 工具函数
-├── styles/      # 设计令牌（global.css @theme 块）
-├── types/       # 全局类型声明（第三方库类型补充，如 alpinejs、des.js）
+├── styles/      # 设计令牌（global.css：:root/.dark 双组变量 + @theme inline 映射）
+├── types/       # 全局类型声明（第三方库类型补充，如 des.js）
 ├── tests/       # 按分类组织的集成/页面测试
 └── assets/      # 静态资源（通过 Astro import 引用）
 public/          # 不经处理的静态文件（favicon 等）
@@ -104,14 +106,14 @@ public/          # 不经处理的静态文件（favicon 等）
 
 ## Frontend Architecture
 
-项目采用**双引擎**架构：
+项目采用 **Vue 单引擎**架构（2026-07 运行时统一重构完成，Alpine.js 已移除）：
 
-- **Alpine.js** — 负责全局壳层交互（侧边栏开关、Toast 通知、收藏夹面板、搜索过滤、暗色模式切换）。这些逻辑写在 `.astro`
-  页面和布局文件中，通过 `x-data` / `x-show` / `@click` 等指令实现。
-- **Vue 3** — 负责工具内部的复杂交互（编码转换、JSON 格式化、哈希计算等）。每个工具是一个独立的 Vue 组件，通过 Astro `client:`
-  指令按需水合。
+- **全局壳层** — `Shell.vue`（唯一 `client:load` 的 island）承载 Header / Sidebar / ToastContainer / 收藏夹 / 搜索 / 暗色切换，
+  响应式状态来自 `src/stores/` 的模块级 reactive store（ESM 单例，跨 island 共享）。
+- **工具 islands** — 每个工具是独立 Vue 组件（`client:idle` / `client:load` 按需水合），`import` 同一批 store 模块。
 
-**跨框架通信**：Vue 组件通过 `CustomEvent('toast', { detail: { message } })` 触发 Alpine 管理的 Toast 通知系统。不需要引入全局状态库。
+**通知通信**：任意组件直接调用 `toastStore.show(message)` / `toastStore.error(message)`。禁止重新引入 `CustomEvent` 字符串桥接；
+不引入全局状态库（Pinia 等），模块级 store 已覆盖壳层共享需求。
 
 ## Heavy Computation Pattern
 
@@ -265,3 +267,4 @@ search_text("min-w-[1")  # 搜索最小宽度任意值
   dayjs、@noble/ciphers、uuid）。新增依赖前需确认其社区活跃度和兼容性
 - **禁止引入未经广泛验证的实验性库**：如果功能可用浏览器原生 API（Web Crypto API、TextEncoder、URL 等）实现，优先使用原生方案
 - **同类库不重复引入**：已有 dayjs 处理日期则不再引入 moment/luxon；已有 @noble/ciphers 则不再引入 crypto-js
+- **UI 原语只用 reka-ui**：可访问交互原语（弹层、选项卡、开关等）一律用 reka-ui，禁止重新引入 @headlessui/vue 或其他原语库；壳层共享状态用 `src/stores/` 模块级 store，禁止重新引入 Alpine.js 或全局状态库
