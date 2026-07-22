@@ -265,7 +265,7 @@ Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐
 
 ### Category Chips（全局筛选，CSS 组件）
 
-Pill 形状（`rounded-full`），`border: 1.5px solid transparent`，活跃态 `bg-text text-surface`（反转），过渡 `background-color 0.15s, color 0.15s, border-color 0.15s`。
+Pill 形状（`rounded-full`），`border: 1.5px solid transparent`，活跃态 `bg-foreground text-background`（反转），过渡 `background-color 0.15s, color 0.15s, border-color 0.15s`。
 
 ### Tool Cards
 
@@ -391,7 +391,7 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | 状态 | 类名 | 样式 |
 |------|------|------|
 | 默认 | `.chip-default` | `bg-card border border-border rounded-full px-4 py-1.5 text-muted-foreground` |
-| 活跃 | `.chip-active` | `bg-text text-surface border-transparent` |
+| 活跃 | `.chip-active` | `bg-foreground text-background border-foreground` |
 | Hover | `.chip-default:hover` | `bg-accent text-foreground` |
 
 ### Sidebar Scroll
