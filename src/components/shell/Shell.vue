@@ -2,26 +2,27 @@
 /**
  * 全局应用壳层（ToolLayout 唯一 client:load 岛）。
  *
- * 渲染 Header（汉堡 + Logo + 收藏入口 + 暗色按钮 + 仓库链接）、
- * Sidebar（桌面常驻 / 移动抽屉）、移动 Overlay，并通过默认 slot
- * 承载页面内容列（由 Astro server 渲染注入）。
+ * 渲染 Header（汉堡 + Logo + 暗色按钮 + 仓库链接）、
+ * Sidebar（桌面常驻 / 移动抽屉，仅展示 7 个分类入口 + 工具数）、移动 Overlay，
+ * 并通过默认 slot 承载页面内容列（由 Astro server 渲染注入）。
  *
  * 响应式状态来自模块级单例 store（sidebarStore / themeStore），
- * onMounted 预热 favorites/theme 的 localStorage 读取。
+ * onMounted 预热 theme 的 localStorage 读取。
  */
 import { onMounted, onUnmounted } from 'vue';
 import { Wrench, Sun, Moon } from '@lucide/vue';
 import { siGithub, siGitee } from 'simple-icons';
 import type { ToolMeta } from '../../data/tools';
+import type { CategoryMeta } from '../../data/categories';
 import { sidebarStore } from '../../stores/sidebar';
 import { themeStore } from '../../stores/theme';
 
 interface Props {
-  /** 分类列表（顺序保持注册顺序） */
-  categories: string[];
-  /** 分类 → 工具列表映射 */
+  /** 分类元数据列表（顺序保持 categories.ts 注册顺序） */
+  categories: CategoryMeta[];
+  /** 分类名 → 工具列表映射（侧边栏取每类 .length 作为数量徽标） */
   toolsByCategory: Record<string, Pick<ToolMeta, 'id' | 'path' | 'name' | 'icon'>[]>;
-  /** 当前路径（用于侧栏高亮），格式如 /text/uuid-generator */
+  /** 当前路径（用于侧栏分类高亮），格式如 /text/uuid-generator 或 /text */
   currentPath: string;
 }
 const props = defineProps<Props>();
@@ -73,16 +74,6 @@ function toggleTheme(): void {
       <!-- 右侧：工具按钮区 + 仓库入口 -->
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1">
-          <!-- 收藏夹入口 -->
-          <a
-            href="/favorites"
-            class="flex items-center gap-1.5 h-9 px-2 max-md:px-1.5 rounded-sm text-muted-foreground hover:text-primary hover:bg-accent transition-[color,background-color] duration-150 focus:outline-none"
-            aria-label="我的收藏"
-          >
-            <span class="text-[1.125rem] leading-none">⭐</span>
-            <span class="text-[0.8125rem] font-medium max-md:hidden">我的收藏</span>
-          </a>
-
           <!-- 暗色模式按钮 -->
           <button
             class="flex items-center justify-center w-9 h-9 rounded-sm text-muted-foreground hover:text-primary hover:bg-accent transition-[color,background-color] duration-150 cursor-pointer border-none bg-transparent focus:outline-none"
@@ -131,23 +122,23 @@ function toggleTheme(): void {
         aria-label="工具导航"
       >
         <div class="flex-1 sidebar-nav-scroll overflow-y-auto py-2">
-          <div v-for="category in props.categories" :key="category">
-            <h3 class="text-xs font-semibold text-muted-foreground px-4 py-4 pb-1 uppercase tracking-wider">{{ category }}</h3>
-            <ul class="list-none m-0 p-0">
-              <li v-for="tool in props.toolsByCategory[category]" :key="tool.id">
-                <a
-                  :href="tool.path"
-                  :class="[
-                    'flex items-center gap-2 px-4 py-2 text-sm text-foreground transition-[background-color] duration-150 hover:bg-accent focus:outline-none',
-                    props.currentPath === tool.path && 'bg-accent text-primary font-medium',
-                  ]"
-                >
-                  <span class="text-base w-6 text-center shrink-0">{{ tool.icon }}</span>
-                  <span>{{ tool.name }}</span>
-                </a>
-              </li>
-            </ul>
-          </div>
+          <ul class="list-none m-0 p-0">
+            <li v-for="cat in props.categories" :key="cat.slug">
+              <a
+                :href="'/' + cat.slug"
+                :class="[
+                  'flex items-center gap-2 px-4 py-2.5 text-sm transition-[background-color,color] duration-150 hover:bg-accent focus:outline-none',
+                  (props.currentPath === '/' + cat.slug || props.currentPath.startsWith('/' + cat.slug + '/'))
+                    ? 'bg-accent text-primary font-medium'
+                    : 'text-foreground',
+                ]"
+              >
+                <span class="text-base w-6 text-center shrink-0">{{ cat.icon }}</span>
+                <span class="flex-1">{{ cat.name }}</span>
+                <span class="inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[0.6875rem] font-medium rounded-full bg-muted text-muted-foreground tabular-nums">{{ (props.toolsByCategory[cat.name] || []).length }}</span>
+              </a>
+            </li>
+          </ul>
         </div>
       </aside>
 

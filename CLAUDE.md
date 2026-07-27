@@ -85,13 +85,13 @@ pnpm astro check      # 运行 Astro TypeScript 类型检查
 src/
 ├── layouts/     # 页面骨架（Layout.astro, ToolLayout.astro）
 ├── pages/       # 基于文件的路由，每个 .astro 文件对应一个 URL
-├── tools/       # 工具页面（按分类组织子目录：encoding/、crypto/、datetime/ 等）
+├── tools/       # 工具页面（按分类组织子目录：text/、crypto/、format/、network/、datetime/、frontend/、devops/）
 ├── components/  # 可复用 UI 组件（.vue 交互型 + .astro 纯展示）
 │   ├── ui/          # 通用交互组件（ToggleSwitch、SelectListbox 等）
-│   ├── layout/      # 布局组件（ToolHeader、Breadcrumb、RelatedTools、ResponsiveWorkspace）
-│   └── shell/       # 全局壳层组件（Shell、ToastContainer、FavoriteButton、SearchPanel、FeedbackForm）
+│   ├── layout/      # 布局组件（ToolHeader、Breadcrumb、RelatedTools、ResponsiveWorkspace、CategoryCard）
+│   └── shell/       # 全局壳层组件（Shell、ToastContainer、SearchPanel、FeedbackForm）
 ├── composables/ # Vue 组合式函数（如 useCopy），供多个工具组件复用
-├── stores/      # 模块级 reactive store（toast、sidebar、favorites、search、theme），跨 island 共享单例
+├── stores/      # 模块级 reactive store（toast、sidebar、search、theme），跨 island 共享单例
 ├── data/        # 工具注册表（tools.ts、tool-faqs.ts）
 ├── utils/       # 工具函数
 ├── styles/      # 设计令牌（global.css：:root/.dark 双组变量 + @theme inline 映射）
@@ -101,14 +101,14 @@ src/
 public/          # 不经处理的静态文件（favicon 等）
 ```
 
-路由采用 `/category/tool-name` 二级结构：`src/tools/encoding/base64.astro` → `/encoding/base64`。工具注册表位于
-`src/data/tools.ts`。URL 策略详见 PRODUCT.md §URL Strategy。
+路由采用三级导航结构：首页 `/` → 分类页 `/[category]`（如 `/text`）→ 工具页 `/[category]/[tool]`（如 `/text/base64`）。工具页路由文件位于 `src/pages/{category}/{tool}.astro`，对应的 Vue 实现组件位于 `src/tools/{category}/{Tool}.vue`，两目录结构对称。工具注册表位于
+`src/data/tools.ts`，分类元数据位于 `src/data/categories.ts`。URL 策略详见 PRODUCT.md §URL Strategy。
 
 ## Frontend Architecture
 
 项目采用 **Vue 单引擎**架构（2026-07 运行时统一重构完成，Alpine.js 已移除）：
 
-- **全局壳层** — `Shell.vue`（唯一 `client:load` 的 island）承载 Header / Sidebar / ToastContainer / 收藏夹 / 搜索 / 暗色切换，
+- **全局壳层** — `Shell.vue`（唯一 `client:load` 的 island）承载 Header / Sidebar（仅 7 个分类入口 + 工具数徽标）/ ToastContainer / 搜索 / 暗色切换，
   响应式状态来自 `src/stores/` 的模块级 reactive store（ESM 单例，跨 island 共享）。
 - **工具 islands** — 每个工具是独立 Vue 组件（`client:idle` / `client:load` 按需水合），`import` 同一批 store 模块。
 
@@ -142,7 +142,7 @@ public/          # 不经处理的静态文件（favicon 等）
 
 - `site: 'https://tools.baixuanz.cn'`：主站点域名
 - `build.inlineStylesheets: 'always'`：内联所有样式表，避免 CSS 请求阻塞渲染
-- Sitemap 集成：过滤掉旧扁平路径（根级单段路径）的重定向页面，仅保留 `/category/slug` 真实页面
+- Sitemap 集成：单段路径仅保留 7 个分类页（`/text` 等，定义于 config 内联的 `CATEGORY_SLUGS`），排除旧扁平重定向页；分类页 `priority: 0.9`，工具页 `0.8`，首页 `1.0`。两段 URL 301 重定向由 `redirects` 配置生成
 - `vite.worker.format: 'es'`：兼容 `@jsquash/avif` 的多线程 emscripten worker 的 code-splitting
 - `vite.optimizeDeps.exclude: ['@jsquash/avif']`：避免预打包破坏其 wasm 相对路径加载
 
@@ -167,6 +167,40 @@ public/          # 不经处理的静态文件（favicon 等）
 3. **合理的默认值** — 如果工具有适合的默认输入值，直接在代码中定义，让用户打开页面即可体验功能。不需要单独的"填入示例"按钮
 4. **SEO 元数据完整** — 新增工具时必须在 `src/data/tools.ts` 中填写完整的 SEO 字段，有 FAQ 时同步在
    `src/data/tool-faqs.ts` 中添加问答对
+
+## Tool Architecture & Maintenance（站内工具链架构）
+
+### 工具拓扑（三级导航）
+
+```
+首页 / （7 分类卡片 + 搜索直达）
+├── /text         文本与编码（13）  Base64/JWT/URL 编解码、UUID、随机串、正则测试器
+├── /crypto       加密与安全（4）    哈希、对称/非对称/SM2 加解密
+├── /format       格式化与转换（8）  JSON 美化/差异、TOML/YAML/XML/TS 互转
+├── /network      网络工具（6）      URL 解析、HTTP 状态码、IPv4 子网、设备信息
+├── /datetime     日期时间（3）      时间戳转换、Cron 解析、时间差
+├── /frontend     前端与媒体（8）    CSS 单位/渐变、颜色面板、二维码、图片转换、幻影坦克
+└── /devops       开发与运维（7）    Docker/Env 转换、Meta/robots/sitemap、Markdown 编辑器
+     └── /{category}/{tool}         工具页（三级末层，49 个）
+```
+
+分类页（`src/pages/[category]/index.astro`）即站内工具的集中管理入口，按分类聚合工具卡片。侧边栏（Shell.vue）全程常驻，提供 7 分类快速切换 + 工具数徽标 + 当前分类高亮。
+
+### 新增工具配置手册
+
+1. **数据层注册** — 在 `src/data/tools.ts` 的 `tools` 数组添加 `ToolMeta`：`id`（工具 slug）、`category`（7 分类之一）、`path`（`/{categorySlug}/{toolSlug}`）、`name`/`description`/`seoDescription`/`keywords`/`icon`/`relatedToolIds`。分类 slug 与中文名见 `categorySlugMap`。
+2. **实现组件** — `src/tools/{category}/{Tool}.vue`（Vue 单文件，`<script setup lang="ts">` + Composition API）。
+3. **路由文件** — `src/pages/{category}/{tool}.astro`：import 实现组件 + `<ToolLayout toolId="{category}/{tool}">` 包裹 + `client:idle` 水合。`pages/` 与 `tools/` 目录结构须对称。
+4. **（可选）FAQ** — 有问答的工具在 `src/data/tool-faqs.ts` 添加以工具 slug 为 key 的问答数组。
+5. **（可选）测试** — 单元测试 `src/tools/{category}/__tests__/` 或 `src/utils/{feature}/__tests__/`；分类集成测试 `src/tests/{category}/`。
+6. **验证** — `pnpm build`（SSG 产物含新页面）+ `pnpm test` + `pnpm astro check`（类型）。
+
+### 维护流程
+
+- **分类调整**：改 `src/data/categories.ts`（元数据）+ `tools.ts` 的 `categorySlugMap`/`ToolCategory` + 受影响工具的 `category`/`path` 字段 + 迁移 `pages/` 与 `tools/` 文件 + 在 `astro.config.mjs` 的 `redirects` 补旧→新 301。
+- **工具 URL 变更**：改 `tools.ts` 的 `path` + 迁移路由/组件文件 + `astro.config.mjs` redirects 补两段→两段 301；扁平 URL 在 `src/pages/[slug].astro` 补条目。
+- **工具下线**：从 `tools.ts` 移除 + 删路由文件 + `[slug].astro` 或 `redirects` 加到分类页的兜底跳转，避免外链 404。
+- **sitemap 校验**：新增分类页需把 slug 加入 `astro.config.mjs` 的 `CATEGORY_SLUGS`（与 `categorySlugMap` 值同步），否则会被 sitemap filter 误排除。
 
 ## Development Conventions
 

@@ -35,31 +35,27 @@
 
 ## Tool Categories
 
-工具按功能分组，每组一个 URL 前缀，侧边栏按分组展示。
+工具按功能分组为 **7 个分类**（2026-07 导航重构，由原 12 分类合并而来）。采用三级导航：首页（分类入口）→ 分类页 `/category`（该类工具卡片）→ 工具页 `/category/tool`。侧边栏仅展示 7 个分类入口 + 工具数徽标，不再展开工具列表。
 
-| 分类 | URL 前缀 | 已有工具 |
-|------|----------|----------|
-| 编码转换 | `/encoding/` | Base64 编解码、URL 编解码、JWT 编解码、Base64 转图片、Base64 转文件 |
-| 加密哈希 | `/crypto/` | 哈希生成器、对称加解密、非对称加解密、SM2 国密加解密 |
-| 日期时间 | `/datetime/` | 日期时间转换器、Cron 表达式解析器 |
-| 文本处理 | `/text/` | UUID 生成器、随机字符串生成 |
-| 网络工具 | `/network/` | 设备信息与UA、HTTP 状态码查询、IPv4 子网计算器、IPv4 范围展开 |
-| 格式化 | `/format/` | JSON 格式化器、JSON 差异对比、JSON 转 XML、JSON 转 YAML |
-| 正则工具 | `/regex/` | — |
-| 颜色工具 | `/color/` | — |
-| CSS 工具 | `/css/` | — |
-| API 工具 | `/api/` | — |
-| 媒体工具 | `/media/` | 二维码生成器 |
-| 编辑器 | `/editor/` | Markdown 编辑器 |
-| DevOps 工具 | `/devops/` | Docker 配置转换 |
+| 分类 | slug | 工具数 | 代表工具 |
+|------|------|--------|----------|
+| 文本与编码 | `/text/` | 13 | Base64 编解码、JWT 编解码、URL 编解码、UUID 生成器、随机字符串、正则测试器 |
+| 加密与安全 | `/crypto/` | 4 | 哈希生成器、对称加解密、非对称加解密、SM2 国密加解密 |
+| 格式化与转换 | `/format/` | 8 | JSON 格式化器、JSON 差异对比、JSON 转 XML/YAML、TOML/TypeScript 互转 |
+| 网络工具 | `/network/` | 6 | URL 解析器、HTTP 状态码查询、IPv4 子网计算器、设备信息 |
+| 日期时间 | `/datetime/` | 3 | 日期时间转换器、Cron 表达式解析器、时间差计算 |
+| 前端与媒体 | `/frontend/` | 8 | CSS 单位换算、渐变生成器、颜色面板、二维码、图片转换、幻影坦克 |
+| 开发与运维 | `/devops/` | 7 | Docker 配置转换、Env 转换、Meta/robots/sitemap 生成、Markdown 编辑器 |
 
-> 工具注册表位于 `src/data/tools.ts`，本表应与其保持同步。
+> 分类元数据（描述、图标）位于 `src/data/categories.ts`，工具注册表位于 `src/data/tools.ts`，本表应与其保持同步。
 
 ## URL Strategy
 
-- 路由采用 kebab-case，语义化命名：`/encoding/base64`、`/datetime/datetime-converter`
-- 分类前缀 + 工具名，形成 `/category/tool-name` 的二级结构
+- 三级导航结构：首页 `/` → 分类页 `/text` `/crypto` … → 工具页 `/text/base64`
+- 路由采用 kebab-case，语义化命名：`/text/base64`、`/datetime/datetime-converter`
+- 分类前缀 + 工具名，形成 `/category/tool-name` 的二级工具页结构；分类页为单段 `/category`
 - 每个工具页面有独立的 `<title>` 和 meta description，便于 SEO
+- 旧两段 URL（如 `/encoding/base64`）通过 `astro.config.mjs` 的 `redirects` 配置 301 重定向到新路径；旧扁平 URL（如 `/base64`）通过 `src/pages/[slug].astro` 重定向
 
 ## SEO Strategy
 

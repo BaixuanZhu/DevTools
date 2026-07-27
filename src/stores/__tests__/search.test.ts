@@ -10,7 +10,7 @@ const tools: ToolMeta[] = [
     seoDescription: '',
     category: '文本与编码',
     icon: '🔐',
-    path: '/encoding/base64',
+    path: '/text/base64',
     keywords: ['base64', '编码'],
     relatedToolIds: [],
   },

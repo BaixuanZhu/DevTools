@@ -1,6 +1,5 @@
 ---
 import type { ToolMeta } from '../../data/tools';
-import FavoriteButton from '../shell/FavoriteButton.vue';
 
 interface Props {
   tool: ToolMeta;
@@ -9,17 +8,13 @@ interface Props {
 const { tool } = Astro.props;
 ---
 
-<div class="relative flex h-full">
-  <a
-    href={tool.path}
-    class="flex items-start gap-4 p-5 pr-14 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
-  >
-    <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
-    <div class="flex-1 min-w-0">
-      <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug">{tool.name}</h3>
-      <p class="m-0 text-[0.8125rem] text-muted-foreground leading-relaxed">{tool.description}</p>
-    </div>
-  </a>
-
-  <FavoriteButton client:visible tool={tool} />
-</div>
+<a
+  href={tool.path}
+  class="flex items-start gap-4 p-5 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
+>
+  <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
+  <div class="flex-1 min-w-0">
+    <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug">{tool.name}</h3>
+    <p class="m-0 text-[0.8125rem] text-muted-foreground leading-relaxed">{tool.description}</p>
+  </div>
+</a>

@@ -4,54 +4,69 @@ import { mount } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import SearchPanel from '../SearchPanel.vue';
 
-/** 造一个模拟首页网格的 DOM，供 SearchPanel 过滤 */
-function seedGrid() {
-  const grid = document.createElement('div');
-  grid.setAttribute('data-search-grid', '');
-  grid.innerHTML = `
-    <div data-id="uuid-generator" style="display:"></div>
-    <div data-id="hash-generator" style="display:"></div>
-  `;
-  document.body.appendChild(grid);
-  return grid;
-}
-
-describe('SearchPanel.vue', () => {
+describe('SearchPanel.vue（下拉直达模式）', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
-    seedGrid();
   });
 
-  it('输入匹配词 → 仅命中的卡片 display 非 none，其余隐藏', async () => {
+  it('空输入 → 不展示下拉建议', () => {
     const wrapper = mount(SearchPanel);
-    await wrapper.find('input').setValue('uuid');
-    // 防抖 150ms
-    await new Promise((r) => setTimeout(r, 200));
-    await nextTick();
-    const cards = document.querySelectorAll('[data-search-grid] [data-id]') as NodeListOf<HTMLElement>;
-    const byId = (id: string) => Array.from(cards).find((c) => c.getAttribute('data-id') === id)!;
-    expect(byId('uuid-generator').style.display).not.toBe('none');
-    expect(byId('hash-generator').style.display).toBe('none');
+    expect(wrapper.find('input').exists()).toBe(true);
+    // 下拉容器不存在（v-if="isOpen"）
+    expect(wrapper.find('ul').exists()).toBe(false);
   });
 
-  it('输入无匹配词 → 显示空状态', async () => {
+  it('输入匹配词 → 下拉列出命中工具，直达链接为 tool.path', async () => {
+    const wrapper = mount(SearchPanel);
+    await wrapper.find('input').setValue('jwt');
+    await nextTick();
+    const items = wrapper.findAll('ul li a');
+    expect(items.length).toBeGreaterThan(0);
+    // JWT 解析工具应命中，链接指向新路径
+    const jwtItem = items.wrappers.find((a) => a.text().includes('JWT'));
+    expect(jwtItem).toBeTruthy();
+    expect(jwtItem!.attributes('href')).toBe('/text/jwt-parser');
+  });
+
+  it('输入无匹配词 → 下拉显示空态文案', async () => {
     const wrapper = mount(SearchPanel);
     await wrapper.find('input').setValue('zzzznope');
-    await new Promise((r) => setTimeout(r, 200));
     await nextTick();
+    expect(wrapper.find('ul').exists()).toBe(false);
     expect(wrapper.text()).toContain('没有找到匹配');
   });
 
-  it('清空搜索 → 全部卡片恢复显示，空状态消失', async () => {
+  it('清空搜索 → 下拉关闭', async () => {
     const wrapper = mount(SearchPanel);
-    await wrapper.find('input').setValue('zzzznope');
-    await new Promise((r) => setTimeout(r, 200));
+    await wrapper.find('input').setValue('jwt');
     await nextTick();
+    expect(wrapper.find('ul').exists()).toBe(true);
     await wrapper.find('button[aria-label="清除搜索"]').trigger('click');
-    await new Promise((r) => setTimeout(r, 200));
     await nextTick();
-    const cards = document.querySelectorAll('[data-search-grid] [data-id]') as NodeListOf<HTMLElement>;
-    expect(Array.from(cards).every((c) => c.style.display !== 'none')).toBe(true);
-    expect(wrapper.text()).not.toContain('没有找到匹配');
+    expect(wrapper.find('ul').exists()).toBe(false);
+  });
+
+  it('↓ 键移动高亮项（第一项默认 active，按 ↓ 后第二项 active）', async () => {
+    const wrapper = mount(SearchPanel);
+    await wrapper.find('input').setValue('json');
+    await nextTick();
+    const items = wrapper.findAll('ul li a');
+    expect(items.length).toBeGreaterThanOrEqual(2);
+    // 初始第一项高亮
+    expect(items[0].classes()).toContain('bg-accent');
+    // 按 ↓ → 第二项高亮
+    await wrapper.find('input').trigger('keydown', { key: 'ArrowDown' });
+    await nextTick();
+    expect(wrapper.findAll('ul li a')[1].classes()).toContain('bg-accent');
+  });
+
+  it('Esc 关闭下拉', async () => {
+    const wrapper = mount(SearchPanel);
+    await wrapper.find('input').setValue('jwt');
+    await nextTick();
+    expect(wrapper.find('ul').exists()).toBe(true);
+    await wrapper.find('input').trigger('keydown', { key: 'Escape' });
+    await nextTick();
+    expect(wrapper.find('ul').exists()).toBe(false);
   });
 });

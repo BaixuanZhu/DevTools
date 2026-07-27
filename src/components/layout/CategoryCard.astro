@@ -1,0 +1,29 @@
+---
+import type { CategoryMeta } from '../../data/categories';
+
+/**
+ * 首页分类卡片（纯展示，零 JS）。
+ * icon + 工具数徽标 + 分类名 + 描述，整卡可点击跳转分类页。
+ * 状态矩阵复用 ToolCard：bg-card border rounded-lg p-6，hover border-primary + 阴影。
+ */
+interface Props {
+  category: CategoryMeta;
+  /** 该分类下工具数量 */
+  count: number;
+}
+const { category, count } = Astro.props;
+---
+
+<a
+  href={`/${category.slug}`}
+  class="group flex flex-col gap-4 p-6 bg-card border border-border rounded-lg transition-[border-color,box-shadow,transform] duration-150 hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+>
+  <div class="flex items-center justify-between">
+    <span class="text-[2rem] leading-none transition-[transform] duration-150 group-hover:scale-110">{category.icon}</span>
+    <span class="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 text-xs font-semibold rounded-full bg-accent text-muted-foreground tabular-nums">{count}</span>
+  </div>
+  <div>
+    <h3 class="m-0 mb-1.5 text-lg font-semibold leading-snug group-hover:text-primary transition-[color] duration-150">{category.name}</h3>
+    <p class="m-0 text-sm text-muted-foreground leading-relaxed">{category.description}</p>
+  </div>
+</a>

@@ -4,9 +4,37 @@ import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap, {ChangeFreqEnum} from '@astrojs/sitemap';
 
+/** 7 个分类 slug（与 src/data/tools.ts 的 categorySlugMap 值保持一致，单源同步） */
+const CATEGORY_SLUGS = new Set(['text', 'crypto', 'format', 'network', 'datetime', 'frontend', 'devops']);
+
+/**
+ * 旧两段 URL → 新两段 URL 重定向（分类合并 12→7 触发的路径迁移）。
+ * Astro SSG 生成带 <meta http-equiv=refresh> + canonical 的重定向页，搜索引擎按 301 等价处理。
+ * 源：docs/superpowers/specs/2026-07-22-navigation-redesign-design.md §3.2
+ */
+const CATEGORY_MERGE_REDIRECTS = {
+    '/encoding/base64': '/text/base64',
+    '/encoding/jwt-parser': '/text/jwt-parser',
+    '/encoding/base64-to-image': '/text/base64-to-image',
+    '/encoding/base64-to-file': '/text/base64-to-file',
+    '/encoding/file-to-base64': '/text/file-to-base64',
+    '/regex/tester': '/text/tester',
+    '/css/unit-converter': '/frontend/unit-converter',
+    '/css/gradient': '/frontend/gradient',
+    '/color/panel': '/frontend/panel',
+    '/media/qr-code-generator': '/frontend/qr-code-generator',
+    '/media/qr-code-reader': '/frontend/qr-code-reader',
+    '/media/image-converter': '/frontend/image-converter',
+    '/media/image-scrambler': '/frontend/image-scrambler',
+    '/media/phantom-tank': '/frontend/phantom-tank',
+    '/editor/markdown-editor': '/devops/markdown-editor',
+};
+
 // https://astro.build/config
 export default defineConfig({
     site: 'https://tools.baixuanz.cn',
+    /** 分类合并后的两段 URL 301 重定向（见上方 CATEGORY_MERGE_REDIRECTS） */
+    redirects: CATEGORY_MERGE_REDIRECTS,
     build: {
         /**
          * 内联所有样式表到 HTML，避免额外的 render-blocking CSS 请求。
@@ -18,16 +46,17 @@ export default defineConfig({
     integrations: [
         vue(),
         sitemap({
-            /** 排除旧扁平路径的重定向页面，只保留分类路径 */
+            /**
+             * 单段路径仅保留 7 个分类页（/text 等），排除旧扁平重定向页（/base64 等）。
+             * 多段路径（工具页）与首页全部保留。
+             */
             filter: (page) => {
-                // 重定向页面的 URL 格式为 https://domain.com/slug/
-                // 真实页面格式为 https://domain.com/category/slug/
-                // 通过解析 pathname 判断是否为根级路径（恰好一段）
                 try {
                     const pathname = new URL(page).pathname.replace(/\/$/, '');
                     const segments = pathname.split('/').filter(Boolean);
-                    // 根级单段路径即为旧重定向页
-                    return segments.length !== 1;
+                    if (segments.length === 0) return true;                            // 首页
+                    if (segments.length === 1) return CATEGORY_SLUGS.has(segments[0]); // 分类页保留，旧扁平重定向排除
+                    return true;                                                       // 工具页等多段
                 } catch {
                     return true;
                 }
@@ -42,6 +71,12 @@ export default defineConfig({
                 // 首页：最高优先级，更新较频繁
                 if (pathname === '') {
                     return {url, ...rest, priority: 1.0, changefreq: ChangeFreqEnum.WEEKLY};
+                }
+
+                const segments = pathname.split('/').filter(Boolean);
+                // 分类页：优先级介于首页(1.0)与工具页(0.8)之间
+                if (segments.length === 1 && CATEGORY_SLUGS.has(segments[0])) {
+                    return {url, ...rest, priority: 0.9, changefreq: ChangeFreqEnum.WEEKLY};
                 }
 
                 // 工具页面：较高优先级，更新较少

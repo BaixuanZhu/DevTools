@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import QrCodeGenerator from '../../tools/frontend/QrCodeGenerator.vue';
+---
+
+<ToolLayout toolId="frontend/qr-code-generator">
+  <QrCodeGenerator client:idle />
+</ToolLayout>

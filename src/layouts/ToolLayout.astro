@@ -6,7 +6,8 @@ import RelatedTools from '../components/layout/RelatedTools.astro';
 import ToastContainer from '../components/shell/ToastContainer.vue';
 import Shell from '../components/shell/Shell.vue';
 import { ChevronDown } from '@lucide/astro';
-import { getToolsByCategory, getCategories, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
+import { getToolsByCategory, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
+import { categories as categoryMetas } from '../data/categories';
 import { getToolFaqs } from '../data/tool-faqs';
 
 interface Props {
@@ -18,11 +19,16 @@ interface Props {
   toolId?: string;
   /** 额外的 JSON-LD 结构化数据（透传至 Layout，如首页的 ItemList） */
   jsonLd?: object | object[];
+  /**
+   * 显式面包屑项；传入则覆盖 toolId 驱动的默认面包屑。
+   * 分类页用它传 [首页, 分类]；工具页不传，走 toolId 默认逻辑。
+   */
+  breadcrumb?: { label: string; href?: string }[];
 }
 
-const { title, description, toolId = '', jsonLd } = Astro.props;
+const { title, description, toolId = '', jsonLd, breadcrumb } = Astro.props;
 const currentPath = toolId ? `/${toolId}` : Astro.url.pathname;
-const categories = getCategories();
+const categories = categoryMetas;
 const toolsByCategory = getToolsByCategory();
 
 /** 通过 toolId 查找工具元数据 */
@@ -129,18 +135,20 @@ if (toolId && toolMeta) {
   }
 }
 
-/** 构建面包屑导航项 */
-const breadcrumbItems = toolId && toolMeta
-  ? (() => {
-      const [categorySlug] = toolId.split('/');
-      const categoryName = slugCategoryMap[categorySlug] || categorySlug;
-      return [
-        { label: '首页', href: '/' },
-        { label: categoryName },
-        { label: toolMeta.name },
-      ];
-    })()
-  : [];
+/** 构建面包屑导航项：显式 breadcrumb prop 优先，否则走 toolId 默认逻辑 */
+const breadcrumbItems = breadcrumb
+  ? breadcrumb
+  : toolId && toolMeta
+    ? (() => {
+        const [categorySlug] = toolId.split('/');
+        const categoryName = slugCategoryMap[categorySlug] || categorySlug;
+        return [
+          { label: '首页', href: '/' },
+          { label: categoryName, href: `/${categorySlug}` },
+          { label: toolMeta.name },
+        ];
+      })()
+    : [];
 
 /** 合并工具页自身结构化数据与外部透传（如首页 ItemList） */
 const allJsonLd: object[] = [

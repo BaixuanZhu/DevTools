@@ -1,20 +1,22 @@
 ---
 /**
  * 旧扁平 URL 重定向页面
- * 旧路径：/base64, /hash-generator 等
- * 新路径：/encoding/base64, /crypto/hash-generator 等
+ * 旧路径：/base64, /hash-generator 等（单段扁平 URL）
+ * 新路径：/text/base64, /crypto/hash-generator 等（分类合并后的三级导航 URL）
+ * 另含 /favorites → /（收藏功能已移除，见 navigation-redesign 设计文档 §9）
  */
 export function getStaticPaths() {
   const redirects: Record<string, string> = {
-    'base64': '/encoding/base64',
+    'base64': '/text/base64',
     'url-encode': '/network/url',
-    'jwt-parser': '/encoding/jwt-parser',
+    'jwt-parser': '/text/jwt-parser',
     'hash-generator': '/crypto/hash-generator',
     'symmetric-crypto': '/crypto/symmetric-crypto',
     'uuid-generator': '/text/uuid-generator',
     'random-string': '/text/random-string',
     'datetime-converter': '/datetime/datetime-converter',
     'device-info': '/network/device-info',
+    'favorites': '/',
   };
 
   return Object.keys(redirects).map((slug) => ({

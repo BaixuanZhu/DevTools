@@ -180,13 +180,53 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 | 边框/分割线 | #e5e2dd | #2a2826 | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
 | 悬停底色 | #f3f1ee | #2a2826 | `bg-accent` | 按钮、卡片、侧栏项的悬停底色，比 background 深一阶 |
 | 强调色（品牌橙） | #e8590c | #f97316 | `text-primary` `bg-primary` `border-primary` | 仅交互元素活跃态。从不作为大面积底色 |
+| 品牌橙·配对文字 | #ffffff | #1a0f02 | `text-primary-foreground` | `bg-primary` 上的文字/图标 |
+| 品牌橙·悬停 | #d4500a | #fb923c | `hover:bg-primary-hover` | primary 按钮/元素的 hover/active 加深 |
+| 品牌橙·深（AA） | #b43807 | #ea580c | `bg-primary-strong` `text-primary-strong` | 需 WCAG AA 合规的小字号按钮/强调（白字对比度 ≥ 4.5:1） |
+| 焦点环 | #e8590c | #f97316 | `ring-ring` `focus:ring-2 focus:ring-ring` | 键盘导航焦点可见性 |
 
-### Semantic
+### Semantic（状态反馈色矩阵）
 
-| 语义 | 浅色 | 暗色 | Tailwind Utility | 使用范围 |
-|------|------|------|-----------------|---------|
-| 错误 | #dc2626 | #ef4444 | `text-error`（兼容别名，指向 destructive） | 仅文字，不做底色 |
-| 成功 | #16a34a | #22c55e | `text-success` | 仅文字，不做底色（如复制确认） |
+每个状态色都配 `*-foreground` 文字配对色与可选的 `*-strong` 深色变体，确保任意场景下文字对比度满足 WCAG 2.1 AA（normal text ≥ 4.5:1，large text ≥ 3:1）。
+
+| 语义 | 浅色 | 暗色 | Tailwind Utility | foreground | 使用范围 |
+|------|------|------|-----------------|------------|---------|
+| 错误/危险 | #dc2626 | #ef4444 | `text-destructive` `bg-destructive` `text-error`（兼容别名） | `text-destructive-foreground` (#fff / #fff) | 错误提示、删除按钮、危险操作 |
+| 成功 | #16a34a | #22c55e | `text-success` `bg-success` | `text-success-foreground` (#fff / #052e16) | 复制确认、校验通过、成功 Toast |
+| 成功·深（AA） | #15803d | #16a34a | `bg-success-strong` | `text-white` | 需 AA 合规的小字号成功按钮 |
+| 信息 | #2563eb | #3b82f6 | `text-info` `bg-info` | `text-info-foreground` (#fff / #fff) | 中性提示、帮助气泡、链接说明 |
+| 警告 | #d97706 | #f59e0b | `text-warning` `bg-warning` | `text-warning-foreground` (#fff / #1a1a1a) | 非破坏性警告、兼容性提示 |
+| 警告·深（AA） | #b45309 | #d97706 | `bg-warning-strong` | `text-white` | 需 AA 合规的小字号警告按钮 |
+
+### WCAG 2.1 AA 对比度约束
+
+**核心原则：** 凡承载正常文字（< 18px 或 < 14px bold）的彩色背景，必须使用对应的 `*-strong` 变体或满足 4.5:1 对比度。base 色相（`primary`/`success`/`warning`）保留品牌识别度，用于图标、大标签（≥ 18px）、装饰、边框——这些场景仅需 3:1（large text AA）。
+
+| 组合 | 对比度 | 等级 | 适用 |
+|------|--------|------|------|
+| `text-foreground` 对 `bg-background` | 16.7:1 | AAA | 正文（两主题均顶级） |
+| `text-muted-foreground` 对 `bg-background` | 4.5:1 | AA | 辅助文字（边界值，勿叠多层） |
+| `text-white` 对 `bg-primary-strong` | 5.1:1 | AA | 小字号 primary 按钮 |
+| `text-white` 对 `bg-primary` | 2.6:1 | — | 仅大字号/图标，**不可用于小字按钮** |
+| `text-white` 对 `bg-destructive` | 4.8:1 | AA | 错误按钮 |
+| `text-white` 对 `bg-info` | 5.2:1 | AA | 信息按钮 |
+| `text-white` 对 `bg-warning-strong` | 5.4:1 | AA | 小字号警告按钮 |
+
+### 渐变色系
+
+低饱和、品牌驱动的柔和渐变（2026 趋势）。仅用于 Hero 区、主按钮、特色卡片等需要视觉层次的场景，**不滥用**——大面积渐变违背 The Shelf Rule。
+
+| 令牌 | 浅色 | 暗色 | Tailwind 用法 | 场景 |
+|------|------|------|--------------|------|
+| `--gradient-primary` | 135° #e8590c→#f97316 | 135° #ea580c→#f97316 | `bg-[image:var(--gradient-primary)]` | 主 CTA 按钮、品牌标识背景 |
+| `--gradient-primary-subtle` | 10%→6% 橙透明 | 14%→6% 橙透明 | `bg-[image:var(--gradient-primary-subtle)]` | 卡片高亮、选中态背景 |
+| `--gradient-surface` | 180° #fff→#faf9f7 | 180° #1f1e1c→#161514 | `bg-[image:var(--gradient-surface)]` | 卡片/面板的微妙立体感 |
+| `--gradient-hero` | 顶部橙光晕 8% | 顶部橙光晕 10% | `bg-[image:var(--gradient-hero)]` | 首页 Hero 区氛围 |
+
+**应用约束：**
+1. 渐变文字必须叠加 `text-foreground` 或 `text-white` 并校验对比度。
+2. 渐变背景上的文字一律用 `*-foreground` 配对色，不裸用 base 色。
+3. `prefers-reduced-motion: reduce` 用户不强制禁用渐变（渐变非动效），但过渡动画已全局降为 0ms。
 
 ---
 
@@ -277,6 +317,17 @@ Pill 形状（`rounded-full`），`border: 1.5px solid transparent`，活跃态 
 
 Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.9375rem]`）和 description（`text-[0.8125rem] text-muted-foreground`）右。
 
+### Category Cards（首页分类入口）
+
+状态矩阵复用 Tool Cards（零 JS 纯展示，整卡 `<a href="/{slug}">`）。
+
+| 状态 | Class |
+|------|-------|
+| Default | `bg-card border border-border rounded-lg p-6` |
+| Hover | `hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]`，图标 `group-hover:scale-110`，标题 `group-hover:text-primary` |
+
+Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent text-muted-foreground rounded-full`）右；底行 name（`text-lg font-semibold`）+ description（`text-sm text-muted-foreground`）。
+
 ### Inputs / Textareas
 
 | 状态 | Class |
@@ -304,9 +355,10 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | Container（桌面） | `sidebar w-60 shrink-0 border-r border-border bg-card flex flex-col`（静态 flex 列，无 `fixed`） |
 | Container（移动） | `position: fixed`，`top: 57px; height: calc(100dvh - 57px); transform: translateX(-100%)`，`.sidebar-open` 时 `translateX(0)` |
 | Nav scroll | `flex-1 sidebar-nav-scroll overflow-y-auto py-2`（导航区独立滚动，隐藏滚动条见 §Sidebar Scroll） |
-| Group headings | `font-semibold text-xs uppercase tracking-wider text-muted-foreground px-4 py-4 pb-1` |
-| Nav links | `flex items-center gap-2 px-4 py-2 text-sm` |
-| Active link | `bg-accent text-primary font-medium` |
+| 分类项 | `flex items-center gap-2 px-4 py-2.5 text-sm`，整项 `<a href="/{slug}">`（仅 7 个分类，不再展开工具链接） |
+| 分类图标 | `text-base w-6 text-center shrink-0`（emoji，来自 `categories.ts`） |
+| 工具数徽标 | `inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[0.6875rem] font-medium rounded-full bg-muted text-muted-foreground tabular-nums` |
+| Active 分类 | `bg-accent text-primary font-medium`（当前路径前缀匹配 `/{slug}` 或恰好等于 `/{slug}`） |
 | Hover | `hover:bg-accent` |
 | Overlay（移动） | `.sidebar-overlay fixed inset-0 bg-black/30 z-[99]`，`top: 57px`；显隐由 `sidebarStore.isOpen` 驱动（Shell.vue 内 `<Transition>`），点击或 Esc 关闭 |
 
@@ -315,11 +367,10 @@ Content 结构：icon（emoji, 1.75rem）左 + name（`font-semibold text-[0.937
 | 元素 | Class |
 |------|-------|
 | Container | `flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0`（通栏，作为 `#app` flex 子项天然钉顶，无需 `sticky`） |
-| Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（收藏夹 · 暗色模式 · Gitee · GitHub） |
+| Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（暗色模式 · Gitee · GitHub） |
 | Logo | `group flex items-center gap-1.5 text-lg font-semibold`，全断点常驻；图标 `text-violet-600`，hover `-rotate-12` |
 | 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，点击调用 `sidebarStore.toggle()` |
-| 收藏夹入口 | 桌面：`h-9 px-2` 文本 + Star 图标，文本为「我的收藏」；移动端（`max-md:`）仅显示图标，`px-1.5`。链接到 `/favorites`，hover `text-primary bg-accent` |
-| 暗色模式按钮 | 同收藏夹按钮样式，点击调用 `themeStore.toggle()` 切换浅色/暗色（持久化于 localStorage） |
+| 暗色模式按钮 | `flex items-center gap-1.5 h-9 px-2` 文本 + 图标，点击调用 `themeStore.toggle()` 切换浅色/暗色（持久化于 localStorage） |
 | Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 
 ### Tool Header

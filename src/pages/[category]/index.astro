@@ -1,0 +1,90 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import ToolCard from '../../components/layout/ToolCard.astro';
+import { categories } from '../../data/categories';
+import { getToolsByCategory, slugCategoryMap } from '../../data/tools';
+
+/**
+ * 分类页（三级导航第二级）：/text /crypto /format /network /datetime /frontend /devops
+ * getStaticPaths 为每个分类生成一个 SSG 页面，渲染该类工具卡片网格。
+ */
+export function getStaticPaths() {
+  return categories.map((c) => ({
+    params: { category: c.slug },
+    props: { category: c },
+  }));
+}
+
+const { category } = Astro.props;
+
+/** 该分类下的全部工具（保持 tools.ts 注册顺序） */
+const toolsByCategory = getToolsByCategory();
+const categoryTools = toolsByCategory[category.name] || [];
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.baixuanz.cn';
+const categoryUrl = `${siteUrl}/${category.slug}`;
+
+/** JSON-LD：CollectionPage + ItemList（该类工具）+ BreadcrumbList（首页 › 分类） */
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: `${category.name} - DevTools`,
+    description: category.description,
+    url: categoryUrl,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: `${category.name} 工具集合`,
+    description: category.description,
+    numberOfItems: categoryTools.length,
+    itemListElement: categoryTools.map((tool, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: tool.name,
+      url: `${siteUrl}${tool.path}`,
+      description: tool.description,
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: '首页', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: category.name, item: categoryUrl },
+    ],
+  },
+];
+
+/** 面包屑（透传 ToolLayout，由其 breadcrumb prop 渲染） */
+const breadcrumb = [
+  { label: '首页', href: '/' },
+  { label: category.name },
+];
+---
+
+<ToolLayout
+  title={`${category.name} - DevTools`}
+  description={category.description}
+  breadcrumb={breadcrumb}
+  jsonLd={jsonLd}
+>
+  <div class="max-w-320 mx-auto">
+    <!-- 分类标题区 -->
+  <div class="mb-8">
+    <h1 class="flex items-center gap-3 text-3xl font-bold m-0 mb-2">
+        <span class="text-[2rem] leading-none">{category.icon}</span>
+        <span>{category.name}</span>
+      </h1>
+    <p class="text-muted-foreground text-base m-0">{category.description}</p>
+    </div>
+
+  <!-- 工具卡片网格 -->
+  <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+    {categoryTools.map((tool) => (
+      <ToolCard tool={tool} />
+    ))}
+  </div>
+  </div>
+</ToolLayout>

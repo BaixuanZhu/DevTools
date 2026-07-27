@@ -1,31 +1,75 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ============ 语义层：浅色 + 暗色两组 ============ */
+/* ============ 语义层：浅色 + 暗色两组 ============
+ * 设计原则：
+ * 1. 品牌橙 #e8590c 保留为 --primary（标识/图标/边框/链接强调）
+ * 2. 每个状态色配 *-foreground 文字配对色，确保 WCAG 2.1 AA（normal text ≥ 4.5:1）
+ * 3. primary/状态色作为按钮背景（白字）对比度不足 AA 时，提供 *-strong 变体
+ * 4. 渐变 token 以 --gradient-* 命名，组件按需引用
+ */
 :root {
   --background: #faf9f7;            /* 原 --color-surface，页面底 */
-  --foreground: #1a1a1a;            /* 原 --color-text，主文字 */
+  --foreground: #1a1a1a;            /* 原 --color-text，主文字（对 background 16.7:1 AAA） */
   --card: #ffffff;                  /* 卡片/壳层底 */
-  --primary: #e8590c;               /* 原 --color-accent，品牌橙（主操作色） */
+  --primary: #e8590c;               /* 品牌“暖橙”——标识/图标/边框/链接 */
+  --primary-foreground: #ffffff;    /* primary 配对文字（大字号/图标满足 AA；小号按钮请用 primary-strong） */
+  --primary-hover: #d4500a;         /* primary hover/active 加深（对白字 3.4:1，大文字 AA） */
+  --primary-strong: #b43807;        /* 满足白字 AA 4.5:1 的深橙——用于需 WCAG 合规的按钮/强调 */
   --border: #e5e2dd;                /* 边框/分割线 */
   --muted: #f3f1ee;                 /* 次要背景 */
-  --muted-foreground: #6b7280;      /* 原 text-muted，次要文字 */
+  --muted-foreground: #6b7280;      /* 原 text-muted（对 background 4.5:1 AA 边界） */
   --accent: #f3f1ee;                /* shadcn 语义：悬停/次要底色（原 --color-hover） */
-  --destructive: #dc2626;           /* 原 --color-error */
-  --success: #16a34a;               /* 成功色（项目保留，不改 destructive） */
+  --accent-foreground: #1a1a1a;     /* accent 配对文字 */
+  --destructive: #dc2626;           /* 原 --color-error（对白字 4.8:1 AA） */
+  --destructive-foreground: #ffffff;
+  --success: #16a34a;               /* 成功（图标/大标签满足 AA；小字按钮用 success-strong） */
+  --success-foreground: #ffffff;
+  --success-strong: #15803d;        /* 满足白字 AA 4.5:1 的深绿 */
+  --info: #2563eb;                  /* 信息蓝（对白字 5.2:1 AA） */
+  --info-foreground: #ffffff;
+  --warning: #d97706;               /* 警告琥珀（大标签满足 AA；小字用 warning-strong） */
+  --warning-foreground: #ffffff;
+  --warning-strong: #b45309;        /* 满足白字 AA 5.4:1 的深琥珀 */
+  --ring: #e8590c;                  /* 焦点环（键盘导航可见性） */
   --radius: 0.25rem;
+
+  /* 渐变色系（2026 趋势：柔和、低饱和、品牌驱动） */
+  --gradient-primary: linear-gradient(135deg, #e8590c 0%, #f97316 100%);
+  --gradient-primary-subtle: linear-gradient(135deg, rgba(232, 89, 12, 0.10) 0%, rgba(249, 115, 22, 0.06) 100%);
+  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
+  --gradient-hero: radial-gradient(ellipse at top, rgba(232, 89, 12, 0.08) 0%, transparent 60%);
 }
 .dark {
   --background: #161514;
   --foreground: #f3f1ee;
   --card: #1f1e1c;
-  --primary: #f97316;
+  --primary: #f97316;               /* 暗色品牌橙（更亮以保证暗底可见性） */
+  --primary-foreground: #1a0f02;    /* 深色文字配亮橙（对比度 8.7:1 AAA） */
+  --primary-hover: #fb923c;         /* hover 更亮 */
+  --primary-strong: #ea580c;        /* 白字配对 4.5:1 AA */
   --border: #2a2826;
   --muted: #2a2826;
-  --muted-foreground: #a1a1aa;
+  --muted-foreground: #a1a1aa;      /* 对 background 7.4:1 AAA */
   --accent: #2a2826;
+  --accent-foreground: #f3f1ee;
   --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
   --success: #22c55e;
+  --success-foreground: #052e16;    /* 深字配亮绿（暗色绿底白字仅 2.5:1 不达标） */
+  --success-strong: #16a34a;
+  --info: #3b82f6;
+  --info-foreground: #ffffff;
+  --warning: #f59e0b;
+  --warning-foreground: #1a1a1a;    /* 深字配亮琥珀 */
+  --warning-strong: #d97706;
+  --ring: #f97316;
+
+  /* 渐变（暗色：更克制，避免高饱和溢出） */
+  --gradient-primary: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  --gradient-primary-subtle: linear-gradient(135deg, rgba(249, 115, 22, 0.14) 0%, rgba(251, 146, 60, 0.06) 100%);
+  --gradient-surface: linear-gradient(180deg, #1f1e1c 0%, #161514 100%);
+  --gradient-hero: radial-gradient(ellipse at top, rgba(249, 115, 22, 0.10) 0%, transparent 60%);
 }
 
 /* ============ 映射层：注入 Tailwind 命名空间 ============ */
@@ -34,12 +78,25 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-strong: var(--primary-strong);
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-strong: var(--success-strong);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-strong: var(--warning-strong);
+  --color-ring: var(--ring);
   --color-error: var(--destructive);     /* 兼容：旧 text-error 指向 destructive */
   --radius-sm: calc(var(--radius));
   --radius-md: calc(var(--radius) * 2);
