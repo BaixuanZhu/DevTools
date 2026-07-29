@@ -47,9 +47,9 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted-foreground shrink-0" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
-    <RadioGroupRoot :model-value="modelValue" @update:model-value="(v) => emit('update:modelValue', v as T)" class="flex gap-1 flex-wrap">
+  <div class="flex flex-wrap items-center gap-2">
+    <span v-if="label" class="shrink-0 text-[0.8125rem] text-muted-foreground" :class="inlineLabel ? '' : 'min-w-18'">{{ label }}</span>
+    <RadioGroupRoot :model-value="modelValue" @update:model-value="(v) => emit('update:modelValue', v as T)" class="flex flex-wrap gap-1">
       <RadioGroupItem
         v-for="option in options"
         :key="option.value"
@@ -59,10 +59,10 @@ const emit = defineEmits<{
         <button
           type="button"
           :class="[
-            'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
-            'transition-[background-color,border-color] duration-150',
-            'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-white',
-            'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
+            'inline-flex h-8 items-center justify-center rounded-md border border-input bg-background px-3 font-sans text-[0.8125rem] text-foreground shadow-sm cursor-pointer',
+            'transition-[background-color,border-color,color] duration-150',
+            'hover:bg-accent hover:text-accent-foreground',
+            'data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground data-[state=checked]:shadow',
           ]"
         >
           {{ option.label }}

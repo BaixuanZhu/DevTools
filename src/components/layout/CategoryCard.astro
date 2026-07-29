@@ -2,9 +2,14 @@
 import type { CategoryMeta } from '../../data/categories';
 
 /**
- * 首页分类卡片（纯展示，零 JS）。
- * icon + 工具数徽标 + 分类名 + 描述，整卡可点击跳转分类页。
- * 状态矩阵复用 ToolCard：bg-card border rounded-lg p-6，hover border-primary + 阴影。
+ * 首页分类卡片（纯 Astro，零 JS）。
+ *
+ * 视觉/语义与 shadcn-vue Card 对齐：
+ * - 根元素复用 Card.vue 的 `rounded-xl border bg-card text-card-foreground shadow`
+ * - 内部 CardHeader 区（icon + 计数 Badge）+ CardContent 区（标题 + 描述）
+ * - 计数徽标复用 Badge secondary variant 的 class tokens
+ *
+ * 整卡为 <a>，hover 提升边框与阴影，复用项目原有的 group-hover 交互。
  */
 interface Props {
   category: CategoryMeta;
@@ -16,14 +21,14 @@ const { category, count } = Astro.props;
 
 <a
   href={`/${category.slug}`}
-  class="group flex flex-col gap-4 p-6 bg-card border border-border rounded-lg transition-[border-color,box-shadow,transform] duration-150 hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]"
+  class="group flex flex-col gap-4 rounded-xl border border-border bg-card p-6 text-card-foreground shadow transition-[border-color,box-shadow,transform] duration-150 hover:border-primary hover:shadow-md"
 >
   <div class="flex items-center justify-between">
     <span class="text-[2rem] leading-none transition-[transform] duration-150 group-hover:scale-110">{category.icon}</span>
-    <span class="inline-flex items-center justify-center min-w-[1.75rem] h-6 px-2 text-xs font-semibold rounded-full bg-accent text-muted-foreground tabular-nums">{count}</span>
+    <span class="inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold tabular-nums text-secondary-foreground">{count}</span>
   </div>
   <div>
-    <h3 class="m-0 mb-1.5 text-lg font-semibold leading-snug group-hover:text-primary transition-[color] duration-150">{category.name}</h3>
-    <p class="m-0 text-sm text-muted-foreground leading-relaxed">{category.description}</p>
+    <h3 class="mb-1.5 text-lg font-semibold leading-snug tracking-tight transition-[color] duration-150 group-hover:text-primary">{category.name}</h3>
+    <p class="m-0 text-sm leading-relaxed text-muted-foreground">{category.description}</p>
   </div>
 </a>

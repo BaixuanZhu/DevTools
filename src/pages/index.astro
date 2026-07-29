@@ -2,6 +2,7 @@
 import ToolLayout from '../layouts/ToolLayout.astro';
 import CategoryCard from '../components/layout/CategoryCard.astro';
 import SearchPanel from '../components/shell/SearchPanel.vue';
+import TypewriterText from '../components/layout/TypewriterText.vue';
 import { categories } from '../data/categories';
 import { getToolsByCategory } from '../data/tools';
 
@@ -13,6 +14,9 @@ const categoryCards = categories.map((c) => ({
   category: c,
   count: (toolsByCategory[c.name] || []).length,
 }));
+
+/** 全站工具总数（hero badge 展示） */
+const totalTools = categoryCards.reduce((sum, c) => sum + c.count, 0);
 
 /** 首页 ItemList：列出 7 个分类（CollectionPage），工具级链接下放到分类页 */
 const itemListJsonLd = {
@@ -32,18 +36,23 @@ const itemListJsonLd = {
 ---
 
 <ToolLayout title="DevTools - 在线工具箱" jsonLd={itemListJsonLd}>
-  <div class="max-w-320 mx-auto">
-    <!-- Hero Section -->
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-bold m-0 mb-3">在线工具箱</h1>
-      <p class="text-muted-foreground text-base m-0 mb-8">零门槛的浏览器端在线工具，即开即用</p>
+  <div class="mx-auto max-w-320">
+    <!-- Hero Section：与 shadcn 视觉对齐（Badge + 大标题 + muted 副标题） -->
+    <div class="mb-10 text-center">
+      <div class="mb-4 inline-flex items-center rounded-md border border-transparent bg-secondary px-2.5 py-0.5 text-xs font-semibold tabular-nums text-secondary-foreground">
+        共 {totalTools} 款工具 · {categoryCards.length} 个分类
+      </div>
+      <h1 class="m-0 mb-3 text-4xl font-bold tracking-tight text-foreground max-md:text-3xl">
+        <TypewriterText text="在线工具箱" client:visible />
+      </h1>
+      <p class="m-0 mb-8 text-base text-muted-foreground">零门槛的浏览器端在线工具，即开即用</p>
     </div>
 
     <!-- 搜索面板（Vue 岛：输入实时匹配 tools → 下拉建议 → 选中直达 tool.path） -->
     <SearchPanel client:load />
 
-    <!-- 分类卡片网格（7 个分类入口） -->
-    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
+    <!-- 分类卡片网格（7 个分类入口）：auto-fill 自适应移动/平板/桌面 -->
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4 max-md:grid-cols-1">
       {categoryCards.map(({ category, count }) => (
         <CategoryCard category={category} count={count} />
       ))}

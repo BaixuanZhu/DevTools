@@ -7,6 +7,8 @@
 import {ref, computed, watch} from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import OptionRadioGroup from '../../components/ui/OptionRadioGroup.vue';
+import { Textarea } from '../../components/ui/textarea';
+import { Button } from '../../components/ui/button';
 import {useCopy} from '../../composables/useCopy';
 import {
   type Base,
@@ -151,32 +153,30 @@ watch(sourceBase, handleBaseChange);
       />
 
       <div>
-        <label class="block text-[0.8125rem] text-muted-foreground mb-1.5">输入数字（每行一个）</label>
-        <textarea
+        <label class="mb-1.5 block text-[0.8125rem] text-muted-foreground">输入数字（每行一个）</label>
+        <Textarea
             v-model="inputText"
             rows="6"
-            class="w-full px-3 py-2 border border-border rounded-sm bg-background text-foreground text-sm font-mono focus:outline-none focus:border-primary resize-y"
+            class="resize-y font-mono text-sm"
             placeholder="在此逐行输入数字..."
         />
         <p v-if="hasErrors" class="mt-1.5 text-xs text-error">部分行包含无效字符，请检查当前进制。</p>
       </div>
 
       <div class="flex gap-2">
-        <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150"
+        <Button
+            variant="outline"
             @click="handleClear"
         >
           清空
-        </button>
-        <button
-            type="button"
-            class="px-4 py-2 border border-border rounded-sm bg-card text-foreground text-sm hover:bg-accent transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+        </Button>
+        <Button
+            variant="outline"
             :disabled="validResults.length === 0"
             @click="handleCopyAll"
         >
           复制全部结果
-        </button>
+        </Button>
       </div>
     </div>
 

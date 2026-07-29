@@ -5,7 +5,20 @@ import CodePanel from '../../components/ui/CodePanel.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import ToggleSwitch from '../../components/ui/ToggleSwitch.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
+import { Button } from '../../components/ui/button';
+import { Textarea } from '../../components/ui/textarea';
+import { ArrowRightLeft } from '@lucide/vue';
 import { encodeBase64, decodeBase64 } from '../../utils/encoding/base64';
+
+/**
+ * Base64 编解码（shadcn-vue 重构示范）。
+ *
+ * 表单控件统一替换为 shadcn-vue 原语：
+ * - 编码/解码/互换按钮 → Button（default / outline variant）
+ * - 输入文本域 → Textarea（border-input + focus ring）
+ * 其余共享组件（ToggleSwitch / SelectListbox / ClearButton / CodePanel）
+ * 已在 s6 阶段统一内部对齐 shadcn 视觉，本文件直接消费即可。
+ */
 
 /** 解码字符集选项（编码固定 UTF-8，仅解码可选） */
 const CHARSET_OPTIONS = [
@@ -93,32 +106,24 @@ function handleClear() {
 
     <!-- 输入面板 -->
     <CodePanel label="输入" show-copy :copy-text="input">
-      <textarea
+      <Textarea
         v-model="input"
-        class="w-full h-60 p-4 bg-card text-foreground font-mono text-sm resize-y box-border focus:outline-none"
+        rows="10"
+        class="h-60 resize-y font-mono text-sm"
         placeholder="输入要编码的文本或要解码的 Base64 字符串"
-      ></textarea>
+      />
     </CodePanel>
 
     <!-- 操作栏：编码/解码/互换/清空 + 解码选项合并为单一区域 -->
-    <div class="flex flex-wrap gap-2 items-center mt-3">
-      <button
-        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
-        @click="executeEncode"
-      >编码</button>
-      <button
-        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 active:brightness-90"
-        @click="executeDecode"
-      >解码</button>
-      <button
-        class="flex items-center gap-1.5 px-4 py-2 border border-border rounded-sm bg-card text-muted-foreground text-[0.8125rem] font-sans cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
-        @click="handleSwap"
-      >
-        <span>⇄</span>
-        <span>互换</span>
-      </button>
+    <div class="mt-3 flex flex-wrap items-center gap-2">
+      <Button @click="executeEncode">编码</Button>
+      <Button @click="executeDecode">解码</Button>
+      <Button variant="outline" @click="handleSwap">
+        <ArrowRightLeft class="h-4 w-4" />
+        互换
+      </Button>
       <ClearButton @clear="handleClear" />
-      <div class="w-px h-6 bg-border mx-1 hidden sm:block"></div>
+      <div class="mx-1 hidden h-6 w-px bg-border sm:block"></div>
       <ToggleSwitch v-model="filterInvalid" label="过滤非法字符" />
       <div class="w-44">
         <SelectListbox
@@ -133,15 +138,15 @@ function handleClear() {
     <CodePanel label="输出" show-copy :copy-text="output" class="mt-3">
       <div
         v-if="output"
-        class="w-full h-60 p-4 m-0 bg-card text-foreground font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+        class="m-0 h-60 w-full overflow-auto whitespace-pre-wrap break-all bg-card p-4 font-mono text-sm text-foreground"
       >{{ output }}</div>
       <div
         v-else-if="errorMsg"
-        class="w-full h-60 p-4 m-0 bg-card text-error font-mono text-sm overflow-auto whitespace-pre-wrap break-all"
+        class="m-0 h-60 w-full overflow-auto whitespace-pre-wrap break-all bg-card p-4 font-mono text-sm text-error"
       >{{ errorMsg }}</div>
       <div
         v-else
-        class="w-full h-60 p-4 m-0 bg-card text-muted-foreground font-mono text-sm"
+        class="m-0 h-60 w-full bg-card p-4 font-mono text-sm text-muted-foreground"
       >点击「编码」或「解码」查看结果</div>
     </CodePanel>
   </div>

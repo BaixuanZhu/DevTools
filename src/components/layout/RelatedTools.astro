@@ -2,6 +2,12 @@
 import type { ToolMeta } from '../../data/tools';
 import { getToolById } from '../../data/tools';
 
+/**
+ * 相关工具网格（纯 Astro，零 JS）。
+ *
+ * 视觉/结构与 ToolCard 对齐（共享 shadcn-vue Card class tokens），
+ * 用于工具页底部「相关工具」区。
+ */
 interface Props {
   /** 相关工具 ID 列表 */
   toolIds: string[];
@@ -17,17 +23,17 @@ const relatedTools: ToolMeta[] = toolIds
 ---
 
 {relatedTools.length > 0 && (
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
     {relatedTools.map((tool) => (
       <div class="relative flex h-full">
         <a
           href={tool.path}
-          class="flex items-start gap-4 p-5 bg-card border border-border rounded-lg transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] w-full h-full"
+          class="flex h-full w-full items-start gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground shadow transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-md"
         >
-          <span class="text-[1.75rem] leading-none shrink-0 mt-0.5">{tool.icon}</span>
-          <div class="flex-1 min-w-0">
-            <h3 class="m-0 mb-1 text-[0.9375rem] font-semibold leading-snug">{tool.name}</h3>
-            <p class="m-0 text-[0.8125rem] text-muted-foreground leading-relaxed">{tool.description}</p>
+          <span class="mt-0.5 shrink-0 text-[1.75rem] leading-none">{tool.icon}</span>
+          <div class="min-w-0 flex-1">
+            <h3 class="mb-1 text-[0.9375rem] font-semibold leading-snug tracking-tight">{tool.name}</h3>
+            <p class="m-0 text-[0.8125rem] leading-relaxed text-muted-foreground">{tool.description}</p>
           </div>
         </a>
       </div>

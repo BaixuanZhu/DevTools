@@ -1,108 +1,143 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* ============ 语义层：浅色 + 暗色两组 ============
- * 设计原则：
- * 1. 品牌橙 #e8590c 保留为 --primary（标识/图标/边框/链接强调）
- * 2. 每个状态色配 *-foreground 文字配对色，确保 WCAG 2.1 AA（normal text ≥ 4.5:1）
- * 3. primary/状态色作为按钮背景（白字）对比度不足 AA 时，提供 *-strong 变体
- * 4. 渐变 token 以 --gradient-* 命名，组件按需引用
+/* ============ shadcn-vue zinc 主题（HSL 变量体系）============
+ * 基础调色板采用 shadcn 官方 zinc（中性灰），符合 2026 现代极简趋势。
+ * 品牌橙 #e8590c 降级为独立 --brand，仅供 Logo/品牌图标使用，不进入交互主色。
+ * 语义状态色（success/info/warning）保留并配 *-foreground，确保 WCAG 2.1 AA。
  */
 :root {
-  --background: #faf9f7;            /* 原 --color-surface，页面底 */
-  --foreground: #1a1a1a;            /* 原 --color-text，主文字（对 background 16.7:1 AAA） */
-  --card: #ffffff;                  /* 卡片/壳层底 */
-  --primary: #e8590c;               /* 品牌“暖橙”——标识/图标/边框/链接 */
-  --primary-foreground: #ffffff;    /* primary 配对文字（大字号/图标满足 AA；小号按钮请用 primary-strong） */
-  --primary-hover: #d4500a;         /* primary hover/active 加深（对白字 3.4:1，大文字 AA） */
-  --primary-strong: #b43807;        /* 满足白字 AA 4.5:1 的深橙——用于需 WCAG 合规的按钮/强调 */
-  --border: #e5e2dd;                /* 边框/分割线 */
-  --muted: #f3f1ee;                 /* 次要背景 */
-  --muted-foreground: #6b7280;      /* 原 text-muted（对 background 4.5:1 AA 边界） */
-  --accent: #f3f1ee;                /* shadcn 语义：悬停/次要底色（原 --color-hover） */
-  --accent-foreground: #1a1a1a;     /* accent 配对文字 */
-  --destructive: #dc2626;           /* 原 --color-error（对白字 4.8:1 AA） */
-  --destructive-foreground: #ffffff;
-  --success: #16a34a;               /* 成功（图标/大标签满足 AA；小字按钮用 success-strong） */
-  --success-foreground: #ffffff;
-  --success-strong: #15803d;        /* 满足白字 AA 4.5:1 的深绿 */
-  --info: #2563eb;                  /* 信息蓝（对白字 5.2:1 AA） */
-  --info-foreground: #ffffff;
-  --warning: #d97706;               /* 警告琥珀（大标签满足 AA；小字用 warning-strong） */
-  --warning-foreground: #ffffff;
-  --warning-strong: #b45309;        /* 满足白字 AA 5.4:1 的深琥珀 */
-  --ring: #e8590c;                  /* 焦点环（键盘导航可见性） */
-  --radius: 0.25rem;
+  --background: 0 0% 100%;                  /* #ffffff */
+  --foreground: 240 10% 3.9%;               /* #09090b zinc-950 */
+  --card: 0 0% 100%;                        /* 卡片底 */
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;                     /* 弹层底（下拉/命令面板）*/
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 240 5.9% 10%;                  /* #18181b zinc-900 —— shadcn 主交互色 */
+  --primary-foreground: 0 0% 98%;           /* #fafafa */
+  --secondary: 240 4.8% 95.9%;              /* #f4f4f5 zinc-100 */
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;                  /* 次要背景 */
+  --muted-foreground: 240 3.8% 46.1%;       /* #71717a zinc-500，对 background 4.6:1 AA */
+  --accent: 240 4.8% 95.9%;                 /* 悬停/次要底色 */
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 72.2% 50.6%;             /* #dc2626，对白字 4.8:1 AA */
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 5.9% 90%;                   /* #e4e4e7 zinc-200 */
+  --input: 240 5.9% 90%;                    /* 输入框边框 */
+  --ring: 240 5.9% 10%;                     /* 焦点环（zinc-900，键盘可见）*/
+  --radius: 0.5rem;                         /* shadcn 默认半径（较之前 0.25 更现代）*/
 
-  /* 渐变色系（2026 趋势：柔和、低饱和、品牌驱动） */
-  --gradient-primary: linear-gradient(135deg, #e8590c 0%, #f97316 100%);
-  --gradient-primary-subtle: linear-gradient(135deg, rgba(232, 89, 12, 0.10) 0%, rgba(249, 115, 22, 0.06) 100%);
-  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #faf9f7 100%);
-  --gradient-hero: radial-gradient(ellipse at top, rgba(232, 89, 12, 0.08) 0%, transparent 60%);
+  /* 品牌橙（独立色，仅 Logo/品牌识别，不进交互系统）*/
+  --brand: 22 90% 48%;                      /* #e8590c */
+  --brand-foreground: 0 0% 100%;
+
+  /* 语义状态色（项目保留，非 shadcn 默认，配 foreground 达 AA）*/
+  --success: 142 71% 45%;                   /* #16a34a */
+  --success-foreground: 0 0% 100%;
+  --info: 217 91% 60%;                      /* #2563eb */
+  --info-foreground: 0 0% 100%;
+  --warning: 32 95% 44%;                    /* #d97706 */
+  --warning-foreground: 0 0% 100%;
+
+  /* 图表色（Card/Chart 用，zinc 体系外的辅助色矩阵）*/
+  --chart-1: 240 5.9% 10%;
+  --chart-2: 240 3.8% 46.1%;
+  --chart-3: 240 5.9% 60%;
+  --chart-4: 240 5.9% 80%;
+  --chart-5: 240 5.9% 90%;
 }
+
 .dark {
-  --background: #161514;
-  --foreground: #f3f1ee;
-  --card: #1f1e1c;
-  --primary: #f97316;               /* 暗色品牌橙（更亮以保证暗底可见性） */
-  --primary-foreground: #1a0f02;    /* 深色文字配亮橙（对比度 8.7:1 AAA） */
-  --primary-hover: #fb923c;         /* hover 更亮 */
-  --primary-strong: #ea580c;        /* 白字配对 4.5:1 AA */
-  --border: #2a2826;
-  --muted: #2a2826;
-  --muted-foreground: #a1a1aa;      /* 对 background 7.4:1 AAA */
-  --accent: #2a2826;
-  --accent-foreground: #f3f1ee;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --success: #22c55e;
-  --success-foreground: #052e16;    /* 深字配亮绿（暗色绿底白字仅 2.5:1 不达标） */
-  --success-strong: #16a34a;
-  --info: #3b82f6;
-  --info-foreground: #ffffff;
-  --warning: #f59e0b;
-  --warning-foreground: #1a1a1a;    /* 深字配亮琥珀 */
-  --warning-strong: #d97706;
-  --ring: #f97316;
+  --background: 240 10% 3.9%;               /* #09090b */
+  --foreground: 0 0% 98%;                   /* #fafafa */
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 0 0% 98%;                      /* 暗色：反相，主色为近白 */
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;              /* #27272a zinc-800 */
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;         /* #a1a1aa，对 background 7.4:1 AAA */
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 60%;               /* #ef4444 */
+  --destructive-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;                 /* #27272a */
+  --input: 240 3.7% 18%;
+  --ring: 240 4.9% 83.9%;
 
-  /* 渐变（暗色：更克制，避免高饱和溢出） */
-  --gradient-primary: linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-  --gradient-primary-subtle: linear-gradient(135deg, rgba(249, 115, 22, 0.14) 0%, rgba(251, 146, 60, 0.06) 100%);
-  --gradient-surface: linear-gradient(180deg, #1f1e1c 0%, #161514 100%);
-  --gradient-hero: radial-gradient(ellipse at top, rgba(249, 115, 22, 0.10) 0%, transparent 60%);
+  --brand: 25 95% 53%;                      /* 暗色品牌橙更亮 #f97316 */
+  --brand-foreground: 240 10% 3.9%;
+
+  --success: 142 71% 45%;
+  --success-foreground: 0 0% 100%;
+  --info: 217 91% 60%;
+  --info-foreground: 0 0% 100%;
+  --warning: 32 95% 52%;
+  --warning-foreground: 240 10% 3.9%;
+
+  --chart-1: 0 0% 98%;
+  --chart-2: 240 5% 64.9%;
+  --chart-3: 240 5% 40%;
+  --chart-4: 240 5% 20%;
+  --chart-5: 240 5% 10%;
 }
 
-/* ============ 映射层：注入 Tailwind 命名空间 ============ */
+/* ============ 映射层：注入 Tailwind v4 命名空间 ============ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-strong: var(--primary-strong);
-  --color-border: var(--border);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-success-strong: var(--success-strong);
-  --color-info: var(--info);
-  --color-info-foreground: var(--info-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-warning-strong: var(--warning-strong);
-  --color-ring: var(--ring);
-  --color-error: var(--destructive);     /* 兼容：旧 text-error 指向 destructive */
-  --radius-sm: calc(var(--radius));
-  --radius-md: calc(var(--radius) * 2);
-  --radius-lg: calc(var(--radius) * 3);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-brand: hsl(var(--brand));
+  --color-brand-foreground: hsl(var(--brand-foreground));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+  --color-error: hsl(var(--destructive));   /* 兼容旧 text-error 别名 */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
   --font-sans: 'Noto Sans SC', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', ui-monospace, monospace;
+}
+
+/* Logo 艺术字：Bricolage Grotesque + 品牌橙渐变 */
+.logo-text {
+  font-family: 'Bricolage Grotesque', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  background-image: linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(25 95% 60%) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* 减少动效偏好 */
@@ -113,46 +148,6 @@
     transition-duration: 0ms !important;
     animation-duration: 0ms !important;
   }
-}
-
-/* Category Filter Chip */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 16px;
-  border-radius: 9999px;
-  font-family: var(--font-sans);
-  font-size: 0.8125rem;
-  font-weight: 500;
-  line-height: 1.4;
-  white-space: nowrap;
-  cursor: pointer;
-  border: 1.5px solid transparent;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s, box-shadow 0.15s;
-  outline: none;
-}
-
-.chip-default {
-  background-color: var(--color-card);
-  color: var(--color-muted-foreground);
-  border-color: var(--color-border);
-}
-
-.chip-default:hover {
-  background-color: var(--color-accent);
-  color: var(--color-foreground);
-  border-color: var(--color-border);
-}
-
-.chip-active {
-  background-color: var(--color-foreground);
-  color: var(--color-background);
-  border-color: var(--color-foreground);
-}
-
-.chip-active:hover {
-  background-color: #333;
-  border-color: #333;
 }
 
 /* Sidebar 滚动条隐藏 */

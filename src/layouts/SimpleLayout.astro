@@ -7,7 +7,7 @@
  */
 import Layout from './Layout.astro';
 import Footer from '../components/layout/Footer.astro';
-import ToastContainer from '../components/shell/ToastContainer.vue';
+import { Toaster } from '../components/ui/sonner';
 import { Code } from '@lucide/astro';
 
 interface Props {
@@ -27,11 +27,11 @@ const { title, description } = Astro.props;
       <!-- Logo -->
       <a
         href="/"
-        class="group flex items-center gap-1.5 text-lg font-semibold text-foreground hover:text-primary transition-[color] duration-150"
+        class="group flex items-center gap-1.5 text-lg transition-[color] duration-150 hover:opacity-90"
         aria-label="DevTools 首页"
       >
-        <Code class="w-6 h-6 text-foreground group-hover:text-primary group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" />
-        <span>DevTools</span>
+        <Code class="w-6 h-6 text-brand group-hover:-rotate-12 transition-[transform,color] duration-300 ease-out" />
+        <span class="logo-text">DevTools</span>
       </a>
 
       <!-- 右侧链接区 -->
@@ -68,6 +68,6 @@ const { title, description } = Astro.props;
     <Footer />
   </div>
 
-  <!-- Toast 通知（全局单岛，消费 toastStore + 兼容 legacy toast 事件） -->
-  <ToastContainer client:load />
+  <!-- Sonner Toaster：feedback/about 等页面接收 toastStore 委派的 Sonner 调用 -->
+  <Toaster client:load />
 </Layout>

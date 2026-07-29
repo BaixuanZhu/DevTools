@@ -1,9 +1,16 @@
 ---
+import { ChevronRight } from '@lucide/astro';
+
 /**
- * 面包屑导航组件
+ * 面包屑导航（纯 Astro，零 JS）。
  *
- * 纯 Astro 组件（零 JS），提供 SEO 友好的面包屑导航。
- * 遵循 DESIGN.md 设计令牌，使用 text-muted-foreground / text-foreground / text-primary。
+ * 视觉与 shadcn-vue Breadcrumb 对齐：
+ * - nav: aria-label="breadcrumb"
+ * - ol: flex flex-wrap items-center gap-1.5 text-sm
+ * - item: inline-flex items-center gap-1.5（BreadcrumbItem token）
+ * - 链接：transition-colors hover:text-foreground（BreadcrumbLink token），默认 text-muted-foreground
+ * - 分隔符：ChevronRight（BreadcrumbSeparator 用 svg，此处用 @lucide/astro 等价）
+ * - 当前页：font-normal text-foreground + aria-current="page"（BreadcrumbPage token）
  */
 interface Props {
   /** 面包屑项列表 */
@@ -13,23 +20,25 @@ interface Props {
 const { items } = Astro.props;
 ---
 
-<nav aria-label="面包屑导航" class="mb-4">
-  <ol class="flex items-center gap-1 text-sm list-none m-0 p-0 flex-wrap">
+<nav aria-label="breadcrumb" class="mb-4">
+  <ol class="m-0 flex list-none flex-wrap items-center gap-1.5 p-0 text-sm">
     {items.map((item, index) => (
       <>
         {index > 0 && (
-          <li aria-hidden="true" class="text-muted-foreground select-none">/</li>
+          <li class="[&>svg]:size-3.5 text-muted-foreground" role="presentation" aria-hidden="true">
+            <ChevronRight />
+          </li>
         )}
-        <li>
+        <li class="inline-flex items-center gap-1.5">
           {item.href ? (
             <a
               href={item.href}
-              class="text-muted-foreground hover:text-primary transition-[color] duration-150"
+              class="text-muted-foreground transition-colors hover:text-foreground"
             >
               {item.label}
             </a>
           ) : (
-            <span class="text-foreground font-medium" aria-current="page">
+            <span class="font-normal text-foreground" aria-current="page">
               {item.label}
             </span>
           )}

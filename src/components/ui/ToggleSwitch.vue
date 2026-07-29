@@ -2,10 +2,11 @@
 /**
  * 开关切换组件（共享 ui，27 个调用方公共 API 冻结）。
  *
- * 底层由 Headless UI Switch 迁移至 reka-ui SwitchRoot/SwitchThumb。
- * 行为/外观/props/emits 与迁移前一致：modelValue 双向绑定、可选 label 与状态文字。
+ * shadcn-vue 重构：内部直接渲染 src/components/ui/switch/Switch.vue，
+ * 让所有调用方自动继承 shadcn Switch 视觉（rounded-full + ring-offset + thumb 平移）。
+ * 行为/外观/props/emits 与重构前一致：modelValue 双向绑定、可选 label 与状态文字。
  */
-import { SwitchRoot, SwitchThumb } from 'reka-ui';
+import { Switch } from './switch';
 
 withDefaults(
   defineProps<{
@@ -24,24 +25,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center gap-2 flex-wrap">
-    <span v-if="label" class="text-[0.8125rem] text-muted-foreground min-w-18 shrink-0">{{ label }}</span>
-    <SwitchRoot
+  <div class="flex flex-wrap items-center gap-2">
+    <span v-if="label" class="min-w-18 shrink-0 text-[0.8125rem] text-muted-foreground">{{ label }}</span>
+    <Switch
       :model-value="modelValue"
       @update:model-value="emit('update:modelValue', $event)"
-      :class="[
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-[background-color] duration-150',
-        'focus:outline-none',
-        modelValue ? 'bg-primary' : 'bg-border',
-      ]"
-    >
-      <SwitchThumb
-        :class="[
-          'pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm transform transition-transform duration-150',
-          modelValue ? 'translate-x-4' : 'translate-x-0',
-        ]"
-      />
-    </SwitchRoot>
+    />
     <span v-if="showStatus" class="text-[0.8125rem] text-muted-foreground">{{ description ?? (modelValue ? '已开启' : '已关闭') }}</span>
   </div>
 </template>
