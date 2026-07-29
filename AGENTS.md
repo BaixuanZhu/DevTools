@@ -33,22 +33,23 @@ pnpm astro check      # Astro TypeScript 类型检查
 - **UI:** Vue 3 `<script setup lang="ts">` + Composition API（交互型）；纯展示用 .astro，零 JS
 - **Language:** TypeScript strict（继承 astro/tsconfigs/strict）
 - **Styling:** Tailwind CSS v4，令牌定义于 `src/styles/global.css`（`:root`/`.dark` 双组变量 + `@theme inline`），utility class 消费
-- **UI Primitives:** reka-ui 无样式可访问原语（Tabs/Switch/Select/Collapsible/Dialog/DropdownMenu）用 Tailwind 定制；shadcn-vue 已初始化（`components.json`，无 `@/` 别名，import 一律相对路径）
+- **UI Primitives:** reka-ui 无样式可访问原语（Tabs/Switch/Select/Collapsible/Dialog/DropdownMenu）；shadcn-vue（new-york 风格）已落地完整组件库（button/card/dialog/dropdown-menu/sheet/sonner/tabs/textarea/breadcrumb 等，位于 `src/components/ui/`），基于 cva 变体 + `cn()`（`src/lib/utils.ts`，clsx + tailwind-merge）合并 class。`components.json` 不配 `@/` 别名，import 一律相对路径
 - **Package Manager:** pnpm ｜ **Node:** >=22.12.0
 
 ## Architecture
 
 ```
 src/
-├── layouts/      # 页面骨架（Layout.astro, ToolLayout.astro）
+├── layouts/      # 页面骨架（Layout.astro 首页/分类、ToolLayout.astro 工具页、SimpleLayout.astro 关于/反馈页）
 ├── pages/        # 文件路由，每个 .astro 对应一个 URL
 ├── tools/        # 工具页面（按分类子目录：text/、crypto/、format/、network/、datetime/、frontend/、devops/）
 ├── components/   # .vue 交互型 + .astro 纯展示
-│   ├── ui/       # 通用交互（ToggleSwitch、SelectListbox 等）
+│   ├── ui/       # shadcn-vue 组件库（button/card/dialog/sonner/tabs 等）+ 通用交互（ToggleSwitch、CopyButton 等）
 │   ├── layout/   # 布局（ToolHeader、Breadcrumb、RelatedTools、CategoryCard 等）
-│   └── shell/    # 全局壳层（Shell、ToastContainer、SearchPanel、FeedbackForm）
+│   └── shell/    # 全局壳层（Shell、SearchPanel、FeedbackForm）
 ├── composables/  # Vue 组合式函数（如 useCopy）
 ├── stores/       # 模块级 reactive store（toast/sidebar/search/theme），跨 island ESM 单例
+├── lib/          # 工具函数（utils.ts 的 cn()，供 shadcn 组件合并 class）
 ├── data/         # 工具注册表（tools.ts、tool-faqs.ts、categories.ts）
 ├── utils/        # 工具函数（含 *.worker.ts）
 ├── styles/       # 设计令牌 global.css
@@ -62,12 +63,12 @@ public/           # 不经处理的静态文件
 
 ## Frontend Architecture
 
-**Vue 单引擎**（2026-07 运行时统一重构完成，Alpine.js 已移除）：
+**Vue 单引擎**（2026-07 运行时统一 + shadcn-vue 重构完成，Alpine.js 已移除）：
 
-- **全局壳层** `Shell.vue`（唯一 `client:load` island）承载 Header / Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/ Toast / 搜索 / 暗色切换。响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
+- **全局壳层** `Shell.vue`（唯一 `client:load` island）承载 Header / Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/ vue-sonner `<Toaster />` / 搜索 / 暗色切换。响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
 - **工具 islands** 每个工具独立 Vue 组件，按需 `client:idle`（默认）/ `client:load`（如 CronParser 需立即响应），`import` 同一批 store 模块。
 
-**通知通信**：任意组件直接 `toastStore.show(msg)` / `toastStore.error(msg)`。禁止 `CustomEvent` 字符串桥接、禁止引入全局状态库（Pinia 等），模块级 store 已覆盖共享需求。
+**通知通信**：任意组件直接调用 `toastStore.show/success/error(msg)`。`toastStore`（`src/stores/toast.ts`）保留原 API 兼容调用方与历史测试，内部委派 vue-sonner 渲染（Shell 挂载的 `<Toaster />` 消费）。禁止 `CustomEvent` 字符串桥接、禁止引入全局状态库（Pinia 等），模块级 store 已覆盖共享需求。
 
 ## Heavy Computation Pattern
 
@@ -163,4 +164,4 @@ Tailwind CSS v4，间距基于 4px 单位（`像素值 / 4 = 类名数值`，如
 - **优先稳定成熟库**：npm 周下载量高、维护活跃、无已知漏洞（如 dayjs、@noble/ciphers、uuid）；新增依赖前确认社区活跃度与兼容性
 - **禁止实验性库**：能用浏览器原生 API（Web Crypto API、TextEncoder、URL）实现的优先原生方案
 - **同类不重复**：已有 dayjs 不引 moment/luxon；已有 @noble/ciphers 不引 crypto-js
-- **UI 原语只用 reka-ui**，禁止 @headlessui/vue 等；壳层状态用 `src/stores/` 模块级 store，禁止 Alpine.js 或全局状态库
+- **UI 原语只用 reka-ui**，禁止 @headlessui/vue 等；Toast 用 vue-sonner（经由 toastStore 适配层），禁止自行实现 toast 队列；壳层状态用 `src/stores/` 模块级 store，禁止 Alpine.js 或全局状态库（Pinia 等）
