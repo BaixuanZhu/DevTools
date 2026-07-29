@@ -29,8 +29,10 @@ pnpm-debug.log*
 .vscode
 # claude code folder
 .claude
-.mcp.json
 .codegraph
+
+# zcode folder
+.zcode
 # workbuddy
 .workbuddy
 

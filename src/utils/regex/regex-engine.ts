@@ -7,7 +7,7 @@
  * - 把测试文本按匹配区间拆成分段，供 Vue 组件渲染高亮
  * - 生成可粘贴回 JavaScript 代码的正则字面量文本
  *
- * 安全规则（CLAUDE.md §Security Rules）：
+ * 安全规则（AGENTS.md §Security Rules）：
  * - 所有 `new RegExp(...)` 调用均包裹 try-catch
  * - 不使用 `eval` / `Function(string)` / `setTimeout(string)` 等动态执行
  * - 命名捕获组结果仅作为只读数据返回，绝不参与代码生成
@@ -144,7 +144,7 @@ function humanizeSyntaxError(message: string): string {
 /**
  * 安全编译正则表达式。
  *
- * 必须包裹 try-catch（CLAUDE.md §Security Rules），任何非法输入都返回
+ * 必须包裹 try-catch（AGENTS.md §Security Rules），任何非法输入都返回
  * 中文错误描述而非抛出异常，便于在 UI 内联显示。
  *
  * @param pattern - 正则 pattern 字符串（不含分隔符）
@@ -159,7 +159,7 @@ export function compileRegex(pattern: string, flags: string): CompileResult {
   }
 
   try {
-    // CLAUDE.md §Security Rules：new RegExp 必须包裹 try-catch
+    // AGENTS.md §Security Rules：new RegExp 必须包裹 try-catch
     const re = new RegExp(pattern, flags);
     return { ok: true, re };
   } catch (e) {
