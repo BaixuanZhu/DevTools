@@ -33,6 +33,8 @@ pnpm-debug.log*
 
 # zcode folder
 .zcode
+# agents folder (AI tool configs, machine-local)
+.agents
 # workbuddy
 .workbuddy
 
