@@ -11,24 +11,6 @@ PRODUCT.md 与 DESIGN.md 是产品行为与视觉规范的唯一标准，开发�
 | **PRODUCT.md** | 产品定位、工具分类、URL 策略、错误处理、浏览器兼容、性能与无障碍 | 新增工具页、改产品行为、讨论优先级 |
 | **DESIGN.md** | 设计令牌、组件状态矩阵、布局模板、UI 选型、样式规则、工具页模式 | 编写任何 UI 代码前 |
 
-## Code Search Rules（强制）
-
-按问题类型选最高效的工具，不固守固定顺序：
-
-| 场景 | 首选工具 |
-|------|----------|
-| 找符号定义 | `codegraph query` |
-| 找直接调用方 | `codegraph callers`（仅返回一层，需递归再 callers） |
-| 理解模块/架构/影响面 | `codegraph explore` / `impact`（结果有噪音，需筛选） |
-| 查找所有出现位置/模板文本/配置值 | IDEA MCP `search_text` / `search_regex`（比 explore 精确） |
-| 需要 LSP / rename / 类型提示 | IDEA MCP |
-| 以上覆盖不到 | `Grep` / `Read` 兜底 |
-
-**铁律**：能用 codegraph 或 IDEA MCP 一次性解决的问题，禁止用 Read 逐文件拼凑；`explore` 返回关系图而非精确答案，主动筛选噪音。
-
-> `codegraph` 已封装为同名 skill，优先 `Skill('codegraph')` 调用；必要时在项目根目录执行 `codegraph explore <query>`。
-> 注意：`new Worker(new URL('./x.worker.ts', import.meta.url))` 动态实例化的 Worker 不被 codegraph 索引，需手动搜 `.worker.ts` 引用。
-
 ## Project Overview
 
 基于 Astro 6 的在线开发者工具网站，浏览器端运算、无后端。产品定义详见 PRODUCT.md。
@@ -131,14 +113,14 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
 
 ```
 首页 /（7 分类卡片 + 搜索直达）
-├── /text     文本与编码   Base64/JWT/URL 编解码、UUID、随机串、正则测试器
-├── /crypto   加密与安全   哈希、对称/非对称/SM2 加解密
-├── /format   格式化与转换 JSON 美化/差异、TOML/YAML/XML/TS 互转
-├── /network  网络工具     URL 解析、HTTP 状态码、IPv4 子网、设备信息
-├── /datetime 日期时间     时间戳转换、Cron 解析、时间差
-├── /frontend 前端与媒体   CSS 单位/渐变、颜色面板、二维码、图片转换、幻影坦克
-└── /devops   开发与运维   Docker/Env 转换、Meta/robots/sitemap、Markdown 编辑器
-     └── /{category}/{tool}  工具页（末层，约 48 个）
+├── /text     文本与编码
+├── /crypto   加密与安全
+├── /format   格式化与转换
+├── /network  网络工具
+├── /datetime 日期时间
+├── /frontend 前端与媒体
+└── /devops   开发与运维
+     └── /{category}/{tool}  工具页（末层）
 ```
 
 分类页 `src/pages/[category]/index.astro` 聚合工具卡片；Sidebar 全程常驻（7 分类切换 + 工具数徽标 + 当前分类高亮）。
