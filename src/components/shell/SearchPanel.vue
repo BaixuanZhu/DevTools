@@ -42,7 +42,7 @@ function onSelect(value: string): void {
 </script>
 
 <template>
-  <div class="mx-auto mb-8 max-w-140">
+  <div class="mx-auto mb-8 max-w-190">
     <Command class="rounded-lg border shadow-sm">
       <CommandInput v-model="query" placeholder="搜索工具，如 base64 / jwt / 二维码..." aria-label="搜索工具" />
       <CommandList>
