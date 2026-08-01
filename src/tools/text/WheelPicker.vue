@@ -406,7 +406,7 @@ onMounted(() => {
             ></canvas>
           </div>
           <button
-            class="px-8 py-2.5 rounded-sm bg-primary text-white text-sm font-medium cursor-pointer transition-opacity duration-150 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
+            class="px-8 py-2.5 rounded-sm bg-primary text-primary-foreground text-sm font-medium cursor-pointer transition-opacity duration-150 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
             :disabled="spinning || validItems().length < 2"
             @click="spin"
           >

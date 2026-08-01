@@ -131,7 +131,7 @@ onMounted(() => {
               :class="[
                 'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                 jsonPretty === opt.value
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-primary-foreground'
                   : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
               ]"
               @click="jsonPretty = opt.value"

@@ -551,7 +551,7 @@ onUnmounted(() => {
                 :class="[
                   'flex items-center gap-1.5 px-3 py-1.5 rounded-sm border text-sm transition-[background-color,border-color,color] duration-150 cursor-pointer focus:outline-none',
                   flagState[fdef.flag]
-                    ? 'bg-primary text-white border-primary'
+                    ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
                 ]"
                 :aria-pressed="flagState[fdef.flag]"

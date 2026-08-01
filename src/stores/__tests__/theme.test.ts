@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { themeStore } from '../theme';
 
-/** mock document.documentElement.classList + localStorage */
-function mockDom() {
+/** mock document.documentElement.classList + localStorage + matchMedia */
+function mockDom(prefersDark = false) {
   const classSet = new Set<string>();
   vi.stubGlobal('document', {
     documentElement: {
@@ -27,17 +27,27 @@ function mockDom() {
       delete store[k];
     },
   });
-  return { classSet, store };
+  // matchMedia mock
+  const mql = {
+    matches: prefersDark,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  };
+  vi.stubGlobal('matchMedia', () => mql);
+  return { classSet, store, mql };
 }
 
 describe('themeStore', () => {
   beforeEach(() => {
+    themeStore.mode.value = 'system';
     themeStore.current.value = 'light';
-    mockDom();
+    vi.unstubAllGlobals();
+    mockDom(false);
   });
 
-  it('apply(dark) 切换 html.dark 并持久化', () => {
+  it('apply(dark) 切换 html.dark 并持久化 dark', () => {
     themeStore.apply('dark');
+    expect(themeStore.mode.value).toBe('dark');
     expect(themeStore.current.value).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
     expect(localStorage.getItem('devtools-theme')).toBe('dark');
@@ -48,6 +58,21 @@ describe('themeStore', () => {
     themeStore.apply('light');
     expect(document.documentElement.classList.contains('dark')).toBe(false);
     expect(localStorage.getItem('devtools-theme')).toBe('light');
+  });
+
+  it('apply(system) 在系统暗色下解析为 dark', () => {
+    mockDom(true);
+    themeStore.apply('system');
+    expect(themeStore.mode.value).toBe('system');
+    expect(themeStore.current.value).toBe('dark');
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    expect(localStorage.getItem('devtools-theme')).toBe('system');
+  });
+
+  it('apply(system) 注册 matchMedia 监听器', () => {
+    const { mql } = mockDom(false);
+    themeStore.apply('system');
+    expect(mql.addEventListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
   it('toggle 在 light/dark 间切换', () => {
@@ -61,13 +86,22 @@ describe('themeStore', () => {
   it('load 恢复已保存的 dark', () => {
     localStorage.setItem('devtools-theme', 'dark');
     themeStore.load();
+    expect(themeStore.mode.value).toBe('dark');
     expect(themeStore.current.value).toBe('dark');
     expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
-  it('load 忽略非法值', () => {
+  it('load 恢复 system 并解析系统偏好', () => {
+    mockDom(true);
+    localStorage.setItem('devtools-theme', 'system');
+    themeStore.load();
+    expect(themeStore.mode.value).toBe('system');
+    expect(themeStore.current.value).toBe('dark');
+  });
+
+  it('load 忽略非法值，回落到 system', () => {
     localStorage.setItem('devtools-theme', 'purple');
     themeStore.load();
-    expect(themeStore.current.value).toBe('light');
+    expect(themeStore.mode.value).toBe('system');
   });
 });

@@ -62,7 +62,7 @@ const stats = computed(() => computeStats(text.value));
 
 /** Primary 按钮（替换全部）的 Tailwind class。 */
 const BTN_PRIMARY_CLASS =
-  'px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
+  'px-4 py-2 border border-primary rounded-sm bg-primary text-primary-foreground text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
 
 /** 工具栏图标按钮基础 class，与 CopyButton 风格一致；尺寸由各按钮追加。 */
 const ICON_BTN_BASE =

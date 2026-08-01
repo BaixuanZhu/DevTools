@@ -11,16 +11,18 @@
  * 桌面端侧边栏保持静态常驻（原项目布局不变），仅移动端走 Sheet。
  */
 import { onMounted } from 'vue';
-import { Wrench, Sun, Moon, Menu, Check } from '@lucide/vue';
+import { Wrench, Sun, Moon, Menu, Check, Monitor } from '@lucide/vue';
 import { siGithub, siGitee } from 'simple-icons';
+import {
+  DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem,
+} from 'reka-ui';
 import type { ToolMeta } from '../../data/tools';
 import type { CategoryMeta } from '../../data/categories';
 import { sidebarStore } from '../../stores/sidebar';
 import { themeStore } from '../../stores/theme';
-import { Button } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { Badge } from '../ui/badge';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '../ui/dropdown-menu';
 import { Toaster } from '../ui/sonner';
 
 interface Props {
@@ -31,7 +33,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const { isOpen } = sidebarStore;
-const { current } = themeStore;
+const { mode, current } = themeStore;
 
 onMounted(() => themeStore.load());
 
@@ -77,23 +79,49 @@ function renderCategory(cat: CategoryMeta): { href: string; active: boolean; cou
       </div>
 
       <div class="flex items-center gap-3">
-        <!-- 主题切换：DropdownMenu（替代单按钮，为后续"跟随系统"留扩展）-->
-        <DropdownMenu>
-          <DropdownMenuTrigger as-child>
-            <Button variant="ghost" size="icon" :aria-label="current === 'dark' ? '切换到亮色模式' : '切换到暗色模式'">
-              <Moon v-if="current === 'dark'" class="h-5 w-5" />
-              <Sun v-else class="h-5 w-5" />
-            </Button>
+        <!-- 主题切换：直接使用 reka-ui 原语（浅色/暗色/跟随系统 三态）-->
+        <DropdownMenuRoot>
+          <DropdownMenuTrigger
+            :class="buttonVariants({ variant: 'ghost', size: 'icon' })"
+            :aria-label="`当前主题：${mode === 'system' ? '跟随系统' : current === 'dark' ? '暗色' : '浅色'}，点击切换`"
+          >
+            <Monitor v-if="mode === 'system'" class="h-5 w-5" />
+            <Moon v-else-if="current === 'dark'" class="h-5 w-5" />
+            <Sun v-else class="h-5 w-5" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem class="gap-2" @select="themeStore.set('light')">
-              <Sun class="h-4 w-4" /> 浅色 <Check v-if="current === 'light'" class="ml-auto h-4 w-4" />
-            </DropdownMenuItem>
-            <DropdownMenuItem class="gap-2" @select="themeStore.set('dark')">
-              <Moon class="h-4 w-4" /> 暗色 <Check v-if="current === 'dark'" class="ml-auto h-4 w-4" />
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          <DropdownMenuPortal>
+            <DropdownMenuContent
+              :side-offset="4"
+              align="end"
+              class="z-50 min-w-[8rem] overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md"
+            >
+              <DropdownMenuItem
+                value="light"
+                class="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                @select="themeStore.apply('light')"
+              >
+                <Sun class="h-4 w-4" /> 浅色
+                <Check v-if="mode === 'light'" class="ml-auto h-4 w-4" />
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                value="dark"
+                class="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                @select="themeStore.apply('dark')"
+              >
+                <Moon class="h-4 w-4" /> 暗色
+                <Check v-if="mode === 'dark'" class="ml-auto h-4 w-4" />
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                value="system"
+                class="relative flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none transition-colors data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+                @select="themeStore.apply('system')"
+              >
+                <Monitor class="h-4 w-4" /> 跟随系统
+                <Check v-if="mode === 'system'" class="ml-auto h-4 w-4" />
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
+        </DropdownMenuRoot>
 
         <!-- 仓库入口 -->
         <div class="flex items-center gap-2 text-foreground">

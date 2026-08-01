@@ -18,7 +18,7 @@ const DEFAULT_INPUT = 'https://example.com/search?q=你好世界&lang=zh-CN';
 
 /** Primary 按钮 class */
 const BTN_PRIMARY_CLASS =
-  'px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
+  'px-4 py-2 border border-primary rounded-sm bg-primary text-primary-foreground text-[0.8125rem] cursor-pointer transition-[opacity] duration-150 hover:opacity-90';
 
 /** 次要按钮 class */
 const BTN_SECONDARY_CLASS =

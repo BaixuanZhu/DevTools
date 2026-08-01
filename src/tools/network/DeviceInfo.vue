@@ -162,7 +162,7 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'px-2.5 py-1 text-xs rounded-sm border transition-colors cursor-pointer',
               !activeBrowser
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activeBrowser = ''"
@@ -175,7 +175,7 @@ onMounted(() => { collectDeviceInfo(); });
             :class="[
               'px-2.5 py-1 text-xs rounded-sm border transition-colors cursor-pointer',
               activeBrowser === b
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="activeBrowser = b"

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 /**
  * shadcn-vue Button —— new-york 风格。
- * 基于 cva 变体 + cn() 合并，渲染为原生 <button>（保留原生 type/disabled 等）。
- * 通过 asChild 模式（本项目用 v-if 简化）支持 <a> 等标签变体。
+ * 基于 cva 变体 + cn() 合并，通过 reka-ui Primitive 渲染。
+ * Primitive 支持 asChild 透传，使 reka-ui 触发器（DropdownMenuTrigger / DialogTrigger 等）
+ * 的 as-child 模式能正确合并事件监听器到此按钮。
  */
 import { computed } from 'vue';
+import { Primitive } from 'reka-ui';
 import { cn } from '../../../lib/utils';
 import { buttonVariants, type ButtonVariants } from './index';
 
@@ -15,6 +17,10 @@ interface Props {
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
   class?: string;
+  /** reka-ui Primitive as：默认渲染 button */
+  as?: string;
+  /** reka-ui Primitive asChild：透传给父级 reka-ui 触发器 */
+  asChild?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -22,6 +28,8 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'default',
   type: 'button',
   disabled: false,
+  as: 'button',
+  asChild: false,
 });
 
 const classes = computed(() =>
@@ -30,7 +38,7 @@ const classes = computed(() =>
 </script>
 
 <template>
-  <button :type="type" :disabled="disabled" :class="classes">
+  <Primitive :as="as" :as-child="asChild" :class="classes" :type="as === 'button' ? type : undefined" :disabled="as === 'button' ? disabled : undefined">
     <slot />
-  </button>
+  </Primitive>
 </template>

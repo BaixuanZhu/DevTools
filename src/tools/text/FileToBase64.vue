@@ -241,11 +241,11 @@ function handleClear() {
 
           <div class="flex gap-2">
             <button
-              class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              class="px-4 py-2 bg-primary text-primary-foreground border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
               @click="handleCopy"
             >复制完整结果</button>
             <button
-              class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+              class="px-4 py-2 bg-primary text-primary-foreground border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
               @click="handleDownloadTxt"
             >下载为 .txt</button>
           </div>

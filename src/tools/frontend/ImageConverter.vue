@@ -136,7 +136,7 @@ onUnmounted(() => {
     <div class="flex items-center justify-between gap-2 mb-3">
       <button
         type="button" :disabled="pendingCount === 0"
-        class="px-4 py-1.5 text-[0.8125rem] rounded-sm bg-primary text-white transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-1.5 text-[0.8125rem] rounded-sm bg-primary text-primary-foreground transition-[filter] duration-150 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed"
         @click="batch.convert()"
       >转换{{ pendingCount > 0 ? ` (${pendingCount})` : '' }}</button>
       <div class="flex items-center gap-2">

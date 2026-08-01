@@ -414,7 +414,7 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i - 1)
-                                  ? 'bg-primary text-white border-primary'
+                                  ? 'bg-primary text-primary-foreground border-primary'
                                   : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
@@ -433,7 +433,7 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i - 1)
-                                  ? 'bg-primary text-white border-primary'
+                                  ? 'bg-primary text-primary-foreground border-primary'
                                   : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
@@ -452,7 +452,7 @@ parseExpression();
                               :class="[
                                 'px-1 py-1 border rounded-sm text-xs font-mono cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
-                                  ? 'bg-primary text-white border-primary'
+                                  ? 'bg-primary text-primary-foreground border-primary'
                                   : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
@@ -471,7 +471,7 @@ parseExpression();
                               :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(i)
-                                  ? 'bg-primary text-white border-primary'
+                                  ? 'bg-primary text-primary-foreground border-primary'
                                   : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >
@@ -490,7 +490,7 @@ parseExpression();
                               :class="[
                                 'px-2 py-1.5 border rounded-sm text-xs font-sans cursor-pointer transition-[background-color,border-color] duration-150',
                                 (fields[config.key].specificValues ?? []).includes(idx)
-                                  ? 'bg-primary text-white border-primary'
+                                  ? 'bg-primary text-primary-foreground border-primary'
                                   : 'bg-background text-foreground border-border hover:bg-accent',
                               ]"
                           >

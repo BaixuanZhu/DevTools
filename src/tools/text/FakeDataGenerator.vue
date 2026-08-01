@@ -249,7 +249,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
       </div>
       <button
         type="button"
-        class="px-6 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
+        class="px-6 py-2 bg-primary border border-primary text-primary-foreground rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
         @click="generate"
       >
         生成
@@ -362,7 +362,7 @@ const dialogParamDefs = computed<FieldTypeMeta['params']>(() => {
             </button>
             <button
               type="button"
-              class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
+              class="px-4 py-2 bg-primary border border-primary text-primary-foreground rounded-sm text-[0.8125rem] cursor-pointer hover:opacity-90 transition-[opacity] duration-150"
               @click="saveFieldConfig"
             >
               保存

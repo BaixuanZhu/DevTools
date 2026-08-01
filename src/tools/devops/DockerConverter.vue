@@ -4,9 +4,8 @@
  *
  * 提供左右双输入区：左侧编辑 docker run 命令，右侧实时输出 compose 配置；
  * 右侧编辑 compose 配置，左侧实时输出 docker run 命令。
- * 通过交换按钮可快速互换两侧内容。
  */
-import { ref, watch, computed, onMounted, nextTick } from 'vue';
+import { ref, watch, computed, onMounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import CodePanel from '../../components/ui/CodePanel.vue';
 import ResponsiveWorkspace from '../../components/layout/ResponsiveWorkspace.vue';
@@ -26,8 +25,6 @@ const errorMsg = ref('');
 const unsupportedCount = ref(0);
 /** 当前正在执行转换的方向，用于防止 watch 循环触发 */
 const convertingFrom = ref<'left' | 'right' | null>(null);
-/** 交换操作标志，用于跳过 watch 触发 */
-const isSwapping = ref(false);
 
 /**
  * 将左侧 docker run 转换为右侧 compose。
@@ -81,7 +78,7 @@ function convertRightToLeft(): void {
 
 /** 监听左侧变化 */
 watch(leftValue, () => {
-  if (isSwapping.value || convertingFrom.value === 'right') return;
+  if (convertingFrom.value === 'right') return;
   convertingFrom.value = 'left';
   convertLeftToRight();
   convertingFrom.value = null;
@@ -89,25 +86,11 @@ watch(leftValue, () => {
 
 /** 监听右侧变化 */
 watch(rightValue, () => {
-  if (isSwapping.value || convertingFrom.value === 'left') return;
+  if (convertingFrom.value === 'left') return;
   convertingFrom.value = 'right';
   convertRightToLeft();
   convertingFrom.value = null;
 });
-
-/**
- * 交换两侧内容。
- * 交换时不触发自动转换，由用户后续编辑触发。
- */
-function handleSwap(): void {
-  isSwapping.value = true;
-  const temp = leftValue.value;
-  leftValue.value = rightValue.value;
-  rightValue.value = temp;
-  nextTick(() => {
-    isSwapping.value = false;
-  });
-}
 
 /**
  * 清空两侧输入和错误状态。
@@ -140,16 +123,6 @@ const unsupportedHint = computed(() => unsupportedCount.value > 0
     />
 
     <ResponsiveWorkspace mode="horizontal" gap="gap-4">
-      <template #actions>
-        <button
-          class="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-sm bg-card text-muted-foreground text-[0.8125rem] cursor-pointer transition-[background-color,border-color,color] duration-150 hover:bg-accent hover:text-foreground"
-          @click="handleSwap"
-        >
-          <span>⇄</span>
-          <span>交换</span>
-        </button>
-      </template>
-
       <template #input>
         <CodePanel
           label="docker run"

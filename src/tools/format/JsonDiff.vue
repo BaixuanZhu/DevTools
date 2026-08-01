@@ -818,7 +818,7 @@ onUnmounted(() => {
               取消
             </button>
             <button
-              class="px-4 py-2 border border-primary rounded-sm bg-primary text-white text-[0.8125rem] cursor-pointer transition-[background-color] duration-150 hover:bg-primary/90"
+              class="px-4 py-2 border border-primary rounded-sm bg-primary text-primary-foreground text-[0.8125rem] cursor-pointer transition-[background-color] duration-150 hover:bg-primary/90"
               @click="confirmExpand"
             >
               确认展开
