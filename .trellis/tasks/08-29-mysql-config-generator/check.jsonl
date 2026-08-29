@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门基线：pnpm build/test/astro check 全绿 + 测试纪律检查项"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "检查 select 选项值非空串不变量测试存在且回归覆盖（SelectItem 空串坑）"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "检查 pages/↔tools/ 对称、私有组件未上浮全局、import 相对路径"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "检查画像字段（listenScope）与覆盖值（overrides）边界未被混淆、重置逻辑保持联动"}
+{"file": ".trellis/tasks/08-29-mysql-config-generator/research/mysql-params-version-notes.md", "reason": "抽查版本矩阵准确性：5.7/8.0/8.4 废弃改名参数的 deprecatedIn/replacedBy 与笔记一致"}
