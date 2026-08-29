@@ -550,7 +550,7 @@ watch(mode, (newMode) => {
       <!-- 操作按钮 -->
       <div class="flex gap-2 items-center mb-4">
         <button
-          class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+          class="px-4 py-2 bg-primary text-primary-foreground border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
           @click="handleEncode"
         >生成 Token</button>
         <ClearButton @clear="handleClearEncode" />

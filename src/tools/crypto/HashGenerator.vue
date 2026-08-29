@@ -316,7 +316,7 @@ watch([hmacResult, verifySignature, verifySignatureEncoding], () => {
             'px-3 py-1.5 border rounded-sm text-[0.8125rem] font-sans cursor-pointer',
             'transition-[background-color,border-color] duration-150',
             selectedAlgorithms.includes(algo)
-              ? 'bg-primary border-primary text-white'
+              ? 'bg-primary border-primary text-primary-foreground'
               : 'bg-background border-border text-foreground hover:bg-accent hover:border-primary',
           ]"
           :aria-pressed="selectedAlgorithms.includes(algo)"

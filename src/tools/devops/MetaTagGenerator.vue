@@ -340,7 +340,7 @@ function handleClear(): void {
                 :class="[
                   'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                   platform === opt.key
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
                 ]"
                 @click="platform = opt.key"
@@ -373,7 +373,7 @@ function handleClear(): void {
                 :class="[
                   'px-3 py-1.5 text-[0.8125rem] transition-[background-color,color] duration-150 cursor-pointer',
                   codeType === opt.key
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-primary-foreground'
                     : 'bg-card text-muted-foreground hover:bg-accent hover:text-foreground',
                 ]"
                 @click="codeType = opt.key"

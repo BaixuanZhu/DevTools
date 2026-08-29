@@ -83,7 +83,7 @@ function getCategoryColor(category: StatusCategory): string {
         :class="[
           'px-3 py-1.5 text-[0.8125rem] rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150',
           activeCategory === 'all'
-            ? 'bg-primary text-white border-primary'
+            ? 'bg-primary text-primary-foreground border-primary'
             : 'bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary hover:text-foreground',
         ]"
         @click="activeCategory = 'all'"
@@ -96,7 +96,7 @@ function getCategoryColor(category: StatusCategory): string {
         :class="[
           'px-3 py-1.5 text-[0.8125rem] rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150',
           activeCategory === cat.key
-            ? 'bg-primary text-white border-primary'
+            ? 'bg-primary text-primary-foreground border-primary'
             : 'bg-card text-muted-foreground border-border hover:bg-accent hover:border-primary hover:text-foreground',
         ]"
         @click="activeCategory = cat.key"

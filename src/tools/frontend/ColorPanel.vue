@@ -451,7 +451,7 @@ function reset(): void {
             :class="[
               'px-3 py-1.5 rounded-sm border text-sm cursor-pointer transition-[background-color,border-color] duration-150 focus:outline-none',
               scheme === key
-                ? 'bg-primary text-white border-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-card text-muted-foreground border-border hover:bg-accent hover:text-foreground',
             ]"
             @click="scheme = key"

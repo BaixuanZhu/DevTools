@@ -509,7 +509,7 @@ onUnmounted(() => {
       <button
         type="button"
         :disabled="!canGenerate"
-        class="px-4 py-2 rounded-sm bg-primary text-white text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+        class="px-4 py-2 rounded-sm bg-primary text-primary-foreground text-[0.8125rem] font-sans cursor-pointer transition-[filter] duration-150 hover:brightness-95 active:brightness-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         aria-label="生成幻影坦克"
         @click="handleGenerate"
       >

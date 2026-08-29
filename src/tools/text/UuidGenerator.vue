@@ -195,7 +195,7 @@ function formatTimestamp(iso: string): string {
 
       <div class="flex gap-2">
         <button
-          class="px-4 py-2 bg-primary border border-primary text-white rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
+          class="px-4 py-2 bg-primary border border-primary text-primary-foreground rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90"
           @click="generate"
         >
           生成

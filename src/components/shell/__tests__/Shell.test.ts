@@ -26,14 +26,16 @@ describe('Shell.vue', () => {
     document.documentElement.classList.remove('dark');
   });
 
-  it('渲染 logo、汉堡按钮、暗色按钮（默认 light 态）', () => {
+  it('渲染 logo、汉堡按钮、主题切换按钮（默认 system 态显示 Monitor）', () => {
     const wrapper = mount(Shell, {
       props: { categories, toolsByCategory, currentPath: '/' },
       slots: { default: '<div class="content">页面内容</div>' },
     });
     expect(wrapper.find('header').exists()).toBe(true);
     expect(wrapper.find('[aria-label="打开导航菜单"]').exists()).toBe(true);
-    expect(wrapper.find('[aria-label="切换到暗色模式"]').exists()).toBe(true);
+    // 触发按钮 aria-label 包含「当前主题」
+    const themeBtn = wrapper.find('header button[aria-label^="当前主题"]');
+    expect(themeBtn.exists()).toBe(true);
     expect(wrapper.text()).toContain('页面内容');
   });
 
@@ -45,15 +47,6 @@ describe('Shell.vue', () => {
     await wrapper.find('[aria-label="打开导航菜单"]').trigger('click');
     expect(sidebarStore.isOpen.value).toBe(true);
     expect(wrapper.find('aside').classes()).toContain('sidebar-open');
-  });
-
-  it('点击暗色按钮 → themeStore.current 变 dark，<html> 加 .dark', async () => {
-    const wrapper = mount(Shell, {
-      props: { categories, toolsByCategory, currentPath: '/' },
-    });
-    await wrapper.find('[aria-label="切换到暗色模式"]').trigger('click');
-    expect(themeStore.current.value).toBe('dark');
-    expect(document.documentElement.classList.contains('dark')).toBe(true);
   });
 
   it('Header 不再包含收藏入口', () => {

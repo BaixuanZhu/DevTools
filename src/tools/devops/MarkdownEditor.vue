@@ -90,7 +90,7 @@ function hello() {
 const viewBtnBase = 'w-8 h-8 flex items-center justify-center rounded-sm border cursor-pointer transition-[background-color,border-color,color] duration-150';
 
 /** 视图模式 - 选中态 */
-const activeView = 'bg-primary border-primary text-white';
+const activeView = 'bg-primary border-primary text-primary-foreground';
 
 /** 视图模式 - 未选中态 */
 const inactiveView = 'bg-card border-border text-muted-foreground hover:bg-accent hover:text-foreground';

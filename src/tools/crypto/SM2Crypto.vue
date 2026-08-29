@@ -272,7 +272,7 @@ function handleClear() {
     <!-- 操作按钮行 -->
     <div class="flex gap-2 items-center mb-4">
       <button
-        class="px-4 py-2 bg-primary text-white border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 bg-primary text-primary-foreground border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="isProcessing"
         @click="handleAction"
       >
