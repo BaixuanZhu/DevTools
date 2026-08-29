@@ -7,16 +7,17 @@ src/
 ├── pages/devops/redis-config-generator.astro   # 路由：ToolLayout 包裹 + client:idle
 ├── tools/devops/RedisConfigGenerator.vue       # 工具主组件（页面级）
 └── tools/devops/redis-config/                  # 私有目录（不上浮全局 components/）
-    ├── params.ts            # 参数定义表（~55 参数：元数据 + 控件 + 计算公式 + 中文注释）
+    ├── params.ts            # 参数定义表（~55 参数：元数据 + 控件 + 计算公式 + 中文说明）
     ├── version.ts           # 版本序数与过滤逻辑（纯函数）
     ├── compute.ts           # 场景/硬件 → 参数默认值 的公式层（纯函数）
     ├── generate.ts          # conf 模板渲染（纯函数：params + ctx → 行数组）
     ├── sysctl.ts            # 系统参数建议区块的数据（非 redis.conf）
+    ├── secret.ts            # 密码生成（crypto.getRandomValues → 24 字符 base64url）
     ├── __tests__/           # 单测：compute / version / generate
     └── components/          # 私有子组件
-        ├── ControlPanel.vue     # 左栏：模式/硬件/场景/版本/持久化
-        ├── ParamRow.vue         # 参数行：名称 + 控件 + 推荐范围刻度 + 版本徽章
-        ├── ScopeSlider.vue      # 保守/推荐/激进三段刻度条
+        ├── ControlPanel.vue     # 左栏：模式/硬件/场景/版本/持久化/监听范围/端口/访问密码（快速配置区）
+        ├── ParamRow.vue         # 参数行：名称 + 控件 + 推荐快捷选项 + 版本徽章
+        ├── NumberField.vue      # 数值输入框 + 推荐快捷选项 chips
         ├── ConfigPreview.vue    # 右栏：行号预览 + 变动高亮
         └── SysctlPanel.vue      # 系统参数建议（可折叠）
 ```
@@ -27,10 +28,10 @@ src/
 
 ```ts
 /** 参数控件类型 */
-type ControlKind = 'select' | 'slider' | 'switch' | 'multi-select' | 'text';
+type ControlKind = 'select' | 'number' | 'switch' | 'multi-select' | 'text';
 
 /** 参数版本标注：pre-7 统一 'pre-7'，UI 不显示徽章；7 系内精确到 minor */
-type RedisVersion = 'pre-7' | '7.0' | '7.2' | '7.4' | '8.0';
+type RedisVersion = 'pre-7' | '7.0' | '7.2' | '7.4' | '8.0' | '8.2' | '8.4';
 
 interface ConfigParam {
   key: string;                       // 'maxmemory'
@@ -41,15 +42,13 @@ interface ConfigParam {
   docUrl: string;                    // 官方文档锚点（可溯源）
   control: ControlKind;
   options?: ParamOption[];           // 枚举值 + 中文说明（select/multi-select 用）
-  min?: number; max?: number; step?: number;   // slider 用
-  /** 推荐范围刻度（ScopeSlider 三段 + 落点），可为空（无连续范围的参数） */
+  min?: number; max?: number; step?: number;   // number 控件用
+  /** 推荐范围（保守/推荐/激进）：数值项派生快捷选项 chips，字符串项显示参考文案提示 */
   range?: { conservative: number|string; recommended: number|string; aggressive: number|string; unit?: string };
   /** 由硬件/场景计算默认值；返回 null 表示该上下文下参数不适用 */
   compute: (ctx: GenerateContext) => string | number | boolean | string[] | null;
-  /** 为什么是这个值的中文说明（模板注释文案） */
+  /** 为什么是这个值的中文说明（面板展示用，不写入 conf） */
   comment: string;
-  /** 复制 conf 时的注释行（含单位与注意点），可与 comment 合并 */
-  confComment?: string;
 }
 
 interface GenerateContext {
@@ -59,15 +58,17 @@ interface GenerateContext {
   diskType: 'hdd' | 'ssd' | 'nvme';
   scenario: 'cache' | 'session' | 'queue' | 'mixed';
   persistence: 'rdb' | 'aof' | 'both' | 'off';
-  version: '7.0' | '7.2' | '7.4' | '8.0';
+  version: '7.0' | '7.2' | '7.4' | '8.0' | '8.2' | '8.4';
   concurrency: number;               // 并发连接预估
   masterAddr?: string;               // 主从模式必填
+  listenScope: 'all' | 'loopback' | 'intranet';  // 监听范围（驱动 bind 推荐值）
+  bindIp: string;                    // 仅内网监听时的绑定 IP
   /** 用户覆盖值：key → value；compute 只在无覆盖时生效 */
   overrides: Record<string, string | number | boolean | string[]>;
 }
 ```
 
-**版本比较**：`version.ts` 里 `VERSION_ORDER = { 'pre-7': -1, '7.0': 0, '7.2': 1, '7.4': 2, '8.0': 3 }`；
+**版本比较**：`version.ts` 里 `VERSION_ORDER = { 'pre-7': -1, '7.0': 0, '7.2': 1, '7.4': 2, '8.0': 3, '8.2': 4, '8.4': 5 }`（8.2/8.4 为 2026-08-29 二轮反馈扩容，官方 release notes 核对无本工具参数集的注册表增删，行为同 8.0）；
 `isAvailable(param, version) = ORDER[param.introducedIn] <= ORDER[version] && !(param.deprecatedIn && ORDER[param.deprecatedIn] <= ORDER[version])`。
 已废弃但被选中的旧名参数：面板显示 `deprecatedIn 废弃 → replacedBy`，渲染时不写入 conf。
 
@@ -76,7 +77,7 @@ interface GenerateContext {
 `generateConf(params, ctx): ConfLine[]`，`ConfLine = { type: 'comment' | 'directive' | 'blank'; text: string; paramKey?: string }`。
 
 - 分组顺序固定（网络 → 内存 → RDB → AOF → 编码 → 复制 → 安全 → 缓冲 → 观测 → Lazy Free → 键空间），组间空行 + 组标题注释。
-- 每个参数输出 1 行中文注释（"为什么"）+ 1 行 `key value`；值来自 `overrides` 优先、否则 `compute(ctx)`。
+- 每个参数仅输出 `key value` 指令行，不输出逐参数注释（面板已带中文说明，产物保持纯净，2026-08-29 用户反馈）；值来自 `overrides` 优先、否则 `compute(ctx)`。
 - `compute` 返回 null 的参数（如单机模式的复制组）整段跳过。
 - 渲染函数不感知 Vue，输出行数组由 `ConfigPreview.vue` 展示、由下载/复制序列化——同一份数据两条消费路径，保证"所见即所得"。
 
@@ -87,21 +88,22 @@ interface GenerateContext {
 - `maxclients`：`min(concurrency × 1.5 向上取整, 系统提示值)`，注释提示与 nofile 联动。
 - `io-threads`：cpuCores ≥ 4 时 2，≥ 8 时 4，否则 1；`io-threads-do-reads` 恒 no（官方注释"读线程通常无收益"）。
 - `appendonly` / `appendfsync`：persistence 映射（both/aof → yes + everysec；off → no）。
-- `save`：场景映射（cache 稀疏 `300 1 60 10000` 之类；queue/session 密集）。
+- `bind`：监听范围映射——loopback → `127.0.0.1 -::1`；intranet → `bindIp.trim()`（未填暂不输出，面板必填校验兜底）；all → 不输出 bind 行（等价监听所有网卡，须配 requirepass 才能安全远程）。
+- `save`：场景映射（cache 稀疏 `300 1 60 10000` 之类；queue/session 密集）；persistence=off 时返回 `""`，conf 输出 `save ""` 显式关闭快照——省略该行时编译期默认阈值仍生效。`save` 下拉的"关闭自动快照"选项值同为字面 `""`；**所有 select 选项值禁止空串**（reka-ui SelectItem 空串 value 抛错，曾导致 RDB 快照组面板不可交互，2026-08-29 二轮反馈修复）。
 - `auto-aof-rewrite-min-size`：memoryGB ≥ 16 → 512mb，否则 64mb。
 - `timeout`：session → 300，其余 0。
 - `tcp-backlog`：concurrency ≥ 2000 → 2048（并联动 sysctl somaxconn 提示），否则 511。
 - `repl-backlog-size`：memoryGB ≥ 8 → 64mb，否则 16mb。
 - `notify-keyspace-events`：session → `Ex`，其余空（注释按键位说明）。
-- 密码（requirepass/masterauth）：`crypto.getRandomValues` 生成 24 字符 base64url，仅用户点"生成"时填充，纯本地。
+- 密码（requirepass/masterauth）：`crypto.getRandomValues` 生成 24 字符 base64url，纯本地；生成函数提取到 `redis-config/secret.ts`（`generatePassword()`，ParamRow 与主组件共用）。主组件挂载时若 overrides.requirepass 未设置则自动生成一次写入，保证默认 conf 含 `requirepass <密码>`（2026-08-29 二轮反馈）；"生成"按钮仍可重新生成，数据层 createDefaultContext 保持确定性不掺随机值。
 
-UI 默认画像：2 核 / 4GB / SSD / 缓存 / RDB / 7.4 / 并发 500 / 单机——打开即生成合法 conf（验收要求"打开即用"）。
+UI 默认画像：2 核 / 4GB / SSD / 缓存 / RDB+AOF 混合 / 7.4 / 并发 500 / 单机——打开即生成合法 conf（验收要求"打开即用"）。
 
 ## 组件与交互
 
 - `RedisConfigGenerator.vue`：持有 `GenerateContext` reactive 状态（`overrides` 用 `Record`），computed 驱动 `generateConf`；上下分两栏（`md:` 以下纵向堆叠）。
-- 左栏 `ControlPanel` + 分组参数列表（每组 `ParamRow`）；右栏 `ConfigPreview`（行号 + 注释灰显 + 变动行 200ms 高亮，`paramKey` 对应）+ 底部操作条（复制 `useCopy` + toastStore 反馈；下载 `Blob` + `URL.createObjectURL`，文件名 `redis.conf`）。
-- 控件直接用 shadcn-vue 原语（Select / Slider / Switch / Checkbox / Input / Button / Collapsible）；推荐项在下拉内加"推荐"标记。`ScopeSlider` 是本工具私有形态组件。
+- 布局三区块：`ControlPanel` → 产物区（`ConfigPreview` + `SysctlPanel` + 免责声明）→ 分组参数单卡清单。移动端纵向排列（flex-col），预览紧随快速配置、在分组清单之前（改完即见）；桌面 `lg:grid-cols-2`：左列 = 快速配置（r1）+ 分组清单（r2），右列产物区 `lg:row-span-2` + `lg:sticky lg:top-0`。分组合并为单卡 `divide-y` 行式清单（首末行 hover 圆角），全部默认收起——推荐值打开即可用，展开仅为微调（2026-08-29 三/四轮反馈）。
+- 控件直接用 shadcn-vue 原语（Select / Switch / Checkbox / Input / Button / Collapsible）；数值控件用私有 `NumberField`（数字输入框 + 推荐快捷选项 chips）；推荐项在下拉内加"推荐"标记。下拉选项文本对齐由共享 `SelectListbox` 的 `itemAlign` 控制（left/center/right，默认 left——2026-08-29 二轮反馈前固定居中，属全站共享组件的向后兼容扩展）。
 - 版本徽章 / 废弃提示用轻量 span + tooltip（原生 title 或简单 CSS，不引新依赖）。
 - 状态不进全局 store（无跨岛共享需求），刷新即重置——配置生成器无持久化必要。
 

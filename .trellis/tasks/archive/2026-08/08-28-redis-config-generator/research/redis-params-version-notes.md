@@ -233,3 +233,17 @@ allkeys-lru  / allkeys-lfu  / allkeys-random  / noeviction
 5. `appendonly` 在 7.0 有 `DENY_LOADING_CONFIG` flag、7.2 起移除——运行期语义微调，不影响生成器输出，仅备注。
 6. 8.0 `redis-full.conf` 的组件参数（search-*、time-series、probabilistic）未纳入本次清单，属独立范围。
 7. alias 参数的兼容范围以 7.0-8.0 为准；更早版本（≤6.x）下新名不可用，生成器按目标版本选择名字时注意（见 §1 表头约定）。
+
+## 3. 8.2 / 8.4（2026-08-29 增补）
+
+版本轴按用户反馈扩容至 8.2 / 8.4（2026-08-29 二轮反馈）。核对来源为 redis.io 官方 release notes 页（已验证可访问）：
+
+- 8.2：https://redis.io/docs/latest/operate/oss_and_stack/stack-with-enterprise/release-notes/redisce/redisos-8.2-release-notes/
+- 8.4：同目录 `redisos-8.4-release-notes/`
+
+### 结论
+
+- **GA 时间**：8.2 于 2025-08 GA；8.4 已 GA（核对时当前点版本 8.4.2）。
+- **变更集中于命令层与指标，不涉及本工具收录的经典配置参数注册表**：8.2/8.4 新增能力为命令层扩展（XDELEX / XACKDEL 流删除命令、DIGEST / DELEX 哈希摘要与条件删除、SET 命令扩展、BITOP 新算子等）与新增指标，本工具收录的约 60 个经典 conf 参数在 8.2/8.4 **无增删、无改名、无默认值变更**。
+- **io-threads-do-reads 维持 deprecatedIn '8.0'**：8.0 起废弃无效的状态延续到 8.2/8.4，无需新增标注。
+- **生成器行为**：8.2/8.4 行为等同 8.0——不新增 introducedIn/deprecatedIn 标注，仅扩容版本序数（8.2=4、8.4=5），版本过滤逻辑自然沿用。
