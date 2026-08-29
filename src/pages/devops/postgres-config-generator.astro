@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import PostgreSQLConfigGenerator from '../../tools/devops/PostgreSQLConfigGenerator.vue';
+---
+
+<ToolLayout toolId="devops/postgres-config-generator">
+  <PostgreSQLConfigGenerator client:idle />
+</ToolLayout>

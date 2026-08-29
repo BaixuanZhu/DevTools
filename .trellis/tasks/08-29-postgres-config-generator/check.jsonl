@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "检查三绿、测试位置、冒烟纪律执行情况"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "检查 any/路径别名/JSDoc 合规"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "检查共享组件契约落地与 redis/mysql 回归"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "检查 toast/store 使用合规"}
+{"file": ".trellis/tasks/08-29-postgres-config-generator/research/postgres-params-version-notes.md", "reason": "抽查生成 conf 与 OS 建议是否与官方核对结论一致"}

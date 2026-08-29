@@ -124,4 +124,18 @@ export const PARAM_UNITS: Record<string, string> = {
   slave_parallel_workers: '线程',
   replica_parallel_workers: '线程',
   long_query_time: '秒',
+  // postgres（下划线小写键；port/max_connections 复用 mysql 已有键，不重复列出）
+  superuser_reserved_connections: '连接',
+  shared_buffers: 'MB',
+  effective_cache_size: 'MB',
+  work_mem: 'MB',
+  maintenance_work_mem: 'MB',
+  max_wal_size: 'MB',
+  min_wal_size: 'MB',
+  wal_keep_size: 'MB',
+  max_worker_processes: '进程',
+  max_parallel_workers: '进程',
+  max_parallel_workers_per_gather: '进程',
+  autovacuum_max_workers: '进程',
+  io_workers: '进程',
 };
