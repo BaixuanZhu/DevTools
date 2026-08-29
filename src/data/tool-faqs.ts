@@ -568,6 +568,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '单个 sitemap.xml 最多 <strong>50,000 条 URL</strong> 且压缩前不超过 <strong>50MB</strong>。超出需拆分为多个 sitemap 并用 sitemap index 引用（本工具暂不支持 index，可手工拆分）。',
     },
   ],
+  'redis-config-generator': [
+    {
+      question: '生成的配置能直接用于生产环境吗？',
+      answer: '可以作为<strong>起点</strong>使用。生成值按你填写的硬件画像与场景计算，覆盖了绝大多数部署的合理默认，但输出为参考值，上线前请结合 <code>INFO</code>、慢查询日志与监控数据持续调整，重要变更先在预发环境验证。',
+    },
+    {
+      question: '为什么生成的参数值和我的生产配置不一样？',
+      answer: '参数值与<strong>硬件、场景、持久化策略、并发预估</strong>强相关。例如开启持久化时 maxmemory 只取物理内存的 60%（给 fork 写时复制留余量），队列场景强制 noeviction 防止淘汰丢数据。调整左侧画像即可看到对应变化，也支持逐参数覆盖。',
+    },
+    {
+      question: '参数旁边的版本徽章是什么意思？',
+      answer: '徽章表示该参数<strong>自对应版本起引入</strong>（如 <code>7.2+</code>）。切换目标版本时，晚于该版本引入的参数会自动隐藏，已废弃的参数（如 8.0 起无效的 <code>io-threads-do-reads</code>）会显示废弃提示且不写入配置文件。',
+    },
+    {
+      question: '我填写的密码和配置会上传到服务器吗？',
+      answer: '不会。工具<strong>纯浏览器端运行</strong>，全部计算与"生成"按钮的密码创建（基于 <code>crypto.getRandomValues</code>）都在本地完成，不经任何网络传输；生成的配置仅在下载或复制时由你带走。',
+    },
+  ],
   'toml-json-converter': [
     {
       question: 'TOML 和 JSON 有什么区别？',

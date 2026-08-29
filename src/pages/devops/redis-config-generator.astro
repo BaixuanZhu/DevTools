@@ -1,0 +1,8 @@
+---
+import ToolLayout from '../../layouts/ToolLayout.astro';
+import RedisConfigGenerator from '../../tools/devops/RedisConfigGenerator.vue';
+---
+
+<ToolLayout toolId="devops/redis-config-generator">
+  <RedisConfigGenerator client:idle />
+</ToolLayout>
