@@ -16,6 +16,7 @@
  * - null   参数在该上下文不适用（整行隐藏、conf 不输出，如单机模式的复制组）
  * - ''     参数适用但当前值为空（行显示、conf 略过指令，如 bind-address 待填 IP）
  */
+import type { ConfigParamBase, ParamValue } from '../../../components/config/types';
 import type { MysqlVersion } from './version';
 import {
   computeAuthenticationPlugin,
@@ -33,7 +34,7 @@ import {
   computeTransactionIsolation,
 } from './compute';
 
-/** 参数控件类型 */
+/** 参数控件类型（字段已由共享 ConfigParamBase 的 control 并集承载，此别名保留为该并集的 mysql 形态） */
 export type ControlKind = 'select' | 'number' | 'switch' | 'text';
 
 /** 参数分组 ID（顺序即 conf 输出顺序，见 PARAM_GROUPS） */
@@ -48,8 +49,8 @@ export type ParamGroupId =
   | 'auth'
   | 'slowlog';
 
-/** 参数值类型（overrides 与 compute 的统一载荷） */
-export type ParamValue = string | number | boolean | string[];
+/** 参数值类型与推荐范围：共享定义 re-export（保持既有 import 路径不变） */
+export type { ParamValue, ParamRange } from '../../../components/config/types';
 
 /** 枚举选项（select 用），label 附中文说明 */
 export interface ParamOption {
@@ -57,16 +58,6 @@ export interface ParamOption {
   value: string;
   /** 显示文本 + 中文说明 */
   label: string;
-}
-
-/** 推荐范围（保守/推荐/激进）：数值项派生快捷选项 chips，字符串项显示参考文案 */
-export interface ParamRange {
-  /** 保守值（数值或描述文案） */
-  conservative: number | string;
-  /** 推荐值 */
-  recommended: number | string;
-  /** 激进值 */
-  aggressive: number | string;
 }
 
 /**
@@ -97,38 +88,25 @@ export interface GenerateContext {
   overrides: Record<string, ParamValue>;
 }
 
-/** conf 指令参数（单个 ConfigParam 的完整定义） */
-export interface ConfigParam {
-  /** 参数名（写入 conf 的 key，用系统变量下划线拼写） */
-  key: string;
+/**
+ * conf 指令参数（单个 ConfigParam 的完整定义）。
+ * 基础字段（key/comment/control/options/min/max/step/range/replacedBy 等）继承共享
+ * ConfigParamBase（src/components/config/types.ts），此处仅保留工具专有字段
+ * 与窄化到 MySQL 版本枚举的版本标注。
+ */
+export interface ConfigParam extends ConfigParamBase {
   /** 所属分组 */
   group: ParamGroupId;
   /** 引入版本（轴点安全方向：补丁级新名一律标 '8.4'） */
   introducedIn: MysqlVersion;
   /** 废弃/从轴上移除的版本（含改名对旧名的 8.4 移除） */
   deprecatedIn?: MysqlVersion;
-  /** 替代参数 key（废弃提示用） */
-  replacedBy?: string;
   /** 官方文档链接（dev.mysql.com/doc/refman，取该参数最相关版本的锚点页） */
   docUrl: string;
-  /** 控件类型 */
-  control: ControlKind;
-  /** 枚举选项（select 用） */
-  options?: ParamOption[];
-  /** 数值输入最小值（失焦 clamp 下界） */
-  min?: number;
-  /** 数值输入最大值（失焦 clamp 上界） */
-  max?: number;
-  /** 数值输入步长（透传 input，供方向键增量） */
-  step?: number;
   /** 数值写入 conf 时追加的单位后缀（如内存尺寸 'M'） */
   valueSuffix?: string;
-  /** 推荐范围（数值参数可选；server_id 等无"档位"语义的参数不设） */
-  range?: ParamRange;
   /** 由硬件/场景/模式计算默认值；返回 null 表示该上下文下参数不适用 */
   compute: (ctx: GenerateContext) => ParamValue | null;
-  /** 为什么是这个值的中文说明（仅面板展示，不写入 conf） */
-  comment: string;
 }
 
 /** 参数分组元数据（conf 输出顺序固定） */
@@ -746,27 +724,8 @@ export function getParam(key: string): ConfigParam | undefined {
   return CONFIG_PARAMS.find((p) => p.key === key);
 }
 
-/** 数值参数的单位后缀（NumberField 输入框旁展示用，key → 单位文案；未列出则不带单位） */
-export const PARAM_UNITS: Record<string, string> = {
-  port: '端口',
-  max_connections: '连接',
-  wait_timeout: '秒',
-  max_allowed_packet: 'MB',
-  innodb_buffer_pool_size: 'MB',
-  innodb_buffer_pool_instances: '个',
-  query_cache_size: 'MB',
-  ngram_token_size: '字符',
-  innodb_ft_min_token_size: '字符',
-  innodb_log_file_size: 'MB',
-  innodb_redo_log_capacity: 'MB',
-  innodb_io_capacity: 'IOPS',
-  innodb_io_capacity_max: 'IOPS',
-  binlog_expire_logs_seconds: '秒',
-  expire_logs_days: '天',
-  slave_parallel_workers: '线程',
-  replica_parallel_workers: '线程',
-  long_query_time: '秒',
-};
+/** 数值参数的单位后缀词汇表（redis 与 mysql 键全量合并后上浮共享层，此处 re-export 保持既有 import 路径） */
+export { PARAM_UNITS } from '../../../components/config/types';
 
 /** 场景选项中文标签（conf 头部注释与 ControlPanel 共用） */
 export const SCENARIO_LABELS: Record<GenerateContext['scenario'], string> = {

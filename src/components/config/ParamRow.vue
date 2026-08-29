@@ -1,35 +1,52 @@
 <script setup lang="ts">
 /**
- * 参数行控件（本工具私有）：按参数定义渲染 5 种控件之一，
- * 附参数名、版本徽章、官方文档链接、中文说明与单参重置；
+ * 参数行控件（配置生成器系列共享，redis/mysql 两版超集合并）：
+ * 按参数定义渲染 5 种控件之一，附参数名、版本徽章、官方文档链接、中文说明与单参重置；
  * 目标版本下已废弃的参数渲染为"废弃提示行"（不渲染控件、不写 conf）。
+ *
+ * 徽章基线由 baselineVersion prop 决定（redis 'pre-7' / mysql '5.7' / pg '16'），
+ * 与基线相同的引入版本不显示徽章（全表同版本时徽章是噪音）。
+ * 密码类参数（param.secret 且 enableSecret）点击"生成"仅 emit generate-secret，
+ * 随机生成逻辑（crypto.getRandomValues）留在各工具页面侧，本组件不感知实现。
+ * 版本可用性判断不进本组件——父层据引擎 isAvailable 决定渲染还是传 deprecated。
  */
 import { computed } from 'vue';
-import type { ConfigParam, ParamValue } from '../params';
-import { PARAM_UNITS } from '../params';
-import type { TargetVersion } from '../version';
-import { generatePassword } from '../secret';
-import SelectListbox from '../../../../components/ui/SelectListbox.vue';
-import ToggleSwitch from '../../../../components/ui/ToggleSwitch.vue';
+import type { ConfigParamBase, ParamValue } from './types';
+import { PARAM_UNITS } from './types';
+import SelectListbox from '../ui/SelectListbox.vue';
+import ToggleSwitch from '../ui/ToggleSwitch.vue';
 import NumberField from './NumberField.vue';
 import type { NumberQuickOption } from './NumberField.vue';
 
 const props = withDefaults(
   defineProps<{
-    /** 参数定义 */
-    param: ConfigParam;
+    /** 参数定义（共享基类形态；工具侧 extends 携带 group/compute 等额外字段） */
+    param: ConfigParamBase;
     /** 当前生效值（override ?? compute；废弃行可为 null） */
     value: ParamValue | null;
     /** 当前上下文的 compute 推荐值（下拉"推荐"标记依据） */
     recommended: ParamValue | null;
-    /** 目标版本（版本徽章 title 用） */
-    version: TargetVersion;
+    /** 目标版本（版本枚举的字符串形态，随页面上下文传入） */
+    version: string;
+    /** 徽章基线版本：introducedIn 与之相同则不显示徽章 */
+    baselineVersion: string;
     /** 用户是否覆盖了推荐值 */
     hasOverride: boolean;
     /** 是否渲染为废弃提示行 */
     deprecated?: boolean;
+    /** 是否启用密码类参数的"生成"按钮（需同时 param.secret；点击 emit generate-secret） */
+    enableSecret?: boolean;
+    /** 工具名（版本徽章 title 前缀，如 'Redis' / 'MySQL'；缺省不加前缀） */
+    productLabel?: string;
+    /** 文本输入占位文案（缺省"未设置"；工具专有提示由页面按参数传入） */
+    placeholder?: string;
   }>(),
-  { deprecated: false },
+  {
+    deprecated: false,
+    enableSecret: false,
+    productLabel: undefined,
+    placeholder: undefined,
+  },
 );
 
 const emit = defineEmits<{
@@ -37,10 +54,19 @@ const emit = defineEmits<{
   update: [value: ParamValue];
   /** 恢复该参数为推荐值 */
   reset: [];
+  /** 生成随机密码（仅密码类参数的"生成"按钮触发，由页面侧生成并写回） */
+  'generate-secret': [];
 }>();
 
-/** 7.0+ 引入的参数显示版本徽章 */
-const badge = computed(() => (props.param.introducedIn === 'pre-7' ? null : props.param.introducedIn));
+/** 与徽章基线相同的引入版本不显示徽章 */
+const badge = computed(() =>
+  props.param.introducedIn === props.baselineVersion ? null : props.param.introducedIn,
+);
+
+/** 徽章无障碍提示：productLabel 缺省时省略工具名前缀 */
+const badgeTitle = computed(() =>
+  `${props.productLabel ? `${props.productLabel} ` : ''}${props.param.introducedIn} 起引入`,
+);
 
 /** select 选项：给推荐项追加"（推荐）"标记 */
 const selectOptions = computed(() =>
@@ -177,7 +203,7 @@ function onSwitchChange(value: boolean): void {
       <span
         v-if="badge"
         class="rounded-full border border-info/40 bg-info/10 px-1.5 py-px text-[0.625rem] font-medium leading-none text-info"
-        :title="`Redis ${badge} 起引入`"
+        :title="badgeTitle"
       >{{ badge }}+</span>
       <span v-if="hasOverride" class="text-[0.625rem] leading-none text-muted-foreground">已自定义</span>
       <button
@@ -248,22 +274,22 @@ function onSwitchChange(value: boolean): void {
         </label>
       </div>
 
-      <!-- 文本（密码类附本地生成按钮） -->
+      <!-- 文本（密码类附"生成"按钮，密码生成经 generate-secret 事件交页面侧处理） -->
       <div v-else class="flex gap-2">
         <input
           type="text"
           :value="textValue"
           :aria-label="param.key"
-          :placeholder="param.key === 'replicaof' ? '如 10.0.0.5 6379' : '未设置（留空则不写入 conf）'"
+          :placeholder="placeholder ?? '未设置（留空则不写入 conf）'"
           class="w-full min-w-0 rounded-sm border border-border bg-card px-3 py-1.5 font-mono text-sm text-foreground outline-none transition-[border-color] duration-150 focus:border-primary"
           @input="emit('update', ($event.target as HTMLInputElement).value)"
         />
         <button
-          v-if="param.secret"
+          v-if="enableSecret && param.secret"
           type="button"
           class="shrink-0 rounded-sm border border-border bg-card px-2.5 text-[0.8125rem] text-muted-foreground transition-[background-color,color] duration-150 hover:bg-accent hover:text-foreground"
           title="本地生成 24 位随机密码（crypto.getRandomValues，不经网络）"
-          @click="emit('update', generatePassword())"
+          @click="emit('generate-secret')"
         >
           生成
         </button>

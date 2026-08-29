@@ -13,8 +13,8 @@ import { CollapsibleRoot, CollapsibleTrigger, CollapsibleContent } from 'reka-ui
 import { ChevronDown } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ControlPanel from './redis-config/components/ControlPanel.vue';
-import ParamRow from './redis-config/components/ParamRow.vue';
-import ConfigPreview from './redis-config/components/ConfigPreview.vue';
+import ParamRow from '../../components/config/ParamRow.vue';
+import ConfigPreview from '../../components/config/ConfigPreview.vue';
 import SysctlPanel from './redis-config/components/SysctlPanel.vue';
 import {
   CONFIG_PARAMS,
@@ -134,7 +134,13 @@ const sysctlItems = computed(() => {
 
       <!-- 产物区：移动端紧随快速配置（微调分组之后置，保住"改完即见"的反馈闭环）；桌面右栏跨两行 sticky -->
       <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:row-span-2">
-        <ConfigPreview :lines="lines" @download="handleDownload" @reset="resetAll" />
+        <ConfigPreview
+          :lines="lines"
+          label="redis.conf"
+          :copy-text="serializeConf(lines)"
+          @download="handleDownload"
+          @reset="resetAll"
+        />
 
         <SysctlPanel :items="sysctlItems" />
 
@@ -172,10 +178,15 @@ const sysctlItems = computed(() => {
                   :value="currentValueOf(param)"
                   :recommended="recommendedOf(param)"
                   :version="ctx.version"
+                  baseline-version="pre-7"
+                  product-label="Redis"
+                  enable-secret
+                  :placeholder="param.key === 'replicaof' ? '如 10.0.0.5 6379' : undefined"
                   :has-override="ctx.overrides[param.key] !== undefined"
                   :deprecated="deprecatedOf(param)"
                   @update="(v) => updateParam(param, v)"
                   @reset="resetParam(param)"
+                  @generate-secret="updateParam(param, generatePassword())"
                 />
               </div>
             </CollapsibleContent>

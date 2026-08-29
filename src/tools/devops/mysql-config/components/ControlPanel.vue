@@ -13,7 +13,7 @@ import type { GenerateContext } from '../params';
 import { SCENARIO_LABELS } from '../params';
 import { TARGET_VERSIONS } from '../version';
 import OptionRadioGroup from '../../../../components/ui/OptionRadioGroup.vue';
-import NumberField from './NumberField.vue';
+import NumberField from '../../../../components/config/NumberField.vue';
 
 const props = defineProps<{
   /** 生成上下文（reactive，直接改属性） */

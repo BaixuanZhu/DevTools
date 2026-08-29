@@ -13,8 +13,8 @@ import { CollapsibleRoot, CollapsibleTrigger, CollapsibleContent } from 'reka-ui
 import { ChevronDown } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
 import ControlPanel from './mysql-config/components/ControlPanel.vue';
-import ParamRow from './mysql-config/components/ParamRow.vue';
-import ConfigPreview from './mysql-config/components/ConfigPreview.vue';
+import ParamRow from '../../components/config/ParamRow.vue';
+import ConfigPreview from '../../components/config/ConfigPreview.vue';
 import AdvicePanel from './mysql-config/components/AdvicePanel.vue';
 import {
   CONFIG_PARAMS,
@@ -138,7 +138,13 @@ const replicationHint = computed(() =>
 
       <!-- 产物区：移动端紧随快速配置（微调分组之后置，保住"改完即见"的反馈闭环）；桌面右栏跨两行 sticky -->
       <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:row-span-2">
-        <ConfigPreview :lines="lines" @download="handleDownload" @reset="resetAll" />
+        <ConfigPreview
+          :lines="lines"
+          label="my.cnf"
+          :copy-text="serializeConf(lines)"
+          @download="handleDownload"
+          @reset="resetAll"
+        />
 
         <AdvicePanel :items="osAdviceItems" :replication-hint="replicationHint" />
 
@@ -176,6 +182,9 @@ const replicationHint = computed(() =>
                   :value="currentValueOf(param)"
                   :recommended="recommendedOf(param)"
                   :version="ctx.version"
+                  baseline-version="5.7"
+                  product-label="MySQL"
+                  :placeholder="param.key === 'bind_address' ? '如 10.0.0.5（留空则不写入 conf）' : undefined"
                   :has-override="ctx.overrides[param.key] !== undefined"
                   :deprecated="deprecatedOf(param)"
                   @update="(v) => updateParam(param, v)"
