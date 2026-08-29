@@ -586,6 +586,28 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '不会。工具<strong>纯浏览器端运行</strong>，全部计算与"生成"按钮的密码创建（基于 <code>crypto.getRandomValues</code>）都在本地完成，不经任何网络传输；生成的配置仅在下载或复制时由你带走。',
     },
   ],
+  'mysql-config-generator': [
+    {
+      question: '生成的推荐值能直接用于生产环境吗？',
+      answer: '可以作为<strong>起点</strong>使用。生成值按你填写的内存、磁盘、场景与并发画像计算，打开即是合法可用的 my.cnf，但输出为参考值，上线前请结合 <code>SHOW STATUS</code>、慢查询日志与监控数据持续调整，重要变更先在预发环境验证。',
+    },
+    {
+      question: '为什么没有密码、root 等账号配置项？',
+      answer: 'my.cnf <strong>不管理账号与密码</strong>——账号创建与授权属 SQL 层（<code>CREATE USER</code> / <code>GRANT</code>），密码不应以明文形式写入配置文件。监听范围放开远程后，请用账号的 HOST 限定来源网段（如 <code>CREATE USER ... @\'10.0.0.%\'</code>）替代网络层的粗放放行。',
+    },
+    {
+      question: '为什么没有 sql_mode 和 lower_case_table_names 配置项？',
+      answer: '两者都是<strong>改动风险大于收益</strong>的参数：显式覆盖 <code>sql_mode</code> 极易破坏既有 SQL（如 ONLY_FULL_GROUP_BY 引发的报错）；<code>lower_case_table_names</code> 在 MySQL 8.0 初始化后改值服务器会<strong>直接拒绝启动</strong>，必须在初始化前确定。如需调整请查阅官方文档并在初始化阶段决策。',
+    },
+    {
+      question: '版本徽章与"废弃 → 替代参数"提示是什么意思？',
+      answer: '徽章表示该参数<strong>自对应轴点版本起引入</strong>（如 <code>8.0+</code>）。切换目标版本时，晚于该版本引入的参数自动隐藏，已废弃/改名的参数显示"废弃 → 替代"提示且不写入配置文件（如 5.7 输出 <code>tx_isolation</code>、8.0 起改用 <code>transaction_isolation</code>）。补丁级引入的新名参数只在 8.4 轴输出，避免 8.0 早期补丁版因未知变量启动失败。',
+    },
+    {
+      question: '配置了 ngram 参数，中文全文搜索为什么还是搜不到？',
+      answer: 'conf 里的 <code>ngram_token_size</code> 只是<strong>服务器级默认分词长度</strong>——FULLTEXT 索引必须显式用 <code>FULLTEXT ... WITH PARSER ngram</code> 建才走中文分词。已有索引改用分词器需要重建：<code>ALTER TABLE ... ADD FULLTEXT INDEX ... WITH PARSER ngram</code>。没有 ngram parser 的索引仍按默认规则切词，中文按整句处理自然搜不到。',
+    },
+  ],
   'toml-json-converter': [
     {
       question: 'TOML 和 JSON 有什么区别？',

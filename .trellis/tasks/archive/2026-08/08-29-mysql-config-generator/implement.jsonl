@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "pages↔tools 目录对称 + 私有目录 engine 模式（组件不上浮全局的边界）"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "三层状态模型与'画像字段 vs 覆盖值'边界——GenerateContext/listenScope/overrides 设计依据"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "reka-ui SelectItem 空串 value 抛错等既有坑 + 共享 ui API 冻结原则"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TS strict 收窄模式（union setter、InstanceType 坑、无路径别名）"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "三验证门 + happy-dom 测试纪律（afterEach unmount）+ Security Rules"}
+{"file": ".trellis/tasks/08-29-mysql-config-generator/research/mysql-params-version-notes.md", "reason": "版本矩阵基准：5.7→8.0→8.4 移除/改名清单与逐参数核对清单，注册表定稿依据"}
