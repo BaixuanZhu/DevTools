@@ -63,6 +63,14 @@ pnpm build         # 生产构建成功（当前 70 页）
 - 数据层不变量测试防回归（实例：`params.test.ts` 遍历断言"所有 select 选项值非空串"）
 - conf 类产物用"打开即用"快照断言 + 分场景指令断言（`generate.test.ts`）
 
+### 浏览器冒烟（agent-browser，三门全绿后仍必做）
+
+单测证明逻辑正确，冒烟证明**水合后行为**正确（SSR 岛屿 hydration 后才有的问题单测测不到）。两条踩过的坑：
+
+- **`AGENT_BROWSER_SESSION` 不跨命令持久**——每条 Bash 都是独立 shell，漏 export 会静默落回默认共享 session 的空白页：症状是 snapshot 有内容、`eval` 读到 `about:blank` / `document.body.textContent` 为空。每条命令都写全 `export AGENT_BROWSER_SESSION="$(agent-browser session id --scope worktree --prefix task)" && ...`
+- **本站壳层滚动在内部容器**——window 滚动 / fullPage 截图无效，须 `document.querySelectorAll('div.overflow-y-auto')[1].scrollTop = N`（第二个匹配才是滚动容器）
+- 交互后读 Vue 渲染结果要异步等一拍再断言（同步读发生在响应式 flush 之前）；区分"conf 指令行"与"面板提示文案"用 `/^key\s*=/m` 而非 includes（废弃参数的替代提示文案里含新参数名）
+
 ---
 
 ## Code Review Checklist
