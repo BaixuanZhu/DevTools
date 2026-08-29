@@ -1,6 +1,5 @@
 import { ref } from 'vue';
 import type { Ref } from 'vue';
-// @ts-expect-error vue-sonner 运行时存在 toast 导出，类型声明缺失
 import { toast as sonnerToast } from 'vue-sonner';
 
 /**
