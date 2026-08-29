@@ -32,19 +32,22 @@ describe('generateConf — 打开即用（默认画像快照断言）', () => {
     expect(d).toContain('maxmemory-policy allkeys-lru');
     expect(d).toContain('maxclients 1000');
     expect(d).toContain('save 300 1 60 10000');
-    expect(d).toContain('appendonly no');
+    expect(d).toContain('appendonly yes');
     expect(d).toContain('appendfsync everysec');
+    expect(d).toContain('aof-use-rdb-preamble yes');
     expect(d).toContain('databases 16');
     expect(d).toContain('io-threads 1');
     expect(d).toContain('tcp-backlog 511');
   });
 
-  it('默认（7.4）包含 7.0+ 参数且含每个参数的中文注释行', () => {
+  it('默认（7.4）包含 7.0+ 参数且产物不含逐参数注释', () => {
     const d = directives(lines);
     expect(d).toContain('appenddirname appendonlydir');
     expect(d).toContain('busy-reply-threshold 5000');
     const comments = lines.filter((l) => l.type === 'comment').map((l) => l.text);
-    expect(comments.some((t) => t.startsWith('# 内存上限按物理内存折算'))).toBe(true);
+    expect(comments.some((t) => t.startsWith('# 内存上限按物理内存折算'))).toBe(false);
+    // 仅保留头部元信息与分组标题注释
+    expect(comments.every((t) => t.startsWith('# Redis 配置文件') || t.startsWith('# 目标版本') || t.startsWith('# ============ '))).toBe(true);
   });
 
   it('单机模式不输出任何复制参数', () => {
@@ -88,9 +91,17 @@ describe('generateConf — 版本联动', () => {
     expect(d.some((t) => t.startsWith('hide-user-data-from-log'))).toBe(false);
   });
 
-  it('目标 8.0 时废弃参数 io-threads-do-reads 不写入 conf', () => {
+  it('目标 8.0/8.2/8.4 时废弃参数 io-threads-do-reads 不写入 conf', () => {
     expect(directives(generateConf(ctx({ version: '7.4' })))).toContain('io-threads-do-reads no');
-    expect(directives(generateConf(ctx({ version: '8.0' })))).not.toContain('io-threads-do-reads no');
+    for (const version of ['8.0', '8.2', '8.4'] as const) {
+      expect(directives(generateConf(ctx({ version })))).not.toContain('io-threads-do-reads no');
+    }
+  });
+
+  it('目标 8.4 时 7.2+/7.4+ 参数照常输出（8.2/8.4 参数集同 8.0）', () => {
+    const d = directives(generateConf(ctx({ version: '8.4' })));
+    expect(d).toContain('set-max-listpack-entries 128');
+    expect(d).toContain('hide-user-data-from-log yes');
   });
 
   it('旧名别名（lua-time-limit / ziplist 系）任何版本都不写入 conf', () => {
@@ -137,9 +148,9 @@ describe('generateConf — 覆盖值与上下文联动', () => {
     expect(d.some((t) => t.startsWith('replica-read-only'))).toBe(true);
   });
 
-  it('关闭持久化时不输出 save 指令且 appendonly 为 no', () => {
+  it('关闭持久化时输出 save "" 显式关闭快照且 appendonly 为 no', () => {
     const d = directives(generateConf(ctx({ persistence: 'off' })));
-    expect(d.some((t) => t.startsWith('save'))).toBe(false);
+    expect(d).toContain('save ""');
     expect(d).toContain('appendonly no');
   });
 
@@ -157,6 +168,14 @@ describe('generateConf — 覆盖值与上下文联动', () => {
   it('notify-keyspace-events 非会话场景输出空串，会话场景输出 Ex', () => {
     expect(directives(generateConf(createDefaultContext()))).toContain('notify-keyspace-events ""');
     expect(directives(generateConf(ctx({ scenario: 'session' })))).toContain('notify-keyspace-events "Ex"');
+  });
+
+  it('监听范围联动 bind：仅本机绑回环、仅内网绑指定 IP（trim、未填省略）', () => {
+    expect(directives(generateConf(ctx({ listenScope: 'loopback' })))).toContain('bind 127.0.0.1 -::1');
+    expect(directives(generateConf(ctx({ listenScope: 'intranet', bindIp: ' 10.0.0.5 ' })))).toContain('bind 10.0.0.5');
+    expect(
+      directives(generateConf(ctx({ listenScope: 'intranet', bindIp: ' ' }))).some((t) => t.startsWith('bind')),
+    ).toBe(false);
   });
 
   it('值为空的文本参数（bind/dir/requirepass）不写入 conf', () => {

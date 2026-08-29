@@ -66,7 +66,8 @@ function formatDirective(param: ConfigParam, value: ParamValue): string[] {
 /**
  * 按分组与版本生成完整 conf 行数组。
  * 规则：目标版本已废弃的参数不写入；组内无任何指令时整组（含组标题）跳过；
- * 每个参数先输出 1 行"为什么"注释，再输出指令行。
+ * 仅输出头部元信息注释、分组标题注释与指令行，不输出逐参数注释
+ * （参数说明保留在左侧面板，产物保持纯净）。
  * @param ctx - 生成上下文
  * @returns conf 行数组（头部注释 + 分组内容）
  */
@@ -87,7 +88,6 @@ export function generateConf(ctx: GenerateContext): ConfLine[] {
       if (!isAvailable(param, ctx.version)) continue;
       const value = resolveValue(param, ctx);
       if (value === null) continue;
-      groupLines.push({ type: 'comment', text: `# ${param.comment}` });
       for (const text of formatDirective(param, value)) {
         groupLines.push({ type: 'directive', text, paramKey: param.key });
       }

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 /**
  * ParamRow 组件回归测试：五类控件的变更必须向父层 emit update。
- * 回归背景：曾出现 select/switch/slider 只绑 :model-value 而漏绑
+ * 回归背景：曾出现 select/switch/数值输入只绑 :model-value 而漏绑
  * update 事件监听的缺陷，导致枚举/布尔/数值参数无法被用户覆盖。
  */
 import { describe, it, expect } from 'vitest';
@@ -43,12 +43,29 @@ describe('ParamRow 控件 → update 事件联动', () => {
     expect(wrapper.emitted('update')?.[0]).toEqual([true]);
   });
 
-  it('slider 拖动时 emit update（数值参数可覆盖）', async () => {
+  it('数字输入框输入时 emit update（数值参数可覆盖）', async () => {
     const wrapper = mountRow('timeout', 0);
-    const range = wrapper.find('input[type="range"]');
-    expect(range.exists()).toBe(true);
-    await range.setValue('300');
+    const input = wrapper.find('input[type="number"]');
+    expect(input.exists()).toBe(true);
+    await input.setValue('300');
     expect(wrapper.emitted('update')?.[0]).toEqual([300]);
+  });
+
+  it('quickOptions 由 range 数值项派生，同值档位名合并，点击 emit 值', async () => {
+    const wrapper = mountRow('port', 6379);
+    // port 的保守/推荐均为 6379，label 合并为 "保守/推荐"；激进为 16379
+    expect(wrapper.text()).toContain('保守/推荐 6379');
+    expect(wrapper.text()).toContain('激进 16379');
+    const aggressive = wrapper.findAll('button').find((b) => b.text().includes('16379'));
+    expect(aggressive).toBeDefined();
+    await aggressive!.trigger('click');
+    expect(wrapper.emitted('update')?.[0]).toEqual([16379]);
+  });
+
+  it('range 含字符串项时显示参考文案且不渲染快捷按钮', () => {
+    const wrapper = mountRow('maxmemory', 2048);
+    expect(wrapper.text()).toContain('参考：保守 50% 内存 · 推荐 60%~75% 内存 · 激进 90% 内存');
+    expect(wrapper.findAll('button')).toHaveLength(0);
   });
 
   it('文本输入 emit update（文本参数可覆盖）', async () => {

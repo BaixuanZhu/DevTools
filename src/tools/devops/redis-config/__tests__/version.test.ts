@@ -19,10 +19,13 @@ describe('VERSION_ORDER', () => {
     expect(VERSION_ORDER['7.0']).toBeLessThan(VERSION_ORDER['7.2']);
     expect(VERSION_ORDER['7.2']).toBeLessThan(VERSION_ORDER['7.4']);
     expect(VERSION_ORDER['7.4']).toBeLessThan(VERSION_ORDER['8.0']);
+    expect(VERSION_ORDER['8.0']).toBeLessThan(VERSION_ORDER['8.2']);
+    expect(VERSION_ORDER['8.2']).toBeLessThan(VERSION_ORDER['8.4']);
   });
 
-  it('目标版本轴不含 pre-7', () => {
-    expect(TARGET_VERSIONS).toEqual(['7.0', '7.2', '7.4', '8.0']);
+  it('目标版本轴不含 pre-7，且覆盖 8.2/8.4（2026-08-29 扩容，行为同 8.0）', () => {
+    expect(TARGET_VERSIONS).toEqual(['7.0', '7.2', '7.4', '8.0', '8.2', '8.4']);
+    expect(TARGET_VERSIONS).not.toContain('pre-7');
   });
 });
 
@@ -45,6 +48,12 @@ describe('isAvailable — 按引入版本过滤', () => {
     expect(isAvailable(param, '8.0')).toBe(true);
   });
 
+  it('7.2 引入的 set-max-listpack-entries 在 8.2/8.4 仍可用（无新增废弃）', () => {
+    const param = getParam('set-max-listpack-entries')!;
+    expect(isAvailable(param, '8.2')).toBe(true);
+    expect(isAvailable(param, '8.4')).toBe(true);
+  });
+
   it('7.4 引入的 hide-user-data-from-log 在 7.2 不可用', () => {
     const param = getParam('hide-user-data-from-log')!;
     expect(isAvailable(param, '7.2')).toBe(false);
@@ -65,6 +74,12 @@ describe('isAvailable — 废弃参数排除', () => {
     expect(isAvailable(param, '8.0')).toBe(false);
     expect(param.deprecatedIn).toBe('8.0');
     expect(param.replacedBy).toBeUndefined();
+  });
+
+  it('io-threads-do-reads 在 8.2/8.4 仍不可用（8.0 废弃沿用至轴末）', () => {
+    const param = getParam('io-threads-do-reads')!;
+    expect(isAvailable(param, '8.2')).toBe(false);
+    expect(isAvailable(param, '8.4')).toBe(false);
   });
 
   it('旧名别名 lua-time-limit 在整个目标轴均不可用，登记 replacedBy 溯源', () => {

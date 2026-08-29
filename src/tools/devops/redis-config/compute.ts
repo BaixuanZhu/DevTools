@@ -21,6 +21,18 @@ const AOF_MIN_SIZE_SMALL = 64;
 const AOF_MIN_SIZE_LARGE = 512;
 
 /**
+ * 计算 bind 推荐值：按监听范围映射——仅本机绑回环、仅内网绑指定 IP（未填时暂不输出）、
+ * 所有接口不输出 bind 行（等价监听所有网卡，须配 requirepass 才能安全远程）。
+ * @param ctx - 生成上下文
+ * @returns bind 指令参数串；空串表示不输出该行
+ */
+export function computeBind(ctx: GenerateContext): string {
+  if (ctx.listenScope === 'loopback') return '127.0.0.1 -::1';
+  if (ctx.listenScope === 'intranet') return ctx.bindIp.trim();
+  return '';
+}
+
+/**
  * 计算 maxmemory 默认值（mb）：物理内存 × 系数后向下取整到 GB。
  * 小内存机器取整后不足 1GB 时退到 512mb，避免出现 0。
  * @param ctx - 生成上下文
@@ -74,13 +86,14 @@ export function computeAppendonly(ctx: GenerateContext): boolean {
 }
 
 /**
- * 计算 RDB save 阈值：关闭持久化时返回空串（不输出 save 指令），
- * 否则按场景映射——缓存稀疏、高频写（会话/队列）密集、混合用官方默认。
+ * 计算 RDB save 阈值：关闭持久化时返回字面值 '""'（conf 输出 save "" 显式关闭
+ * 快照——省略该行时编译期默认阈值仍生效），否则按场景映射——缓存稀疏、
+ * 高频写（会话/队列）密集、混合用官方默认。
  * @param ctx - 生成上下文
- * @returns save 指令参数串（如 '3600 1 300 100 60 10000'），空串表示关闭快照
+ * @returns save 指令参数串（如 '3600 1 300 100 60 10000'），'""' 表示显式关闭快照
  */
 export function computeSave(ctx: GenerateContext): string {
-  if (ctx.persistence === 'off') return '';
+  if (ctx.persistence === 'off') return '""';
   switch (ctx.scenario) {
     case 'cache':
       return '300 1 60 10000';

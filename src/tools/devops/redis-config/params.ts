@@ -14,6 +14,7 @@ import type { RedisVersion, TargetVersion } from './version';
 import {
   computeAofMinSizeMB,
   computeAppendonly,
+  computeBind,
   computeIoThreads,
   computeMaxClients,
   computeMaxMemoryMB,
@@ -28,7 +29,7 @@ import {
 } from './compute';
 
 /** 参数控件类型 */
-export type ControlKind = 'select' | 'slider' | 'switch' | 'multi-select' | 'text';
+export type ControlKind = 'select' | 'number' | 'switch' | 'multi-select' | 'text';
 
 /** 参数分组 ID（顺序即 conf 输出顺序，见 PARAM_GROUPS） */
 export type ParamGroupId =
@@ -55,7 +56,7 @@ export interface ParamOption {
   label: string;
 }
 
-/** 推荐范围刻度（ScopeSlider 三段 + 落点）；相对量用字符串，绝对量用数字 */
+/** 推荐范围（保守/推荐/激进）：数值项派生快捷选项 chips，字符串项显示参考文案 */
 export interface ParamRange {
   /** 保守值（数值或描述文案） */
   conservative: number | string;
@@ -87,6 +88,10 @@ export interface GenerateContext {
   concurrency: number;
   /** 主库地址（主从模式必填，格式如 '10.0.0.5 6379'） */
   masterAddr: string;
+  /** 监听范围：驱动 bind 推荐值（快速配置"监听范围"单选） */
+  listenScope: 'all' | 'loopback' | 'intranet';
+  /** 仅内网监听时的绑定 IP（listenScope 为 'intranet' 时必填） */
+  bindIp: string;
   /** 用户覆盖值：key → value；compute 只在无覆盖时生效 */
   overrides: Record<string, ParamValue>;
 }
@@ -109,19 +114,19 @@ export interface ConfigParam {
   control: ControlKind;
   /** 枚举选项（select / multi-select 用） */
   options?: ParamOption[];
-  /** slider 最小值 */
+  /** 数值输入最小值（失焦 clamp 下界） */
   min?: number;
-  /** slider 最大值 */
+  /** 数值输入最大值（失焦 clamp 上界） */
   max?: number;
-  /** slider 步长 */
+  /** 数值输入步长（透传 input，供方向键增量） */
   step?: number;
   /** 数值写入 conf 时追加的单位后缀（如内存尺寸 'mb'） */
   valueSuffix?: string;
-  /** 推荐范围刻度（连续值参数可选） */
+  /** 推荐范围（连续数值参数可选） */
   range?: ParamRange;
   /** 由硬件/场景计算默认值；返回 null 表示该上下文下参数不适用 */
   compute: (ctx: GenerateContext) => ParamValue | null;
-  /** 为什么是这个值的中文说明（conf 注释行 + 面板注释） */
+  /** 为什么是这个值的中文说明（仅面板展示，不写入 conf） */
   comment: string;
   /** 密码类文本参数：控件旁提供"生成"按钮（crypto.getRandomValues 纯本地） */
   secret?: boolean;
@@ -133,7 +138,7 @@ export interface ParamGroupMeta {
   id: ParamGroupId;
   /** 分组标题（conf 组注释与面板标题共用） */
   label: string;
-  /** 面板 Collapsible 是否默认展开（次要组默认收起防面板膨胀） */
+  /** 面板 Collapsible 是否默认展开（推荐值打开即可用，全部默认收起、按需展开微调） */
   defaultOpen: boolean;
 }
 
@@ -173,12 +178,12 @@ const COBL_STRICT = 'normal 256mb 64mb 60\nreplica 256mb 64mb 60\npubsub 32mb 8m
 
 /** 参数分组定义（conf 组顺序固定：网络 → 内存 → RDB → AOF → 编码 → 复制 → 安全 → 缓冲 → 观测 → Lazy Free → 键空间） */
 export const PARAM_GROUPS: ParamGroupMeta[] = [
-  { id: 'network', label: '网络连接', defaultOpen: true },
-  { id: 'memory', label: '内存策略', defaultOpen: true },
-  { id: 'rdb', label: 'RDB 快照', defaultOpen: true },
-  { id: 'aof', label: 'AOF 追加日志', defaultOpen: true },
+  { id: 'network', label: '网络连接', defaultOpen: false },
+  { id: 'memory', label: '内存策略', defaultOpen: false },
+  { id: 'rdb', label: 'RDB 快照', defaultOpen: false },
+  { id: 'aof', label: 'AOF 追加日志', defaultOpen: false },
   { id: 'encoding', label: '数据结构编码', defaultOpen: false },
-  { id: 'replication', label: '复制（主从）', defaultOpen: true },
+  { id: 'replication', label: '复制（主从）', defaultOpen: false },
   { id: 'security', label: '安全', defaultOpen: false },
   { id: 'buffers', label: '客户端缓冲', defaultOpen: false },
   { id: 'observe', label: '观测', defaultOpen: false },
@@ -195,8 +200,8 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
     control: 'text',
-    compute: () => '',
-    comment: '留空则监听所有接口（依赖 protected-mode 拦截外网）；仅本机访问可填 127.0.0.1 -::1',
+    compute: computeBind,
+    comment: '由快速配置"监听范围"驱动，可在此覆盖；留空=监听所有网卡，远程访问靠 requirepass 把门；不要写 0.0.0.0——显式 bind 行会让 protected-mode 失效',
   },
   {
     key: 'protected-mode',
@@ -205,27 +210,27 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     docUrl: DOC_URLS.config,
     control: 'switch',
     compute: () => true,
-    comment: '未配置 bind 与密码时拒绝外部访问；确认内网隔离到位后按需关闭',
+    comment: '仅在"无 bind 行且未设密码"时拦截外部连接；已设 requirepass 后不参与判断，保留 yes 作为清空密码时的兜底',
   },
   {
     key: 'port',
     group: 'network',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 1024,
     max: 65535,
     step: 1,
     range: { conservative: 6379, recommended: 6379, aggressive: 16379 },
     compute: () => 6379,
-    comment: '监听端口，默认 6379；同机多实例需错开',
+    comment: '监听端口，默认 6379；同机多实例需错开；改非标端口可减少扫描暴露面，但认证安全仍依赖 requirepass',
   },
   {
     key: 'tcp-backlog',
     group: 'network',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 128,
     max: 4096,
     step: 64,
@@ -238,7 +243,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'network',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 900,
     step: 15,
@@ -251,7 +256,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'network',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 900,
     step: 30,
@@ -264,7 +269,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'network',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 200,
     max: 40000,
     step: 100,
@@ -277,7 +282,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'network',
     introducedIn: '7.4',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 100,
     step: 1,
@@ -292,7 +297,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'memory',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.eviction,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 65536,
     step: 256,
@@ -316,7 +321,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'memory',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.eviction,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 16,
     step: 1,
@@ -329,7 +334,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'memory',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 8,
     step: 1,
@@ -360,10 +365,10 @@ export const CONFIG_PARAMS: ConfigParam[] = [
       { value: '900 1 300 10 60 10000', label: '较密集 — 15min/1 次、5min/10 次、1min/1 万次' },
       { value: '300 1 60 10000', label: '稀疏 — 5min/1 次、1min/1 万次（缓存型）' },
       { value: '300 10 60 10000', label: '密集 — 5min/10 次、1min/1 万次（高频写）' },
-      { value: '', label: '关闭自动快照' },
+      { value: '""', label: '关闭自动快照（save ""）' },
     ],
     compute: computeSave,
-    comment: 'RDB 触发阈值（秒 内变更次数）；缓存可稀疏，高频写建议密集或以 AOF 为主；关闭持久化时不输出',
+    comment: 'RDB 触发阈值（秒 内变更次数）；缓存可稀疏，高频写建议密集或以 AOF 为主；关闭持久化时输出 save "" 显式关闭——省略该行时编译期默认快照阈值仍生效',
   },
   {
     key: 'stop-writes-on-bgsave-error',
@@ -449,7 +454,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'aof',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.persistence,
-    control: 'slider',
+    control: 'number',
     min: 10,
     max: 300,
     step: 10,
@@ -462,7 +467,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'aof',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.persistence,
-    control: 'slider',
+    control: 'number',
     min: 16,
     max: 1024,
     step: 16,
@@ -496,7 +501,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.0',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 1024,
     step: 32,
@@ -509,7 +514,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.0',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 512,
     step: 8,
@@ -539,7 +544,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.0',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 512,
     step: 16,
@@ -552,7 +557,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.0',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 256,
     step: 8,
@@ -565,7 +570,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.2',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 512,
     step: 16,
@@ -578,7 +583,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: '7.2',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 256,
     step: 8,
@@ -591,7 +596,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'encoding',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 64,
     max: 65536,
     step: 64,
@@ -643,7 +648,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'replication',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.replication,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 256,
     step: 1,
@@ -666,7 +671,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'replication',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.replication,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 5,
     step: 1,
@@ -679,7 +684,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'replication',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.replication,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 60,
     step: 5,
@@ -692,7 +697,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'replication',
     introducedIn: '8.0',
     docUrl: DOC_URLS.replication,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 2048,
     step: 64,
@@ -711,7 +716,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     control: 'text',
     secret: true,
     compute: () => '',
-    comment: '访问密码（等价于为 default 用户设密码）；多用户细粒度权限请用 ACL，requirepass 与 aclfile 互斥',
+    comment: '远程访问的准入门槛（等价于为 default 用户设密码），打开页面已自动生成，点"生成"可重新生成；多用户细粒度权限请用 ACL，requirepass 与 aclfile 互斥',
   },
   {
     key: 'enable-debug-command',
@@ -773,7 +778,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'buffers',
     introducedIn: '7.0',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 100,
     max: 60000,
     step: 100,
@@ -788,7 +793,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'observe',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: -1,
     max: 100000,
     step: 100,
@@ -801,7 +806,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'observe',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 64,
     max: 2048,
     step: 64,
@@ -814,7 +819,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'observe',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 1000,
     step: 10,
@@ -890,7 +895,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'keyspace',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 10,
     step: 1,
@@ -903,7 +908,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     group: 'keyspace',
     introducedIn: 'pre-7',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 1,
     max: 256,
     step: 1,
@@ -920,7 +925,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'hash-max-listpack-entries',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 1024,
     step: 32,
@@ -934,7 +939,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'hash-max-listpack-value',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 512,
     step: 8,
@@ -948,7 +953,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'list-max-listpack-size',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: -5,
     max: 512,
     step: 1,
@@ -962,7 +967,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'zset-max-listpack-entries',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 512,
     step: 16,
@@ -976,7 +981,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'zset-max-listpack-value',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 0,
     max: 256,
     step: 8,
@@ -990,7 +995,7 @@ export const CONFIG_PARAMS: ConfigParam[] = [
     deprecatedIn: '7.0',
     replacedBy: 'busy-reply-threshold',
     docUrl: DOC_URLS.config,
-    control: 'slider',
+    control: 'number',
     min: 100,
     max: 60000,
     step: 100,
@@ -1004,8 +1009,8 @@ export function getParam(key: string): ConfigParam | undefined {
   return CONFIG_PARAMS.find((p) => p.key === key);
 }
 
-/** slider 参数当前值的单位提示（ScopeSlider 展示用，key → 单位文案；未列出则不带单位） */
-export const SLIDER_UNITS: Record<string, string> = {
+/** 数值参数的单位后缀（NumberField 输入框旁展示用，key → 单位文案；未列出则不带单位） */
+export const PARAM_UNITS: Record<string, string> = {
   'tcp-keepalive': '秒',
   timeout: '秒',
   maxclients: '连接',
@@ -1042,16 +1047,16 @@ export const SCENARIO_LABELS: Record<GenerateContext['scenario'], string> = {
   mixed: '混合',
 };
 
-/** 持久化策略中文标签 */
+/** 持久化策略中文标签（conf 头部注释用，短语形式） */
 export const PERSISTENCE_LABELS: Record<GenerateContext['persistence'], string> = {
-  rdb: '仅 RDB',
-  aof: '仅 AOF',
+  rdb: 'RDB',
+  aof: 'AOF',
   both: 'RDB+AOF',
   off: '关闭',
 };
 
 /**
- * 创建默认生成上下文（打开即用的推荐画像：2 核 / 4GB / SSD / 缓存 / RDB / 7.4 / 并发 500 / 单机）。
+ * 创建默认生成上下文（打开即用的推荐画像：2 核 / 4GB / SSD / 缓存 / RDB+AOF 混合 / 7.4 / 并发 500 / 单机）。
  * 每次调用返回全新对象，供初始渲染与重置使用。
  * @returns 全新的 GenerateContext
  */
@@ -1062,10 +1067,12 @@ export function createDefaultContext(): GenerateContext {
     memoryGB: 4,
     diskType: 'ssd',
     scenario: 'cache',
-    persistence: 'rdb',
+    persistence: 'both',
     version: '7.4',
     concurrency: 500,
     masterAddr: '',
+    listenScope: 'all',
+    bindIp: '',
     overrides: {},
   };
 }

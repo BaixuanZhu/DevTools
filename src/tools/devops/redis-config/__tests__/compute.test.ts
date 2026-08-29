@@ -5,6 +5,7 @@ import { describe, it, expect } from 'vitest';
 import {
   computeAofMinSizeMB,
   computeAppendonly,
+  computeBind,
   computeIoThreads,
   computeMaxClients,
   computeMaxMemoryMB,
@@ -90,8 +91,8 @@ describe('computeAppendonly', () => {
 });
 
 describe('computeSave', () => {
-  it('关闭持久化时返回空串（conf 不输出 save）', () => {
-    expect(computeSave(ctx({ persistence: 'off' }))).toBe('');
+  it('关闭持久化时返回字面值 ""（conf 输出 save "" 显式关闭）', () => {
+    expect(computeSave(ctx({ persistence: 'off' }))).toBe('""');
   });
 
   it('缓存稀疏、会话/队列密集、混合用官方默认', () => {
@@ -150,5 +151,14 @@ describe('computeNotifyKeyspaceEvents', () => {
   it('会话场景开 Ex，其余关闭', () => {
     expect(computeNotifyKeyspaceEvents(ctx({ scenario: 'session' }))).toEqual(['E', 'x']);
     expect(computeNotifyKeyspaceEvents(ctx({ scenario: 'cache' }))).toEqual([]);
+  });
+});
+
+describe('computeBind', () => {
+  it('监听范围映射：仅本机回环、仅内网绑定 IP（trim、未填为空串）、所有接口为空串', () => {
+    expect(computeBind(ctx({ listenScope: 'loopback' }))).toBe('127.0.0.1 -::1');
+    expect(computeBind(ctx({ listenScope: 'intranet', bindIp: ' 10.0.0.5 ' }))).toBe('10.0.0.5');
+    expect(computeBind(ctx({ listenScope: 'intranet', bindIp: ' ' }))).toBe('');
+    expect(computeBind(ctx({ listenScope: 'all' }))).toBe('');
   });
 });

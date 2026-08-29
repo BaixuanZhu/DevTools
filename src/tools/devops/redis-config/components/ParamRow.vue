@@ -1,16 +1,18 @@
 <script setup lang="ts">
 /**
  * 参数行控件（本工具私有）：按参数定义渲染 5 种控件之一，
- * 附参数名、版本徽章、官方文档链接、中文注释与单参重置；
+ * 附参数名、版本徽章、官方文档链接、中文说明与单参重置；
  * 目标版本下已废弃的参数渲染为"废弃提示行"（不渲染控件、不写 conf）。
  */
 import { computed } from 'vue';
 import type { ConfigParam, ParamValue } from '../params';
-import { SLIDER_UNITS } from '../params';
+import { PARAM_UNITS } from '../params';
 import type { TargetVersion } from '../version';
+import { generatePassword } from '../secret';
 import SelectListbox from '../../../../components/ui/SelectListbox.vue';
 import ToggleSwitch from '../../../../components/ui/ToggleSwitch.vue';
-import ScopeSlider from './ScopeSlider.vue';
+import NumberField from './NumberField.vue';
+import type { NumberQuickOption } from './NumberField.vue';
 
 const props = withDefaults(
   defineProps<{
@@ -54,6 +56,54 @@ const selectOptions = computed(() =>
 /** 下拉当前值（string 形态） */
 const stringValue = computed(() => (typeof props.value === 'string' ? props.value : ''));
 
+/**
+ * 由 range 数值项派生推荐快捷选项：按值去重，同值档位名以 / 合并
+ * （如 port 的保守/推荐均为 6379 → label "保守/推荐"）；含字符串项或无 range 时不出 chips。
+ */
+const quickOptions = computed<NumberQuickOption[] | undefined>(() => {
+  const range = props.param.range;
+  if (
+    !range ||
+    typeof range.conservative !== 'number' ||
+    typeof range.recommended !== 'number' ||
+    typeof range.aggressive !== 'number'
+  ) {
+    return undefined;
+  }
+  const merged = new Map<number, string[]>();
+  const entries = [
+    [range.conservative, '保守'],
+    [range.recommended, '推荐'],
+    [range.aggressive, '激进'],
+  ] as const;
+  for (const [value, label] of entries) {
+    const labels = merged.get(value);
+    if (labels) {
+      if (!labels.includes(label)) labels.push(label);
+    } else {
+      merged.set(value, [label]);
+    }
+  }
+  return [...merged.entries()].map(([value, labels]) => ({
+    value,
+    label: labels.length > 1 ? labels.join('/') : labels[0],
+  }));
+});
+
+/** range 含字符串项（相对量如 '60% 内存'）时的参考文案，数值项形态为空 */
+const rangeHint = computed(() => {
+  const range = props.param.range;
+  if (
+    !range ||
+    (typeof range.conservative === 'number' &&
+      typeof range.recommended === 'number' &&
+      typeof range.aggressive === 'number')
+  ) {
+    return '';
+  }
+  return `参考：保守 ${range.conservative} · 推荐 ${range.recommended} · 激进 ${range.aggressive}`;
+});
+
 /** 开关当前值 */
 const boolValue = computed(() => props.value === true);
 
@@ -84,10 +134,10 @@ function onSelectChange(value: string | number): void {
 }
 
 /**
- * 滑块变更。
+ * 数值输入变更。
  * @param value - 新数值
  */
-function onSliderChange(value: number): void {
+function onNumberChange(value: number): void {
   emit('update', value);
 }
 
@@ -97,18 +147,6 @@ function onSliderChange(value: number): void {
  */
 function onSwitchChange(value: boolean): void {
   emit('update', value);
-}
-
-/**
- * 本地生成 24 字符 base64url 密码（crypto.getRandomValues，18 字节熵），不经过网络。
- */
-function generateSecret(): void {
-  const bytes = crypto.getRandomValues(new Uint8Array(18));
-  let binary = '';
-  bytes.forEach((b) => {
-    binary += String.fromCharCode(b);
-  });
-  emit('update', btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''));
 }
 </script>
 
@@ -170,18 +208,20 @@ function generateSecret(): void {
         @update:model-value="onSelectChange"
       />
 
-      <!-- 连续数值滑块 -->
-      <ScopeSlider
-        v-else-if="param.control === 'slider'"
-        :model-value="Number(value ?? param.min ?? 0)"
-        :min="param.min ?? 0"
-        :max="param.max ?? 100"
-        :step="param.step ?? 1"
-        :range="param.range ?? null"
-        :unit="SLIDER_UNITS[param.key]"
-        :label="param.key"
-        @update:model-value="onSliderChange"
-      />
+      <!-- 连续数值输入（附推荐快捷选项；相对量参数显示参考文案） -->
+      <template v-else-if="param.control === 'number'">
+        <NumberField
+          :model-value="Number(value ?? param.min ?? 0)"
+          :min="param.min"
+          :max="param.max"
+          :step="param.step"
+          :unit="PARAM_UNITS[param.key]"
+          :quick-options="quickOptions"
+          :label="param.key"
+          @update:model-value="onNumberChange"
+        />
+        <p v-if="rangeHint" class="mt-1 text-[0.6875rem] text-muted-foreground">{{ rangeHint }}</p>
+      </template>
 
       <!-- 布尔开关 -->
       <ToggleSwitch
@@ -223,7 +263,7 @@ function generateSecret(): void {
           type="button"
           class="shrink-0 rounded-sm border border-border bg-card px-2.5 text-[0.8125rem] text-muted-foreground transition-[background-color,color] duration-150 hover:bg-accent hover:text-foreground"
           title="本地生成 24 位随机密码（crypto.getRandomValues，不经网络）"
-          @click="generateSecret"
+          @click="emit('update', generatePassword())"
         >
           生成
         </button>

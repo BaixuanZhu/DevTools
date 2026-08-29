@@ -1,15 +1,17 @@
 /**
  * Redis 版本序数与参数可用性过滤（纯函数层）。
  *
- * 版本轴为 7.0 / 7.2 / 7.4 / 8.0；早于 7.0 的参数统一标注 pre-7（UI 不显示徽章）。
+ * 版本轴为 7.0 / 7.2 / 7.4 / 8.0 / 8.2 / 8.4；早于 7.0 的参数统一标注 pre-7（UI 不显示徽章）。
  * 引入/废弃版本元数据以 research/redis-params-version-notes.md 为准
  * （源：Redis 官方 config.c 注册表 diff 与 00-RELEASENOTES）。
+ * 8.2/8.4 的变更集中于命令层与指标，对本工具收录参数无增删/改名，行为等同 8.0
+ * （2026-08-29 核对官方 release notes，见 research 笔记末节）。
  */
 
 /** 参数版本标注类型：pre-7 表示 7.0 前已存在，7 系内精确到 minor */
-export type RedisVersion = 'pre-7' | '7.0' | '7.2' | '7.4' | '8.0';
+export type RedisVersion = 'pre-7' | '7.0' | '7.2' | '7.4' | '8.0' | '8.2' | '8.4';
 
-/** 生成器支持的目标版本（下拉轴，不含 pre-7——生成器不面向 7.0 以前输出） */
+/** 生成器支持的目标版本（按钮组轴，不含 pre-7——生成器不面向 7.0 以前输出） */
 export type TargetVersion = Exclude<RedisVersion, 'pre-7'>;
 
 /** 版本 → 序数（越小越早），pre-7 恒早于所有目标版本 */
@@ -19,14 +21,16 @@ export const VERSION_ORDER: Record<RedisVersion, number> = {
   '7.2': 1,
   '7.4': 2,
   '8.0': 3,
+  '8.2': 4,
+  '8.4': 5,
 };
 
-/** 目标版本轴（下拉顺序即升序） */
-export const TARGET_VERSIONS: readonly TargetVersion[] = ['7.0', '7.2', '7.4', '8.0'];
+/** 目标版本轴（按钮组顺序即升序） */
+export const TARGET_VERSIONS: readonly TargetVersion[] = ['7.0', '7.2', '7.4', '8.0', '8.2', '8.4'];
 
-/** 版本下拉元数据 */
+/** 版本按钮组元数据（label 用纯版本号——按钮组自带"目标版本"分组标签，每个按钮再带 Redis 前缀会过宽） */
 export const VERSION_OPTIONS: { value: TargetVersion; label: string }[] = TARGET_VERSIONS.map(
-  (v) => ({ value: v, label: `Redis ${v}` }),
+  (v) => ({ value: v, label: v }),
 );
 
 /** 参与版本判断的最小参数结构（避免与 params.ts 相互依赖） */

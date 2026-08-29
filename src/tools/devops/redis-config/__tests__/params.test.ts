@@ -22,9 +22,17 @@ describe('参数定义完整性', () => {
     }
   });
 
-  it('slider 参数必须提供 min < max 与正步长', () => {
+  it('所有选项值禁止空串（reka-ui SelectItem 对空串 value 抛错，曾导致 RDB 快照组面板不可交互）', () => {
     for (const param of CONFIG_PARAMS) {
-      if (param.control === 'slider') {
+      for (const option of param.options ?? []) {
+        expect(option.value, `${param.key} 选项 "${option.label}"`).not.toBe('');
+      }
+    }
+  });
+
+  it('number 参数必须提供 min < max 与正步长', () => {
+    for (const param of CONFIG_PARAMS) {
+      if (param.control === 'number') {
         expect(param.min, param.key).toBeDefined();
         expect(param.max, param.key).toBeDefined();
         expect(param.step, param.key).toBeGreaterThan(0);
@@ -55,6 +63,10 @@ describe('参数定义完整性', () => {
 });
 
 describe('打开即用：默认画像下的参数适用性', () => {
+  it('默认持久化策略为 RDB+AOF 混合', () => {
+    expect(createDefaultContext().persistence).toBe('both');
+  });
+
   it('单机默认画像下：复制组不适用（null），凭据/绑定类为空（""）', () => {
     const ctx = createDefaultContext();
     const nullKeys = new Set(

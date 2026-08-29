@@ -433,8 +433,8 @@ export const tools: ToolMeta[] = [
   {
     id: 'redis-config-generator',
     name: 'Redis 配置生成器',
-    description: '按硬件画像与使用场景生成带版本标注和中文注释的 redis.conf，支持单机/主从',
-    seoDescription: '在线 Redis 配置文件生成器，按 CPU、内存、磁盘与使用场景实时生成可直接使用的 redis.conf，支持 7.0/7.2/7.4/8.0 版本联动过滤、单机与主从模式、参数中文注释与官方文档溯源，附带内核参数建议，可一键复制下载，纯浏览器端运算数据不上传。',
+    description: '按硬件画像与使用场景生成带版本标注的 redis.conf，支持单机/主从',
+    seoDescription: '在线 Redis 配置文件生成器，按 CPU、内存、磁盘与使用场景实时生成可直接使用的 redis.conf，支持 7.0-8.4 版本联动过滤、单机与主从模式、参数中文说明与官方文档溯源，附带内核参数建议，可一键复制下载，纯浏览器端运算数据不上传。',
     category: '开发与运维',
     icon: '🛢️',
     path: '/devops/redis-config-generator',

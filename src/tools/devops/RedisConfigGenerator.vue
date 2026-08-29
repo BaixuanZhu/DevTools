@@ -3,11 +3,12 @@
  * Redis 配置生成器（工具页主组件）。
  *
  * 持有 GenerateContext（reactive），computed 驱动 generateConf 渲染；
- * 左栏 = 控制面板 + 分组参数列表（Collapsible，次要组默认收起），
- * 右栏 = 实时预览 + 系统参数建议 + 免责声明。状态不进全局 store，
+ * 移动端纵向排列：快速配置 → 产物区（预览/系统建议/免责）→ 分组参数单卡清单；
+ * 桌面双栏 grid：左列 = 快速配置 + 分组清单，右列产物区跨行 sticky。
+ * 分组全部默认收起（推荐值打开即可用，展开仅为微调）。状态不进全局 store，
  * 刷新即重置（配置生成器无持久化必要）。
  */
-import { computed, reactive } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 import { CollapsibleRoot, CollapsibleTrigger, CollapsibleContent } from 'reka-ui';
 import { ChevronDown } from '@lucide/vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
@@ -29,13 +30,21 @@ import {
   resolveValue,
   serializeConf,
 } from './redis-config/generate';
+import { generatePassword } from './redis-config/secret';
 import { isAvailable, isDeprecatedAt, showsDeprecationNotice } from './redis-config/version';
 import { buildSysctlSuggestions } from './redis-config/sysctl';
 import { downloadTextFile } from '../../utils/shared/download';
 import { toastStore } from '../../stores/toast';
 
-/** 生成上下文（默认画像：2 核 / 4GB / SSD / 缓存 / RDB / 7.4 / 并发 500 / 单机） */
+/** 生成上下文（默认画像：2 核 / 4GB / SSD / 缓存 / RDB+AOF 混合 / 7.4 / 并发 500 / 单机） */
 const ctx = reactive<GenerateContext>(createDefaultContext());
+
+/** 打开页面即本地生成一次 requirepass（island 服务端渲染时 setup 也会执行，随机值须推迟到挂载后，避免 SSR/水合不匹配） */
+onMounted(() => {
+  if (ctx.overrides['requirepass'] === undefined) {
+    ctx.overrides['requirepass'] = generatePassword();
+  }
+});
 
 /** 生成的 conf 行数组（预览、复制、下载共用） */
 const lines = computed(() => generateConf(ctx));
@@ -84,11 +93,12 @@ function resetParam(param: ConfigParam): void {
   delete ctx.overrides[param.key];
 }
 
-/** 清空全部覆盖值，恢复推荐值 */
+/** 清空全部覆盖值，恢复推荐值；requirepass 重新生成一次，保证重置后的 conf 仍可直接使用 */
 function resetAll(): void {
   for (const key of Object.keys(ctx.overrides)) {
     delete ctx.overrides[key];
   }
+  ctx.overrides['requirepass'] = generatePassword();
   toastStore.success('已恢复全部推荐值');
 }
 
@@ -110,23 +120,36 @@ const sysctlItems = computed(() => {
   <div class="w-full">
     <ToolHeader
       title="Redis 配置生成器"
-      description="按硬件画像与使用场景生成带版本标注和中文注释的 redis.conf，支持单机/主从与系统参数建议"
+      description="按硬件画像与使用场景生成带版本标注的 redis.conf，支持单机/主从与系统参数建议"
       :show-example="false"
     />
 
-    <div class="mx-auto flex w-full max-w-400 flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start xl:gap-8">
-      <!-- 左栏：画像输入 + 分组参数 -->
-      <div class="flex min-w-0 flex-col gap-4">
+    <div
+      class="mx-auto flex w-full max-w-400 flex-col gap-6 lg:grid lg:grid-cols-2 lg:items-start lg:gap-x-6 lg:gap-y-4 xl:gap-x-8"
+    >
+      <!-- 快速配置：移动端居首；桌面左栏第 1 行 -->
+      <div class="min-w-0">
         <ControlPanel :ctx="ctx" @reset="resetAll" />
+      </div>
 
-        <section
-          v-for="group in groups"
-          :key="group.id"
-          class="rounded-lg border border-border bg-card"
-        >
-          <CollapsibleRoot :default-open="group.defaultOpen">
+      <!-- 产物区：移动端紧随快速配置（微调分组之后置，保住"改完即见"的反馈闭环）；桌面右栏跨两行 sticky -->
+      <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0 lg:row-span-2">
+        <ConfigPreview :lines="lines" @download="handleDownload" @reset="resetAll" />
+
+        <SysctlPanel :items="sysctlItems" />
+
+        <p class="text-[0.8125rem] leading-relaxed text-muted-foreground">
+          免责声明：输出为参考值，需结合 <code class="rounded-sm bg-accent px-1 font-mono text-xs">INFO</code> /
+          慢查询 / 监控数据持续调整；所有计算与密码生成均在浏览器本地完成，数据不上传。
+        </p>
+      </div>
+
+      <!-- 分组参数：合并为单卡行式清单，全部默认收起，按需展开微调 -->
+      <section class="min-w-0 rounded-lg border border-border bg-card">
+        <div class="divide-y divide-border">
+          <CollapsibleRoot v-for="group in groups" :key="group.id" :default-open="group.defaultOpen">
             <CollapsibleTrigger
-              class="group flex w-full items-center justify-between px-4 py-2.5 text-left transition-[background-color] duration-150 hover:bg-accent"
+              class="group flex w-full items-center justify-between px-4 py-2.5 text-left transition-[background-color] duration-150 first:rounded-t-lg last:rounded-b-lg hover:bg-accent"
             >
               <span class="flex items-center gap-2">
                 <span class="text-[0.8125rem] font-medium text-foreground">{{ group.label }}</span>
@@ -157,20 +180,8 @@ const sysctlItems = computed(() => {
               </div>
             </CollapsibleContent>
           </CollapsibleRoot>
-        </section>
-      </div>
-
-      <!-- 右栏：实时预览 + 系统建议 + 免责声明 -->
-      <div class="flex min-w-0 flex-col gap-4 lg:sticky lg:top-0">
-        <ConfigPreview :lines="lines" @download="handleDownload" @reset="resetAll" />
-
-        <SysctlPanel :items="sysctlItems" />
-
-        <p class="text-[0.8125rem] leading-relaxed text-muted-foreground">
-          免责声明：输出为参考值，需结合 <code class="rounded-sm bg-accent px-1 font-mono text-xs">INFO</code> /
-          慢查询 / 监控数据持续调整；所有计算与密码生成均在浏览器本地完成，数据不上传。
-        </p>
-      </div>
+        </div>
+      </section>
     </div>
   </div>
 </template>

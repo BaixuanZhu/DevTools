@@ -1,11 +1,12 @@
 <script setup lang="ts">
 /**
- * 下拉选择框（共享 ui，公共 API 冻结）。
+ * 下拉选择框（共享 ui）。
  *
  * 底层由 Headless UI Listbox 迁移至 reka-ui Select（portal 化）。
  * 迁移同时修复历史 ui-active/ui-selected 死类名（Tailwind v4 未注册）：
  * 选中态走 data-[state=checked] + SelectItemIndicator（对勾），键盘高亮走 data-[highlighted]。
  * 值解析兼容历史 (option.key ?? option.value)。
+ * 2026-08-29 新增 itemAlign 选项文本对齐（此前固定居中，默认已改为左对齐）。
  */
 import { computed } from 'vue';
 import {
@@ -26,13 +27,22 @@ const props = withDefaults(
     label?: string;
     /** 透传给触发器按钮的额外 class，用于行内紧凑场景对齐高度（如 h-9） */
     buttonClass?: string;
+    /** 下拉选项文本对齐方式（默认左对齐；长中文说明的选项左对齐更易扫读） */
+    itemAlign?: 'left' | 'center' | 'right';
   }>(),
-  { label: undefined, buttonClass: undefined },
+  { label: undefined, buttonClass: undefined, itemAlign: 'left' },
 );
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number];
 }>();
+
+/** 对齐档位 → 选项文本 span 的 justify 类 */
+const ITEM_ALIGN_CLASS = {
+  left: 'justify-start',
+  center: 'justify-center',
+  right: 'justify-end',
+} as const;
 
 /** 解析选项值：兼容历史 `(option as any).key ?? option.value`。 */
 function optionValue(option: { value: string | number; [k: string]: unknown }): string | number {
@@ -79,7 +89,7 @@ const selectedLabel = computed(() => {
               :value="optionValue(option)"
               class="relative cursor-pointer select-none py-1.5 pl-8 pr-2 outline-none data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground data-[state=checked]:text-foreground"
             >
-              <span class="flex items-center justify-center gap-1.5 truncate">{{ option.label }}</span>
+              <span class="flex items-center gap-1.5 truncate" :class="ITEM_ALIGN_CLASS[itemAlign]">{{ option.label }}</span>
               <SelectItemIndicator class="absolute inset-y-0 left-0 flex items-center pl-2 text-primary">
                 <Check class="h-4 w-4" :size="16" aria-hidden="true" />
               </SelectItemIndicator>
