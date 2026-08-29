@@ -1,4 +1,3 @@
-// @ts-expect-error vue-sonner 无类型导出声明，运行时存在
 import { toast as sonnerToast } from 'vue-sonner';
 
 /**

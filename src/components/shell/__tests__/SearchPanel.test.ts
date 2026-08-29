@@ -23,7 +23,7 @@ describe('SearchPanel.vue（下拉直达模式）', () => {
     const items = wrapper.findAll('ul li a');
     expect(items.length).toBeGreaterThan(0);
     // JWT 解析工具应命中，链接指向新路径
-    const jwtItem = items.wrappers.find((a) => a.text().includes('JWT'));
+    const jwtItem = items.find((a) => a.text().includes('JWT'));
     expect(jwtItem).toBeTruthy();
     expect(jwtItem!.attributes('href')).toBe('/text/jwt-parser');
   });

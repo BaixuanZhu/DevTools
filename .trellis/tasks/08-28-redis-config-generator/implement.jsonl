@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/index.md", "reason": "frontend 规范入口（Pre-Development Checklist + Quality Check）"}
+{"file": "DESIGN.md", "reason": "设计令牌/间距规则/组件状态矩阵，编写任何 UI 代码前必读"}
+{"file": "PRODUCT.md", "reason": "产品行为规范：错误处理策略、URL 策略、性能与无障碍"}
+{"file": ".trellis/tasks/08-28-redis-config-generator/research/redis-params-version-notes.md", "reason": "参数版本标注数据源（introducedIn/deprecatedIn/replacedBy 以此为准）"}

@@ -6,10 +6,10 @@ Guidance for ZCode (and other coding agents) working in this repository.
 
 PRODUCT.md 与 DESIGN.md 是产品行为与视觉规范的唯一标准，开发功能或修改界面前必须查阅。本文件仅保留编码层面的快速参考。
 
-| 文件 | 职责 | 何时查阅 |
-|------|------|----------|
+| 文件           | 职责                                                             | 何时查阅                           |
+|----------------|------------------------------------------------------------------|------------------------------------|
 | **PRODUCT.md** | 产品定位、工具分类、URL 策略、错误处理、浏览器兼容、性能与无障碍 | 新增工具页、改产品行为、讨论优先级 |
-| **DESIGN.md** | 设计令牌、组件状态矩阵、布局模板、UI 选型、样式规则、工具页模式 | 编写任何 UI 代码前 |
+| **DESIGN.md**  | 设计令牌、组件状态矩阵、布局模板、UI 选型、样式规则、工具页模式  | 编写任何 UI 代码前                 |
 
 ## Project Overview
 
@@ -32,8 +32,12 @@ pnpm astro check      # Astro TypeScript 类型检查
 - **Framework:** Astro 6 + Vue 3（@astrojs/vue）
 - **UI:** Vue 3 `<script setup lang="ts">` + Composition API（交互型）；纯展示用 .astro，零 JS
 - **Language:** TypeScript strict（继承 astro/tsconfigs/strict）
-- **Styling:** Tailwind CSS v4，令牌定义于 `src/styles/global.css`（`:root`/`.dark` 双组变量 + `@theme inline`），utility class 消费
-- **UI Primitives:** reka-ui 无样式可访问原语（Tabs/Switch/Select/Collapsible/Dialog/DropdownMenu）；shadcn-vue（new-york 风格）已落地完整组件库（button/card/dialog/dropdown-menu/sheet/sonner/tabs/textarea/breadcrumb 等，位于 `src/components/ui/`），基于 cva 变体 + `cn()`（`src/lib/utils.ts`，clsx + tailwind-merge）合并 class。`components.json` 不配 `@/` 别名，import 一律相对路径
+- **Styling:** Tailwind CSS v4，令牌定义于 `src/styles/global.css`（`:root`/`.dark` 双组变量 + `@theme inline`），utility
+  class 消费
+- **UI Primitives:** reka-ui 无样式可访问原语（Tabs/Switch/Select/Collapsible/Dialog/DropdownMenu）；shadcn-vue（new-york
+  风格）已落地完整组件库（button/card/dialog/dropdown-menu/sheet/sonner/tabs/textarea/breadcrumb 等，位于
+  `src/components/ui/`），基于 cva 变体 + `cn()`（`src/lib/utils.ts`，clsx + tailwind-merge）合并 class。`components.json` 不配
+  `@/` 别名，import 一律相对路径
 - **Package Manager:** pnpm ｜ **Node:** >=22.12.0
 
 ## Architecture
@@ -59,23 +63,30 @@ src/
 public/           # 不经处理的静态文件
 ```
 
-三级导航：首页 `/` → 分类页 `/[category]`（如 `/text`）→ 工具页 `/[category]/[tool]`（如 `/text/base64`）。`src/pages/{category}/{tool}.astro` 路由与 `src/tools/{category}/{Tool}.vue` 实现组件目录结构对称。注册表 `src/data/tools.ts`，分类元数据 `src/data/categories.ts`。URL 策略见 PRODUCT.md §URL Strategy。
+三级导航：首页 `/` → 分类页 `/[category]`（如 `/text`）→ 工具页 `/[category]/[tool]`（如 `/text/base64`）。
+`src/pages/{category}/{tool}.astro` 路由与 `src/tools/{category}/{Tool}.vue` 实现组件目录结构对称。注册表
+`src/data/tools.ts`，分类元数据 `src/data/categories.ts`。URL 策略见 PRODUCT.md §URL Strategy。
 
 ## Frontend Architecture
 
 **Vue 单引擎**（2026-07 运行时统一 + shadcn-vue 重构完成，Alpine.js 已移除）：
 
-- **全局壳层** `Shell.vue`（唯一 `client:load` island）承载 Header / Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/ vue-sonner `<Toaster />` / 搜索 / 暗色切换。响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
-- **工具 islands** 每个工具独立 Vue 组件，按需 `client:idle`（默认）/ `client:load`（如 CronParser 需立即响应），`import` 同一批 store 模块。
+- **全局壳层** `Shell.vue`（唯一 `client:load` island）承载 Header / Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/
+  vue-sonner `<Toaster />` / 搜索 / 暗色切换。响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
+- **工具 islands** 每个工具独立 Vue 组件，按需 `client:idle`（默认）/ `client:load`（如 CronParser 需立即响应），`import` 同一批
+  store 模块。
 
-**通知通信**：任意组件直接调用 `toastStore.show/success/error(msg)`。`toastStore`（`src/stores/toast.ts`）保留原 API 兼容调用方与历史测试，内部委派 vue-sonner 渲染（Shell 挂载的 `<Toaster />` 消费）。禁止 `CustomEvent` 字符串桥接、禁止引入全局状态库（Pinia 等），模块级 store 已覆盖共享需求。
+**通知通信**：任意组件直接调用 `toastStore.show/success/error(msg)`。`toastStore`（`src/stores/toast.ts`）保留原 API
+兼容调用方与历史测试，内部委派 vue-sonner 渲染（Shell 挂载的 `<Toaster />` 消费）。禁止 `CustomEvent` 字符串桥接、禁止引入全局状态库（Pinia
+等），模块级 store 已覆盖共享需求。
 
 ## Heavy Computation Pattern
 
 耗时运算（大文件哈希、深层 JSON 对比）用 Web Worker 避免阻塞主线程：
 
 - Worker 放 `src/utils/{feature}/` 下，命名 `{feature}.worker.ts`
-- 组件中 `new Worker(new URL('./path/to/worker.ts', import.meta.url), { type: 'module' })` 实例化，通过 `postMessage`/`onmessage` 交换数据
+- 组件中 `new Worker(new URL('./path/to/worker.ts', import.meta.url), { type: 'module' })` 实例化，通过 `postMessage`/
+  `onmessage` 交换数据
 - 参考：`src/utils/format/json-diff.worker.ts`、`src/utils/regex/regex.worker.ts`
 
 ## Testing
@@ -90,10 +101,13 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
 关键配置在 `astro.config.mjs`：
 
 - `site: 'https://tools.baixuanz.cn'`；`build.inlineStylesheets: 'always'`（内联样式表，避免 CSS 阻塞渲染）
-- Sitemap：单段路径仅保留 7 分类页（`CATEGORY_SLUGS` 内联定义，与 `categorySlugMap` 同步），排除旧扁平重定向页；首页 priority 1.0、分类页 0.9、工具页 0.8。两段 URL 301 由 `redirects` 生成。
-- `vite.worker.format: 'es'`：兼容 `@jsquash/avif` emscripten worker code-splitting；`vite.optimizeDeps.exclude: ['@jsquash/avif']`
+- Sitemap：单段路径仅保留 7 分类页（`CATEGORY_SLUGS` 内联定义，与 `categorySlugMap` 同步），排除旧扁平重定向页；首页 priority
+  1.0、分类页 0.9、工具页 0.8。两段 URL 301 由 `redirects` 生成。
+- `vite.worker.format: 'es'`：兼容 `@jsquash/avif` emscripten worker code-splitting；
+  `vite.optimizeDeps.exclude: ['@jsquash/avif']`
 
-部署：EdgeOne Pages（主站）；GitHub Pages（`.github/workflows/astro-gh-workflow.yml`，push main 触发，`pnpm exec astro build --base=/DevTools`）。
+部署：EdgeOne Pages（主站）；GitHub Pages（`.github/workflows/astro-gh-workflow.yml`，push main 触发，
+`pnpm exec astro build --base=/DevTools`）。
 
 ## Security Rules（强制）
 
@@ -128,17 +142,22 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
 
 ### 新增工具步骤
 
-1. **注册** — `src/data/tools.ts` 的 `tools` 数组加 `ToolMeta`：`id`/`category`/`path`（`/{categorySlug}/{toolSlug}`）/`name`/`description`/`seoDescription`/`keywords`/`icon`/`relatedToolIds`。分类 slug 与中文名见 `categorySlugMap`。
+1. **注册** — `src/data/tools.ts` 的 `tools` 数组加 `ToolMeta`：`id`/`category`/`path`（`/{categorySlug}/{toolSlug}`）/
+   `name`/`description`/`seoDescription`/`keywords`/`icon`/`relatedToolIds`。分类 slug 与中文名见 `categorySlugMap`。
 2. **组件** — `src/tools/{category}/{Tool}.vue`（`<script setup lang="ts">`）。
-3. **路由** — `src/pages/{category}/{tool}.astro`：import 组件 + `<ToolLayout toolId="{category}/{tool}">` 包裹 + `client:idle` 水合。`pages/` 与 `tools/` 目录对称。
+3. **路由** — `src/pages/{category}/{tool}.astro`：import 组件 + `<ToolLayout toolId="{category}/{tool}">` 包裹 +
+   `client:idle` 水合。`pages/` 与 `tools/` 目录对称。
 4. **（可选）FAQ** — `src/data/tool-faqs.ts` 以 tool slug 为 key 加问答数组。
-5. **（可选）测试** — `src/tools/{category}/__tests__/` 或 `src/utils/{feature}/__tests__/`；集成测试 `src/tests/{category}/`。
+5. **（可选）测试** — `src/tools/{category}/__tests__/` 或 `src/utils/{feature}/__tests__/`；集成测试
+   `src/tests/{category}/`。
 6. **验证** — `pnpm build` + `pnpm test` + `pnpm astro check`。
 
 ### 维护流程
 
-- **分类调整**：改 `categories.ts` + `tools.ts` 的 `categorySlugMap`/`ToolCategory` + 受影响工具 `category`/`path` + 迁移 `pages/` 与 `tools/` 文件 + `astro.config.mjs` `redirects` 补旧→新 301。
-- **URL 变更**：改 `tools.ts` `path` + 迁移路由/组件 + `astro.config.mjs` redirects 补两段→两段 301；扁平 URL 在 `src/pages/[slug].astro` 补条目。
+- **分类调整**：改 `categories.ts` + `tools.ts` 的 `categorySlugMap`/`ToolCategory` + 受影响工具 `category`/`path` + 迁移
+  `pages/` 与 `tools/` 文件 + `astro.config.mjs` `redirects` 补旧→新 301。
+- **URL 变更**：改 `tools.ts` `path` + 迁移路由/组件 + `astro.config.mjs` redirects 补两段→两段 301；扁平 URL 在
+  `src/pages/[slug].astro` 补条目。
 - **下线**：从 `tools.ts` 移除 + 删路由 + `[slug].astro` 或 `redirects` 加到分类页兜底跳转，避免外链 404。
 - **sitemap 校验**：新增分类页需把 slug 加入 `astro.config.mjs` `CATEGORY_SLUGS`，否则被 sitemap filter 误排除。
 
@@ -156,7 +175,8 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
 Tailwind CSS v4，间距基于 4px 单位（`像素值 / 4 = 类名数值`，如 120px → `w-30`）。
 
 - **禁止用任意值语法表示标准类名能表示的值**：`w-[120px]`→`w-30`、`min-h-[160px]`→`min-h-40`、`max-w-[720px]`→`max-w-180`。
-- **允许任意值**：设计令牌精确尺寸（`text-[0.8125rem]` 等，见 DESIGN.md）、非 4 倍数特殊值（`h-[57px]`）、自定义层级/效果（`z-[100]`、`shadow-[...]`）。
+- **允许任意值**：设计令牌精确尺寸（`text-[0.8125rem]` 等，见 DESIGN.md）、非 4 倍数特殊值（`h-[57px]`）、自定义层级/效果（
+  `z-[100]`、`shadow-[...]`）。
 - 检查任意值：用 IDEA MCP `get_file_problems(filePath)` 或 `search_text("w-[1")` 排查。
 
 ## Dependency Rules（强制）
@@ -164,4 +184,31 @@ Tailwind CSS v4，间距基于 4px 单位（`像素值 / 4 = 类名数值`，如
 - **优先稳定成熟库**：npm 周下载量高、维护活跃、无已知漏洞（如 dayjs、@noble/ciphers、uuid）；新增依赖前确认社区活跃度与兼容性
 - **禁止实验性库**：能用浏览器原生 API（Web Crypto API、TextEncoder、URL）实现的优先原生方案
 - **同类不重复**：已有 dayjs 不引 moment/luxon；已有 @noble/ciphers 不引 crypto-js
-- **UI 原语只用 reka-ui**，禁止 @headlessui/vue 等；Toast 用 vue-sonner（经由 toastStore 适配层），禁止自行实现 toast 队列；壳层状态用 `src/stores/` 模块级 store，禁止 Alpine.js 或全局状态库（Pinia 等）
+- **UI 原语只用 reka-ui**，禁止 @headlessui/vue 等；Toast 用 vue-sonner（经由 toastStore 适配层），禁止自行实现 toast
+  队列；壳层状态用 `src/stores/` 模块级 store，禁止 Alpine.js 或全局状态库（Pinia 等）
+
+<!-- TRELLIS:START -->
+
+# Trellis Instructions
+
+These instructions are for AI assistants working in this project.
+
+This project is managed by Trellis. The working knowledge you need lives under `.trellis/`:
+
+- `.trellis/workflow.md` — development phases, when to create tasks, skill routing
+- `.trellis/spec/` — package- and layer-scoped coding guidelines (read before writing code in a given layer)
+- `.trellis/workspace/` — per-developer journals and session traces
+- `.trellis/tasks/` — active and archived tasks (PRDs, research, jsonl context)
+
+If a Trellis command is available on your platform (e.g. `/trellis:finish-work`, `/trellis:continue`), prefer it over
+manual steps. Not every platform exposes every command.
+
+If you're using Codex or another agent-capable tool, additional project-scoped helpers may live in:
+
+- `.agents/skills/` — reusable Trellis skills
+- `.codex/agents/` — optional custom subagents
+
+Managed by Trellis. Edits outside this block are preserved; edits inside may be overwritten by a future
+`trellis update`.
+
+<!-- TRELLIS:END -->
