@@ -10,7 +10,7 @@ import { VERSION_OPTIONS } from '../version';
 import { generatePassword } from '../secret';
 import CopyButton from '../../../../components/ui/CopyButton.vue';
 import OptionRadioGroup from '../../../../components/ui/OptionRadioGroup.vue';
-import NumberField from './NumberField.vue';
+import NumberField from '../../../../components/config/NumberField.vue';
 
 const props = defineProps<{
   /** 生成上下文（reactive，直接改属性） */

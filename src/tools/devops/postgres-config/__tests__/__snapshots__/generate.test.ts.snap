@@ -1,0 +1,57 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`generatePgConf — 打开即用（默认画像快照） > 默认画像完整 conf 文本快照（回归锚点：格式或推荐值漂移即失败） 1`] = `
+"# PostgreSQL 配置文件（postgresql.conf）— 由 DevTools 配置生成器输出（参考值，请结合 pg_stat_statements / 日志 / 监控调整）
+# 目标版本 PostgreSQL 17 ｜ 单机 ｜ 场景：通用 OLTP ｜ 内存 4GB ｜ CPU 4 核 ｜ 磁盘 SSD
+# datadir / hba_file 等路径类参数由 initdb 与服务管理器管理，本文件为最小化常用配置，未列出参数使用内置默认值
+# 账号与口令属 pg_hba.conf 与 SQL 层（CREATE ROLE ... PASSWORD）管理，本文件不包含认证配置
+
+# Connections & Authentication
+listen_addresses = 'localhost'
+port = 5432
+max_connections = 100
+superuser_reserved_connections = 3
+password_encryption = scram-sha-256
+
+# Memory
+shared_buffers = 1024MB
+effective_cache_size = 2457MB
+work_mem = 8MB
+maintenance_work_mem = 204MB
+huge_pages = off
+
+# Write-Ahead Log & Checkpoints
+wal_level = replica
+wal_buffers = -1
+wal_compression = off
+max_wal_size = 1024MB
+min_wal_size = 128MB
+checkpoint_timeout = 5min
+checkpoint_completion_target = 0.9
+
+# Parallel Query & Planner
+max_worker_processes = 8
+max_parallel_workers = 3
+max_parallel_workers_per_gather = 1
+jit = off
+random_page_cost = 1.5
+effective_io_concurrency = 200
+default_statistics_target = 100
+
+# Autovacuum
+autovacuum = on
+autovacuum_max_workers = 3
+autovacuum_vacuum_scale_factor = 0.2
+autovacuum_vacuum_cost_limit = 200
+
+# Logging
+logging_collector = off
+log_min_duration_statement = 1000
+log_checkpoints = on
+log_line_prefix = '%m [%p] %u@%d '
+
+# Timezone
+timezone = 'Asia/Shanghai'
+log_timezone = 'Asia/Shanghai'
+"
+`;

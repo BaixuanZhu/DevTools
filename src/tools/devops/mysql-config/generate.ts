@@ -9,6 +9,7 @@
  * - 布尔值输出 ON/OFF（MySQL 惯例大写），Redis 为 yes/no
  * - conf 以 `[mysqld]` 段头开始，组标题注释为纯英文组名
  */
+import type { ConfLine } from '../../../components/config/types';
 import {
   DISK_LABELS,
   PARAM_GROUPS,
@@ -19,15 +20,8 @@ import {
 } from './params';
 import { isAvailable } from './version';
 
-/** my.cnf 单行结构 */
-export interface ConfLine {
-  /** 行类型：注释 / 指令 / 段头 / 空行 */
-  type: 'comment' | 'directive' | 'section' | 'blank';
-  /** 行文本（注释行含 '#' 前缀，段头为 '[mysqld]'，空行为空串） */
-  text: string;
-  /** 指令所属参数 key（预览按此高亮变动行） */
-  paramKey?: string;
-}
+/** my.cnf 单行结构（共享四值并集定义，re-export 保持既有测试 import 路径） */
+export type { ConfLine };
 
 /**
  * 解析参数当前生效值：用户覆盖优先，否则取 compute 推荐值。

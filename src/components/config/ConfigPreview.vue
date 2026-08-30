@@ -1,20 +1,26 @@
 <script setup lang="ts">
 /**
- * 右栏配置预览（本工具私有）：行号 + 注释/指令视觉区分 + 变动行短暂高亮，
- * 底部操作条（复制 / 下载 redis.conf / 重置为推荐值）复用 CodePanel。
+ * 右栏配置预览（配置生成器系列共享）：行号 + 注释/指令视觉区分 + 变动行短暂高亮，
+ * 底部操作条（复制 / 下载 / 重置为推荐值）复用 CodePanel。
  * 预览与下载共用同一份 ConfLine[]，保证"所见即所得"。
+ * 序列化格式各工具不同（redis `key value`，mysql/PG `key = value`），serializeConf
+ * 留在各工具 generate.ts，本组件经 copyText prop 接收成品文本，不感知具体格式。
  */
 import { onBeforeUnmount, ref, watch } from 'vue';
-import CodePanel from '../../../../components/ui/CodePanel.vue';
-import { serializeConf, type ConfLine } from '../generate';
+import CodePanel from '../ui/CodePanel.vue';
+import type { ConfLine } from './types';
 
 const props = defineProps<{
   /** 生成的 conf 行数组 */
   lines: ConfLine[];
+  /** 面板标签（产物文件名，如 'redis.conf' / 'my.cnf' / 'postgresql.conf'） */
+  label: string;
+  /** 复制/下载用的完整文本（由父层 serializeConf(lines) 计算） */
+  copyText: string;
 }>();
 
 const emit = defineEmits<{
-  /** 下载 redis.conf（文件名与序列化由父层处理） */
+  /** 下载 conf 文件（文件名与序列化由父层处理） */
   download: [];
   /** 重置为推荐值 */
   reset: [];
@@ -68,11 +74,11 @@ function lineClass(line: ConfLine): string {
 
 <template>
   <CodePanel
-    label="redis.conf"
+    :label="label"
     show-copy
     show-download
     show-clear
-    :copy-text="serializeConf(lines)"
+    :copy-text="copyText"
     @download="emit('download')"
     @clear="emit('reset')"
   >

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 数值输入框（本工具私有形态组件）：数字输入 + 推荐快捷选项 chips。
+ * 数值输入框（配置生成器系列共享形态组件）：数字输入 + 推荐快捷选项 chips。
  *
  * 输入解析成功即 emit（解析失败不 emit，避免清空过程中误写值）；
  * 失焦时把值 clamp 到 [min, max]，空值/非法恢复为当前绑定值。
@@ -24,7 +24,7 @@ const props = withDefaults(
     max?: number;
     /** 原生步长（透传 input，供方向键增量） */
     step?: number;
-    /** 值单位（输入框右侧灰字后缀，如 'mb' / '秒'） */
+    /** 值单位（输入框右侧灰字后缀，如 'MB' / '秒'） */
     unit?: string;
     /** 推荐快捷选项（输入框下方一排小按钮） */
     quickOptions?: NumberQuickOption[];

@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "三绿门、断言习惯、agent-browser 冒烟纪律（session 重导出/内部滚动容器/指令正则区分）"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "共享组件上浮的组件拆分与 props 契约规范"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TS strict、无 any、无路径别名约束"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "模块级 store 与 toast 适配层约定（页面免责声明/toast 复制反馈）"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "pages/tools/data 注册对称结构与 components/config 新目录落位"}
+{"file": ".trellis/tasks/08-29-postgres-config-generator/research/postgres-params-version-notes.md", "reason": "全部参数默认值/可用性/18 独有项/OS 建议的官方核对结论，注册表唯一事实源"}

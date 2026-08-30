@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
 /**
- * NumberField 组件回归测试：输入 emit、失焦 clamp、快捷选项与外部值回写。
- * NumberField 是快速配置与参数行的共用形态组件，保证输入契约稳定。
+ * NumberField 组件回归测试（迁移自 mysql-config，组件上浮共享层）：输入 emit、
+ * 失焦 clamp、快捷选项与外部值回写。NumberField 是快速配置与参数行的共用形态组件，
+ * 保证输入契约稳定。
  */
 import { describe, it, expect, afterEach } from 'vitest';
 import { mount, type VueWrapper } from '@vue/test-utils';
-import NumberField from '../components/NumberField.vue';
+import NumberField from '../NumberField.vue';
 
 /** 已挂载实例登记表：afterEach 统一卸载，防异步更新残留 */
 const mounted: VueWrapper[] = [];

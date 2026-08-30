@@ -4,6 +4,7 @@
  * 输出 ConfLine[] 而非字符串：预览高亮、复制、下载共用同一份数据，
  * 保证"预览 = 产物"。渲染层不感知 Vue。
  */
+import type { ConfLine } from '../../../components/config/types';
 import {
   CONFIG_PARAMS,
   PARAM_GROUPS,
@@ -15,15 +16,8 @@ import {
 } from './params';
 import { isAvailable } from './version';
 
-/** conf 单行结构 */
-export interface ConfLine {
-  /** 行类型：注释 / 指令 / 空行 */
-  type: 'comment' | 'directive' | 'blank';
-  /** 行文本（注释行含 '#' 前缀，空行为空串） */
-  text: string;
-  /** 指令所属参数 key（预览按此高亮变动行） */
-  paramKey?: string;
-}
+/** conf 单行结构（共享四值并集定义，re-export 保持既有测试 import 路径） */
+export type { ConfLine };
 
 /**
  * 解析参数当前生效值：用户覆盖优先，否则取 compute 推荐值。

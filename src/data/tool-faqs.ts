@@ -608,6 +608,28 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'conf 里的 <code>ngram_token_size</code> 只是<strong>服务器级默认分词长度</strong>——FULLTEXT 索引必须显式用 <code>FULLTEXT ... WITH PARSER ngram</code> 建才走中文分词。已有索引改用分词器需要重建：<code>ALTER TABLE ... ADD FULLTEXT INDEX ... WITH PARSER ngram</code>。没有 ngram parser 的索引仍按默认规则切词，中文按整句处理自然搜不到。',
     },
   ],
+  'postgres-config-generator': [
+    {
+      question: '生成的 postgresql.conf 直接可用吗？怎么生效？',
+      answer: '可以作为<strong>起点</strong>直接使用：保存后放入 <code>conf.d/</code> 目录（需主配置 include）或合并进 postgresql.conf，执行 <code>SELECT pg_reload_conf();</code> / <code>pg_ctl reload</code> 即可让多数参数生效，条目说明中标注"需重启"的参数（如 shared_buffers）要重启实例。注意客户端接入控制属 <code>pg_hba.conf</code> 与 <code>ALTER ROLE</code>，本工具不生成；datadir 等路径类参数由 initdb 与服务管理器管理，也不在产物中。另外产物里的 <code>huge_pages = try</code> 与 OS 建议中"禁用透明大页（THP）"并不矛盾：前者指显式大页 hugetlbfs（官方推荐，需按 OS 建议分配 <code>vm.nr_hugepages</code>），后者是内核自动大页机制（官方文档明确不推荐）；内存 &lt; 16GB 时工具有意收紧为 off（官方默认 try），需要时手动改回。',
+    },
+    {
+      question: 'work_mem 设为 8MB，是整个实例只能用 8MB 做排序吗？',
+      answer: '不是。<strong>work_mem 是每个排序/哈希操作各自可占用的内存</strong>，不是全实例配额——官方文档原文明确提示：一条复杂查询可能同时执行多个排序/哈希操作，多个会话也可能并发执行，总内存占用可达该值的数倍。因此高并发复杂查询下实际内存远超设定值，调大前先用 <code>EXPLAIN ANALYZE</code> 确认是否有溢出到磁盘的 Sort/Hash。',
+    },
+    {
+      question: 'shared_buffers 为什么只给内存的 25%？',
+      answer: '25% 是官方文档建议的<strong>起步值</strong>（专用服务器 "a reasonable starting value is 25% of the memory"），不是上限。PostgreSQL 重度依赖操作系统页缓存（优化器经 <code>effective_cache_size</code> 感知），把 shared_buffers 调得过高反而挤压 OS 缓存、造成同一份数据双重缓冲；社区流传的"40% 封顶"是经验口径，官方文档并未给出。',
+    },
+    {
+      question: 'lc_collate / lc_ctype 为什么不能出现在配置文件里？',
+      answer: '两者在<strong>建库时即固定</strong>，直接决定文本列索引的排序序——官方 locale 文档要求必须保持不变，"or indexes on text columns would become corrupt"，中途改掉索引会损坏。PostgreSQL 16 起把它们写进 postgresql.conf 会直接报 <code>unrecognized configuration parameter</code>；需要不同排序规则可用 <code>COLLATE</code> 做列级/表达式级方案。',
+    },
+    {
+      question: '为什么"异步 I/O"参数组只在 18 显示？',
+      answer: '<code>io_method</code> 与 <code>io_workers</code> 是 PostgreSQL 18 新增的异步 I/O 框架参数，16/17 不存在——写进旧版本配置会因无法识别而启动失败。因此目标版本切到 16/17 时整组自动隐藏，切回 18 恢复显示。',
+    },
+  ],
   'toml-json-converter': [
     {
       question: 'TOML 和 JSON 有什么区别？',

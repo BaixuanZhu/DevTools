@@ -10,6 +10,7 @@
  * - null   参数在该上下文不适用（整行隐藏、conf 不输出，如单机模式的复制组）
  * - ''     参数适用但当前值为空（行显示、conf 略过指令，如 requirepass 未生成时）
  */
+import type { ConfigParamBase, ParamValue } from '../../../components/config/types';
 import type { RedisVersion, TargetVersion } from './version';
 import {
   computeAofMinSizeMB,
@@ -28,7 +29,7 @@ import {
   computeTimeoutSeconds,
 } from './compute';
 
-/** 参数控件类型 */
+/** 参数控件类型（字段已由共享 ConfigParamBase 的 control 并集承载，此别名保留为该并集的 redis 形态） */
 export type ControlKind = 'select' | 'number' | 'switch' | 'multi-select' | 'text';
 
 /** 参数分组 ID（顺序即 conf 输出顺序，见 PARAM_GROUPS） */
@@ -45,8 +46,8 @@ export type ParamGroupId =
   | 'lazyfree'
   | 'keyspace';
 
-/** 参数值类型（overrides 与 compute 的统一载荷） */
-export type ParamValue = string | number | boolean | string[];
+/** 参数值类型与推荐范围：共享定义 re-export（保持既有 import 路径不变） */
+export type { ParamValue, ParamRange } from '../../../components/config/types';
 
 /** 枚举选项（select / multi-select 用），label 附中文说明 */
 export interface ParamOption {
@@ -54,16 +55,6 @@ export interface ParamOption {
   value: string;
   /** 显示文本 + 中文说明 */
   label: string;
-}
-
-/** 推荐范围（保守/推荐/激进）：数值项派生快捷选项 chips，字符串项显示参考文案 */
-export interface ParamRange {
-  /** 保守值（数值或描述文案） */
-  conservative: number | string;
-  /** 推荐值 */
-  recommended: number | string;
-  /** 激进值 */
-  aggressive: number | string;
 }
 
 /**
@@ -96,40 +87,25 @@ export interface GenerateContext {
   overrides: Record<string, ParamValue>;
 }
 
-/** conf 指令参数（单个 ConfigParam 的完整定义） */
-export interface ConfigParam {
-  /** 参数名（写入 conf 的 key，如 'maxmemory'） */
-  key: string;
+/**
+ * conf 指令参数（单个 ConfigParam 的完整定义）。
+ * 基础字段（key/comment/control/options/min/max/step/range/secret 等）继承共享
+ * ConfigParamBase（src/components/config/types.ts），此处仅保留工具专有字段
+ * 与窄化到 Redis 版本枚举的版本标注。
+ */
+export interface ConfigParam extends ConfigParamBase {
   /** 所属分组 */
   group: ParamGroupId;
   /** 引入版本（pre-7 的 UI 不显示徽章） */
   introducedIn: RedisVersion;
   /** 标记废弃的版本 */
   deprecatedIn?: RedisVersion;
-  /** 替代参数 key（废弃提示用） */
-  replacedBy?: string;
   /** 官方文档链接（redis.io 无逐参数页，指向配置总览或主题页） */
   docUrl: string;
-  /** 控件类型 */
-  control: ControlKind;
-  /** 枚举选项（select / multi-select 用） */
-  options?: ParamOption[];
-  /** 数值输入最小值（失焦 clamp 下界） */
-  min?: number;
-  /** 数值输入最大值（失焦 clamp 上界） */
-  max?: number;
-  /** 数值输入步长（透传 input，供方向键增量） */
-  step?: number;
   /** 数值写入 conf 时追加的单位后缀（如内存尺寸 'mb'） */
   valueSuffix?: string;
-  /** 推荐范围（连续数值参数可选） */
-  range?: ParamRange;
   /** 由硬件/场景计算默认值；返回 null 表示该上下文下参数不适用 */
   compute: (ctx: GenerateContext) => ParamValue | null;
-  /** 为什么是这个值的中文说明（仅面板展示，不写入 conf） */
-  comment: string;
-  /** 密码类文本参数：控件旁提供"生成"按钮（crypto.getRandomValues 纯本地） */
-  secret?: boolean;
 }
 
 /** 参数分组元数据（conf 输出顺序固定） */
@@ -1009,35 +985,8 @@ export function getParam(key: string): ConfigParam | undefined {
   return CONFIG_PARAMS.find((p) => p.key === key);
 }
 
-/** 数值参数的单位后缀（NumberField 输入框旁展示用，key → 单位文案；未列出则不带单位） */
-export const PARAM_UNITS: Record<string, string> = {
-  'tcp-keepalive': '秒',
-  timeout: '秒',
-  maxclients: '连接',
-  'max-new-connections-per-cycle': '个/周期',
-  maxmemory: 'mb',
-  'maxmemory-samples': '个',
-  'io-threads': '线程',
-  'auto-aof-rewrite-percentage': '%',
-  'auto-aof-rewrite-min-size': 'mb',
-  'hash-max-listpack-entries': '个',
-  'hash-max-listpack-value': '字节',
-  'zset-max-listpack-entries': '个',
-  'zset-max-listpack-value': '字节',
-  'set-max-listpack-entries': '个',
-  'set-max-listpack-value': '字节',
-  'set-max-intset-entries': '个',
-  'repl-backlog-size': 'mb',
-  'min-replicas-to-write': '个',
-  'min-replicas-max-lag': '秒',
-  'replica-full-sync-buffer-limit': 'mb',
-  'busy-reply-threshold': 'ms',
-  'slowlog-log-slower-than': 'µs',
-  'slowlog-max-len': '条',
-  'latency-monitor-threshold': 'ms',
-  'active-expire-effort': '级',
-  databases: '个',
-};
+/** 数值参数的单位后缀词汇表（redis 与 mysql 键全量合并后上浮共享层，此处 re-export 保持既有 import 路径） */
+export { PARAM_UNITS } from '../../../components/config/types';
 
 /** 场景选项中文标签（conf 头部注释与 ControlPanel 共用） */
 export const SCENARIO_LABELS: Record<GenerateContext['scenario'], string> = {

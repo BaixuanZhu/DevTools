@@ -439,7 +439,7 @@ export const tools: ToolMeta[] = [
     icon: '🛢️',
     path: '/devops/redis-config-generator',
     keywords: ['redis 配置生成', 'redis.conf 生成器', 'redis 配置文件', 'redis maxmemory 设置', 'redis 淘汰策略', 'redis 主从配置', 'redis 持久化配置', 'redis 参数优化', 'redis 配置在线'],
-    relatedToolIds: ['env-converter', 'docker-run-helper', 'mysql-config-generator'],
+    relatedToolIds: ['env-converter', 'docker-run-helper', 'mysql-config-generator', 'postgres-config-generator'],
   },
   {
     id: 'mysql-config-generator',
@@ -450,7 +450,18 @@ export const tools: ToolMeta[] = [
     icon: '🐬',
     path: '/devops/mysql-config-generator',
     keywords: ['mysql 配置生成', 'my.cnf 生成器', 'mysql 配置文件', 'my.cnf 在线生成', 'mysql 配置调优', 'mysql 内存调优', 'mysql 主从配置', 'mysql 5.7 配置', 'mysql 8.0 配置', 'mysql 8.4 配置', 'mysql 参数优化', 'innodb_buffer_pool_size 设置'],
-    relatedToolIds: ['redis-config-generator', 'env-converter', 'docker-run-helper'],
+    relatedToolIds: ['redis-config-generator', 'env-converter', 'docker-run-helper', 'postgres-config-generator'],
+  },
+  {
+    id: 'postgres-config-generator',
+    name: 'PostgreSQL 配置生成器',
+    description: '按内存/CPU/磁盘/场景/版本生成带版本标注的 postgresql.conf，支持单机/主从与 OS 参数建议',
+    seoDescription: '在线 PostgreSQL 配置文件生成器，按内存、CPU 核数、磁盘、使用场景与并发实时生成可直接使用的 postgresql.conf，支持 16/17/18 版本联动过滤（异步 I/O 组仅 v18 显示）、单机与主从模式（复制组参数与 pg_basebackup 备库要点）、参数中文说明与官方文档溯源，附带 OS 内核参数建议，可一键复制下载，纯浏览器端运算数据不上传。',
+    category: '开发与运维',
+    icon: '🐘',
+    path: '/devops/postgres-config-generator',
+    keywords: ['postgresql 配置生成', 'postgresql.conf 生成器', 'pg 配置文件', 'postgresql 配置调优', 'postgresql 内存调优', 'postgresql 主从配置', 'pg 16 配置', 'pg 17 配置', 'pg 18 配置', 'postgresql 参数优化', 'shared_buffers 设置', 'work_mem 设置'],
+    relatedToolIds: ['mysql-config-generator', 'redis-config-generator', 'docker-run-helper'],
   },
   {
     id: 'qr-code-reader',
