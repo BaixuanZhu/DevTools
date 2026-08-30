@@ -9,6 +9,9 @@
  *   - fileName?: string        产出 File 的基础名（不含扩展名），默认 'cropped'
  *   - outputType?: 'image/png' | 'image/jpeg' | 'image/webp'  默认 'image/png'
  *   - outputQuality?: number   有损质量 0-1，默认 0.92
+ *   - defaultAspect?: 'free' | '1:1' | '16:9' | '4:3' | '3:2'  初始比例预设，默认 'free'；
+ *                              创作型场景（如 ICO 制作需正方形）传 '1:1' 可减少一次手动切换，
+ *                              批量工具弹窗用法不传该 prop，行为与历史版本完全一致
  *
  * Emits:
  *   - crop: (result: CropResult) => void
@@ -53,12 +56,15 @@ interface Props {
   outputType?: CropOutputType;
   /** 有损格式质量 0-1 */
   outputQuality?: number;
+  /** 初始比例预设（默认 'free'；创作场景如 ICO 制作传 '1:1'） */
+  defaultAspect?: AspectPreset;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   fileName: 'cropped',
   outputType: 'image/png',
   outputQuality: 0.92,
+  defaultAspect: 'free',
 });
 
 const emit = defineEmits<{
@@ -75,8 +81,8 @@ const cropper = ref<CropperJS.default | null>(null);
 const cropperImage = ref<InstanceType<typeof CropperJS.CropperImage> | null>(null);
 const cropperSelection = ref<InstanceType<typeof CropperJS.CropperSelection> | null>(null);
 
-/** 比例预设 */
-const aspectPreset = ref<AspectPreset>('free');
+/** 比例预设（初值取 defaultAspect，仅初始化时读取，不响应运行时变化） */
+const aspectPreset = ref<AspectPreset>(props.defaultAspect);
 
 /** 翻转状态 */
 const flipHorizontal = ref(false);

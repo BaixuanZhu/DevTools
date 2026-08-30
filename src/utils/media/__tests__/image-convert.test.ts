@@ -57,7 +57,6 @@ describe('getOutputMime', () => {
     expect(getOutputMime('webp')).toBe('image/webp');
     expect(getOutputMime('avif')).toBe('image/avif');
     expect(getOutputMime('tiff')).toBe('image/tiff');
-    expect(getOutputMime('ico')).toBe('image/x-icon');
   });
 });
 
@@ -68,15 +67,13 @@ describe('getOutputExtension', () => {
     expect(getOutputExtension('webp')).toBe('.webp');
     expect(getOutputExtension('avif')).toBe('.avif');
     expect(getOutputExtension('tiff')).toBe('.tiff');
-    expect(getOutputExtension('ico')).toBe('.ico');
   });
 });
 
 describe('isLossless', () => {
-  it('png / tiff / ico 为无损，jpeg / webp / avif 为有损', () => {
+  it('png / tiff 为无损，jpeg / webp / avif 为有损', () => {
     expect(isLossless('png')).toBe(true);
     expect(isLossless('tiff')).toBe(true);
-    expect(isLossless('ico')).toBe(true);
     expect(isLossless('jpeg')).toBe(false);
     expect(isLossless('webp')).toBe(false);
     expect(isLossless('avif')).toBe(false);
@@ -90,7 +87,6 @@ describe('needsFillBackground', () => {
     expect(needsFillBackground('webp')).toBe(false);
     expect(needsFillBackground('avif')).toBe(false);
     expect(needsFillBackground('tiff')).toBe(false);
-    expect(needsFillBackground('ico')).toBe(false);
   });
 });
 
@@ -145,9 +141,8 @@ describe('pickEncoderKind', () => {
     expect(pickEncoderKind('webp')).toBe('canvas');
   });
 
-  it('avif / tiff / ico 走各自编码器', () => {
+  it('avif / tiff 走各自编码器', () => {
     expect(pickEncoderKind('avif')).toBe('avif');
     expect(pickEncoderKind('tiff')).toBe('tiff');
-    expect(pickEncoderKind('ico')).toBe('ico');
   });
 });

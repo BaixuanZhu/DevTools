@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "utils/media、components/media、tools/、pages/ 目录对称约定"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "新增 IcoGeneratePanel/IcoParsePanel 私有组件规范"}
+{"file": ".trellis/spec/frontend/hook-guidelines.md", "reason": "useImageBatch 参数接口收敛的 composable 约定"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁、测试位置（同目录 __tests__）、禁止模式"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "encodeIco/rasterizeToPng 复用边界决策依据"}
+{"file": "PRODUCT.md", "reason": "工具页 SEO 字段要求与错误处理口径"}
+{"file": "DESIGN.md", "reason": "Tabs/控件/空态 UI 规范与令牌"}

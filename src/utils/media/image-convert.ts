@@ -3,18 +3,14 @@
  *
  * 包含可单测的纯函数（字节格式化、尺寸缩放、格式映射、尺寸校验）
  * 以及依赖浏览器 Canvas API 的解码/编码函数。
+ * ICO 不在此列：输出由「ICO 图标制作」工具（encoders/ico）承担，
+ * ICO 输入仍支持，映射为 PNG。
  */
-
-import {
-  DEFAULT_ICO_SIZES,
-  type IcoAnchor,
-  type IcoFit,
-} from './encoders/ico';
 
 // ==================== 类型 ====================
 
-/** 支持的输出格式（GIF / BMP 仅作输入，不在此列） */
-export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'tiff' | 'ico';
+/** 支持的输出格式（GIF / BMP / ICO 仅作输入，不在此列） */
+export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'tiff';
 
 /** 加载后的位图及其原始尺寸 */
 export interface LoadedImage {
@@ -35,12 +31,6 @@ export interface ConvertOptions {
   scale: number;
   /** 是否填充白底（jpeg 不支持透明） */
   fillBackground: boolean;
-  /** ICO 输出尺寸列表；缺省回退到默认三尺寸 */
-  icoSizes?: number[];
-  /** ICO 裁切适配方式；缺省 cover */
-  icoFit?: IcoFit;
-  /** ICO cover 模式锚点；缺省 center */
-  icoAnchor?: IcoAnchor;
 }
 
 /** 图片转换结果 */
@@ -72,7 +62,7 @@ export const CANVAS_MAX_DIMENSION = 16384;
 export const DEFAULT_QUALITY = 80;
 
 /** 无损格式（不支持质量调节） */
-export const LOSSLESS_FORMATS: OutputFormat[] = ['png', 'tiff', 'ico'];
+export const LOSSLESS_FORMATS: OutputFormat[] = ['png', 'tiff'];
 
 /** 格式所属分组（有损可调质量 / 无损） */
 export type FormatGroup = 'lossy' | 'lossless';
@@ -84,7 +74,6 @@ export const OUTPUT_FORMATS: { value: OutputFormat; label: string; group: Format
   { value: 'avif', label: 'AVIF', group: 'lossy' },
   { value: 'png', label: 'PNG', group: 'lossless' },
   { value: 'tiff', label: 'TIFF', group: 'lossless' },
-  { value: 'ico', label: 'ICO', group: 'lossless' },
 ];
 
 // ==================== 纯函数 ====================
@@ -126,8 +115,6 @@ export function getOutputMime(format: OutputFormat): string {
       return 'image/avif';
     case 'tiff':
       return 'image/tiff';
-    case 'ico':
-      return 'image/x-icon';
   }
 }
 
@@ -147,8 +134,6 @@ export function getOutputExtension(format: OutputFormat): string {
       return '.avif';
     case 'tiff':
       return '.tiff';
-    case 'ico':
-      return '.ico';
   }
 }
 
@@ -199,7 +184,7 @@ export function defaultFormatForInput(mime: string): OutputFormat {
 }
 
 /** 编码路径种类：canvas 原生 / 各懒加载编码器 */
-export type EncoderKind = 'canvas' | 'avif' | 'tiff' | 'ico';
+export type EncoderKind = 'canvas' | 'avif' | 'tiff';
 
 /**
  * 根据输出格式选择编码路径（纯函数，供 convertImage 分派与单测使用）。
@@ -215,8 +200,6 @@ export function pickEncoderKind(format: OutputFormat): EncoderKind {
       return 'avif';
     case 'tiff':
       return 'tiff';
-    case 'ico':
-      return 'ico';
   }
 }
 
@@ -273,10 +256,9 @@ export async function loadImage(file: File): Promise<LoadedImage> {
 /**
  * 转换图片：按百分比缩放尺寸，再以指定格式/质量编码。
  *
- * - 无损格式（png/tiff/ico）忽略 quality；
+ * - 无损格式（png/tiff）忽略 quality；
  * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）；
- * - ICO 按 icoSizes 多尺寸封装，裁切方式由 icoFit/icoAnchor 决定，忽略 scale；
- * - avif/tiff/ico 编码器懒加载。
+ * - avif/tiff 编码器懒加载。
  *
  * @param opts 转换选项
  * @returns 转换结果（含 object URL，调用方负责释放）
@@ -284,24 +266,6 @@ export async function loadImage(file: File): Promise<LoadedImage> {
  */
 export async function convertImage(opts: ConvertOptions): Promise<ConvertResult> {
   const { bitmap, format, quality, scale, fillBackground } = opts;
-
-  // ICO：多尺寸封装，忽略 scale
-  if (format === 'ico') {
-    const { encodeIco } = await import('./encoders/ico');
-    const r = await encodeIco(bitmap, {
-      sizes: opts.icoSizes && opts.icoSizes.length > 0 ? opts.icoSizes : DEFAULT_ICO_SIZES,
-      fit: opts.icoFit ?? 'cover',
-      anchor: opts.icoAnchor ?? 'center',
-      fillBackground,
-    });
-    return {
-      blob: r.blob,
-      url: URL.createObjectURL(r.blob),
-      width: r.width,
-      height: r.height,
-      size: r.size,
-    };
-  }
 
   const { width, height } = computeScaledSize(bitmap.width, bitmap.height, scale);
 
