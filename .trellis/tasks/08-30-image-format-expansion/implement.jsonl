@@ -1,0 +1,6 @@
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "encoders/decoders 新文件布局约定"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁与禁止模式（含 Security Rules）"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "枚举扩展与 narrowing"}
+{"file": ".trellis/spec/guides/code-reuse-thinking-guide.md", "reason": "复用 convertImage/loadImage 既有分派模式，不另起炉灶"}
+{"file": "PRODUCT.md", "reason": "浏览器兼容矩阵、性能基线（懒加载体积约束）"}
+{"file": "DESIGN.md", "reason": "控件文案与空态 UI 规范"}

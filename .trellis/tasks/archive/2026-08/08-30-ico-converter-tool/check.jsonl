@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "全量门禁与检查清单"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "OutputFormat 类型收敛后的 strict 检查"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "utils→composable→组件跨层改动的一致性检查"}
+{"file": "PRODUCT.md", "reason": "SEO 字段完整性（tools.ts/FAQ）核对依据"}
