@@ -9,6 +9,11 @@ import {
   defaultFormatForInput,
   checkCanvasLimits,
   pickEncoderKind,
+  OUTPUT_FORMATS,
+  LOSSLESS_FORMATS,
+  isSvgFile,
+  isHeicFile,
+  type OutputFormat,
 } from '../image-convert';
 
 describe('formatBytes', () => {
@@ -57,6 +62,8 @@ describe('getOutputMime', () => {
     expect(getOutputMime('webp')).toBe('image/webp');
     expect(getOutputMime('avif')).toBe('image/avif');
     expect(getOutputMime('tiff')).toBe('image/tiff');
+    expect(getOutputMime('bmp')).toBe('image/bmp');
+    expect(getOutputMime('gif')).toBe('image/gif');
   });
 });
 
@@ -67,26 +74,32 @@ describe('getOutputExtension', () => {
     expect(getOutputExtension('webp')).toBe('.webp');
     expect(getOutputExtension('avif')).toBe('.avif');
     expect(getOutputExtension('tiff')).toBe('.tiff');
+    expect(getOutputExtension('bmp')).toBe('.bmp');
+    expect(getOutputExtension('gif')).toBe('.gif');
   });
 });
 
 describe('isLossless', () => {
-  it('png / tiff 为无损，jpeg / webp / avif 为有损', () => {
+  it('png / tiff / bmp 为无损，jpeg / webp / avif / gif 为有损', () => {
     expect(isLossless('png')).toBe(true);
     expect(isLossless('tiff')).toBe(true);
+    expect(isLossless('bmp')).toBe(true);
     expect(isLossless('jpeg')).toBe(false);
     expect(isLossless('webp')).toBe(false);
     expect(isLossless('avif')).toBe(false);
+    expect(isLossless('gif')).toBe(false);
   });
 });
 
 describe('needsFillBackground', () => {
-  it('仅 jpeg 需要填白底', () => {
+  it('仅 jpeg 需要填白底（BMP / GIF 保留透明）', () => {
     expect(needsFillBackground('jpeg')).toBe(true);
     expect(needsFillBackground('png')).toBe(false);
     expect(needsFillBackground('webp')).toBe(false);
     expect(needsFillBackground('avif')).toBe(false);
     expect(needsFillBackground('tiff')).toBe(false);
+    expect(needsFillBackground('bmp')).toBe(false);
+    expect(needsFillBackground('gif')).toBe(false);
   });
 });
 
@@ -112,9 +125,48 @@ describe('defaultFormatForInput', () => {
     expect(defaultFormatForInput('image/vnd.microsoft.icon')).toBe('png');
   });
 
+  it('BMP / ICO / SVG 输入默认 PNG（图形与无损场景）', () => {
+    expect(defaultFormatForInput('image/bmp')).toBe('png');
+    expect(defaultFormatForInput('image/x-icon')).toBe('png');
+    expect(defaultFormatForInput('image/vnd.microsoft.icon')).toBe('png');
+    expect(defaultFormatForInput('image/svg+xml')).toBe('png');
+  });
+
+  it('HEIC / HEIF 输入默认 WebP（照片场景小体积）', () => {
+    expect(defaultFormatForInput('image/heic')).toBe('webp');
+    expect(defaultFormatForInput('image/heif')).toBe('webp');
+    expect(defaultFormatForInput('image/heic-sequence')).toBe('webp');
+    expect(defaultFormatForInput('image/heif-sequence')).toBe('webp');
+  });
+
+  it('MIME 为空时按扩展名兜底（Windows 空 MIME 场景）', () => {
+    expect(defaultFormatForInput('', 'photo.svg')).toBe('png');
+    expect(defaultFormatForInput('', 'photo.SVG')).toBe('png');
+    expect(defaultFormatForInput('', 'IMG_0001.heic')).toBe('webp');
+    expect(defaultFormatForInput('', 'IMG_0001.HEIF')).toBe('webp');
+    expect(defaultFormatForInput('', 'photo.jpg')).toBe('webp');
+  });
+
+  it('MIME 已知时文件名不参与判定', () => {
+    expect(defaultFormatForInput('image/png', 'fake.heic')).toBe('png');
+    expect(defaultFormatForInput('image/jpeg', 'fake.svg')).toBe('jpeg');
+  });
+
   it('未知/空 MIME 默认 WebP', () => {
     expect(defaultFormatForInput('')).toBe('webp');
     expect(defaultFormatForInput('image/unknown')).toBe('webp');
+  });
+});
+
+describe('OUTPUT_FORMATS / LOSSLESS_FORMATS 不变量', () => {
+  it('每种输出格式恰好出现一次，且分组与 LOSSLESS_FORMATS 一致', () => {
+    const allFormats: OutputFormat[] = ['png', 'jpeg', 'webp', 'avif', 'tiff', 'bmp', 'gif'];
+    const values = OUTPUT_FORMATS.map((f) => f.value);
+    expect(new Set(values).size).toBe(allFormats.length);
+    for (const f of allFormats) expect(values).toContain(f);
+    for (const f of OUTPUT_FORMATS) {
+      expect(f.group === 'lossless').toBe(LOSSLESS_FORMATS.includes(f.value));
+    }
   });
 });
 
@@ -141,8 +193,26 @@ describe('pickEncoderKind', () => {
     expect(pickEncoderKind('webp')).toBe('canvas');
   });
 
-  it('avif / tiff 走各自编码器', () => {
+  it('avif / tiff / bmp / gif 走各自编码器', () => {
     expect(pickEncoderKind('avif')).toBe('avif');
     expect(pickEncoderKind('tiff')).toBe('tiff');
+    expect(pickEncoderKind('bmp')).toBe('bmp');
+    expect(pickEncoderKind('gif')).toBe('gif');
+  });
+});
+
+describe('isSvgFile / isHeicFile', () => {
+  it('SVG 按 MIME 或 .svg 扩展名判定', () => {
+    expect(isSvgFile(new File([], 'a.svg', { type: '' }))).toBe(true);
+    expect(isSvgFile(new File([], 'a', { type: 'image/svg+xml' }))).toBe(true);
+    expect(isSvgFile(new File([], 'a.png', { type: 'image/png' }))).toBe(false);
+  });
+
+  it('HEIC/HEIF 按 MIME（含 -sequence）或扩展名判定', () => {
+    expect(isHeicFile(new File([], 'a', { type: 'image/heic' }))).toBe(true);
+    expect(isHeicFile(new File([], 'a', { type: 'image/heif-sequence' }))).toBe(true);
+    expect(isHeicFile(new File([], 'IMG_1.heic', { type: '' }))).toBe(true);
+    expect(isHeicFile(new File([], 'IMG_1.heif', { type: '' }))).toBe(true);
+    expect(isHeicFile(new File([], 'a.png', { type: 'image/png' }))).toBe(false);
   });
 });

@@ -9,8 +9,8 @@
 
 // ==================== 类型 ====================
 
-/** 支持的输出格式（GIF / BMP / ICO 仅作输入，不在此列） */
-export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'tiff';
+/** 支持的输出格式（bmp 自研编码 / gif 走 gifenc，均懒加载；ICO 仅作输入） */
+export type OutputFormat = 'png' | 'jpeg' | 'webp' | 'avif' | 'tiff' | 'bmp' | 'gif';
 
 /** 加载后的位图及其原始尺寸 */
 export interface LoadedImage {
@@ -25,7 +25,10 @@ export interface ConvertOptions {
   bitmap: ImageBitmap;
   /** 目标格式 */
   format: OutputFormat;
-  /** 质量 10-100，仅对有损格式（jpeg/webp）生效 */
+  /**
+   * 质量 10-100，仅对有损格式生效。语义随格式而异：
+   * jpeg/webp/avif 为编码质量，gif 映射为调色板颜色数。
+   */
   quality: number;
   /** 尺寸缩放百分比 1-100（100 = 原尺寸） */
   scale: number;
@@ -61,8 +64,8 @@ export const CANVAS_MAX_DIMENSION = 16384;
 /** 默认质量（有损格式） */
 export const DEFAULT_QUALITY = 80;
 
-/** 无损格式（不支持质量调节） */
-export const LOSSLESS_FORMATS: OutputFormat[] = ['png', 'tiff'];
+/** 无损格式（不支持质量调节）。BMP 未压缩属无损；GIF 量化有损，不在此列 */
+export const LOSSLESS_FORMATS: OutputFormat[] = ['png', 'tiff', 'bmp'];
 
 /** 格式所属分组（有损可调质量 / 无损） */
 export type FormatGroup = 'lossy' | 'lossless';
@@ -72,8 +75,10 @@ export const OUTPUT_FORMATS: { value: OutputFormat; label: string; group: Format
   { value: 'jpeg', label: 'JPEG', group: 'lossy' },
   { value: 'webp', label: 'WebP', group: 'lossy' },
   { value: 'avif', label: 'AVIF', group: 'lossy' },
+  { value: 'gif', label: 'GIF', group: 'lossy' },
   { value: 'png', label: 'PNG', group: 'lossless' },
   { value: 'tiff', label: 'TIFF', group: 'lossless' },
+  { value: 'bmp', label: 'BMP', group: 'lossless' },
 ];
 
 // ==================== 纯函数 ====================
@@ -115,6 +120,10 @@ export function getOutputMime(format: OutputFormat): string {
       return 'image/avif';
     case 'tiff':
       return 'image/tiff';
+    case 'bmp':
+      return 'image/bmp';
+    case 'gif':
+      return 'image/gif';
   }
 }
 
@@ -134,6 +143,10 @@ export function getOutputExtension(format: OutputFormat): string {
       return '.avif';
     case 'tiff':
       return '.tiff';
+    case 'bmp':
+      return '.bmp';
+    case 'gif':
+      return '.gif';
   }
 }
 
@@ -157,11 +170,19 @@ export function needsFillBackground(format: OutputFormat): boolean {
  * 根据输入图片的 MIME 推荐默认输出格式。
  *
  * - PNG/JPEG/WebP/AVIF/TIFF 保持原格式；
- * - BMP / ICO 输入默认 PNG（保留无损）；
+ * - BMP / ICO / SVG 输入默认 PNG（图形与无损场景）；
+ * - HEIC/HEIF（iPhone 实拍）默认 WebP（照片场景小体积）；
  * - GIF / 未知格式默认 WebP（GIF 仅取首帧）。
+ *
+ * Windows 下拖入的 .svg/.heic/.heif 文件 MIME 可能为空，故用扩展名兜底。
  * @param mime 输入图片 MIME 类型
+ * @param fileName 可选的文件名（MIME 为空时按扩展名兜底判定）
  */
-export function defaultFormatForInput(mime: string): OutputFormat {
+export function defaultFormatForInput(mime: string, fileName?: string): OutputFormat {
+  if (!mime) {
+    if (fileName && /\.svg$/i.test(fileName)) return 'png';
+    if (fileName && /\.(heic|heif)$/i.test(fileName)) return 'webp';
+  }
   switch (mime) {
     case 'image/png':
       return 'png';
@@ -178,13 +199,20 @@ export function defaultFormatForInput(mime: string): OutputFormat {
     case 'image/x-icon':
     case 'image/vnd.microsoft.icon':
       return 'png';
+    case 'image/svg+xml':
+      return 'png';
+    case 'image/heic':
+    case 'image/heif':
+    case 'image/heic-sequence':
+    case 'image/heif-sequence':
+      return 'webp';
     default:
       return 'webp';
   }
 }
 
 /** 编码路径种类：canvas 原生 / 各懒加载编码器 */
-export type EncoderKind = 'canvas' | 'avif' | 'tiff';
+export type EncoderKind = 'canvas' | 'avif' | 'tiff' | 'bmp' | 'gif';
 
 /**
  * 根据输出格式选择编码路径（纯函数，供 convertImage 分派与单测使用）。
@@ -200,7 +228,30 @@ export function pickEncoderKind(format: OutputFormat): EncoderKind {
       return 'avif';
     case 'tiff':
       return 'tiff';
+    case 'bmp':
+      return 'bmp';
+    case 'gif':
+      return 'gif';
   }
+}
+
+/**
+ * 判断文件是否为 SVG（MIME 或 .svg 扩展名，部分系统 MIME 为空）。
+ * @param file 用户上传的图片文件
+ */
+export function isSvgFile(file: File): boolean {
+  return file.type === 'image/svg+xml' || /\.svg$/i.test(file.name);
+}
+
+/**
+ * 判断文件是否为 HEIC/HEIF（MIME 含 -sequence 变体，或 .heic/.heif 扩展名——
+ * Windows 资源管理器常报空 MIME）。
+ * @param file 用户上传的图片文件
+ */
+export function isHeicFile(file: File): boolean {
+  return (
+    /^image\/hei[cf](-sequence)?$/.test(file.type) || /\.(heic|heif)$/i.test(file.name)
+  );
 }
 
 // ==================== 尺寸校验 ====================
@@ -232,14 +283,24 @@ export function checkCanvasLimits(
 /**
  * 加载图片文件为位图，自动纠正手机拍照的 EXIF 方向。
  *
- * TIFF 走 utif2 解码（浏览器原生不支持），其余格式走 createImageBitmap。
+ * 解码分派：SVG 走浏览器原生光栅化、HEIC/HEIF 走 libheif-js、TIFF 走 utif2
+ * （三者均为懒加载解码器），其余格式走 createImageBitmap。
  * 所有解码异常统一归一化为中文错误，避免底层库原始异常冒泡。
  *
  * @param file 用户上传的图片文件
  * @throws 当浏览器无法解码该文件时抛出，由调用方捕获并提示
  */
 export async function loadImage(file: File): Promise<LoadedImage> {
+  const isHeic = isHeicFile(file);
   try {
+    if (isSvgFile(file)) {
+      const { decodeSvg } = await import('./decoders/svg');
+      return await decodeSvg(file);
+    }
+    if (isHeic) {
+      const { decodeHeic } = await import('./decoders/heic');
+      return await decodeHeic(file);
+    }
     if (file.type === 'image/tiff') {
       const { decodeTiff } = await import('./decoders/tiff');
       return await decodeTiff(file);
@@ -247,8 +308,11 @@ export async function loadImage(file: File): Promise<LoadedImage> {
     const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
     return { bitmap, width: bitmap.width, height: bitmap.height };
   } catch {
+    // HEIC 单独提示：其失败与浏览器兼容无关（libheif 为 WASM），多为文件损坏或不支持的编码变体
     throw new Error(
-      '图片解码失败：可能文件损坏，或浏览器不支持该格式（如 AVIF 需 Chrome / 新版 Safari）',
+      isHeic
+        ? 'HEIC/HEIF 图片解码失败：文件可能已损坏，或包含本工具暂不支持的编码变体'
+        : '图片解码失败：可能文件损坏，或浏览器不支持该格式（如 AVIF 需 Chrome / 新版 Safari）',
     );
   }
 }
@@ -256,9 +320,10 @@ export async function loadImage(file: File): Promise<LoadedImage> {
 /**
  * 转换图片：按百分比缩放尺寸，再以指定格式/质量编码。
  *
- * - 无损格式（png/tiff）忽略 quality；
+ * - 无损格式（png/tiff/bmp）忽略 quality；
  * - fillBackground 为 true 时先在 canvas 填充白底（jpeg 透明→白）；
- * - avif/tiff 编码器懒加载。
+ *   BMP/GIF 保留透明，不做填充；
+ * - avif/tiff/bmp/gif 编码器懒加载，仅在命中对应格式时才取 ImageData。
  *
  * @param opts 转换选项
  * @returns 转换结果（含 object URL，调用方负责释放）
@@ -292,11 +357,24 @@ export async function convertImage(opts: ConvertOptions): Promise<ConvertResult>
     return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
   }
 
-  // 懒加载编码器（avif/tiff）
+  // 懒加载编码器（avif/tiff/bmp/gif）：统一在此处取 ImageData，canvas 路径不付这笔开销
   const imageData = ctx.getImageData(0, 0, width, height);
+
   if (format === 'avif') {
     const { encodeAvif } = await import('./encoders/avif');
     const blob = await encodeAvif(imageData, quality);
+    return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
+  }
+
+  if (format === 'gif') {
+    const { encodeGif } = await import('./encoders/gif');
+    const blob = await encodeGif(imageData, quality);
+    return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
+  }
+
+  if (format === 'bmp') {
+    const { encodeBmp } = await import('./encoders/bmp');
+    const blob = await encodeBmp(imageData);
     return { blob, url: URL.createObjectURL(blob), width, height, size: blob.size };
   }
 
