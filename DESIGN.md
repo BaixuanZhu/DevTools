@@ -367,9 +367,10 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 | 元素 | Class |
 |------|-------|
 | Container | `flex items-center justify-between px-6 py-2 border-b border-border bg-card h-[57px] shrink-0`（通栏，作为 `#app` flex 子项天然钉顶，无需 `sticky`） |
-| Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 右侧（暗色模式 · Gitee · GitHub） |
+| Layout | 左侧（汉堡按钮 mobile-only + Logo 全断点常驻）+ 中部（快捷入口 ≥lg）+ 右侧（暗色模式 · Gitee · GitHub） |
 | Logo | `group flex items-center gap-1.5 text-lg font-semibold`，全断点常驻；图标 `text-violet-600`，hover `-rotate-12` |
 | 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，点击调用 `sidebarStore.toggle()` |
+| 快捷入口 | `hidden lg:flex` 的 `<nav aria-label="常用工具">`（清单数据驱动于 `src/data/quick-links.ts`，≤6 个）；项为 `px-2 py-1 rounded-sm text-sm` 图标+名称，激活态与 Sidebar 激活分类同款 `bg-accent text-primary font-medium`，hover `bg-accent`，150ms 过渡 |
 | 暗色模式按钮 | `flex items-center gap-1.5 h-9 px-2` 文本 + 图标，点击调用 `themeStore.toggle()` 切换浅色/暗色（持久化于 localStorage） |
 | Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
 
