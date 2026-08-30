@@ -49,6 +49,8 @@ src/
 ├── tools/        # 工具页面（按分类子目录：text/、crypto/、format/、network/、datetime/、frontend/、devops/）
 ├── components/   # .vue 交互型 + .astro 纯展示
 │   ├── ui/       # shadcn-vue 组件库（button/card/dialog/sonner/tabs 等）+ 通用交互（ToggleSwitch、CopyButton 等）
+│   ├── media/    # 图片工具私有组件（ImageConverter 系列、IcoMaker 面板、Cropper/Lightbox 等）
+│   ├── config/   # 配置生成器共享表单层（Redis/MySQL/PostgreSQL 共用：ParamRow、NumberField、ConfigPreview 等）
 │   ├── layout/   # 布局（ToolHeader、Breadcrumb、RelatedTools、CategoryCard 等）
 │   └── shell/    # 全局壳层（Shell、SearchPanel、FeedbackForm）
 ├── composables/  # Vue 组合式函数（如 useCopy）
@@ -71,10 +73,11 @@ public/           # 不经处理的静态文件
 
 **Vue 单引擎**（2026-07 运行时统一 + shadcn-vue 重构完成，Alpine.js 已移除）：
 
-- **全局壳层** `Shell.vue`（唯一 `client:load` island）承载 Header / Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/
-  vue-sonner `<Toaster />` / 搜索 / 暗色切换。响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
-- **工具 islands** 每个工具独立 Vue 组件，按需 `client:idle`（默认）/ `client:load`（如 CronParser 需立即响应），`import` 同一批
-  store 模块。
+- **全局壳层** `Shell.vue`（全站 `client:load` 岛）承载 Header（含快捷入口：清单数据驱动于 `src/data/quick-links.ts`，仅 ≥lg
+  显示）/ Sidebar（7 分类入口 + 工具数徽标 + 当前分类高亮）/ vue-sonner `<Toaster />` / 主题三态切换（浅色/暗色/跟随系统）。
+  响应式状态来自 `src/stores/` 模块级 reactive store（ESM 单例，跨 island 共享）。
+- **其他 islands** 首页搜索 `SearchPanel.vue`（reka-ui Command，`client:load`，仅挂在首页）；每个工具独立 Vue 组件，按需
+  `client:idle`（默认）/ `client:load`（如 CronParser 需立即响应），`import` 同一批 store 模块。
 
 **通知通信**：任意组件直接调用 `toastStore.show/success/error(msg)`。`toastStore`（`src/stores/toast.ts`）保留原 API
 兼容调用方与历史测试，内部委派 vue-sonner 渲染（Shell 挂载的 `<Toaster />` 消费）。禁止 `CustomEvent` 字符串桥接、禁止引入全局状态库（Pinia
@@ -88,6 +91,9 @@ public/           # 不经处理的静态文件
 - 组件中 `new Worker(new URL('./path/to/worker.ts', import.meta.url), { type: 'module' })` 实例化，通过 `postMessage`/
   `onmessage` 交换数据
 - 参考：`src/utils/format/json-diff.worker.ts`、`src/utils/regex/regex.worker.ts`
+
+大型 wasm / 编码类依赖（`@jsquash/avif`、`libheif-js`、`gifenc`）一律动态 `import()` 懒加载，使其成为独立 chunk、禁止进主包
+（验收口径：主包 gzip 体积不因新格式/编码能力增长）。
 
 ## Testing
 
@@ -166,6 +172,7 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
 - 页面 title/布局用 Layout.astro / ToolLayout.astro，props 传标题
 - 水合策略：工具默认 `client:idle`，需立即响应用户输入的用 `client:load`（如 CronParser）；纯展示组件不加 `client:`，零 JS
 - 新增公共组件/工具函数必须写 JSDoc/TSDoc；可复用 Vue 逻辑优先封装到 `src/composables/`（如 `useCopy`）
+- 工具专属组件按领域就近放 `src/components/{domain}/`（如 `media/`、`config/`），仅跨工具复用的通用原语才进 `components/ui/`
 - **无路径别名**：不用 `@/`/`~/`，import 一律相对路径
 - **无 ESLint/Prettier**：靠 TS strict + 代码审查保证一致性
 - **测试位置**：单元测试放被测模块同目录的 `__tests__/`
