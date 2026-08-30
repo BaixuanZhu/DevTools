@@ -39,13 +39,13 @@
 
 | 分类 | slug | 工具数 | 代表工具 |
 |------|------|--------|----------|
-| 文本与编码 | `/text/` | 13 | Base64 编解码、JWT 编解码、URL 编解码、UUID 生成器、随机字符串、正则测试器 |
+| 文本与编码 | `/text/` | 12 | Base64 编解码、JWT 编解码、URL 编解码、UUID 生成器、随机字符串、正则测试器 |
 | 加密与安全 | `/crypto/` | 4 | 哈希生成器、对称加解密、非对称加解密、SM2 国密加解密 |
 | 格式化与转换 | `/format/` | 8 | JSON 格式化器、JSON 差异对比、JSON 转 XML/YAML、TOML/TypeScript 互转 |
 | 网络工具 | `/network/` | 6 | URL 解析器、HTTP 状态码查询、IPv4 子网计算器、设备信息 |
 | 日期时间 | `/datetime/` | 3 | 日期时间转换器、Cron 表达式解析器、时间差计算 |
-| 前端与媒体 | `/frontend/` | 8 | CSS 单位换算、渐变生成器、颜色面板、二维码、图片转换、幻影坦克 |
-| 开发与运维 | `/devops/` | 7 | Docker 配置转换、Env 转换、Meta/robots/sitemap 生成、Markdown 编辑器 |
+| 前端与媒体 | `/frontend/` | 9 | CSS 单位换算、渐变生成器、颜色面板、二维码、图片转换、ICO 图标制作、幻影坦克 |
+| 开发与运维 | `/devops/` | 10 | Docker 配置转换、Env 转换、Meta/robots/sitemap 生成、Redis/PostgreSQL 配置生成、Markdown 编辑器 |
 
 > 分类元数据（描述、图标）位于 `src/data/categories.ts`，工具注册表位于 `src/data/tools.ts`，本表应与其保持同步。
 
