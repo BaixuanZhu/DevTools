@@ -207,8 +207,7 @@ function handleClear(): void {
               <span
                 v-for="chip in keywordChips"
                 :key="chip"
-                class="chip chip-default"
-                style="cursor: default; padding: 2px 10px; font-size: 0.75rem;"
+                class="inline-block cursor-default rounded-full border border-border bg-card px-2.5 py-0.5 text-xs text-muted-foreground"
               >{{ chip }}</span>
             </div>
           </div>
