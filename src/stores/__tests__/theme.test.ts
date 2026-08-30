@@ -27,12 +27,14 @@ function mockDom(prefersDark = false) {
       delete store[k];
     },
   });
-  // matchMedia mock
+  // matchMedia mock。store 经 window.matchMedia + SSR 守卫读取系统偏好
+  // （node 环境无全局 window），因此必须挂在 window 对象内而非全局裸名。
   const mql = {
     matches: prefersDark,
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
   };
+  vi.stubGlobal('window', { matchMedia: () => mql });
   vi.stubGlobal('matchMedia', () => mql);
   return { classSet, store, mql };
 }
@@ -43,6 +45,10 @@ describe('themeStore', () => {
     themeStore.current.value = 'light';
     vi.unstubAllGlobals();
     mockDom(false);
+    // store 的媒体查询监听器是模块级单例：显式走一次 apply('light') 让上一条
+    // 用例注册的监听器（挂在旧 mock 的 mql 上）被 teardown，避免「已注册」
+    // 早退导致本条用例的新 mql spy 收不到 addEventListener。
+    themeStore.apply('light');
   });
 
   it('apply(dark) 切换 html.dark 并持久化 dark', () => {
