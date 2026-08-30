@@ -9,6 +9,8 @@
  * - Toaster（Sonner，全局 Toast 容器，替代 ToastContainer.vue）
  *
  * 桌面端侧边栏保持静态常驻（原项目布局不变），仅移动端走 Sheet。
+ * Header 中部（≥lg 断点）渲染快捷入口 nav，清单由 layouts 经 quickLinks prop 传入
+ * （数据源 src/data/quick-links.ts，Shell 不直接 import 工具注册表）。
  */
 import { onMounted } from 'vue';
 import { Wrench, Sun, Moon, Menu, Check, Monitor } from '@lucide/vue';
@@ -18,6 +20,7 @@ import {
 } from 'reka-ui';
 import type { ToolMeta } from '../../data/tools';
 import type { CategoryMeta } from '../../data/categories';
+import type { QuickLinkTool } from '../../data/quick-links';
 import { sidebarStore } from '../../stores/sidebar';
 import { themeStore } from '../../stores/theme';
 import { Button, buttonVariants } from '../ui/button';
@@ -26,11 +29,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '../ui/sheet';
 import { Toaster } from '../ui/sonner';
 
 interface Props {
+  /** 分类元数据列表（Sidebar 桌面常驻 + 移动 Sheet 共用） */
   categories: CategoryMeta[];
+  /** 分类名 → 工具元数据子集映射（Sidebar 工具数徽标用） */
   toolsByCategory: Record<string, Pick<ToolMeta, 'id' | 'path' | 'name' | 'icon'>[]>;
+  /** 当前页面路径（激活态匹配依据） */
   currentPath: string;
+  /** Header 中部快捷入口清单（≥lg 渲染）；缺省为 [] 时不渲染，向后兼容 */
+  quickLinks?: QuickLinkTool[];
 }
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), { quickLinks: () => [] });
 
 const { isOpen } = sidebarStore;
 const { mode, current } = themeStore;
@@ -78,7 +86,25 @@ function renderCategory(cat: CategoryMeta): { href: string; active: boolean; cou
         </a>
       </div>
 
-      <div class="flex items-center gap-3">
+      <!-- 快捷入口：清单由 quick-links.ts 驱动，lg 以下 hidden 不渲染 -->
+      <nav
+        v-if="quickLinks.length"
+        aria-label="常用工具"
+        class="hidden lg:flex items-center gap-1 min-w-0 mx-4"
+      >
+        <a
+          v-for="t in quickLinks"
+          :key="t.id"
+          :href="t.path"
+          class="flex items-center gap-1.5 px-2 py-1 rounded-sm text-sm whitespace-nowrap transition-[background-color,color] duration-150 hover:bg-accent focus:outline-none"
+          :class="currentPath === t.path ? 'bg-accent text-primary font-medium' : 'text-foreground'"
+        >
+          <span class="text-base shrink-0" aria-hidden="true">{{ t.icon }}</span>
+          {{ t.name }}
+        </a>
+      </nav>
+
+      <div class="flex items-center gap-3 ml-auto">
         <!-- 主题切换：直接使用 reka-ui 原语（浅色/暗色/跟随系统 三态）-->
         <DropdownMenuRoot>
           <DropdownMenuTrigger

@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
 import { describe, it, expect, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
+import { nextTick } from 'vue';
 import Shell from '../Shell.vue';
 import { sidebarStore } from '../../../stores/sidebar';
 import { themeStore } from '../../../stores/theme';
 import type { CategoryMeta } from '../../../data/categories';
+import type { QuickLinkTool } from '../../../data/quick-links';
 
 const categories: CategoryMeta[] = [
   { name: '文本与编码', slug: 'text', icon: '🔤', description: '文本处理与编码' },
@@ -18,6 +20,11 @@ const toolsByCategory = {
     { id: 'hash-generator', name: '哈希生成器', icon: '🔒', path: '/crypto/hash-generator' },
   ],
 };
+const quickLinks: QuickLinkTool[] = [
+  { id: 'json-formatter', path: '/format/json-formatter', name: 'JSON 格式化', icon: '{ }' },
+  { id: 'base64', path: '/text/base64', name: 'Base64', icon: '🔐' },
+  { id: 'tester', path: '/text/tester', name: '正则测试器', icon: '🎯' },
+];
 
 describe('Shell.vue', () => {
   beforeEach(() => {
@@ -39,14 +46,17 @@ describe('Shell.vue', () => {
     expect(wrapper.text()).toContain('页面内容');
   });
 
-  it('点击汉堡按钮 → sidebarStore.isOpen 变 true，aside 获得 sidebar-open', async () => {
+  it('点击汉堡按钮 → sidebarStore.isOpen 变 true，移动端 Sheet 抽屉经 portal 打开', async () => {
     const wrapper = mount(Shell, {
       props: { categories, toolsByCategory, currentPath: '/' },
     });
     expect(sidebarStore.isOpen.value).toBe(false);
     await wrapper.find('[aria-label="打开导航菜单"]').trigger('click');
     expect(sidebarStore.isOpen.value).toBe(true);
-    expect(wrapper.find('aside').classes()).toContain('sidebar-open');
+    // shadcn Sheet 重构后桌面 aside 不再有 sidebar-open；抽屉内容经 DialogPortal 渲染到 body
+    await nextTick();
+    await nextTick();
+    expect(document.body.querySelector('nav[aria-label="工具导航（移动端）"]')).not.toBeNull();
   });
 
   it('Header 不再包含收藏入口', () => {
@@ -89,5 +99,61 @@ describe('Shell.vue', () => {
       props: { categories, toolsByCategory, currentPath: '/text' },
     });
     expect(wrapper.find('aside a[href="/text"]').classes()).toContain('bg-accent');
+  });
+
+  it('传入 quickLinks 时 Header 中部 nav 按清单顺序渲染入口（文本与 href 一致）', () => {
+    const wrapper = mount(Shell, {
+      props: { categories, toolsByCategory, currentPath: '/', quickLinks },
+    });
+    const nav = wrapper.find('nav[aria-label="常用工具"]');
+    expect(nav.exists()).toBe(true);
+    const links = nav.findAll('a');
+    expect(links).toHaveLength(3);
+    expect(links.map((a) => a.attributes('href'))).toEqual([
+      '/format/json-formatter',
+      '/text/base64',
+      '/text/tester',
+    ]);
+    // 名称渲染（图标 aria-hidden，文本可读）
+    expect(links[0].text()).toContain('JSON 格式化');
+    expect(links[1].text()).toContain('Base64');
+    expect(links[2].text()).toContain('正则测试器');
+    // <lg 断点隐藏是 CSS 行为，断言类名存在即可
+    expect(nav.classes()).toContain('hidden');
+    expect(nav.classes()).toContain('lg:flex');
+  });
+
+  it('currentPath 命中某入口时仅该项为激活态（text-primary）', () => {
+    const wrapper = mount(Shell, {
+      props: { categories, toolsByCategory, currentPath: '/text/base64', quickLinks },
+    });
+    // findAll 每次返回新 wrapper 实例，不能按对象身份过滤，按 href 区分
+    const links = wrapper.findAll('nav[aria-label="常用工具"] a');
+    const active = links.filter((a) => a.attributes('href') === '/text/base64');
+    expect(active).toHaveLength(1);
+    expect(active[0].classes()).toContain('text-primary');
+    for (const a of links) {
+      if (a.attributes('href') !== '/text/base64') {
+        expect(a.classes()).not.toContain('text-primary');
+      }
+    }
+  });
+
+  it('currentPath 无匹配（首页）时快捷入口无激活项', () => {
+    const wrapper = mount(Shell, {
+      props: { categories, toolsByCategory, currentPath: '/', quickLinks },
+    });
+    const links = wrapper.findAll('nav[aria-label="常用工具"] a');
+    expect(links.length).toBeGreaterThan(0);
+    for (const a of links) {
+      expect(a.classes()).not.toContain('text-primary');
+    }
+  });
+
+  it('quickLinks 缺省时不渲染快捷入口 nav（向后兼容）', () => {
+    const wrapper = mount(Shell, {
+      props: { categories, toolsByCategory, currentPath: '/' },
+    });
+    expect(wrapper.find('nav[aria-label="常用工具"]').exists()).toBe(false);
   });
 });

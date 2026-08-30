@@ -1,0 +1,5 @@
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "Shell.vue 组件 props/样式/aria 约定，新增 nav 与 prop 需遵循"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "Shell 是唯一 client:load 岛，layouts→props 数据流约定"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁（build/test/astro check）与测试位置约定"}
+{"file": "DESIGN.md", "reason": "Header 组件规范、令牌、激活态规则（primary 仅激活态）、150ms 过渡"}
+{"file": "PRODUCT.md", "reason": "导航结构与性能基线（Header 属全局壳层）"}
