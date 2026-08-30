@@ -5,7 +5,7 @@ import Breadcrumb from '../components/layout/Breadcrumb.astro';
 import RelatedTools from '../components/layout/RelatedTools.astro';
 import Shell from '../components/shell/Shell.vue';
 import { ChevronDown } from '@lucide/astro';
-import { getToolsByCategory, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
+import { getToolsByCategory, getStandaloneTools, getToolBySlug, getToolById, slugCategoryMap } from '../data/tools';
 import { getQuickLinkTools } from '../data/quick-links';
 import { categories as categoryMetas } from '../data/categories';
 import { getToolFaqs } from '../data/tool-faqs';
@@ -33,6 +33,9 @@ const toolsByCategory = getToolsByCategory();
 
 /** Header 快捷入口清单（服务端解析为最小子集后传给 Shell，序列化体积最小） */
 const quickLinks = getQuickLinkTools();
+
+/** 独立工作台工具清单（Sidebar 顶部一级菜单区，服务端解析为最小子集） */
+const standaloneTools = getStandaloneTools().map(({ id, path, name, icon }) => ({ id, path, name, icon }));
 
 /** 通过 toolId 查找工具元数据 */
 const toolMeta = toolId ? getToolBySlug(toolId) : undefined;
@@ -167,6 +170,7 @@ const allJsonLd: object[] = [
     toolsByCategory={toolsByCategory}
     currentPath={currentPath}
     quickLinks={quickLinks}
+    standaloneTools={standaloneTools}
   >
     <!-- 内容列（Shell 的默认 slot）：server 渲染注入 -->
     <div class="flex-1 flex flex-col overflow-x-hidden overflow-y-auto min-w-0">

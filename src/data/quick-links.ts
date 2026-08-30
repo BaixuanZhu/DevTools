@@ -8,8 +8,8 @@
  */
 import { getToolById, type ToolMeta } from './tools';
 
-/** Header 快捷入口展示所需的工具元数据子集（图标 + 名称 + 路径） */
-export type QuickLinkTool = Pick<ToolMeta, 'id' | 'path' | 'name' | 'icon'>;
+/** Header 快捷入口展示所需的工具元数据子集（图标 + 名称 + 路径 + 独立形态标记） */
+export type QuickLinkTool = Pick<ToolMeta, 'id' | 'path' | 'name' | 'icon' | 'standalone'>;
 
 /** 快捷入口精选工具 id（有序，按使用频次预估降序） */
 export const QUICK_LINK_TOOL_IDS: string[] = [
@@ -39,7 +39,7 @@ export function getQuickLinkTools(): QuickLinkTool[] {
       }
       continue;
     }
-    result.push({ id: tool.id, path: tool.path, name: tool.name, icon: tool.icon });
+    result.push({ id: tool.id, path: tool.path, name: tool.name, icon: tool.icon, standalone: tool.standalone });
   }
   return result;
 }

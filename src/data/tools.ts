@@ -29,12 +29,18 @@ export interface ToolMeta {
   description: string;
   /** SEO 专用描述（120-160 字符，用于 meta description） */
   seoDescription: string;
-  /** 分类 */
-  category: ToolCategory;
+  /** 所属分类（独立工作台形态的工具不归属任何分类，省略此字段并以 standalone 标记） */
+  category?: ToolCategory;
   /** 图标（emoji） */
   icon: string;
-  /** 路由路径（常规为二级路径格式 /category/id；旗舰工作台例外为单段路径，如 /markdown） */
+  /** 路由路径（常规为二级路径格式 /category/id；独立工作台为单段路径，如 /markdown） */
   path: string;
+  /**
+   * 独立工作台形态标记。
+   * 标记后：不进分类页聚合与 Sidebar 徽标、Sidebar 出现独立一级入口、
+   * 全站所有指向该工具的链接一律新标签页打开（target="_blank"）。
+   */
+  standalone?: true;
   /** 页面 <title> 覆盖（可选，不传则自动拼接 "{name} - DevTools"） */
   title?: string;
   /** 长尾关键词列表，用于 meta keywords 标签及内部选题参考 */
@@ -358,9 +364,9 @@ export const tools: ToolMeta[] = [
     name: 'Markdown 编辑器',
     description: '独立全屏 Markdown 工作台：多文档草稿箱、编辑/分栏/预览三视图，支持 mermaid 图表、数学公式、图片粘贴与导入导出，纯浏览器端运行',
     seoDescription: '免费在线 Markdown 工作台，独立全屏编辑器支持多文档草稿箱自动保存与刷新恢复、仅编辑/分栏/仅预览三视图切换、mermaid 流程图与 KaTeX 数学公式渲染、图片粘贴拖拽 base64 内联、导入 .md 文件并导出 Markdown/HTML/PDF，纯浏览器端运行数据绝不上传。',
-    category: '开发与运维',
     icon: '✏️',
     path: '/markdown',
+    standalone: true,
     keywords: [
       'markdown 编辑器',
       'markdown 工作台',
@@ -645,10 +651,11 @@ export function getToolBySlug(toolId: string): ToolMeta | undefined {
   return getToolById(slug);
 }
 
-/** 按分类分组工具列表 */
+/** 按分类分组工具列表（独立工作台工具不归属分类，不参与分组） */
 export function getToolsByCategory(): Record<ToolCategory, ToolMeta[]> {
   return tools.reduce(
     (acc, tool) => {
+      if (!tool.category) return acc;
       if (!acc[tool.category]) {
         acc[tool.category] = [];
       }
@@ -659,14 +666,21 @@ export function getToolsByCategory(): Record<ToolCategory, ToolMeta[]> {
   );
 }
 
-/** 获取所有分类（去重，保持注册顺序） */
+/** 获取独立工作台形态的工具（Sidebar 一级菜单入口来源，按注册顺序） */
+export function getStandaloneTools(): ToolMeta[] {
+  return tools.filter((t) => t.standalone);
+}
+
+/** 获取所有分类（去重，保持注册顺序；独立工作台工具无分类，不参与） */
 export function getCategories(): ToolCategory[] {
   const seen = new Set<ToolCategory>();
-  return tools.filter((t) => {
-    if (seen.has(t.category)) return false;
-    seen.add(t.category);
-    return true;
-  }).map((t) => t.category);
+  return tools.reduce<ToolCategory[]>((acc, t) => {
+    if (t.category && !seen.has(t.category)) {
+      seen.add(t.category);
+      acc.push(t.category);
+    }
+    return acc;
+  }, []);
 }
 
 /** 获取指定工具的相关工具列表（最多 4 个，过滤无效 ID） */

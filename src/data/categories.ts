@@ -54,6 +54,6 @@ export const categories: CategoryMeta[] = [
     name: '开发与运维',
     slug: 'devops',
     icon: '🐳',
-    description: 'Docker/Env 配置转换、Meta/robots/sitemap 生成与 Markdown 编辑器',
+    description: 'Docker/Env 配置转换、Meta/robots/sitemap 生成与 Redis/PostgreSQL 配置生成',
   },
 ];

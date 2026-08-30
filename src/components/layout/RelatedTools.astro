@@ -28,6 +28,8 @@ const relatedTools: ToolMeta[] = toolIds
       <div class="relative flex h-full">
         <a
           href={tool.path}
+          target={tool.standalone ? '_blank' : undefined}
+          rel={tool.standalone ? 'noopener noreferrer' : undefined}
           class="flex h-full w-full items-start gap-4 rounded-xl border border-border bg-card p-5 text-card-foreground shadow transition-[border-color,box-shadow] duration-150 hover:border-primary hover:shadow-md"
         >
           <span class="mt-0.5 shrink-0 text-[1.75rem] leading-none">{tool.icon}</span>

@@ -3,7 +3,7 @@
  * 首页搜索面板（client:load 岛）—— 基于 shadcn-vue Command（reka-ui Listbox）。
  *
  * 行为：输入实时匹配 tools（name/keywords/description）→ 自行 computed 过滤
- * → 键盘导航（↑↓ Enter）→ 选中直达 tool.path（MPA 全页跳转）。
+ * → 键盘导航（↑↓ Enter）→ 选中直达 tool.path（MPA 全页跳转；独立工作台新标签页打开）。
  *
  * 注：reka-ui Listbox 不提供内置 filterFunction，过滤逻辑由本组件 computed 完成。
  */
@@ -32,6 +32,11 @@ const filteredTools = computed<ToolMeta[]>(() => {
 });
 
 function go(tool: ToolMeta): void {
+  // 独立工作台形态的工具固定新标签页打开（全站链接规范，见 ToolMeta.standalone）
+  if (tool.standalone) {
+    window.open(tool.path, '_blank', 'noopener');
+    return;
+  }
   window.location.href = tool.path;
 }
 

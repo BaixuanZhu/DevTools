@@ -6,8 +6,8 @@
  * - onMounted 调 themeStore.load() 恢复主题，顶栏提供三态切换控件（与 Shell 同款交互）
  * - 挂载 vue-sonner <Toaster />（独立页没有 Shell，toastStore 必须有渲染目标）
  *
- * 内核 md-editor-v3：仅编辑/分栏/仅预览三视图 + 多文档草稿箱（doc-store 自动保存）
- * + 图片粘贴/拖拽 base64 内联 + 导入 .md / 导出 md·html·PDF。
+ * 内核 md-editor-v3：分栏/仅编辑/仅预览的视图切换由其内置工具栏提供（preview / previewOnly 按钮）
+ * + 多文档草稿箱（doc-store 自动保存）+ 图片粘贴/拖拽 base64 内联 + 导入 .md / 导出 md·html·PDF。
  *
  * 扩展库全量本地化：md-editor-v3 默认在运行时从 unpkg CDN 加载 mermaid/katex/highlight.js/
  * prettier/cropper/screenfull/echarts（面向国内用户可达性不稳定），此处通过 config() 注入本地实例，
@@ -15,11 +15,10 @@
  * 被替代的 CDN 样式（katex 字体、cropper、hljs 主题）由本组件自行 import，暗色 hljs 主题
  * 以 .dark 作用域覆盖浅色基底。
  */
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { MdEditor, MdPreview, config } from 'md-editor-v3';
-// md-editor-v3 6.x 样式引入：style.css 为编辑器全量样式，preview.css 供 MdPreview 消费
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { MdEditor, config } from 'md-editor-v3';
+// md-editor-v3 6.x 样式引入：style.css 为编辑器全量样式（含内置预览区样式）
 import 'md-editor-v3/lib/style.css';
-import 'md-editor-v3/lib/preview.css';
 import type { ToolbarNames, UploadImgCallBack, UploadImgEvent } from 'md-editor-v3';
 
 // ---- md-editor 扩展库本地实例（替代 unpkg CDN，见文件头说明）----
@@ -63,7 +62,7 @@ import 'cropperjs1/dist/cropper.css';
 import 'highlight.js/styles/atom-one-light.css';
 
 import {
-  Check, Columns2, Download, Eye, FilePlus2, FileUp, Monitor, Moon, PanelLeft, SquarePen, Sun,
+  Check, Download, FilePlus2, FileUp, Monitor, Moon, PanelLeft, Sun,
 } from '@lucide/vue';
 import { DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuPortal } from 'reka-ui';
 import { Button, buttonVariants } from '../../components/ui/button';
@@ -106,7 +105,7 @@ for (const [name, lang] of HIGHLIGHT_LANGUAGES) {
 }
 
 /**
- * 注入 md-editor 全局扩展配置（模块级执行：先于任何 MdEditor/MdPreview 实例挂载）。
+ * 注入 md-editor 全局扩展配置（模块级执行：先于任何编辑器实例挂载）。
  * md-editor 源码守卫为「instance 存在即跳过对应 unpkg script/link 的追加」，
  * 至此编辑器在离线/被墙环境具备全部能力（mermaid/katex/高亮/格式化/裁剪/全屏/echarts 图表）。
  *
@@ -129,9 +128,6 @@ config({
   },
 });
 
-/** 工作台三视图模式：仅编辑 / 分栏 / 仅预览 */
-type WorkstationViewMode = 'edit' | 'split' | 'preview';
-
 /** 自动保存防抖时长（ms），与任务约定一致 */
 const AUTOSAVE_DELAY_MS = 300;
 
@@ -146,7 +142,7 @@ const WELCOME_CONTENT = `# Markdown 工作台
 
 ## 任务列表
 
-- [x] 仅编辑 / 分栏 / 仅预览三视图
+- [x] 工具栏一键切换 分栏 / 仅编辑 / 仅预览
 - [x] 多文档草稿箱，左侧随时切换
 - [ ] 把这份文档改成你自己的内容
 
@@ -186,24 +182,8 @@ graph LR
 
 > 提示：所有内容仅保存在浏览器 localStorage，不会上传到任何服务器。`;
 
-/** 视图模式分段控件定义（图标 + 无障碍文案） */
-const VIEW_MODES: Array<{ key: WorkstationViewMode; label: string }> = [
-  { key: 'edit', label: '仅编辑' },
-  { key: 'split', label: '分栏' },
-  { key: 'preview', label: '仅预览' },
-];
-
 /** 隐藏的工具栏项：github 是 md-editor 仓库外链，与独立工作台无关 */
 const TOOLBARS_EXCLUDE: ToolbarNames[] = ['github'];
-
-/** 视图模式按钮基础样式 */
-const viewBtnBase =
-  'flex items-center justify-center h-9 w-9 rounded-sm border transition-[background-color,border-color,color] duration-150';
-/** 视图模式按钮选中态 */
-const viewBtnActive = 'bg-primary border-primary text-primary-foreground';
-/** 视图模式按钮未选中态 */
-const viewBtnInactive =
-  'bg-transparent border-transparent text-muted-foreground hover:bg-accent hover:text-foreground';
 
 // 主题 store 的解构（Shell 同款）：ref 在模板中自动解包
 const { mode: themeMode, current: resolvedTheme } = themeStore;
@@ -214,8 +194,6 @@ const docs = ref<MarkdownDoc[]>([]);
 const activeId = ref<string | null>(null);
 /** 当前活动文档正文（编辑器双向绑定源） */
 const content = ref('');
-/** 视图模式（默认分栏：打开即同时看到编辑与渲染效果） */
-const viewMode = ref<WorkstationViewMode>('split');
 /**
  * 侧栏开合。client:only 岛的 setup 仅在浏览器执行（无 SSR 水合不匹配风险），
  * 故可直接按视口宽度取初值：桌面展开、移动端收起。
@@ -438,11 +416,16 @@ function handleExportHtml(): void {
   }
 }
 
-/** 导出 PDF：先切到仅预览视图（打印样式只输出预览内容），再调用浏览器打印 */
-async function handleExportPdf(): Promise<void> {
+/**
+ * 导出 PDF：打印编辑器当前预览区（分栏模式的预览栏或内置「仅预览」视图均可，
+ * 打印样式见文件尾部 @media print 块）。用户通过内置工具栏关闭预览后无预览 DOM，予以提示。
+ */
+function handleExportPdf(): void {
+  if (!document.querySelector('.md-editor-preview')) {
+    toastStore.error('当前无预览内容，请先通过工具栏恢复预览再导出 PDF');
+    return;
+  }
   try {
-    viewMode.value = 'preview';
-    await nextTick();
     exportPdf();
   } catch {
     toastStore.error('导出失败，请重试');
@@ -547,23 +530,7 @@ function handleEditorSave(): void {
         @change="handleTitleInput"
       />
 
-      <!-- 视图模式分段控件 -->
-      <div class="flex items-center gap-0.5" role="group" aria-label="视图模式">
-        <button
-          v-for="vm in VIEW_MODES"
-          :key="vm.key"
-          type="button"
-          :class="[viewBtnBase, viewMode === vm.key ? viewBtnActive : viewBtnInactive]"
-          :aria-pressed="viewMode === vm.key"
-          :title="vm.label"
-          :aria-label="vm.label"
-          @click="viewMode = vm.key"
-        >
-          <SquarePen v-if="vm.key === 'edit'" :size="16" />
-          <Columns2 v-else-if="vm.key === 'split'" :size="16" />
-          <Eye v-else :size="16" />
-        </button>
-      </div>
+      <!-- 视图切换由 md-editor 内置工具栏提供（preview / previewOnly），不再自建分段控件 -->
 
       <!-- 主题三态切换（复用 themeStore，交互与 Shell 同款） -->
       <DropdownMenuRoot>
@@ -632,11 +599,9 @@ function handleEditorSave(): void {
       </aside>
 
       <main class="flex-1 min-w-0 min-h-0">
-        <!-- 仅编辑 / 分栏：md-editor 完整编辑器（仅编辑时关闭预览栏） -->
+        <!-- md-editor 完整编辑器：分栏为默认形态，仅编辑/仅预览经其内置工具栏切换 -->
         <MdEditor
-          v-if="viewMode !== 'preview'"
           v-model="content"
-          :preview="viewMode === 'split'"
           :theme="resolvedTheme"
           language="zh-CN"
           auto-focus
@@ -646,10 +611,6 @@ function handleEditorSave(): void {
           @onUploadImg="handleUploadImg"
           @onSave="handleEditorSave"
         />
-        <!-- 仅预览：MdPreview 只读组件（与编辑器共享同一套扩展与主题配置） -->
-        <div v-else class="h-full overflow-y-auto print-area">
-          <MdPreview :model-value="content" :theme="resolvedTheme" language="zh-CN" />
-        </div>
       </main>
     </div>
 
@@ -733,22 +694,28 @@ function handleEditorSave(): void {
   text-decoration: underline;
 }
 
-/* PDF 导出打印样式：仅显示预览区内容（进入仅预览视图后触发打印） */
+/*
+ * PDF 导出打印样式：仅显示 md-editor 预览区。
+ * 分栏模式与内置「仅预览」视图的预览内容都是 .md-editor-preview（前者多包一层 -preview-wrapper），
+ * 固定定位使其脱离编辑器的滚动容器与分栏宽度限制，占满打印页。
+ */
 @media print {
   body * {
     visibility: hidden;
   }
-  .print-area,
-  .print-area * {
+  .md-editor-preview,
+  .md-editor-preview * {
     visibility: visible;
   }
-  .print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
+  .md-editor-preview {
+    position: fixed;
+    inset: 0;
     width: 100%;
+    max-width: none;
     max-height: none;
     overflow: visible;
+    padding: 2rem;
+    background: #fff;
   }
 }
 </style>
