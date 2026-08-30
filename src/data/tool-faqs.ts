@@ -285,11 +285,19 @@ const toolFaqs: Record<string, FaqItem[]> = {
     },
     {
       question: '支持哪些图片格式？',
-      answer: '读取（输入）支持 <strong>PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF</strong>；转换（输出）支持 <strong>PNG / JPG / WebP / AVIF / TIFF</strong>。其中 GIF / BMP / ICO 仅作为输入读取，转换时需选择其他输出格式；需要生成或解析 ICO 请使用「ICO 图标制作」工具。',
+      answer: '读取（输入）支持 <strong>PNG / JPG / WebP / AVIF / SVG / HEIC / GIF / BMP / ICO / TIFF</strong>；转换（输出）支持 <strong>PNG / JPG / WebP / AVIF / TIFF / GIF / BMP</strong>。其中 GIF 输出为静态单帧、BMP 保留透明；需要生成或解析 ICO 请使用「ICO 图标制作」工具。',
     },
     {
       question: '为什么 GIF 转换后不会动？',
-      answer: '本工具按<strong>单张静态图</strong>处理，GIF 输入时只取<strong>第一帧</strong>。如需保留动画（多帧、帧率、循环），属于动图编辑场景，不在本工具范围内。',
+      answer: '本工具按<strong>单张静态图</strong>处理：GIF 输入只取<strong>第一帧</strong>，输出 GIF 同样是<strong>静态单帧</strong>，不做逐帧编辑。如需保留动画（多帧、帧率、循环），属于动图编辑场景，不在本工具范围内。',
+    },
+    {
+      question: '为什么输出 BMP 特别大？',
+      answer: 'BMP 是<strong>未压缩</strong>的位图格式，按像素原样存储（32 位下每像素 4 字节），体积远大于 PNG / WebP 等压缩格式，属预期行为。适合需要<strong>无损原始像素</strong>、供其他程序读取的场景；追求小体积请选 WebP / PNG。',
+    },
+    {
+      question: 'HEIC 是什么？为什么首次转换要等一下？',
+      answer: 'HEIC / HEIF 是 iPhone 默认的拍照格式，压缩率高但浏览器普遍不支持直接解码。本工具内置 WASM 解码器，<strong>仅在首次导入 HEIC 时才加载</strong>（约数秒，之后复用），全程本地解码、文件不上传。随后可转为 PNG / WebP 等通用格式。',
     },
     {
       question: 'AVIF 编码为什么比较慢？',

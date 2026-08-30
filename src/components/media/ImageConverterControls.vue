@@ -58,6 +58,9 @@ const qualityDisabled = computed(() => isLossless(props.params.format));
 
     <div class="min-h-5 text-[0.8125rem] text-muted-foreground">
       <p v-if="hasItems && params.format === 'jpeg'" class="m-0">JPEG 不支持透明背景，透明区域将填充白色</p>
+      <p v-else-if="hasItems && params.format === 'gif'" class="m-0">
+        GIF 输出为静态单帧，质量对应调色板颜色数：越低色彩越少、体积越小
+      </p>
     </div>
   </div>
 </template>

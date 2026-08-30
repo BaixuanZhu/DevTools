@@ -477,12 +477,12 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-converter',
     name: '图片转换与压缩',
-    description: 'PNG / JPG / WebP / AVIF 等格式互转与质量压缩、尺寸缩放，支持 EXIF 隐私擦除（无损去除 GPS 与设备信息）和逐图裁切，纯浏览器端本地处理',
-    seoDescription: '免费在线图片转换与压缩工具，支持多图批量处理（一次最多 30 张），PNG、JPG、WebP、AVIF、TIFF 格式互转与读取 GIF、BMP、ICO，自定义质量压缩与按比例尺寸缩放；可逐图裁切、点击预览转换结果、一键打包 ZIP 下载；内置 EXIF 隐私擦除（默认开启，无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，即开即用。',
+    description: 'PNG / JPG / WebP / AVIF / GIF / BMP 等格式互转与质量压缩、尺寸缩放，支持 SVG / HEIC 导入、EXIF 隐私擦除（无损去除 GPS 与设备信息）和逐图裁切，纯浏览器端本地处理',
+    seoDescription: '免费在线图片转换与压缩工具，支持多图批量处理（一次最多 30 张），输出 PNG、JPG、WebP、AVIF、TIFF、GIF、BMP，读取 SVG、HEIC、GIF、BMP、ICO，自定义质量压缩与按比例尺寸缩放；可逐图裁切、点击预览转换结果、一键打包 ZIP 下载；内置 EXIF 隐私擦除（默认开启，无损去除 GPS 定位、设备型号、拍摄时间等元数据），纯浏览器端本地处理图片绝不上传，即开即用。',
     category: '前端与媒体',
     icon: '🗜️',
     path: '/frontend/image-converter',
-    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩', 'avif 转换', 'tiff 转 png', '图片转 avif', 'gif 转 png', 'exif 擦除', '去除 exif', '图片去隐私', '去除 gps 信息', '删除拍摄位置', '元数据清除'],
+    keywords: ['图片压缩', '图片格式转换', 'png 转 webp', 'jpg 压缩', '在线图片压缩', '图片缩小', 'webp 转换', '图片体积压缩', 'avif 转换', 'tiff 转 png', '图片转 avif', 'gif 转 png', 'svg 转 png', 'heic 转 jpg', 'heic 转 png', '图片转 gif', '图片转 bmp', 'exif 擦除', '去除 exif', '图片去隐私', '去除 gps 信息', '删除拍摄位置', '元数据清除'],
     relatedToolIds: ['ico-maker', 'base64-to-image', 'qr-code-generator'],
   },
   {

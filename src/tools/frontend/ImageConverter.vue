@@ -119,7 +119,7 @@ onUnmounted(() => {
   <div>
     <ToolHeader
       title="图片转换与压缩"
-      description="批量将 PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除与逐图裁切，纯浏览器端本地处理"
+      description="批量将 PNG / JPG / WebP / AVIF / GIF / BMP 等格式互转，支持 SVG / HEIC 导入、质量压缩与尺寸缩放，支持 EXIF 隐私擦除与逐图裁切，纯浏览器端本地处理"
       :show-example="false"
     />
 
@@ -157,7 +157,7 @@ onUnmounted(() => {
       @click="pick" @drop="onDrop" @dragover="onDragOver" @dragleave="onDragLeave"
     >
       <div class="text-sm text-foreground">拖入图片 / 点击选择 / Ctrl+V 粘贴（最多 30 张）</div>
-      <div class="text-xs text-muted-foreground mt-1">支持 PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF，单张上限 50MB</div>
+      <div class="text-xs text-muted-foreground mt-1">支持 PNG / JPG / WebP / AVIF / SVG / HEIC / GIF / BMP / ICO / TIFF，单张上限 50MB</div>
     </div>
 
     <div v-else class="flex flex-col gap-2" @drop="onDrop" @dragover="onDragOver" @dragleave="onDragLeave">

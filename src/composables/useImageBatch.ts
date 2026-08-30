@@ -209,7 +209,10 @@ export function useImageBatch(params: ConvertParams) {
     }
 
     for (const file of accepted) {
-      if (!file.type.startsWith('image/')) {
+      // Windows 下拖入的 .svg/.heic/.heif 常报空 MIME，需按扩展名放行（loadImage 内含同口径判定）
+      const knownImage =
+        file.type.startsWith('image/') || /\.(svg|heic|heif)$/i.test(file.name);
+      if (!knownImage) {
         errorMsg.value = `「${file.name}」不是图片文件，已跳过`;
         continue;
       }
@@ -218,7 +221,7 @@ export function useImageBatch(params: ConvertParams) {
         continue;
       }
       try {
-        const inputFormat = defaultFormatForInput(file.type);
+        const inputFormat = defaultFormatForInput(file.type, file.name);
         const isJpeg = inputFormat === 'jpeg';
         const [img, bytes, orientation] = await Promise.all([
           loadImage(file),
