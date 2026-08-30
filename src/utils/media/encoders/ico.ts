@@ -1,11 +1,8 @@
-/** ICO 输出可选尺寸（favicon 常用尺寸集合）。 */
+/** ICO 可选尺寸（favicon 常用尺寸集合）。 */
 export const ICO_SIZE_OPTIONS = [16, 32, 48, 64, 128, 256] as const;
 
-/** ICO 默认勾选的尺寸（favicon 标准三尺寸）。 */
+/** ICO 默认勾选的尺寸（favicon 标准三尺寸，ICO 制作工具的初始多选集）。 */
 export const DEFAULT_ICO_SIZES: number[] = [16, 32, 48];
-
-/** ICO 单选模式下的默认尺寸（favicon 最常用尺寸）。 */
-export const DEFAULT_ICO_SIZE = 32;
 
 /** ICO 裁切适配方式：cover=裁切填满正方形，contain=等比留白完整保留。 */
 export type IcoFit = 'cover' | 'contain';
@@ -66,7 +63,10 @@ export function computeCoverCrop(
 }
 
 /**
- * 将位图缩放到指定尺寸并编码为 PNG 字节（用于 ICO 打包）。
+ * 将位图缩放到指定尺寸并编码为独立 PNG（模块级导出，供复用）。
+ *
+ * 复用方：encodeIco 的逐尺寸打包，以及 IcoMakerPanel 的逐尺寸预览与
+ * 单尺寸 PNG 下载（与 .ico 内封装的图像保证同一渲染口径）。
  *
  * - cover：按锚点取源图正方形区域裁切后缩放填满，非正方形图不变形；
  * - contain：等比缩放整图放入正方形，居中，周围按 fillBackground 透明或填白。
@@ -74,8 +74,10 @@ export function computeCoverCrop(
  * @param bitmap 源位图
  * @param size 目标宽高（正方形）
  * @param opts 裁切适配方式、锚点与背景填充
+ * @returns PNG 字节
+ * @throws 无法创建 2D 上下文或 PNG 编码失败时抛出
  */
-async function rasterizeToPng(
+export async function rasterizeToPng(
   bitmap: ImageBitmap,
   size: number,
   opts: Pick<IcoEncodeOptions, 'fit' | 'anchor' | 'fillBackground'>,

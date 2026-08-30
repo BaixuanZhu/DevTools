@@ -13,7 +13,6 @@ import ImageLightbox, { type LightboxSlide } from '../../components/media/ImageL
 import ImageCropper, { type CropResult } from '../../components/media/ImageCropper.vue';
 import { useImageBatch, type ConvertParams } from '../../composables/useImageBatch';
 import { checkCanvasLimits, DEFAULT_QUALITY } from '../../utils/media/image-convert';
-import { DEFAULT_ICO_SIZE } from '../../utils/media/encoders/ico';
 import { toastStore } from '../../stores/toast';
 
 const params = reactive<ConvertParams>({
@@ -21,9 +20,6 @@ const params = reactive<ConvertParams>({
   quality: DEFAULT_QUALITY,
   scale: 100,
   eraseExif: true,
-  icoSizes: [DEFAULT_ICO_SIZE],
-  icoFit: 'cover',
-  icoAnchor: 'center',
 });
 
 const batch = useImageBatch(params);
@@ -123,7 +119,7 @@ onUnmounted(() => {
   <div>
     <ToolHeader
       title="图片转换与压缩"
-      description="批量将 PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除、逐图裁切与 ICO 图标导出，纯浏览器端本地处理"
+      description="批量将 PNG / JPG / WebP / AVIF 等格式互转、质量压缩与尺寸缩放，支持 EXIF 隐私擦除与逐图裁切，纯浏览器端本地处理"
       :show-example="false"
     />
 

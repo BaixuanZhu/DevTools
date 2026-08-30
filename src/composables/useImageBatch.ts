@@ -19,7 +19,6 @@ import {
 } from '../utils/media/image-convert';
 import { stripJpegMetadata } from '../utils/media/exif-strip';
 import { downloadAllAsZip, type ZipFile } from '../utils/media/zip-download';
-import { type IcoFit, type IcoAnchor } from '../utils/media/encoders/ico';
 
 /** 全局统一的转换参数 */
 export interface ConvertParams {
@@ -27,9 +26,6 @@ export interface ConvertParams {
   quality: number;
   scale: number;
   eraseExif: boolean;
-  icoSizes: number[];
-  icoFit: IcoFit;
-  icoAnchor: IcoAnchor;
 }
 
 /** 单项转换状态 */
@@ -158,9 +154,6 @@ export function useImageBatch(params: ConvertParams) {
           quality: params.quality,
           scale: params.scale,
           fillBackground: needsFillBackground(params.format),
-          icoSizes: params.icoSizes,
-          icoFit: params.icoFit,
-          icoAnchor: params.icoAnchor,
         });
       }
       it.status = 'done';
@@ -340,15 +333,7 @@ export function useImageBatch(params: ConvertParams) {
 
   // 参数变更 → 已出结果项标记为待转换，等待用户点击「转换」
   watch(
-    () => [
-      params.format,
-      params.quality,
-      params.scale,
-      params.eraseExif,
-      params.icoFit,
-      params.icoAnchor,
-      [...params.icoSizes],
-    ],
+    () => [params.format, params.quality, params.scale, params.eraseExif],
     () => {
       if (items.value.length === 0) return;
       markAllStale();

@@ -285,7 +285,7 @@ const toolFaqs: Record<string, FaqItem[]> = {
     },
     {
       question: '支持哪些图片格式？',
-      answer: '读取（输入）支持 <strong>PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF</strong>；转换（输出）支持 <strong>PNG / JPG / WebP / AVIF / TIFF / ICO</strong>。其中 GIF / BMP 仅作为输入读取，转换时需选择其他输出格式。',
+      answer: '读取（输入）支持 <strong>PNG / JPG / WebP / AVIF / GIF / BMP / ICO / TIFF</strong>；转换（输出）支持 <strong>PNG / JPG / WebP / AVIF / TIFF</strong>。其中 GIF / BMP / ICO 仅作为输入读取，转换时需选择其他输出格式；需要生成或解析 ICO 请使用「ICO 图标制作」工具。',
     },
     {
       question: '为什么 GIF 转换后不会动？',
@@ -294,14 +294,6 @@ const toolFaqs: Record<string, FaqItem[]> = {
     {
       question: 'AVIF 编码为什么比较慢？',
       answer: 'AVIF 压缩率高、编码运算量大，浏览器 Canvas 原生不支持输出 AVIF，本工具使用 WASM 编码器（首次使用时加载），大图编码可能需要数秒，属正常现象。',
-    },
-    {
-      question: 'ICO 可以输出哪些尺寸？',
-      answer: 'ICO 主要用于 <strong>favicon</strong>，本工具提供 <strong>16 / 32 / 48 / 64 / 128 / 256</strong> 标准尺寸供选择（默认 32），生成对应尺寸的 .ico 图标，覆盖从浏览器标签到桌面图标的不同需求。',
-    },
-    {
-      question: '转 ICO 时非正方形图片会怎么处理？',
-      answer: 'ICO 要求正方形画布，本工具提供两种适配方式：<strong>裁切填满</strong>（cover）按所选<strong>九宫格锚点</strong>从原图截取正方形区域并填满，不变形但会裁掉边缘；<strong>留白完整</strong>（contain）等比缩放完整保留整图、周围透明留白。可按图片主体位置选择合适方式与锚点。',
     },
     {
       question: '擦除 EXIF 会影响画质吗？',
@@ -318,6 +310,24 @@ const toolFaqs: Record<string, FaqItem[]> = {
     {
       question: '怎么预览转换后的效果？',
       answer: '每张图片转换完成后，点击该行的<strong>「预览」</strong>按钮即可在灯箱中查看转换结果大图，并用左右箭头或键盘方向键在多张图片间翻页。',
+    },
+  ],
+  'ico-maker': [
+    {
+      question: 'favicon 的尺寸应该怎么选？',
+      answer: '浏览器标签页 / 书签一般用 <strong>16 / 32 / 48</strong>，高分屏与桌面快捷方式、应用商店会用到 <strong>64 / 128 / 256</strong>。建议至少勾选 16 / 32 / 48，条件允许可全选——.ico 文件内部可同时封装多个尺寸，浏览器会自动挑选最合适的一档，文件体积增幅很小。',
+    },
+    {
+      question: '为什么要先裁切？可以跳过吗？',
+      answer: 'favicon 是正方形且显示尺寸极小，缩到 16px 后大量细节会糊成一团。先用默认的 <strong>1:1</strong> 比例框住核心主体（Logo、头像等），各尺寸观感会明显更清晰。也可点<strong>「跳过裁切，用原图生成」</strong>直接使用整图：正方形原图直接缩放，非正方形图会按适配方式（裁切填满 / 留白完整）自动处理。',
+    },
+    {
+      question: '为什么提取出来的都是 PNG？',
+      answer: '现代 ICO 内嵌的本就是 <strong>PNG 位图</strong>，直接取出即可；旧版 Windows 图标内嵌的是 <strong>BMP</strong>（无文件头、高度含掩码面），工具会重建文件头解码后<strong>统一转成 PNG</strong> 交付，保证浏览器和设计工具都能直接打开使用。',
+    },
+    {
+      question: '留白填白开关有什么用？',
+      answer: '源图非正方形且选择<strong>「留白完整」</strong>时，周围留白区域默认保持<strong>透明</strong>（favicon 在深色 / 浅色标签页上都能自然融合）；开启「留白填白」后会填充白色，适合目标场景底色固定为白色的情况。正方形源图不存在留白，该开关不影响效果。',
     },
   ],
   'ipv6-cidr': [
