@@ -49,8 +49,8 @@ export interface ConfigParamBase {
   key: string;
   /** 为什么是这个值的中文说明（仅面板展示，不写入 conf） */
   comment: string;
-  /** 控件类型 */
-  control: 'number' | 'select' | 'multi-select' | 'switch' | 'text';
+  /** 控件类型（combobox 为可搜索下拉，供大选项集使用——如 PG 时区表，消费 SearchSelect） */
+  control: 'number' | 'select' | 'multi-select' | 'switch' | 'text' | 'combobox';
   /** 引入版本（与 baselineVersion 相同时徽章隐藏） */
   introducedIn: string;
   /** 标记废弃的版本（弃用提示行依据） */
@@ -65,7 +65,7 @@ export interface ConfigParamBase {
   max?: number;
   /** 数值输入步长（透传 input，供方向键增量） */
   step?: number;
-  /** 枚举选项（select / multi-select 用） */
+  /** 枚举选项（select / multi-select / combobox 用） */
   options?: ParamOption[];
   /** 推荐范围（连续数值参数可选） */
   range?: ParamRange;

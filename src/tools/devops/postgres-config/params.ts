@@ -22,6 +22,7 @@
  */
 import type { ConfigParamBase, ParamValue } from '../../../components/config/types';
 import type { PgVersion } from './version';
+import { TIMEZONE_OPTIONS } from './timezones';
 import {
   computeAutovacuumCostLimit,
   computeAutovacuumScaleFactor,
@@ -721,10 +722,11 @@ export const CONFIG_PARAMS: PgParam[] = [
     introducedIn: '16',
     availableIn: ['16', '17', '18'],
     docUrl: DOC_URLS.timezone,
-    control: 'text',
+    control: 'combobox',
     quoted: true,
+    options: TIMEZONE_OPTIONS,
     defaultValue: 'Asia/Shanghai',
-    comment: '会话默认时区：initdb 会按系统环境写入初始值，这里显式固定为 Asia/Shanghai，消除对安装环境的依赖（集群节点应保持一致，按需修改）',
+    comment: '会话默认时区：initdb 会按系统环境写入初始值，这里显式固定为 Asia/Shanghai，消除对安装环境的依赖（集群节点应保持一致，按需在面板搜索修改）',
   },
   {
     key: 'log_timezone',
@@ -732,8 +734,9 @@ export const CONFIG_PARAMS: PgParam[] = [
     introducedIn: '16',
     availableIn: ['16', '17', '18'],
     docUrl: DOC_URLS.logTimezone,
-    control: 'text',
+    control: 'combobox',
     quoted: true,
+    options: TIMEZONE_OPTIONS,
     defaultValue: 'Asia/Shanghai',
     comment: '日志时间戳时区：与 timezone 保持一致便于日志对账；改后 reload 生效',
   },

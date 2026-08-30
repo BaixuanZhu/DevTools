@@ -188,10 +188,10 @@ export interface GenerateContext {
 | | | log_line_prefix | `'%m [%p] %u@%d '` | T | 引号包裹 |
 | 8 | Asynchronous I/O（仅 v18） | io_method | worker | S | worker/sync/io_uring；16/17 下整组隐藏 |
 | | | io_workers | 3 | N | |
-| 9 | Timezone | timezone | 'Asia/Shanghai' | T | 引号包裹；UI 可改 |
-| | | log_timezone | 'Asia/Shanghai' | T | 引号包裹；UI 可改 |
+| 9 | Timezone | timezone | 'Asia/Shanghai' | C | 引号包裹；**可搜索选择**（本地 IANA 常用表，2026-08-30 用户追加）；UI 可改 |
+| | | log_timezone | 'Asia/Shanghai' | C | 引号包裹；同上 |
 
-计数：5+5+7+3+7+4+4+2+2 = **39 条目 / 9 组**（符合常用项原则）。
+计数：5+5+7+3+7+4+4+2+2 = **39 条目 / 9 组**（符合常用项原则）。控制列图例：N=number，S=select，B=switch（on/off），T=text，**C=combobox（可搜索选择）**。
 
 **裁剪备忘**（写入 FAQ 或注释）：`shared_preload_libraries`（空串无输出价值 → FAQ 讲 pg_stat_statements 启用）、`log_connections`（18 类型变化，回避）、`maintenance_io_concurrency`（冷门且 18 改默认，陷阱项）、`lc_collate`/`lc_ctype`/`server_encoding`/`data_checksums`（**仅 initdb 可设**，写进 conf 非法）、`io_max_concurrency`/`autovacuum_worker_slots` 等（18 独有冷门项）、连接级缓冲区无 PG 对应物（PG 无 per-connection buffer 概念）。
 
@@ -229,6 +229,12 @@ export interface GenerateContext {
 - 底部 AdvicePanel：OS 建议（§8）+ 备库要点（仅主从态）+ 免责声明
 
 **onMounted**：PG 无 server_id/requirepass 类实例级随机值 → **无随机种子逻辑**（比两前作少一处）。
+
+## 7b. 时区可搜索选择（2026-08-30 用户追加）
+
+- **数据**：`src/tools/devops/postgres-config/timezones.ts` 本地维护的 IANA 常用时区表（约 80 条，条目 `{ value: IANA 名, label: 中文地区/标准时间名, offset: 'UTC+8' 形式标准偏移 }`）。生成方式：Node `Intl.supportedValuesOf('timeZone')` 取真实 IANA 名清单后人工精选（禁止凭记忆编造时区名）；偏移为**标准时区偏移**（不含夏令时，注明）。工具私有数据，暂不上浮。
+- **组件**：优先复用组件库——`src/components/ui/command/`（shadcn-vue Command，基于 reka-ui Listbox 原语，SearchPanel 在用）已存在；缺的只是弹层。封装 `src/components/ui/SearchSelect.vue`：reka-ui `PopoverRoot/PopoverTrigger/PopoverContent` 薄壳 + 既有 Command/CommandInput/CommandList/CommandEmpty/CommandItem 组合，props `{ options: {value,label,keywords?}[]; modelValue: string; placeholder? }` + `update:modelValue` emit；键盘可达、暗色走设计令牌；过滤词含 IANA 名/中文标注/偏移。不新增依赖（cmdk 之类一律不引）。
+- **接入**：共享 ParamRow 控件种类增加 `'combobox'`（纯增量分支，redis/mysql 不用不受影响），时区两条目 options 由 timezones 表映射；产物渲染不变（`timezone = 'Asia/Shanghai'` 带引号）。
 
 ## 8. advice.ts
 

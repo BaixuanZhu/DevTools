@@ -31,6 +31,13 @@
 4. `pages/devops/postgres-config-generator.astro`：ToolLayout + `client:idle`
 5. `data/tools.ts` 注册（icon 🐘，relatedToolIds 双向）+ `data/tool-faqs.ts` 5 条
 
+### 步骤 2b：时区可搜索选择（2026-08-30 用户追加，design §7b）
+
+1. `postgres-config/timezones.ts`：Node `Intl.supportedValuesOf('timeZone')` 取真实 IANA 名 → 精选约 80 常用时区（含 UTC/Asia 全主区/欧美澳非主要城市），条目含中文标注与标准偏移
+2. `src/components/ui/SearchSelect.vue`：reka-ui Popover 薄壳 + 既有 Command 组件（键盘可达、暗色令牌、过滤含 IANA/中文/偏移）
+3. 共享 ParamRow 增加 `combobox` 控件分支（纯增量）；params.ts 时区两条目改 control 并接 options；generate 渲染不变
+4. 测试：timezones 不变量（值 ∈ Intl.supportedValuesOf、唯一、含 UTC 与 Asia/Shanghai）+ ParamRow combobox 用例；三绿 + PG 页冒烟（搜索选择联动 conf）
+
 ### 步骤 3：验证
 
 ```bash

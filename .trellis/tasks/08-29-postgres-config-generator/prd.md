@@ -41,6 +41,7 @@
 - **R7 共享层上浮**：契约与回归门见 design §2（types.ts 解耦工具类型；serializeConf 留工具侧；版本可用性判断留工具引擎；ParamRow 密码生成改 emit）
 - **R8 注册**：tools.ts（icon 🐘、relatedToolIds 三工具双向）、tool-faqs.ts 5 条、pages/tools 对称、SEO 全字段
 - **R9 工具页硬性要求**：输入校验中文提示、清空/复制按钮、打开即用合理默认值（4GB/4 核/SSD/oltp/200 并发）
+- **R10 时区可搜索选择**（2026-08-30 用户追加）：timezone/log_timezone 由 text 改为可搜索选择——本地维护 IANA 常用时区表（真实 IANA 名 + 中文标注 + 标准偏移），优先复用组件库（既有 Command）+ 封装 `ui/SearchSelect.vue`（reka-ui Popover 薄壳，不新增依赖），共享 ParamRow 增量支持 `combobox` 控件；design §7b
 
 ## Acceptance Criteria
 

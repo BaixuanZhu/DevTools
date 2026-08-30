@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * 参数行控件（配置生成器系列共享，redis/mysql 两版超集合并）：
- * 按参数定义渲染 5 种控件之一，附参数名、版本徽章、官方文档链接、中文说明与单参重置；
+ * 按参数定义渲染 6 种控件之一（number/select/multi-select/switch/text/combobox），
+ * 附参数名、版本徽章、官方文档链接、中文说明与单参重置；
  * 目标版本下已废弃的参数渲染为"废弃提示行"（不渲染控件、不写 conf）。
  *
  * 徽章基线由 baselineVersion prop 决定（redis 'pre-7' / mysql '5.7' / pg '16'），
@@ -14,6 +15,7 @@ import { computed } from 'vue';
 import type { ConfigParamBase, ParamValue } from './types';
 import { PARAM_UNITS } from './types';
 import SelectListbox from '../ui/SelectListbox.vue';
+import SearchSelect from '../ui/SearchSelect.vue';
 import ToggleSwitch from '../ui/ToggleSwitch.vue';
 import NumberField from './NumberField.vue';
 import type { NumberQuickOption } from './NumberField.vue';
@@ -231,6 +233,18 @@ function onSwitchChange(value: boolean): void {
         :model-value="stringValue"
         :options="selectOptions"
         button-class="h-8"
+        @update:model-value="onSelectChange"
+      />
+
+      <!-- 可搜索下拉（combobox）：选项集较大时用（如 PG 时区表）。
+           options 由工具注册表整表传入，不做"（推荐）"后缀——推荐值在大列表里
+           未必在首屏，标记意义有限；选中即 emit update，其余行内逻辑与其他控件一致 -->
+      <SearchSelect
+        v-else-if="param.control === 'combobox'"
+        :model-value="stringValue"
+        :options="param.options ?? []"
+        button-class="h-8"
+        empty-text="无匹配时区"
         @update:model-value="onSelectChange"
       />
 

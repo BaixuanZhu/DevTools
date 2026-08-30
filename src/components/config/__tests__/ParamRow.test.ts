@@ -244,6 +244,43 @@ describe('ParamRow 控件 → update 事件联动', () => {
   });
 });
 
+describe('ParamRow combobox 控件（可搜索下拉，PG 时区形态）', () => {
+  /** 复用文件头惯例的 mini 选项表（真实时区表见 postgres-config/timezones.ts） */
+  const TZ_OPTIONS = [
+    { value: 'Asia/Shanghai', label: '中国标准时间' },
+    { value: 'UTC', label: '协调世界时（UTC）' },
+  ];
+
+  it('渲染 SearchSelect 且触发器显示当前选中项 label（不落回文本输入框）', () => {
+    const wrapper = mountRow(
+      makeParam({ key: 'timezone', control: 'combobox', introducedIn: '16', options: TZ_OPTIONS }),
+      'Asia/Shanghai',
+    );
+    expect(wrapper.findComponent({ name: 'SearchSelect' }).exists()).toBe(true);
+    expect(wrapper.get('button').text()).toContain('中国标准时间');
+    expect(wrapper.find('input[type="text"]').exists()).toBe(false);
+  });
+
+  it('值不在 options 中时触发器回显原值（自定义时区值的可见性兜底）', () => {
+    const wrapper = mountRow(
+      makeParam({ key: 'timezone', control: 'combobox', introducedIn: '16', options: TZ_OPTIONS }),
+      'Europe/Paris',
+    );
+    expect(wrapper.get('button').text()).toContain('Europe/Paris');
+  });
+
+  it('选择触发 update emit（经 SearchSelect update:modelValue 转发到父层）', async () => {
+    const wrapper = mountRow(
+      makeParam({ key: 'log_timezone', control: 'combobox', introducedIn: '16', options: TZ_OPTIONS }),
+      'Asia/Shanghai',
+    );
+    const select = wrapper.findComponent({ name: 'SearchSelect' });
+    select.vm.$emit('update:modelValue', 'UTC');
+    await nextTick();
+    expect(wrapper.emitted('update')?.[0]).toEqual(['UTC']);
+  });
+});
+
 describe('ParamRow 版本徽章与废弃提示行', () => {
   it('基线版本引入的参数不显示徽章，新版本引入的显示徽章（MySQL 5.7 基线）', () => {
     const baseline = mountRow(makeParam({ key: 'max_connections', control: 'number' }), 240);
