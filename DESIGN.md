@@ -1,14 +1,15 @@
 ---
 name: DevTools
-description: Browser-based developer tool suite with warm, precise utility-first design
+description: Browser-based developer tool suite with clean, precise utility-first design (shadcn zinc tokens; brand orange reserved for the logo)
 colors:
-  surface: "#faf9f7"
+  surface: "#ffffff"
   card: "#ffffff"
-  text: "#1a1a1a"
-  muted: "#6b7280"
-  border: "#e5e2dd"
-  accent: "#e8590c"
-  hover: "#f3f1ee"
+  text: "#09090b"
+  muted: "#71717a"
+  border: "#e4e4e7"
+  primary: "#18181b"
+  brand: "#e8590c"
+  hover: "#f4f4f5"
   error: "#dc2626"
   success: "#16a34a"
 typography:
@@ -56,7 +57,7 @@ spacing:
   "2xl": "48px"
 components:
   button-primary:
-    backgroundColor: "{colors.accent}"
+    backgroundColor: "{colors.primary}"
     textColor: "#ffffff"
     rounded: "{rounded.sm}"
     padding: "8px 16px"
@@ -79,16 +80,6 @@ components:
     textColor: "{colors.text}"
     rounded: "{rounded.sm}"
     padding: "8px 16px"
-  chip-default:
-    backgroundColor: "{colors.card}"
-    textColor: "{colors.muted}"
-    rounded: "9999px"
-    padding: "6px 16px"
-  chip-active:
-    backgroundColor: "{colors.text}"
-    textColor: "{colors.surface}"
-    rounded: "9999px"
-    padding: "6px 16px"
 ---
 
 # Design System: DevTools
@@ -99,14 +90,14 @@ components:
 
 **Creative North Star: "The Utility Shelf"**
 
-Every tool visible, labeled, ready. No drawers to open, no manuals to read. The interface is a well-organized shelf: you see what you need, you grab it, you use it, you put it back. Warm ivory surfaces, forged orange accents used as signals not decoration. The palette feels warm and precise: never clinical, never loud.
+Every tool visible, labeled, ready. No drawers to open, no manuals to read. The interface is a well-organized shelf: you see what you need, you grab it, you use it, you put it back. Clean neutral (shadcn zinc) surfaces carry the palette; one warm orange is reserved exclusively for the brand mark. Precise and quiet: never clinical, never loud.
 
-Light surfaces with a subtle warm tint carry 90% of the viewport. A single saturated accent (forged orange) appears only on interactive elements in active state: focused inputs, active tabs, selected categories. Its rarity makes it noticeable. Components feel precise and restrained: borders define shape, padding creates breathing room, transitions give feedback without theater.
+Neutral light surfaces (pure white, zinc base) carry 90% of the viewport. Interactive emphasis is tonal: primary（浅色 zinc-900，暗色反相为近白）marks primary actions and active states; hover uses the tonal accent. The saturated forged orange appears only as the brand signature（Logo 艺术字），never as a UI state color. Components feel precise and restrained: borders define shape, padding creates breathing room, transitions give feedback without theater.
 
 The system rejects everything PRODUCT.md calls out: login walls, multi-step flows, loading spinners, unnecessary navigation depth. A tool page loads and the cursor is already in the input field.
 
 **Key Characteristics:**
-- `bg-background`（#faf9f7）铺底，`text-primary` / `border-primary`（#e8590c）每屏占比 ≤ 10%
+- `bg-background`（#ffffff）铺底，`text-primary`（zinc-900 主交互色）仅用于主操作与激活态；品牌橙（`--brand`）仅出现在 Logo
 - 触感明确：边框定义形状，150ms transition 确认动作
 - 无阴影层级：tonal layering（`bg-card` on `bg-background`，`bg-accent` 悬停）
 - 零摩擦交互：页面加载后输入框自动聚焦，结果实时更新，无需提交按钮
@@ -164,26 +155,25 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 
 ## 2. Colors
 
-**The Shelf Rule.** 中性色承载 90% 的面。primary（#e8590c）仅出现在交互元素的活跃态：聚焦输入框、活跃标签页、选中筛选、悬停 Logo。稀缺即力量。任一屏幕超过 10% 的橙色即为异常。
+**The Shelf Rule.** 中性色（shadcn zinc 体系）承载 90% 的面。primary（浅色 zinc-900 / 暗色近白，双主题反相）是主交互色：主按钮、激活标签/筛选、焦点边框。品牌橙 `--brand`（#e8590c）降级为品牌识别色，仅用于 Logo/品牌图标，不进入交互系统——任一屏幕的橙色占比接近 0% 是常态。
 
-**令牌体系（2026-07 重构）：** 设计令牌定义于 `src/styles/global.css`，采用 shadcn 语义的双层结构——`:root` / `.dark` 两组 CSS 变量（语义层）经 `@theme inline` 映射进 Tailwind 命名空间（映射层）。组件只消费语义类名，切换 `<html class="dark">` 即整站换主题。**语义对齐 shadcn 约定：`primary` = 品牌橙（主操作色），`accent` = 悬停/次要底色（灰）**——与重构前的旧命名（accent=橙、hover=灰）相反，引用旧文档时注意。
+**令牌体系（2026-07 重构）：** 设计令牌定义于 `src/styles/global.css`，采用 shadcn 语义的双层结构——`:root` / `.dark` 两组 CSS 变量（语义层）经 `@theme inline` 映射进 Tailwind 命名空间（映射层）。组件只消费语义类名，切换 `<html class="dark">` 即整站换主题。**语义对齐 shadcn 约定：`primary` = 主交互色（浅色 zinc-900 / 暗色近白），`accent` = 悬停/次要底色（灰）**。品牌橙独立为 `--brand`，不随交互态变化。与重构前的旧体系（暖调象牙白底、primary=橙）完全不同，引用旧文档时注意。
 
 ### Neutral + Primary（浅色 / 暗色双组）
 
 | 语义 | 浅色 | 暗色 | Tailwind Utility | 使用范围 |
 |------|------|------|-----------------|---------|
-| 页面底色 | #faf9f7 | #161514 | `bg-background` | 所有页面的 `<body>` 底色 |
-| 卡片/Header 底 | #ffffff | #1f1e1c | `bg-card` | 卡片、Sidebar、Header、Footer 的背景 |
-| 主文字 | #1a1a1a | #f3f1ee | `text-foreground` | 正文、标题、输入内容。从不使用纯黑 |
-| 次要文字/禁用 | #6b7280 | #a1a1aa | `text-muted-foreground` | 辅助说明、placeholder、侧栏分组标题、禁用态文字 |
-| 次要背景 | #f3f1ee | #2a2826 | `bg-muted` | 需要比卡片浅一阶的填充区 |
-| 边框/分割线 | #e5e2dd | #2a2826 | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
-| 悬停底色 | #f3f1ee | #2a2826 | `bg-accent` | 按钮、卡片、侧栏项的悬停底色，比 background 深一阶 |
-| 强调色（品牌橙） | #e8590c | #f97316 | `text-primary` `bg-primary` `border-primary` | 仅交互元素活跃态。从不作为大面积底色 |
-| 品牌橙·配对文字 | #ffffff | #1a0f02 | `text-primary-foreground` | `bg-primary` 上的文字/图标 |
-| 品牌橙·悬停 | #d4500a | #fb923c | `hover:bg-primary-hover` | primary 按钮/元素的 hover/active 加深 |
-| 品牌橙·深（AA） | #b43807 | #ea580c | `bg-primary-strong` `text-primary-strong` | 需 WCAG AA 合规的小字号按钮/强调（白字对比度 ≥ 4.5:1） |
-| 焦点环 | #e8590c | #f97316 | `ring-ring` `focus:ring-2 focus:ring-ring` | 键盘导航焦点可见性 |
+| 页面底色 | #ffffff | #09090b | `bg-background` | 所有页面的 `<body>` 底色 |
+| 卡片/弹层底 | #ffffff | #09090b | `bg-card` `bg-popover` | 卡片、Sidebar、Header、Footer、下拉弹层（与底色同值，边界由 border 划定） |
+| 主文字 | #09090b | #fafafa | `text-foreground` | 正文、标题、输入内容。从不使用纯黑 |
+| 次要文字/禁用 | #71717a | #a1a1aa | `text-muted-foreground` | 辅助说明、placeholder、禁用态文字 |
+| 次要背景 | #f4f4f5 | #27272a | `bg-muted` `bg-secondary` | 需要填充区分层的区域 |
+| 边框/分割线 | #e4e4e7 | #27272a | `border-border` | 输入框、卡片、分割线、侧栏右边框 |
+| 悬停底色 | #f4f4f5 | #27272a | `bg-accent` | 按钮、卡片、侧栏项的悬停底色 |
+| 主交互色 | #18181b | #fafafa | `text-primary` `bg-primary` `border-primary` | 主按钮、激活态；`bg-primary` 上配 `text-primary-foreground` |
+| 品牌橙 | #e8590c | #f97316 | `text-brand` `bg-brand`（配 `text-brand-foreground`） | 仅 Logo/品牌识别（`.logo-text` 渐变）。不进入交互系统 |
+| 焦点环 | #18181b | #d4d4d8 | `ring-ring` | 键盘导航焦点可见性（reka-ui 组件内置 focus 管理） |
+| 圆角基准 | — | — | `--radius: 0.5rem` | `rounded-sm`/`rounded-md`/`rounded-lg` 由此推导 |
 
 ### Semantic（状态反馈色矩阵）
 
@@ -192,41 +182,27 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 | 语义 | 浅色 | 暗色 | Tailwind Utility | foreground | 使用范围 |
 |------|------|------|-----------------|------------|---------|
 | 错误/危险 | #dc2626 | #ef4444 | `text-destructive` `bg-destructive` `text-error`（兼容别名） | `text-destructive-foreground` (#fff / #fff) | 错误提示、删除按钮、危险操作 |
-| 成功 | #16a34a | #22c55e | `text-success` `bg-success` | `text-success-foreground` (#fff / #052e16) | 复制确认、校验通过、成功 Toast |
-| 成功·深（AA） | #15803d | #16a34a | `bg-success-strong` | `text-white` | 需 AA 合规的小字号成功按钮 |
+| 成功 | #16a34a | #22c55e | `text-success` `bg-success` | `text-success-foreground` (#fff) | 复制确认、校验通过、成功 Toast |
 | 信息 | #2563eb | #3b82f6 | `text-info` `bg-info` | `text-info-foreground` (#fff / #fff) | 中性提示、帮助气泡、链接说明 |
-| 警告 | #d97706 | #f59e0b | `text-warning` `bg-warning` | `text-warning-foreground` (#fff / #1a1a1a) | 非破坏性警告、兼容性提示 |
-| 警告·深（AA） | #b45309 | #d97706 | `bg-warning-strong` | `text-white` | 需 AA 合规的小字号警告按钮 |
+| 警告 | #d97706 | #f59e0b | `text-warning` `bg-warning` | `text-warning-foreground` (#fff) | 非破坏性警告、兼容性提示 |
 
 ### WCAG 2.1 AA 对比度约束
 
-**核心原则：** 凡承载正常文字（< 18px 或 < 14px bold）的彩色背景，必须使用对应的 `*-strong` 变体或满足 4.5:1 对比度。base 色相（`primary`/`success`/`warning`）保留品牌识别度，用于图标、大标签（≥ 18px）、装饰、边框——这些场景仅需 3:1（large text AA）。
+**核心原则：** 凡承载正常文字（< 18px 或 < 14px bold）的彩色背景，必须使用对应的 配对的 `*-foreground` 或满足 4.5:1 对比度。base 色相（`primary`/`success`/`warning`）保留识别度，用于图标、大标签（≥ 18px）、装饰、边框——这些场景仅需 3:1（large text AA）。
 
 | 组合 | 对比度 | 等级 | 适用 |
 |------|--------|------|------|
-| `text-foreground` 对 `bg-background` | 16.7:1 | AAA | 正文（两主题均顶级） |
-| `text-muted-foreground` 对 `bg-background` | 4.5:1 | AA | 辅助文字（边界值，勿叠多层） |
-| `text-white` 对 `bg-primary-strong` | 5.1:1 | AA | 小字号 primary 按钮 |
-| `text-white` 对 `bg-primary` | 2.6:1 | — | 仅大字号/图标，**不可用于小字按钮** |
+| `text-foreground` 对 `bg-background` | ≈19:1 | AAA | 正文（两主题均顶级） |
+| `text-muted-foreground` 对 `bg-background` | 4.6:1 | AA | 辅助文字（暗色侧 7.4:1 AAA；边界值，勿叠多层） |
+| `text-primary-foreground` 对 `bg-primary` | ≈16:1 | AAA | 主按钮文字 |
 | `text-white` 对 `bg-destructive` | 4.8:1 | AA | 错误按钮 |
 | `text-white` 对 `bg-info` | 5.2:1 | AA | 信息按钮 |
-| `text-white` 对 `bg-warning-strong` | 5.4:1 | AA | 小字号警告按钮 |
 
-### 渐变色系
+> success / warning 的白字配对对比度处于 AA 边界附近，仅用于图标与大字号文字；新增大面积用法前先实测对比度。
 
-低饱和、品牌驱动的柔和渐变（2026 趋势）。仅用于 Hero 区、主按钮、特色卡片等需要视觉层次的场景，**不滥用**——大面积渐变违背 The Shelf Rule。
+### 品牌橙使用边界
 
-| 令牌 | 浅色 | 暗色 | Tailwind 用法 | 场景 |
-|------|------|------|--------------|------|
-| `--gradient-primary` | 135° #e8590c→#f97316 | 135° #ea580c→#f97316 | `bg-[image:var(--gradient-primary)]` | 主 CTA 按钮、品牌标识背景 |
-| `--gradient-primary-subtle` | 10%→6% 橙透明 | 14%→6% 橙透明 | `bg-[image:var(--gradient-primary-subtle)]` | 卡片高亮、选中态背景 |
-| `--gradient-surface` | 180° #fff→#faf9f7 | 180° #1f1e1c→#161514 | `bg-[image:var(--gradient-surface)]` | 卡片/面板的微妙立体感 |
-| `--gradient-hero` | 顶部橙光晕 8% | 顶部橙光晕 10% | `bg-[image:var(--gradient-hero)]` | 首页 Hero 区氛围 |
-
-**应用约束：**
-1. 渐变文字必须叠加 `text-foreground` 或 `text-white` 并校验对比度。
-2. 渐变背景上的文字一律用 `*-foreground` 配对色，不裸用 base 色。
-3. `prefers-reduced-motion: reduce` 用户不强制禁用渐变（渐变非动效），但过渡动画已全局降为 0ms。
+全局**不设渐变令牌**。橙色渐变仅存在于一处：`.logo-text`（Logo 艺术字，135° 品牌橙→亮橙，`background-clip: text`，定义于 `global.css`）。UI 状态与组件不使用渐变、不使用品牌橙；功能性预览图案（如透明底棋盘格）可使用自定义 `bg-[image:...]`，不属品牌色范畴。
 
 ---
 
@@ -268,11 +244,11 @@ ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 
 
 ## 4. Elevation
 
-Flat by default。深度通过 tonal layering 传达：`bg-card`（#ffffff）坐落在 `bg-background`（#faf9f7）上，悬停态切换为 `bg-accent`（#f3f1ee）。投影仅用于需要从背景浮出的功能性浮层。
+Flat by default。深度通过 tonal layering 传达：`bg-card` 坐落在 `bg-background` 上（两主题均同值，边界由 `border-border` 划定），悬停态切换为 `bg-accent`。投影仅用于需要从背景浮出的功能性浮层。
 
 **The Minimal Shadow Rule.** 静态内容区域不使用投影。投影仅用于浮层组件（下拉菜单、Toast 通知、弹出面板）和工具卡片悬停态，且必须保持 imperceptible（`shadow-sm` 或 `shadow-[0_2px_8px_rgba(0,0,0,0.06)]`）。内容卡片、按钮、输入框等常规元素不使用投影。
 
-**Dark Mode: Supported（2026-07 起）。** 暖调浅色仍是默认与设计身份；暗色通过 `.dark` 组 token 实现（见 §Colors），由 Header 的暗色按钮切换（`themeStore`，选择持久化于 localStorage）。全局壳层（Header/Sidebar/Toast/卡片）与所有消费语义 token 的组件自动适配；**不使用 token 而硬编码颜色的组件在暗色下属于缺陷**，应改消费 token。个别工具的暗色对比度深度校验为持续跟进项，发现具体问题进行具体修复。
+**Dark Mode: Supported（2026-07 起）。** 中性浅色为默认，含三态 `system` 模式；暗色通过 `.dark` 组 token 实现（见 §Colors），由 Header 主题菜单切换（浅色/暗色/跟随系统，`themeStore`，选择持久化于 localStorage）。全局壳层（Header/Sidebar/Toast/卡片）与所有消费语义 token 的组件自动适配；**不使用 token 而硬编码颜色的组件在暗色下属于缺陷**，应改消费 token。个别工具的暗色对比度深度校验为持续跟进项，发现具体问题进行具体修复。
 
 ---
 
@@ -340,27 +316,30 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 
 错误消息与输入框的间距：`mt-1`（4px）。
 
-### Search Bar
+### Search Panel（首页搜索，reka-ui Command）
 
-| 状态 | Class |
-|------|-------|
-| Container | `bg-card border border-border rounded-md px-4 py-2 flex gap-2` |
-| Focus（容器） | `focus-within:border-primary transition-[border-color] duration-150` |
-| Input | 占位文本 `text-muted-foreground`，输入文字 `text-foreground`，无边框、无 outline |
+| 元素 | 描述 |
+|------|------|
+| Container | `<Command class="rounded-lg border shadow-sm">`（reka-ui Listbox） |
+| Input | `CommandInput`：无边框无 outline，placeholder `text-muted-foreground`，v-model 实时过滤 |
+| List | `CommandList` 常驻挂载、显隐由 reka-ui 管理；空态 `CommandEmpty`（文案「没有匹配的工具」） |
+| Item | `CommandItem`：icon + 名称 + 描述两行；↑↓ 键盘高亮，Enter / 点击直达 `tool.path`（MPA 跳转） |
+
+过滤逻辑（name/keywords/description 加权评分排序）由组件内 computed 实现——reka-ui 不提供内置 filter。
 
 ### Sidebar Navigation
 
 | 元素 | Class |
 |------|-------|
-| Container（桌面） | `sidebar w-60 shrink-0 border-r border-border bg-card flex flex-col`（静态 flex 列，无 `fixed`） |
-| Container（移动） | `position: fixed`，`top: 57px; height: calc(100dvh - 57px); transform: translateX(-100%)`，`.sidebar-open` 时 `translateX(0)` |
+| Container（桌面） | `hidden lg:flex w-60 shrink-0 border-r border-border bg-card flex-col`（静态 flex 列，无 `fixed`） |
+| Container（移动） | Sheet 抽屉（reka-ui Dialog）：`<SheetContent side="left" class="w-72 p-0">`，标题「工具导航」，显隐由 `sidebarStore.isOpen` 驱动 |
 | Nav scroll | `flex-1 sidebar-nav-scroll overflow-y-auto py-2`（导航区独立滚动，隐藏滚动条见 §Sidebar Scroll） |
 | 分类项 | `flex items-center gap-2 px-4 py-2.5 text-sm`，整项 `<a href="/{slug}">`（仅 7 个分类，不再展开工具链接） |
 | 分类图标 | `text-base w-6 text-center shrink-0`（emoji，来自 `categories.ts`） |
 | 工具数徽标 | `inline-flex items-center justify-center min-w-[1.5rem] h-5 px-1.5 text-[0.6875rem] font-medium rounded-full bg-muted text-muted-foreground tabular-nums` |
 | Active 分类 | `bg-accent text-primary font-medium`（当前路径前缀匹配 `/{slug}` 或恰好等于 `/{slug}`） |
 | Hover | `hover:bg-accent` |
-| Overlay（移动） | `.sidebar-overlay fixed inset-0 bg-black/30 z-[99]`，`top: 57px`；显隐由 `sidebarStore.isOpen` 驱动（Shell.vue 内 `<Transition>`），点击或 Esc 关闭 |
+| Overlay（移动） | Sheet 内置遮罩，点击遮罩或 Esc 关闭（reka-ui Dialog 原语行为，无需手写 overlay） |
 
 ### Header
 
@@ -372,7 +351,7 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 | 汉堡按钮 | `hidden max-lg:flex`，三条 2px 横线，宽 18px，点击调用 `sidebarStore.toggle()` |
 | 快捷入口 | `hidden lg:flex` 的 `<nav aria-label="常用工具">`（清单数据驱动于 `src/data/quick-links.ts`，≤6 个）；项为 `px-2 py-1 rounded-sm text-sm` 图标+名称，激活态与 Sidebar 激活分类同款 `bg-accent text-primary font-medium`，hover `bg-accent`，150ms 过渡 |
 | 暗色模式按钮 | `flex items-center gap-1.5 h-9 px-2` 文本 + 图标，点击调用 `themeStore.toggle()` 切换浅色/暗色（持久化于 localStorage） |
-| Gitee / GitHub | 同收藏夹按钮样式，`target="_blank" rel="noopener noreferrer"` |
+| Gitee / GitHub | 纯图标链接（simple-icons SVG），`target="_blank" rel="noopener noreferrer"` |
 
 ### Tool Header
 
@@ -394,15 +373,9 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 | 版权行 / 链接行 / 备案行 | `text-[0.8125rem] text-muted-foreground`，链接 `hover:text-primary` |
 | 备案行 | ICP / 公安备案号通过组件顶部 `SITE` 常量配置，留空则不渲染；公安备案前缀盾牌图标（内联 SVG 占位，未来替换为官方国徽） |
 
-### Toast Notification
+### Toast（vue-sonner）
 
-| 元素 | Class |
-|------|-------|
-| Position | `fixed top-4 left-1/2 -translate-x-1/2 z-50` |
-| Container | `bg-card border border-border rounded-md px-4 py-2 shadow-[0_2px_8px_rgba(0,0,0,0.06)]` |
-| Success | `border-success text-success` |
-| Error | `border-error text-error` |
-| Animation | `transition-[opacity,transform] duration-150`，入场 `opacity-0 → opacity-100`，1.5s 后自动消失 |
+全局由 Shell 挂载 `<Toaster />`（vue-sonner，top-center）。任意组件经 `toastStore.show/success/error(message)` 触发（AGENTS.md：禁止自建 toast 队列）；toastStore 以镜像计时（默认 3000ms）与 sonner 内部 duration 保持出列一致。样式由 sonner 主题消费语义 token，不自绘容器。
 
 ### ResponsiveWorkspace
 
@@ -436,16 +409,6 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 | 标题栏 | `flex items-center justify-between px-4 py-2 border-b border-border bg-card` |
 | 代码区域 | `p-4 font-mono text-sm overflow-auto whitespace-pre-wrap break-all` |
 
-### Category Filter Chip（CSS 组件）
-
-首页全局分类筛选芯片，使用原生 CSS 类（非 Vue 组件），定义于 `global.css`。
-
-| 状态 | 类名 | 样式 |
-|------|------|------|
-| 默认 | `.chip-default` | `bg-card border border-border rounded-full px-4 py-1.5 text-muted-foreground` |
-| 活跃 | `.chip-active` | `bg-foreground text-background border-foreground` |
-| Hover | `.chip-default:hover` | `bg-accent text-foreground` |
-
 ### Sidebar Scroll
 
 侧栏导航区域的滚动条隐藏样式，通过 `.sidebar-nav-scroll` 类名应用。在保持滚动功能的同时隐藏原生滚动条，通过 `scrollbar-width: none` 和 `::-webkit-scrollbar { display: none }` 实现。
@@ -457,8 +420,8 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 ### Do:
 - **Do** focus the main input field on page load so the user can start typing immediately.
 - **Do** show results in real-time as the user types, with no submit button required (unless the operation is destructive or slow).
-- **Do** use `bg-background`（#faf9f7）as the page surface and `bg-card`（#ffffff）for raised surfaces (cards, sidebar, header).
-- **Do** use `text-primary` / `border-primary`（#e8590c）only on interactive elements in active state. Its rarity is its strength.
+- **Do** consume semantic tokens (`bg-background`, `bg-card`, `bg-accent`) instead of hardcoded colors — hardcoded colors break dark mode.
+- **Do** use `text-primary` as the main interactive color (zinc-900); keep the brand orange (`--brand`) exclusive to the Logo.
 - **Do** cap code field body text at 65 to 75ch for readability.
 - **Do** use 150ms ease transitions for all state changes (`transition-[border-color]` etc.). Fast enough to feel responsive, slow enough to perceive.
 - **Do** keep standard tool pages self-contained at max-width 720px; wide tools (JSON, editors, diffs) may extend to 1600px with dual-column layout for code editing/comparison.
@@ -466,7 +429,7 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 
 ### Don't:
 - **Don't** use a dark theme with blue/cyan neon accents. This is the first training-data reflex for "dev tools" and it is prohibited.
-- **Don't** use glassmorphism, gradient text (background-clip: text), or side-stripe borders greater than 1px as colored accents.
+- **Don't** use glassmorphism, gradient text (background-clip: text), or side-stripe borders greater than 1px as colored accents.（唯一例外：Logo 艺术字 `.logo-text`）
 - **Don't** add login walls, onboarding flows, multi-step wizards, or loading spinners. From PRODUCT.md anti-references: forced login, complex flows, and anything that makes the user wait are prohibited.
 - **Don't** use `accent` as a background fill for large areas (`bg-primary` on full-width sections). It is a signal, not a surface.
 - **Don't** add shadows to resting content areas. The tool card `hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)]` and floating layer components (dropdowns, toasts) are exceptions.
@@ -474,4 +437,4 @@ Content 结构：顶行 icon（emoji, 2rem）左 + 工具数徽标（`bg-accent 
 - **Don't** use identical card grids with the same-sized cards repeated endlessly without visual differentiation.
 - **Don't** introduce a second sans-serif font family. `font-sans` handles everything except code; `font-mono` handles code.
 - **Don't** use `transition-colors` when a specific property works — prefer `transition-[border-color]`, `transition-[background-color]` for precise control.
-- **Don't** implement a dark theme. The warm-ivory light palette is a deliberate design identity; dark mode is not in scope.
+- **Don't** treat dark mode as an afterthought — every new component must be checked against the `.dark` token set（见 §4 Dark Mode）。
