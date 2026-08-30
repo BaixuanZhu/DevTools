@@ -93,3 +93,13 @@
 **Symptom**: SSR 非内联渲染下方法解析到原型链而非 setup 绑定，行为诡异难排查。
 
 **Fix**: 换名（如 `currentValueOf`）。实例：`RedisConfigGenerator.vue` 的 `currentValueOf()`。
+
+## Patterns
+
+### Pattern: 可搜索选择（combobox）= reka-ui Popover 薄壳 + 既有 ui/command 系列
+
+需要"大列表 + 关键词过滤"的选择器（如 83 条 IANA 时区）时，不要引 cmdk 之类新依赖，也不要手写过滤下拉：组件库已有 `src/components/ui/command/`（shadcn-vue Command，基于 reka-ui Listbox 原语），只需按 `src/components/ui/SearchSelect.vue` 的方式用 reka-ui `PopoverRoot/Trigger/Content` 做薄壳组合。共享 ParamRow 的 `control: 'combobox'` 分支是消费范例；弹层宽度用 `w-[var(--reka-popover-trigger-width)]` 对齐触发器，`emptyText` 等领域文案由调用方传入（共享组件不硬编码）。
+
+### Pattern: IANA 时区/地域类本地表的有效性测试锚定
+
+静态维护 IANA 名清单时（如 `src/tools/devops/postgres-config/timezones.ts`），有效性断言用 `new Intl.DateTimeFormat('en-US', { timeZone: value })` **可解析性**，不要断言 `Intl.supportedValuesOf('timeZone')` 成员——后者只含 canonical 名且新旧拼写取向随运行时 ICU 版本漂移，前者接受 tzdata 全部 canonical 名与 backward 链接，与 PostgreSQL 的接受面一致。表值统一采用**现代规范拼写**（Asia/Kolkata、Europe/Kyiv 等 tzdata 主文件 Zone 名），旧拼写（Calcutta、Kiev）放 keywords 作搜索别名。
