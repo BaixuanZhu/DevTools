@@ -4,8 +4,12 @@ import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap, {ChangeFreqEnum} from '@astrojs/sitemap';
 
-/** 7 个分类 slug（与 src/data/tools.ts 的 categorySlugMap 值保持一致，单源同步） */
-const CATEGORY_SLUGS = new Set(['text', 'crypto', 'format', 'network', 'datetime', 'frontend', 'devops']);
+/**
+ * 单段路径 sitemap 白名单：7 个分类 slug + 旗舰工作台页 /markdown。
+ * 分类 slug 与 src/data/tools.ts 的 categorySlugMap 值保持一致（单源同步）；
+ * markdown 是工作台专属单段路径，不在 categorySlugMap 内，故在此单独登记。
+ */
+const CATEGORY_SLUGS = new Set(['text', 'crypto', 'format', 'network', 'datetime', 'frontend', 'devops', 'markdown']);
 
 /**
  * 旧两段 URL → 新两段 URL 重定向（分类合并 12→7 触发的路径迁移）。
@@ -27,14 +31,23 @@ const CATEGORY_MERGE_REDIRECTS = {
     '/media/image-converter': '/frontend/image-converter',
     '/media/image-scrambler': '/frontend/image-scrambler',
     '/media/phantom-tank': '/frontend/phantom-tank',
-    '/editor/markdown-editor': '/devops/markdown-editor',
+    // markdown-editor 升级为单段工作台路径后，旧扁平 URL 直接指向 /markdown，避免两跳重定向链
+    '/editor/markdown-editor': '/markdown',
+};
+
+/**
+ * markdown-editor 升级为独立旗舰工作台的路径迁移：旧两段工具页 URL 301 到单段 /markdown。
+ * Astro 路由清单中 redirect 优先于同路径的文件路由，旧页面文件删除前重定向即已生效。
+ */
+const MARKDOWN_WORKSTATION_REDIRECTS = {
+    '/devops/markdown-editor': '/markdown',
 };
 
 // https://astro.build/config
 export default defineConfig({
     site: 'https://tools.baixuanz.cn',
-    /** 分类合并后的两段 URL 301 重定向（见上方 CATEGORY_MERGE_REDIRECTS） */
-    redirects: CATEGORY_MERGE_REDIRECTS,
+    /** 两段 URL 分类合并迁移 + markdown 工作台单段路径迁移的 301 重定向（见上方两个重定向表） */
+    redirects: { ...CATEGORY_MERGE_REDIRECTS, ...MARKDOWN_WORKSTATION_REDIRECTS },
     build: {
         /**
          * 内联所有样式表到 HTML，避免额外的 render-blocking CSS 请求。
@@ -47,15 +60,15 @@ export default defineConfig({
         vue(),
         sitemap({
             /**
-             * 单段路径仅保留 7 个分类页（/text 等），排除旧扁平重定向页（/base64 等）。
-             * 多段路径（工具页）与首页全部保留。
+             * 单段路径仅保留白名单内页面：7 个分类页（/text 等）+ 旗舰工作台页（/markdown），
+             * 排除旧扁平重定向页（/base64 等）。多段路径（工具页）与首页全部保留。
              */
             filter: (page) => {
                 try {
                     const pathname = new URL(page).pathname.replace(/\/$/, '');
                     const segments = pathname.split('/').filter(Boolean);
                     if (segments.length === 0) return true;                            // 首页
-                    if (segments.length === 1) return CATEGORY_SLUGS.has(segments[0]); // 分类页保留，旧扁平重定向排除
+                    if (segments.length === 1) return CATEGORY_SLUGS.has(segments[0]); // 白名单单段页保留，旧扁平重定向排除
                     return true;                                                       // 工具页等多段
                 } catch {
                     return true;
@@ -74,7 +87,7 @@ export default defineConfig({
                 }
 
                 const segments = pathname.split('/').filter(Boolean);
-                // 分类页：优先级介于首页(1.0)与工具页(0.8)之间
+                // 白名单单段页（分类页与旗舰工作台页 /markdown）：优先级介于首页(1.0)与工具页(0.8)之间
                 if (segments.length === 1 && CATEGORY_SLUGS.has(segments[0])) {
                     return {url, ...rest, priority: 0.9, changefreq: ChangeFreqEnum.WEEKLY};
                 }

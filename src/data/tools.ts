@@ -33,7 +33,7 @@ export interface ToolMeta {
   category: ToolCategory;
   /** 图标（emoji） */
   icon: string;
-  /** 路由路径（二级路径格式：/category/id） */
+  /** 路由路径（常规为二级路径格式 /category/id；旗舰工作台例外为单段路径，如 /markdown） */
   path: string;
   /** 页面 <title> 覆盖（可选，不传则自动拼接 "{name} - DevTools"） */
   title?: string;
@@ -356,12 +356,22 @@ export const tools: ToolMeta[] = [
   {
     id: 'markdown-editor',
     name: 'Markdown 编辑器',
-    description: '在线 Markdown 编辑器，支持实时预览、语法高亮和多格式导出',
-    seoDescription: '在线 Markdown 编辑器，支持实时预览、分栏编辑、代码块高亮，可导出为 Markdown、HTML、PDF 格式，纯浏览器端运行。',
+    description: '独立全屏 Markdown 工作台：多文档草稿箱、编辑/分栏/预览三视图，支持 mermaid 图表、数学公式、图片粘贴与导入导出，纯浏览器端运行',
+    seoDescription: '免费在线 Markdown 工作台，独立全屏编辑器支持多文档草稿箱自动保存与刷新恢复、仅编辑/分栏/仅预览三视图切换、mermaid 流程图与 KaTeX 数学公式渲染、图片粘贴拖拽 base64 内联、导入 .md 文件并导出 Markdown/HTML/PDF，纯浏览器端运行数据绝不上传。',
     category: '开发与运维',
     icon: '✏️',
-    path: '/devops/markdown-editor',
-    keywords: ['markdown 编辑器', 'markdown 在线', 'markdown 预览', '在线 md 编辑器', 'markdown 导出', 'markdown 转换'],
+    path: '/markdown',
+    keywords: [
+      'markdown 编辑器',
+      'markdown 工作台',
+      'markdown 多文档',
+      'markdown 在线',
+      'markdown 预览',
+      '在线 md 编辑器',
+      'markdown 导出',
+      'mermaid 编辑器',
+      'markdown 转换',
+    ],
     relatedToolIds: ['json-formatter', 'json-to-yaml'],
   },
   {

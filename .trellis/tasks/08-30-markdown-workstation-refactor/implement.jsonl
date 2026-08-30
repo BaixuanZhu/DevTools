@@ -1,0 +1,7 @@
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "新组件/页面/数据层落位需遵循模块组织约定（tools/{domain}、components/{domain}、pages 对称）"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "MarkdownWorkstation 与 DocumentSidebar 的组件模式、props 组合规范"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "岛层与 module store（themeStore）共享状态的边界与禁忌（禁 Pinia/全局库）"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁、测试要求、禁止模式（eval/任意值类名等）"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TS strict 收窄模式与命名规范"}
+{"file": "PRODUCT.md", "reason": "URL 策略、错误处理、SEO 元数据要求（新页 JSON-LD/FAQ 需对齐）"}
+{"file": "DESIGN.md", "reason": "设计令牌、组件状态矩阵、布局模板（工作台形态需符合现有体系）"}

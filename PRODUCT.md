@@ -54,6 +54,11 @@
 - 三级导航结构：首页 `/` → 分类页 `/text` `/crypto` … → 工具页 `/text/base64`
 - 路由采用 kebab-case，语义化命名：`/text/base64`、`/datetime/datetime-converter`
 - 分类前缀 + 工具名，形成 `/category/tool-name` 的二级工具页结构；分类页为单段 `/category`
+- **例外——旗舰工作台单段路径**：Markdown 工作台位于 `/markdown`（单段一级路径，不在任何分类前缀下），
+  注册表 `path` 仍唯一指向它，分类卡/搜索/相关工具/快捷入口照常可达。旧 URL
+  `/devops/markdown-editor`、`/editor/markdown-editor` 301 到 `/markdown`
+- **例外——完全独立页面形态**：`/markdown` 不使用 Layout.astro，无站点壳层（Header/Sidebar/Footer）、
+  无 FAQ、无介绍内容，是全屏工作台应用；页面自含主题切换与 Toast 渲染，SEO 仅保留 head 内不可见元数据
 - 每个工具页面有独立的 `<title>` 和 meta description，便于 SEO
 - 旧两段 URL（如 `/encoding/base64`）通过 `astro.config.mjs` 的 `redirects` 配置 301 重定向到新路径；旧扁平 URL（如 `/base64`）通过 `src/pages/[slug].astro` 重定向
 
@@ -66,6 +71,8 @@
 - **`<meta name="keywords">`**：在 `src/data/tools.ts` 中通过 `keywords` 数组定义，5–10 个长尾关键词
 - **JSON-LD 结构化数据**：ToolLayout 自动注入 `WebSite`、`BreadcrumbList`、`WebPage`、`SoftwareApplication` schema
 - **FAQ 结构化数据**：有 FAQ 的工具需在 `src/data/tool-faqs.ts` 中维护问答对，渲染为原生 `<details>` 元素
+- **例外——Markdown 工作台（/markdown）**：完全独立页面形态豁免 FAQ 与页面正文索引内容
+  （`tool-faqs.ts` 中不维护其键），SEO 仅保留 head 内不可见元数据与 SoftwareApplication JSON-LD
 
 新增工具时必须在 `src/data/tools.ts` 中完整填写上述字段，否则 SeoHead 组件无法生成有效的 meta 标签。
 

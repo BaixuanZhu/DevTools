@@ -18,6 +18,7 @@ export const QUICK_LINK_TOOL_IDS: string[] = [
   'image-converter',
   'datetime-converter',
   'tester',
+  'markdown-editor',
 ];
 
 /**
