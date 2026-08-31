@@ -103,3 +103,11 @@
 ### Pattern: IANA 时区/地域类本地表的有效性测试锚定
 
 静态维护 IANA 名清单时（如 `src/tools/devops/postgres-config/timezones.ts`），有效性断言用 `new Intl.DateTimeFormat('en-US', { timeZone: value })` **可解析性**，不要断言 `Intl.supportedValuesOf('timeZone')` 成员——后者只含 canonical 名且新旧拼写取向随运行时 ICU 版本漂移，前者接受 tzdata 全部 canonical 名与 backward 链接，与 PostgreSQL 的接受面一致。表值统一采用**现代规范拼写**（Asia/Kolkata、Europe/Kyiv 等 tzdata 主文件 Zone 名），旧拼写（Calcutta、Kiev）放 keywords 作搜索别名。
+
+### Pattern: 完全独立工作台页（standalone workbench island）
+
+旗舰工具（如 /markdown Markdown 工作台）需要脱离站点壳层的全屏应用形态时，页面**不 import Layout.astro/ToolLayout**，直接输出完整 HTML 文档（手写 head 元数据 + JSON-LD + `import global.css`），body 只放一个 `client:only="vue"` 全屏岛（范式 `src/pages/markdown.astro` + `src/tools/markdown/MarkdownWorkstation.vue`）。脱离 Shell 后有三项必须自含的隐藏职责，遗漏即静默失效：`onMounted` 调 `themeStore.load()`（否则主题不恢复）、岛内挂 vue-sonner `<Toaster />`（否则 toastStore 无渲染目标）、主题切换控件需自带（复用 themeStore API）。注册表（tools.ts）仅是元数据与入口，独立页照常注册（`path` 可为单段，需登记 `astro.config.mjs` 单段白名单与 `src/data/__tests__/tools.test.ts` 的 `FLAGSHIP_SINGLE_SEGMENT_PATHS` 两个**人工同步点**）。
+
+### Pattern: 重型编辑器扩展库本地实例注入（禁运行时 CDN）
+
+md-editor-v3 等组件库默认从 unpkg CDN 运行时加载扩展（mermaid/katex/highlight.js/prettier/cropperjs/screenfull/echarts 共 7 处），国内可达性不稳定。接入时一律 `pnpm add` 对应包并在模块级 `config({ editorExtensions: { *.instance } })` 注入本地实例（库源码守卫：有 instance 即跳过 script/link 追加，范式 `MarkdownWorkstation.vue` 顶部）；被替代的 CDN 样式（katex css+字体、cropper css、hljs 主题）也要本地 import。库体只允许进懒加载岛 chunk。两个易踩坑：echarts 6 ESM 无 default export（用 `import * as`），且其默认 `parseOption` 用 `new Function` 处理用户输入、触碰 Security Rules，必须覆写为 `JSON.parse`；同版本共存冲突（如 md-editor 需要 cropperjs v1 而站点用 v2）用 npm 别名解决（`"cropperjs1": "npm:cropperjs@^1.6.3"`），**禁止直接降级共享依赖版本**——会隐性打断不相关工具（image-converter/ico-maker 的裁切器用 v2 API，且 .vue 组件不受 astro check/单测覆盖，门禁全绿仍会放行）。

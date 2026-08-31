@@ -119,6 +119,8 @@ The system rejects everything PRODUCT.md calls out: login walls, multi-step flow
 
 ResponsiveWorkspace 组件封装了宽度选择逻辑：`vertical` 模式使用 `max-w-[720px]`，`horizontal` 模式使用 `max-w-[1600px]` 并切换为 `grid grid-cols-1 lg:grid-cols-2` 双栏网格。
 
+**工作台页形态（例外，2026-08 起）：** 旗舰工作台（Markdown 工作台 `/markdown`）不套用上述工具页模板，也不使用站点壳层：页面为完整独立 HTML 文档（不用 Layout.astro），`body` 为 `h-dvh overflow-hidden` 全屏锁高容器，仅挂一个 `client:only="vue"` 全屏岛。岛自含应用级顶栏（文档操作 + 标题 + 视图切换 + 主题三态切换，控件复用 Header 同款按钮/下拉规范）、左侧文档列表侧栏（桌面 `w-60` 静态列、移动端 fixed 抽屉 + 遮罩）与主编辑区。因无 Shell，岛内需自含 `themeStore.load()` 初始化与 `<Toaster />` 挂载；无 FAQ、无 Footer、无面包屑等站点化元素。第三方编辑器（md-editor-v3）通过自身的 theme prop 跟随 `themeStore.current`，整体视觉仍消费语义 token。
+
 **响应式断点：**
 
 | 断点 | 布局行为 |

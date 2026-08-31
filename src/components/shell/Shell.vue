@@ -13,7 +13,7 @@
  * （数据源 src/data/quick-links.ts，Shell 不直接 import 工具注册表）。
  */
 import { onMounted } from 'vue';
-import { Wrench, Sun, Moon, Menu, Check, Monitor } from '@lucide/vue';
+import { Wrench, Sun, Moon, Menu, Check, Monitor, ExternalLink } from '@lucide/vue';
 import { siGithub, siGitee } from 'simple-icons';
 import {
   DropdownMenuRoot, DropdownMenuTrigger, DropdownMenuPortal, DropdownMenuContent, DropdownMenuItem,
@@ -37,8 +37,10 @@ interface Props {
   currentPath: string;
   /** Header 中部快捷入口清单（≥lg 渲染）；缺省为 [] 时不渲染，向后兼容 */
   quickLinks?: QuickLinkTool[];
+  /** 独立工作台工具清单（Sidebar 顶部一级菜单区；链接一律新标签页打开） */
+  standaloneTools?: Pick<ToolMeta, 'id' | 'path' | 'name' | 'icon'>[];
 }
-const props = withDefaults(defineProps<Props>(), { quickLinks: () => [] });
+const props = withDefaults(defineProps<Props>(), { quickLinks: () => [], standaloneTools: () => [] });
 
 const { isOpen } = sidebarStore;
 const { mode, current } = themeStore;
@@ -96,6 +98,8 @@ function renderCategory(cat: CategoryMeta): { href: string; active: boolean; cou
           v-for="t in quickLinks"
           :key="t.id"
           :href="t.path"
+          :target="t.standalone ? '_blank' : undefined"
+          :rel="t.standalone ? 'noopener noreferrer' : undefined"
           class="flex items-center gap-1.5 px-2 py-1 rounded-sm text-sm whitespace-nowrap transition-[background-color,color] duration-150 hover:bg-accent focus:outline-none"
           :class="currentPath === t.path ? 'bg-accent text-primary font-medium' : 'text-foreground'"
         >
@@ -170,6 +174,25 @@ function renderCategory(cat: CategoryMeta): { href: string; active: boolean; cou
       <!-- 桌面端 Sidebar（静态常驻） -->
       <aside class="hidden lg:flex w-60 shrink-0 border-r border-border bg-card flex-col" role="navigation" aria-label="工具导航">
         <div class="flex-1 sidebar-nav-scroll overflow-y-auto py-2">
+          <!-- 独立工作台一级菜单（新标签页打开，无徽标） -->
+          <ul v-if="props.standaloneTools.length" class="list-none m-0 p-0 pb-1.5 mb-1.5 border-b border-border">
+            <li class="px-4 pt-1 pb-1 text-[0.6875rem] text-muted-foreground select-none" aria-hidden="true">工作台</li>
+            <li v-for="t in props.standaloneTools" :key="t.id">
+              <a
+                :href="t.path"
+                target="_blank"
+                rel="noopener noreferrer"
+                :class="[
+                  'flex items-center gap-2 px-4 py-2.5 text-sm transition-[background-color,color] duration-150 hover:bg-accent focus:outline-none',
+                  currentPath === t.path ? 'bg-accent text-primary font-medium' : 'text-foreground',
+                ]"
+              >
+                <span class="text-base w-6 text-center shrink-0">{{ t.icon }}</span>
+                <span class="flex-1">{{ t.name }}</span>
+                <ExternalLink class="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+              </a>
+            </li>
+          </ul>
           <ul class="list-none m-0 p-0">
             <li v-for="cat in props.categories" :key="cat.slug">
               <a
@@ -195,6 +218,24 @@ function renderCategory(cat: CategoryMeta): { href: string; active: boolean; cou
             <SheetTitle>工具导航</SheetTitle>
           </SheetHeader>
           <nav class="flex-1 sidebar-nav-scroll overflow-y-auto py-2" aria-label="工具导航（移动端）">
+            <ul v-if="props.standaloneTools.length" class="list-none m-0 p-0 pb-1.5 mb-1.5 border-b border-border">
+              <li class="px-4 pt-1 pb-1 text-[0.6875rem] text-muted-foreground select-none" aria-hidden="true">工作台</li>
+              <li v-for="t in props.standaloneTools" :key="t.id">
+                <a
+                  :href="t.path"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :class="[
+                    'flex items-center gap-2 px-4 py-2.5 text-sm transition-[background-color,color] duration-150 hover:bg-accent',
+                    currentPath === t.path ? 'bg-accent text-primary font-medium' : 'text-foreground',
+                  ]"
+                >
+                  <span class="text-base w-6 text-center shrink-0">{{ t.icon }}</span>
+                  <span class="flex-1">{{ t.name }}</span>
+                  <ExternalLink class="h-3.5 w-3.5 text-muted-foreground shrink-0" aria-hidden="true" />
+                </a>
+              </li>
+            </ul>
             <ul class="list-none m-0 p-0">
               <li v-for="cat in props.categories" :key="cat.slug">
                 <a

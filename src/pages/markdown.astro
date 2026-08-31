@@ -1,0 +1,103 @@
+---
+/**
+ * /markdown 独立旗舰工作台页（完全独立形态，R1）。
+ *
+ * 与全站其他页面不同：本页**不使用 Layout.astro / ToolLayout.astro**，手写完整 HTML 文档——
+ * 无 Shell/Header/Sidebar/Footer/面包屑/FAQ/介绍内容，body 仅一个全屏岛。
+ * SEO 仅保留 head 内不可见元数据（title/description/keywords/canonical/
+ * 站点验证/OG/SoftwareApplication JSON-LD），元数据单源取自工具注册表。
+ *岛用 client:only="vue"：md-editor-v3 依赖浏览器 API，禁用 SSR 渲染路径。
+ */
+import '../styles/global.css';
+import MarkdownWorkstation from '../tools/markdown/MarkdownWorkstation.vue';
+import { getToolById } from '../data/tools';
+
+/** 工具注册表元数据（元数据单源） */
+const tool = getToolById('markdown-editor');
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.baixuanz.cn';
+const pageUrl = `${siteUrl}/markdown`;
+const pageTitle = tool ? `${tool.name} - DevTools` : 'Markdown 工作台 - DevTools';
+const description = tool?.seoDescription ?? '免费在线 Markdown 工作台，纯浏览器端运行。';
+const keywordList = tool?.keywords ?? [];
+
+/** og:image 与全站一致 */
+const ogImage = `${siteUrl}/og.png`;
+
+/** SoftwareApplication 结构化数据（对齐 ToolLayout 工具页拼装，无面包屑/WebPage——独立页无站点导航） */
+const softwareAppJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: tool?.name ?? 'Markdown 工作台',
+  description,
+  url: pageUrl,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Browser',
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+  },
+};
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {keywordList.length > 0 && <meta name="keywords" content={keywordList.join(', ')} />}
+    <link rel="canonical" href={pageUrl} />
+    <meta name="msvalidate.01" content="C615FE8B2856A777991D6342873F34E4" />
+    <meta name="baidu-site-verification" content="codeva-ADm4YuLoCS" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="zh_CN" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <!-- 提前建立与 Google Fonts 源的连接，减少 DNS/TCP/TLS 耗时 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- 非阻塞加载字体 CSS：先以 preload 方式获取，加载完成后提升为 stylesheet -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;600&display=swap"
+      />
+    </noscript>
+    <!-- 首帧前同步设置暗色 class，避免 FOUC（localStorage + prefers-color-scheme，须容错） -->
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('devtools-theme');
+          var dark =
+            saved === 'dark' ||
+            (saved === 'system' || !saved
+              ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              : false);
+          if (dark) document.documentElement.classList.add('dark');
+        } catch (e) {}
+      })();
+    </script>
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(softwareAppJsonLd)} />
+  </head>
+  <body class="h-dvh overflow-hidden bg-background text-foreground font-sans text-base leading-normal antialiased">
+    <!-- 全屏工作台岛：完全独立形态下页面唯一的 body 内容 -->
+    <MarkdownWorkstation client:only="vue">
+      <p class="flex h-dvh items-center justify-center text-sm text-muted-foreground">正在加载 Markdown 工作台…</p>
+    </MarkdownWorkstation>
+  </body>
+</html>

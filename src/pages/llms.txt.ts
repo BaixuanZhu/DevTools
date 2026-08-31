@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { tools, getToolsByCategory } from '../data/tools';
+import { tools, getToolsByCategory, getStandaloneTools } from '../data/tools';
 
 /**
  * 动态生成 /llms.txt —— 面向大语言模型与 AI 检索引擎的站点纯文本概览。
@@ -32,6 +32,17 @@ export const GET: APIRoute = ({ site }) => {
     lines.push(`### ${category}`);
     lines.push('');
     for (const tool of list) {
+      lines.push(`- [${tool.name}](${siteUrl}${tool.path}): ${tool.description}`);
+    }
+    lines.push('');
+  }
+
+  // 独立工作台工具不归属分类，单独输出（避免从站点索引中消失）
+  const standalone = getStandaloneTools();
+  if (standalone.length > 0) {
+    lines.push('### 独立工作台');
+    lines.push('');
+    for (const tool of standalone) {
       lines.push(`- [${tool.name}](${siteUrl}${tool.path}): ${tool.description}`);
     }
     lines.push('');
