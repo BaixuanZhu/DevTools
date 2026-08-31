@@ -417,16 +417,17 @@ function handleExportHtml(): void {
 }
 
 /**
- * 导出 PDF：打印编辑器当前预览区（分栏模式的预览栏或内置「仅预览」视图均可，
- * 打印样式见文件尾部 @media print 块）。用户通过内置工具栏关闭预览后无预览 DOM，予以提示。
+ * 导出 PDF：把预览区元素交给 exportPdf 克隆到打印宿主输出（分栏模式的预览栏与
+ * 内置「仅预览」视图均有 .md-editor-preview）。用户通过内置工具栏关闭预览后无预览 DOM，予以提示。
  */
 function handleExportPdf(): void {
-  if (!document.querySelector('.md-editor-preview')) {
+  const preview = document.querySelector<HTMLElement>('.md-editor-preview');
+  if (!preview) {
     toastStore.error('当前无预览内容，请先通过工具栏恢复预览再导出 PDF');
     return;
   }
   try {
-    exportPdf();
+    exportPdf(preview);
   } catch {
     toastStore.error('导出失败，请重试');
   }
@@ -481,7 +482,7 @@ function handleEditorSave(): void {
   <div class="h-dvh flex flex-col overflow-hidden bg-background text-foreground font-sans">
     <!-- 顶栏：文档操作 + 标题 + 视图切换 + 主题切换 -->
     <header
-      class="flex flex-wrap items-center gap-1.5 px-3 py-1.5 min-h-12 shrink-0 border-b border-border bg-card print:hidden"
+      class="flex flex-wrap items-center gap-1.5 px-3 py-1.5 min-h-12 shrink-0 border-b border-border bg-card"
     >
       <Button
         variant="ghost"
@@ -586,7 +587,7 @@ function handleEditorSave(): void {
       <!-- 文档侧栏：桌面静态列，移动端 fixed 抽屉 -->
       <aside
         v-show="sidebarOpen"
-        class="w-60 shrink-0 border-r border-border bg-card min-h-0 max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-40 max-lg:w-72 max-lg:shadow-lg print:hidden"
+        class="w-60 shrink-0 border-r border-border bg-card min-h-0 max-lg:fixed max-lg:inset-y-0 max-lg:left-0 max-lg:z-40 max-lg:w-72 max-lg:shadow-lg"
       >
         <DocumentSidebar
           :docs="docs"
@@ -695,27 +696,54 @@ function handleEditorSave(): void {
 }
 
 /*
- * PDF 导出打印样式：仅显示 md-editor 预览区。
- * 分栏模式与内置「仅预览」视图的预览内容都是 .md-editor-preview（前者多包一层 -preview-wrapper），
- * 固定定位使其脱离编辑器的滚动容器与分栏宽度限制，占满打印页。
+ * PDF 导出打印样式：页面交给 markdown-export.exportPdf 动态挂载的打印宿主
+ * （.md-print-host，含预览区克隆，挂 md-editor 类命中排版主题变量作用域）。
+ * body 直下除宿主外全部退场（含 reka-ui portal 的菜单/toast 残影，规避关闭动画与
+ * window.print 的时序竞态）；宿主只中和 .md-editor 根的盒模型约束（500px 高 /
+ * 边框 / overflow 裁剪），让克隆内容以正常文档流跨页分页；超宽代码块 pre-wrap
+ * 折行避免被页宽裁切，标题不与后续内容分家，代码块/表格尽量不跨页截断。
+ * 屏幕态 display:none 是 afterprint 未触发时（旧 Safari）的兜底隐藏。
  */
+.md-print-host {
+  display: none;
+}
+
 @media print {
-  body * {
-    visibility: hidden;
+  body > :not(.md-print-host) {
+    display: none !important;
   }
-  .md-editor-preview,
-  .md-editor-preview * {
-    visibility: visible;
-  }
-  .md-editor-preview {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    max-width: none;
-    max-height: none;
+  .md-print-host {
+    display: block;
+    height: auto;
+    border: none;
+    background: none;
     overflow: visible;
+  }
+  .md-print-host .md-editor-preview {
     padding: 2rem;
-    background: #fff;
+  }
+  /* 代码块头部的窗口装饰点/语言标签/复制按钮是屏幕交互件，打印剔除 */
+  .md-print-host .md-editor-code-head {
+    display: none;
+  }
+  /* 预览主题的代码块是浅字深底（浅色模式亦然），打印不输出背景时浅字会贴白纸，强制深字 */
+  .md-print-host .md-editor-code pre,
+  .md-print-host .md-editor-code pre code {
+    color: #383a42 !important;
+    background: transparent !important;
+  }
+  .md-print-host pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .md-print-host h1,
+  .md-print-host h2,
+  .md-print-host h3 {
+    break-after: avoid;
+  }
+  .md-print-host pre,
+  .md-print-host table {
+    break-inside: avoid;
   }
 }
 </style>

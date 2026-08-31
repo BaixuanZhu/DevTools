@@ -36,10 +36,63 @@ export function exportHtml(markdown: string, filename = 'document.html'): void {
 
 /**
  * 导出为 PDF（调用浏览器打印）。
- * 通过触发 window.print()，配合调用方 @media print 样式只显示预览区内容。
+ *
+ * 应用页面是固定视口布局（h-dvh + overflow 裁剪），直接 window.print 会被截成单页；
+ * 因此把预览区 DOM 克隆到 body 下的打印宿主（.md-print-host）参与正常文档流，
+ * 由文档流分页天然支持跨页。宿主挂 md-editor 类以命中预览排版主题的
+ * `.md-editor .md-editor-preview` 变量作用域；打印期间暂时摘除 html.dark，
+ * 避免暗色令牌把打印内容染成浅字白纸（afterprint 后恢复）。
+ *
+ * @param previewEl - 编辑器预览区元素（.md-editor-preview，分栏与仅预览视图均有）
  */
-export function exportPdf(): void {
+export function exportPdf(previewEl: HTMLElement): void {
+  document.querySelector('.md-print-host')?.remove();
+
+  const host = document.createElement('div');
+  host.className = 'md-editor md-print-host';
+  host.appendChild(cloneForPrint(previewEl));
+  document.body.appendChild(host);
+
+  const wasDark = document.documentElement.classList.contains('dark');
+  if (wasDark) document.documentElement.classList.remove('dark');
+
+  const cleanup = (): void => {
+    window.removeEventListener('afterprint', cleanup);
+    host.remove();
+    if (wasDark) document.documentElement.classList.add('dark');
+  };
+  window.addEventListener('afterprint', cleanup);
   window.print();
+}
+
+/**
+ * 克隆预览区 DOM 用于打印。
+ * canvas 位图不随 cloneNode 携带（echarts 图表克隆后是空白），
+ * 逐个经 toDataURL 转为等尺寸图片替换。
+ * @param source - 预览区元素
+ * @returns 可直接挂载的深克隆节点
+ */
+function cloneForPrint(source: HTMLElement): HTMLElement {
+  const clone = source.cloneNode(true) as HTMLElement;
+  const canvases = source.querySelectorAll('canvas');
+  const clonedCanvases = clone.querySelectorAll('canvas');
+  canvases.forEach((canvas, index) => {
+    const target = clonedCanvases[index];
+    if (!target) return;
+    try {
+      const img = document.createElement('img');
+      img.src = canvas.toDataURL('image/png');
+      img.width = canvas.width;
+      img.height = canvas.height;
+      // 优先沿用画布内联尺寸（echarts 按容器设置），缺省回退位图像素
+      img.style.width = canvas.style.width || `${canvas.width}px`;
+      img.style.height = canvas.style.height || `${canvas.height}px`;
+      target.replaceWith(img);
+    } catch {
+      target.remove();
+    }
+  });
+  return clone;
 }
 
 /**
