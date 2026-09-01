@@ -122,4 +122,4 @@ md-editor-v3 等组件库默认从 unpkg CDN 运行时加载扩展（mermaid/kat
 
 ### Pattern: 独立 HTML 导出产物（多主题内嵌 + 单一生成路径）
 
-导出类功能凡有「预览 + 下载」，预览与下载必须共用同一条产物生成函数（范式 `markdown-export.ts` 的 `buildHtmlDocument`，消费方 `HtmlExportDialog.vue`），杜绝两套渲染漂移。独立 HTML 产物遵守**零外部依赖契约**（无外链 css/js/字体，沙箱/file:// 均可用），由单测固化（`markdown-export.test.ts` 断言无 `<link`/`src="http`/`url(http`）。多主题实现：主题 = CSS 变量声明集挂 `:root[data-theme]`，基础排版只消费变量（新增主题成本 = 一组变量）；切换器脚本是静态字符串常量（不拼用户输入，过 Security Rules），localStorage 一律 try/catch 降级。预览 iframe 用 `sandbox="allow-scripts"`（**不给** allow-same-origin）：切换器在预览里真实可用，产物脚本又碰不到父页面与站点存储；所选主题烘为 `<html data-theme>` 默认值，导出文件打开即所见。
+导出类功能凡有「预览 + 下载」，预览与下载必须共用同一条产物生成函数（范式 `markdown-export.ts` 的 `buildHtmlDocument`，消费方 `HtmlExportDialog.vue`），杜绝两套渲染漂移；主题选择收敛在预览 UI，**产物只烘焙所选主题、不含任何脚本**（单测固化零 `<script>`/零外链，`markdown-export.test.ts`）。多主题实现：主题 = CSS 变量声明集挂 `:root[data-theme]`，基础排版只消费变量（新增主题成本 = 一组变量；变量表达不了的结构性特色用主题级 `extraCss` 附加规则）。预览 iframe 用空 `sandbox`（全沙箱禁脚本，静态展示）。另两条硬约束：① 嵌在 md-editor-v3 页面里的弹层（共享 `ui/dialog/DialogContent.vue`）z-index 必须 ≥ 21000——md-editor 内部 dropdown/modal 为 20000-20001，z-50 会被盖住；② 从 DropdownMenuItem select 里开 Dialog 必须 `setTimeout ≥100ms` 再置开（见上文 Common Mistake）。

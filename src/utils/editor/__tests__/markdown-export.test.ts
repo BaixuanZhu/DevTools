@@ -63,29 +63,33 @@ describe('buildHtmlDocument', () => {
     expect(doc).toContain(`<html lang="zh-CN" data-theme="${DEFAULT_HTML_THEME_ID}">`);
   });
 
-  it('themeId 指定主题，未知 id 回退缺省主题', () => {
-    expect(buildHtmlDocument(SAMPLE, { themeId: 'dark' })).toContain('data-theme="dark"');
+  it('只烘焙所选主题的变量段（不内嵌其余主题）', () => {
+    const doc = buildHtmlDocument(SAMPLE, { themeId: 'aurora' });
+    expect(doc).toContain('data-theme="aurora"');
+    expect(doc).toContain(':root[data-theme="aurora"]');
+    expect(doc.match(/:root\[data-theme=/g)).toHaveLength(1);
+    expect(doc).not.toContain(':root[data-theme="classic-light"]');
+  });
+
+  it('themeId 未知 id 回退缺省主题', () => {
     expect(buildHtmlDocument(SAMPLE, { themeId: 'not-exist' })).toContain(
       `data-theme="${DEFAULT_HTML_THEME_ID}"`,
     );
   });
 
-  it('内嵌全部主题变量段与主题切换器', () => {
-    const doc = buildHtmlDocument(SAMPLE);
-    for (const theme of HTML_EXPORT_THEMES) {
-      expect(doc).toContain(`:root[data-theme="${theme.id}"]`);
-    }
-    expect(doc).toContain('id="mdoc-theme-select"');
-    expect(doc).toContain('<script>');
-    expect(doc).toContain('mdoc-theme');
+  it('主题附加规则（extraCss）注入产物', () => {
+    const aurora = buildHtmlDocument(SAMPLE, { themeId: 'aurora' });
+    expect(aurora).toContain('linear-gradient');
+    const plain = buildHtmlDocument(SAMPLE, { themeId: 'classic-light' });
+    expect(plain).not.toContain('linear-gradient');
   });
 
-  it('产物零外部资源引用（不依赖任何网络请求）', () => {
+  it('产物完全静态：无任何脚本、外链与网络资源引用', () => {
     const doc = buildHtmlDocument(SAMPLE);
+    expect(doc).not.toContain('<script');
     expect(doc).not.toMatch(/<link\s/i);
     expect(doc).not.toMatch(/src=["']https?:/i);
     expect(doc).not.toMatch(/url\(\s*["']?https?:/i);
-    expect(doc).not.toMatch(/<script[^>]+src=/i);
   });
 
   it('title 注入 <title> 并做 HTML 转义', () => {

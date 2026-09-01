@@ -2,10 +2,9 @@
 /**
  * HTML 导出预览对话框（Markdown 工作台消费）。
  *
- * 预览与下载共用 buildHtmlDocument 产物，保证所见即所得：主题切换即时重建 srcdoc；
- * iframe 以 sandbox="allow-scripts"（无 allow-same-origin）隔离在不透明源，
- * 预览内嵌的主题切换器真实可用，且产物脚本无法触碰父页面与站点存储。
- * 导出文件内嵌全部主题，此处选中的主题烘为打开文件时的默认值。
+ * 预览与下载共用 buildHtmlDocument 产物，保证所见即所得：主题切换即时重建 srcdoc，
+ * 所选主题直接烘焙进导出文件（产物无脚本，iframe 以空 sandbox 全沙箱渲染）。
+ * 对话框 z 层级见 ui/dialog/DialogContent.vue（压过 md-editor 内部弹层）。
  */
 import { computed, ref } from 'vue';
 import { Download } from '@lucide/vue';
@@ -65,7 +64,7 @@ function handleDownload(): void {
       <DialogHeader>
         <DialogTitle>导出 HTML 预览</DialogTitle>
         <DialogDescription>
-          选择主题查看导出效果；导出文件内置全部主题并自带切换器，打开后仍可随时切换。
+          选择主题查看导出效果；导出文件将烘焙所选主题，为零外部依赖的静态单文件。
         </DialogDescription>
       </DialogHeader>
 
@@ -86,7 +85,7 @@ function handleDownload(): void {
       <div class="min-h-0 rounded-md border border-border overflow-hidden bg-card">
         <iframe
           :srcdoc="previewDoc"
-          sandbox="allow-scripts"
+          sandbox=""
           title="导出 HTML 预览"
           class="w-full h-full border-0"
         ></iframe>

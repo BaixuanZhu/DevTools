@@ -21,6 +21,13 @@ pnpm astro check
 pnpm build
 ```
 
+## 二轮（用户反馈，2026-09-01 晚）
+
+1. [x] 共享 DialogContent z-[21000]（压过 md-editor 20000-20001 弹层）
+2. [x] 产物去内嵌切换器：只烘所选主题、无脚本；iframe 空 sandbox
+3. [x] 「暗色」→ 极光渐变（extraCss 渐变标题）；科技蓝重做（h2 侧边条 + 掘金配色）
+4. [x] 单测改 10 例（单主题段、无脚本、extraCss 注入）；prd/design/spec 同步
+
 ## 评审门 / 回滚点
 
 - 步骤 2 完成后：产物结构确认（零外部依赖契约）再进组件；
