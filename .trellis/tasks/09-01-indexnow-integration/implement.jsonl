@@ -1,0 +1,1 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁（pnpm build/test/astro check）与禁用模式，本任务改动构建配置后必须全量过检"}

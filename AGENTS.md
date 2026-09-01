@@ -111,6 +111,9 @@ Vitest（配置 `vitest.config.ts`）：`environment: 'node'`、`globals: true`�
   1.0、分类页 0.9、工具页 0.8。两段 URL 301 由 `redirects` 生成。
 - `vite.worker.format: 'es'`：兼容 `@jsquash/avif` emscripten worker code-splitting；
   `vite.optimizeDeps.exclude: ['@jsquash/avif']`
+- IndexNow：`astro-indexnow` 构建后把新增/变更页提交到 api.indexnow.org。缓存
+  `.astro-indexnow-cache.json` **必须提交入库**（EdgeOne 每次构建是全新容器，不入库会全量重提）；
+  GitHub Pages 构建经 `INDEXNOW_DISABLED=1` 关闭提交（`--base=/DevTools` 的 URL 非真实站点地址）。
 
 部署：EdgeOne Pages（主站）；GitHub Pages（`.github/workflows/astro-gh-workflow.yml`，push main 触发，
 `pnpm exec astro build --base=/DevTools`）。

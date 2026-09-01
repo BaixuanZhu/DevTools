@@ -153,6 +153,9 @@ importers:
       '@vue/test-utils':
         specifier: ^2.4.11
         version: 2.4.11(@vue/compiler-dom@3.5.40)(@vue/server-renderer@3.5.40)(vue@3.5.40(typescript@6.0.3))
+      astro-indexnow:
+        specifier: ^2.3.10
+        version: 2.3.10(astro@6.4.8(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.3)(yaml@2.9.0))
       happy-dom:
         specifier: ^20.11.0
         version: 20.11.1
@@ -1821,6 +1824,12 @@ packages:
   assertion-error@2.0.1:
     resolution: {integrity: sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA==}
     engines: {node: '>=12'}
+
+  astro-indexnow@2.3.10:
+    resolution: {integrity: sha512-O0QnP5lUQ4mbMOBPxXf1pNXVhu80R9Pk3rU5Jzbc7pFB+lSQH7UHQ6TSZtRsggVkgSD7W0g38OLxfep7Wb6Qqw==}
+    engines: {node: '>=22.12.0'}
+    peerDependencies:
+      astro: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
 
   astro@6.4.8:
     resolution: {integrity: sha512-KK5lX90uU9EeVaTjINyj3sy9/NFXVa59aowaqbWBDDKLXZh4rr7GwIaCFYVetE22MJtsCNFerQXn0vlCLmpP/Q==}
@@ -5734,6 +5743,10 @@ snapshots:
   array-iterate@2.0.1: {}
 
   assertion-error@2.0.1: {}
+
+  astro-indexnow@2.3.10(astro@6.4.8(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.3)(yaml@2.9.0)):
+    dependencies:
+      astro: 6.4.8(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.3)(yaml@2.9.0)
 
   astro@6.4.8(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.3)(yaml@2.9.0):
     dependencies:

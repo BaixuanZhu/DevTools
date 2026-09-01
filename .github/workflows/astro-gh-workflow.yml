@@ -52,6 +52,9 @@ jobs:
 
       - name: Build your site
         run: pnpm exec astro build --base=/DevTools   # 会执行 package.json 中的 build 脚本
+        env:
+          # --base=/DevTools 产出的 URL 并非真实站点地址，禁止向 IndexNow 提交（见 astro.config.mjs INDEXNOW_KEY 注释）
+          INDEXNOW_DISABLED: '1'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5

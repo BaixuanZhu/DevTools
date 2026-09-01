@@ -3,6 +3,7 @@ import {defineConfig} from 'astro/config';
 import vue from '@astrojs/vue';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap, {ChangeFreqEnum} from '@astrojs/sitemap';
+import indexnow from 'astro-indexnow';
 
 /**
  * 单段路径 sitemap 白名单：7 个分类 slug + 旗舰工作台页 /markdown。
@@ -43,6 +44,18 @@ const MARKDOWN_WORKSTATION_REDIRECTS = {
     '/devops/markdown-editor': '/markdown',
 };
 
+/**
+ * IndexNow 密钥，等于 public/c90a69ccaca440b18dd4aff0cb43801c.txt 的文件名。
+ * 协议要求该密钥文件公开可访问（https://tools.baixuanz.cn/<key>.txt）以验证站点所有权，
+ * 密钥本身是公开信息，内联为常量不构成泄露，且免去 CI 环境变量配置。
+ * 构建结束后 astro-indexnow 对比 dist HTML 哈希与缓存文件，只把新增/变更页面提交到
+ * api.indexnow.org（自动分发 Bing/Yandex 等）；缓存 .astro-indexnow-cache.json 须提交入库，
+ * 否则 EdgeOne 全新构建容器会每次全量重提。
+ * GitHub Pages 工作流以 --base=/DevTools 构建，产出 URL 并非真实站点地址，
+ * 通过 INDEXNOW_DISABLED=1 关闭该场景下的提交。
+ */
+const INDEXNOW_KEY = 'c90a69ccaca440b18dd4aff0cb43801c';
+
 // https://astro.build/config
 export default defineConfig({
     site: 'https://tools.baixuanz.cn',
@@ -58,6 +71,10 @@ export default defineConfig({
     },
     integrations: [
         vue(),
+        indexnow({
+            key: INDEXNOW_KEY,
+            enabled: process.env.INDEXNOW_DISABLED !== '1',
+        }),
         sitemap({
             /**
              * 单段路径仅保留白名单内页面：7 个分类页（/text 等）+ 旗舰工作台页（/markdown），
