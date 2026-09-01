@@ -41,7 +41,10 @@ export interface ToolMeta {
    * 全站所有指向该工具的链接一律新标签页打开（target="_blank"）。
    */
   standalone?: true;
-  /** 页面 <title> 覆盖（可选，不传则自动拼接 "{name} - DevTools"） */
+  /**
+   * 页面 <title>（格式 "{工具名} - {长尾词/场景} - DevTools"，目标 25-45 字符，守卫区间 25-60，
+   * 与 seoDescription 守卫同按 JS 字符数计）。不传时 ToolLayout 回退拼接，但守卫测试要求全部显式配置。
+   */
   title?: string;
   /** 长尾关键词列表，用于 meta keywords 标签及内部选题参考 */
   keywords: string[];
@@ -54,6 +57,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'number-base-converter',
     name: '进制转换器',
+    title: '进制转换器 - 二进制/十六进制互转与 BigInt 大数进制计算 - DevTools',
     description: '二进制、八进制、十进制、十六进制批量互转，支持大整数与补码二进制预览',
     seoDescription: '免费在线进制转换工具，支持二进制、八进制、十进制、十六进制任意进制批量互转，基于 BigInt 精确处理超出 Number 安全范围的任意大整数与负数补码，并提供逐位二进制位图预览辅助理解位运算，前端开发与协议调试必备，纯浏览器端运算数据绝不上传。',
     category: '文本与编码',
@@ -65,6 +69,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'text-toolbox',
     name: '文本处理工具箱',
+    title: '文本处理工具箱 - 大小写转换、去重排序与字数统计 - DevTools',
     description: '大小写与全半角转换、去重去空行、排序、字数字节统计、查找替换，一站式文本处理',
     seoDescription: '免费在线文本处理工具箱，一站式完成大小写与全半角转换、按行去重去空行、正序倒序排序、字数与字节统计、行号添加删除、正则查找替换等高频文本操作，粘贴即处理无需切换多个工具，文案整理、日志清洗与数据预处理场景即开即用，纯浏览器端本地运算数据绝不上传。',
     category: '文本与编码',
@@ -76,6 +81,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'uuid-generator',
     name: 'UUID 生成器',
+    title: 'UUID 生成器 - 在线批量生成 v4/v7 与解析版本时间戳 - DevTools',
     description: '生成并解析多种版本的 UUID（v1/v3/v4/v5/v6/v7），支持格式转换与解码分析',
     seoDescription: '免费在线 UUID 生成器与解析工具，支持 v1/v3/v4/v5/v6/v7 多版本一键与批量生成，可自定义连字符与大小写格式，粘贴既有 UUID 即可解码出版本号、时间戳与 MAC 地址等字段信息，数据库主键与分布式 ID 造数必备，纯浏览器端运算数据绝不上传。',
     category: '文本与编码',
@@ -87,6 +93,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'hash-generator',
     name: '哈希生成器',
+    title: '哈希生成器 - MD5/SHA 系列哈希计算与 HMAC 签名 - DevTools',
     description: '支持 MD5、SHA-1、SHA-256 等哈希算法与 HMAC 带密钥签名，结果可转换为不同进制',
     seoDescription: '免费在线哈希生成与 HMAC 工具，支持 MD5、SHA-1、SHA-256、SHA-384、SHA-512 等算法对文本计算哈希值，HMAC-SHA256 带密钥签名生成与验证适用于 API 签名与 Webhook 回调校验，结果可切换十六进制或 Base64 输出，纯浏览器端运算数据绝不上传。',
     category: '加密与安全',
@@ -98,6 +105,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'random-string',
     name: '随机字符串生成',
+    title: '随机字符串生成 - 自定义长度字符集与排除易混淆字符 - DevTools',
     description: '自定义长度和字符集的随机字符串生成器',
     seoDescription: '免费在线随机字符串生成工具，支持自定义长度与字符集（大小写字母、数字、符号自由组合），可设置排除易混淆字符并批量一次生成多条随机密码、随机昵称或测试用随机文本，结果支持一键复制，注册造数与安全加固等场景即开即用，纯浏览器端运算数据绝不上传。',
     category: '文本与编码',
@@ -109,6 +117,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'datetime-converter',
     name: '日期时间转换器',
+    title: '日期时间转换器 - Unix 时间戳与多时区日期互转 - DevTools',
     description: '时间戳与日期格式互转，支持多种日期格式',
     seoDescription: '免费在线日期时间转换工具，支持 Unix 时间戳（秒/毫秒）与日期字符串双向互转，内置北京时间、UTC、纽约、东京等多时区实时对比，ISO 8601 等常见日期格式一键输出，前后端联调排查时区与时间戳问题即开即用，纯浏览器端运算数据绝不上传。',
     category: '日期时间',
@@ -120,6 +129,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'jwt-parser',
     name: 'JWT 编解码',
+    title: 'JWT 编解码 - Token 在线解析、验签与构造 - DevTools',
     description: '解析和生成 JSON Web Token，支持 HMAC 签名验证与编码',
     seoDescription: '免费在线 JWT 解析与生成工具，粘贴 JSON Web Token 即可解码 Header 与 Payload 明文、查看签名算法与过期时间等标准声明，支持 HMAC 密钥在线验证签名合法性，也可自行构造 Token 用于联调测试，登录态排查与接口调试必备，纯浏览器端解码数据绝不上传。',
     category: '文本与编码',
@@ -131,6 +141,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'device-info',
     name: '设备信息与UA',
+    title: '设备信息与 UA 查看 - 浏览器 UA 与屏幕分辨率在线检测 - DevTools',
     description: '查看浏览器、操作系统、屏幕等设备信息',
     seoDescription: '免费在线设备信息查看工具，一键获取浏览器 UserAgent 完整字符串与解析结果、操作系统与版本、浏览器内核、屏幕分辨率与像素比、CPU 核心数、语言时区与网络连接类型等软硬件信息，可用于环境排查与兼容性测试，支持一键复制，纯浏览器端本地检测不上传数据。',
     category: '网络工具',
@@ -142,6 +153,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'http-status-codes',
     name: 'HTTP 状态码查询',
+    title: 'HTTP 状态码查询 - 全部状态码中文释义与排查建议 - DevTools',
     description: '查询 HTTP 状态码含义，支持分类筛选与关键词搜索',
     seoDescription: '免费在线 HTTP 状态码查询手册，完整收录 1xx 信息提示到 5xx 服务器错误的全部状态码，按分类筛选或输入关键词即可快速定位，每个状态码附中文释义、常见触发场景与排查建议，并标注 RFC 规范来源，接口联调排查 404/500 等问题必备，纯浏览器端查询数据不上传。',
     category: '网络工具',
@@ -153,6 +165,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'ipv4-cidr',
     name: 'IPv4 子网计算器',
+    title: 'IPv4 子网计算器 - CIDR 网络地址与可用主机段计算 - DevTools',
     description: '输入 IP 地址和子网掩码，计算网络地址、广播地址、可用主机数等子网信息',
     seoDescription: '免费在线 IPv4 子网计算工具，输入 IP 地址与子网掩码或 CIDR 前缀即可获取网络地址、广播地址、可用主机范围、掩码反码与二进制表示等完整子网信息，附 CIDR 与子网划分术语中文说明，网络配置与运维排障必备，纯浏览器端计算数据绝不上传。',
     category: '网络工具',
@@ -164,6 +177,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'ipv6-cidr',
     name: 'IPv6 子网计算器',
+    title: 'IPv6 子网计算器 - CIDR 地址范围与地址类型识别 - DevTools',
     description: '输入 IPv6 地址和前缀长度，计算网络地址、地址范围、地址总数与地址类型',
     seoDescription: '免费在线 IPv6 子网计算工具，输入 IPv6 地址与 CIDR 前缀长度即可获取网络地址、首末可用地址、地址范围与地址总数，自动识别链路本地、组播等地址类型，支持压缩与展开格式互转，基于 BigInt 精确处理 128 位大数，网络运维与 IPv6 改造必备，纯浏览器端运算数据不上传。',
     category: '网络工具',
@@ -175,6 +189,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'ipv4-range-expander',
     name: 'IPv4 范围展开',
+    title: 'IPv4 范围展开 - IP 区间转最简 CIDR 列表 - DevTools',
     description: '将 IPv4 地址范围转换为最简 CIDR 列表',
     seoDescription: '免费在线 IPv4 地址范围转换工具，输入起始与结束 IP 地址即可自动计算覆盖该区间的最少 CIDR 块列表，逐条展示每个 CIDR 块的网络地址、掩码与可用主机数并统计 IP 总数，防火墙规则整理与网段规划场景必备，纯浏览器端运算数据绝不上传。',
     category: '网络工具',
@@ -186,6 +201,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'url',
     name: 'URL 解析器',
+    title: 'URL 解析器 - 在线编码解码与 query 参数编辑 - DevTools',
     description: 'URL 编解码与结构化解析，支持 query 参数表格化编辑与一键重建 URL',
     seoDescription: '免费在线 URL 解析与编解码工具，支持 URL 编码解码、结构化拆解 protocol、host、path、query 与 hash 组成部分，查询参数以表格形式编辑后一键重建完整 URL，自动区分 encodeURIComponent 与 encodeURI 差异，接口联调与参数排查必备，纯浏览器端运算数据不上传。',
     category: '网络工具',
@@ -197,6 +213,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'symmetric-crypto',
     name: '对称加解密',
+    title: '对称加解密 - AES/SM4/ChaCha20 多算法在线加密解密 - DevTools',
     description: '支持 AES、SM4、ChaCha20、DES 等对称加密算法的加解密',
     seoDescription: '免费在线对称加密解密工具，支持 AES-128/192/256 的 CBC 与 GCM 模式、国密 SM4、ChaCha20-Poly1305 及 DES/3DES 等主流算法，密钥与初始向量支持多进制格式输入，密文可切换 Base64 与十六进制输出，接口报文加解密联调必备，纯浏览器端运算密钥数据绝不上传。',
     category: '加密与安全',
@@ -208,6 +225,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'asymmetric-crypto',
     name: '非对称加解密',
+    title: '非对称加解密 - RSA/ECDSA 密钥生成与签名验签 - DevTools',
     description: '支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等非对称加密算法的密钥生成、加解密与签名验签',
     seoDescription: '免费在线非对称加密解密工具，支持 RSA-OAEP、RSA-PSS、ECDSA、Ed25519 等主流算法的密钥对生成、公钥加密、私钥解密与签名验签，密钥支持 PEM 与 JWK 等格式导入导出，接口签名联调与密码学学习必备，纯浏览器端 WebCrypto 运算数据绝不上传。',
     category: '加密与安全',
@@ -219,6 +237,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'sm2-crypto',
     name: 'SM2 国密加解密',
+    title: 'SM2 国密加解密 - 密钥对生成、加解密与签名验签 - DevTools',
     description: 'SM2 国密非对称加密算法，支持密钥对生成、公钥加密与私钥解密',
     seoDescription: '免费在线 SM2 国密加解密工具，支持密钥对一键生成、公钥加密与私钥解密，以及 SM2 签名验签，兼容 C1C3C2 与 C1C2C3 两种密文排列模式并可互转，满足政务、金融等国密改造场景的接口联调与验证需求，纯浏览器端运算密钥数据绝不上传。',
     category: '加密与安全',
@@ -230,6 +249,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'qr-code-generator',
     name: '二维码生成器',
+    title: '二维码生成器 - 自定义颜色尺寸容错与 PNG/SVG 下载 - DevTools',
     description: '在线生成自定义颜色、尺寸和容错级别的二维码，支持 PNG 与 SVG 下载',
     seoDescription: '免费在线二维码生成工具，输入文字或网址实时生成高清二维码，支持自定义前景色与背景色、尺寸大小与容错级别（L/M/Q/H），可下载 PNG 位图与 SVG 矢量图两种格式用于印刷或网页嵌入，名片、海报与产品包装扫码场景即开即用，纯浏览器端生成数据绝不上传。',
     category: '前端与媒体',
@@ -241,6 +261,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'base64',
     name: 'Base64 编解码',
+    title: 'Base64 编解码 - 多字符集文本转码与中文乱码修复 - DevTools',
     description: 'Base64 编码与解码，支持多字符集与非法字符过滤',
     seoDescription: '免费在线 Base64 编码解码工具，支持 UTF-8、GBK、Big5、Shift_JIS 等多字符集解码并自动过滤非法字符，文本与 Base64 双向即时转换，轻松解决中文乱码问题，附带 Data URI 格式支持，前后端联调与编码排查必备，纯浏览器端运算数据绝不上传。',
     category: '文本与编码',
@@ -252,6 +273,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'base64-to-image',
     name: 'Base64 转图片',
+    title: 'Base64 转图片 - Data URI 解码预览与图片还原下载 - DevTools',
     description: '将 Base64 字符串解码为图片，支持预览和下载',
     seoDescription: '免费在线 Base64 转图片工具，粘贴 Base64 字符串或 Data URI 即可实时预览 PNG、JPEG、GIF、SVG、WebP、BMP 等格式的图片内容，自动解析显示图片宽高、体积与 MIME 类型，支持一键下载还原图片文件，前端样式与邮件模板调试必备，纯浏览器端解析数据绝不上传。',
     category: '文本与编码',
@@ -263,6 +285,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'base64-to-file',
     name: 'Base64 转文件',
+    title: 'Base64 转文件 - MIME 自动识别与任意文件还原下载 - DevTools',
     description: '将 Base64 字符串解码为文件，支持 Data URI 格式自动识别',
     seoDescription: '免费在线 Base64 转文件工具，粘贴 Base64 字符串或 Data URI 即可自动识别 MIME 类型并还原为原始文件，支持图片、文档、压缩包等任意类型一键下载，显示文件大小便于核对完整性，前后端联调接口导出场景必备，纯浏览器端解析数据绝不上传。',
     category: '文本与编码',
@@ -274,6 +297,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'file-to-base64',
     name: '文件转 Base64',
+    title: '文件转 Base64 - 图片文档编码与分块大文件处理 - DevTools',
     description: '将任意文件编码为 Base64 字符串，可选附带 Data URI 前缀',
     seoDescription: '免费在线文件转 Base64 工具，将图片、文档、音视频等任意文件拖拽或点击上传即可编码为 Base64 字符串或 Data URI，可选是否附带格式前缀，大文件采用异步分块编码不卡页面，结果显示字符长度便于核对，前端内联资源与接口传参场景必备，纯浏览器端运算文件绝不上传。',
     category: '文本与编码',
@@ -285,6 +309,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'cron-parser',
     name: 'Cron 表达式',
+    title: 'Cron 表达式解析 - 中文翻译、执行时间预览与可视化构建 - DevTools',
     description: '解析 Cron 表达式，预览执行时间，可视化构建',
     seoDescription: '免费在线 Cron 表达式解析工具，输入表达式即时翻译为中文描述并预览未来多轮执行时间，内置可视化构建器点选分/时/日/月/周即可生成表达式，附带每分钟、每天凌晨等常用定时任务模板一键填入，运维配 crontab 与 Spring 定时任务调试必备，纯浏览器端运算。',
     category: '日期时间',
@@ -296,6 +321,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'time-calculator',
     name: '时间差计算器',
+    title: '时间差计算器 - 两时间点间隔与时间戳差值在线计算 - DevTools',
     description: '计算两个时间点的时间差（天/时/分/秒 + 总秒数）',
     seoDescription: '免费在线时间差计算工具，输入两个时间点（支持 Unix 时间戳与日期时间字符串混用）即可计算相差的天、时、分、秒与总秒数，自动标注先后方向并附总分钟与总小时换算结果，项目排期、日志时间差与倒计时核算场景即开即用，纯浏览器端运算数据绝不上传。',
     category: '日期时间',
@@ -307,6 +333,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'json-formatter',
     name: 'JSON 格式化器',
+    title: 'JSON 格式化器 - 美化压缩与语法校验、错误行列定位 - DevTools',
     description: '在线 JSON 格式化、压缩与校验工具',
     seoDescription: '免费在线 JSON 格式化工具，支持一键美化缩进、压缩为单行与语法校验定位错误行列号，实时语法高亮显示键值类型并统计节点数、深度与字节数，结果可一键复制下载，接口调试与配置文件整理必备，大文本粘贴即转无需等待，纯浏览器端运算数据绝不上传服务器。',
     category: '格式化与转换',
@@ -318,6 +345,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'json-diff',
     name: 'JSON 差异对比',
+    title: 'JSON 差异对比 - 语义/严格双模式与键值变更高亮 - DevTools',
     description: '可视化对比两份 JSON 的差异，支持语义模式与严格文本模式',
     seoDescription: '免费在线 JSON 差异对比工具，支持语义对比模式（忽略键顺序与格式差异）与严格文本对比两种策略，左右并排高亮展示新增、删除与修改的键值差异，适用于接口返回值比对、配置变更审查与测试断言排查，深层大文件经 Web Worker 异步处理不卡界面，纯浏览器端运算数据绝不上传。',
     category: '格式化与转换',
@@ -329,6 +357,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'json-to-xml',
     name: 'JSON 转 XML',
+    title: 'JSON 转 XML - 自定义根元素与属性节点规则转换 - DevTools',
     description: '将 JSON 数据转换为 XML 格式，支持自定义根元素名',
     seoDescription: '免费在线 JSON 转 XML 工具，输入 JSON 即可生成格式规范的标准 XML 文档，支持自定义根元素名称、属性节点与文本节点转换规则，自动处理特殊字符转义并美化缩进输出，接口数据格式迁移与旧系统对接必备，纯浏览器端运算数据绝不上传。',
     category: '格式化与转换',
@@ -340,6 +369,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'json-to-yaml',
     name: 'JSON 转 YAML',
+    title: 'JSON 转 YAML - 双向互转与嵌套缩进自动对齐 - DevTools',
     description: '将 JSON 数据转换为标准 YAML 格式',
     seoDescription: '免费在线 JSON 转 YAML 工具，粘贴 JSON 即可实时生成标准 YAML 配置格式，自动处理嵌套缩进、数组列表与多行字符串，支持 YAML 反向转回 JSON 双向互转对照查看，Kubernetes 清单与 CI 配置编写必备，纯浏览器端解析数据绝不上传。',
     category: '格式化与转换',
@@ -351,6 +381,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'json-to-ts',
     name: 'JSON 转 TS',
+    title: 'JSON 转 TS - 智能生成 interface 类型定义 - DevTools',
     description: '将 JSON 数据智能推断为 TypeScript interface，自动合并数组字段并标注可选类型',
     seoDescription: '免费的在线 JSON 转 TypeScript 工具，粘贴 JSON 即可自动生成 TS interface 类型定义，智能合并数组元素字段并标注可选类型，支持嵌套对象与多类型并集，输出可通过 tsc strict 严格检查，纯浏览器端运算，数据不上传服务器。',
     category: '格式化与转换',
@@ -362,6 +393,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'markdown-editor',
     name: 'Markdown 编辑器',
+    title: 'Markdown 编辑器 - 多文档草稿箱与 mermaid 工作台 - DevTools',
     description: '独立全屏 Markdown 工作台：多文档草稿箱、编辑/分栏/预览三视图，支持 mermaid 图表、数学公式、图片粘贴与导入导出，纯浏览器端运行',
     seoDescription: '免费在线 Markdown 工作台，独立全屏编辑器支持多文档草稿箱自动保存与刷新恢复、仅编辑/分栏/仅预览三视图切换、mermaid 流程图与 KaTeX 数学公式渲染、图片粘贴拖拽 base64 内联、导入 .md 文件并导出 Markdown/HTML/PDF，纯浏览器端运行数据绝不上传。',
     icon: '✏️',
@@ -383,6 +415,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'docker-converter',
     name: 'Docker 配置转换',
+    title: 'Docker 配置转换 - run 与 compose 实时双向互转 - DevTools',
     description: 'docker run 命令与 docker compose 配置实时互转，支持端口、环境变量、挂载卷等常用 flag',
     seoDescription: '免费在线 Docker Run 与 Compose 互转工具，粘贴 docker run 命令即可实时生成等价的 docker-compose.yml，反向粘贴 Compose 配置也能还原为 run 命令，端口映射、环境变量、挂载卷、重启策略等常用参数双向无损转换，容器部署与配置迁移必备，纯浏览器端解析数据绝不上传。',
     category: '开发与运维',
@@ -394,6 +427,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'docker-run-helper',
     name: 'Docker Run 命令助手',
+    title: 'Docker Run 命令助手 - 表单生成命令与 flag 速查表 - DevTools',
     description: '通过表单快速生成 docker run 命令，并提供常用 flag 分类速查表',
     seoDescription: '免费在线 Docker Run 命令生成器，通过表单填写镜像名称、端口映射、环境变量、挂载卷、重启策略等选项即可实时生成可直接复制的 docker run 命令，附带常用 flag 分类速查表与 Nginx、MySQL、Redis 等典型示例，容器入门与部署命令编写必备，纯浏览器端生成数据不上传。',
     category: '开发与运维',
@@ -405,6 +439,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'env-converter',
     name: '环境变量转换器',
+    title: '环境变量转换器 - .env 与 JSON 双向互转及类型推断 - DevTools',
     description: '.env 配置与 JSON 双向互转，支持引号、转义与同文件变量插值',
     seoDescription: '免费在线 .env 与 JSON 互转工具，支持环境变量文件与 JSON 双向实时转换，正确处理单双引号、转义字符与布尔数值类型推断，自动剥离注释行并提示数量，同文件变量插值引用也能识别，前后端配置迁移与 dotenv 排查必备，纯浏览器端解析数据绝不上传。',
     category: '开发与运维',
@@ -416,6 +451,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'meta-tag-generator',
     name: 'Meta 标签生成器',
+    title: 'Meta 标签生成器 - OG 与 JSON-LD 在线一键生成 - DevTools',
     description: '填写表单实时生成 Basic / Open Graph / Twitter Card / JSON-LD 标签，附社交分享卡片预览',
     seoDescription: '在线 Meta 标签生成器，填写标题、描述、关键词、URL、预览图，实时生成 Basic、Open Graph、Twitter Card 与 Article/WebSite JSON-LD 结构化数据，并提供 Facebook、X、微信等社交分享卡片可视化预览，浏览器端生成可一键复制。',
     category: '开发与运维',
@@ -427,6 +463,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'robots-generator',
     name: 'robots.txt 生成器',
+    title: 'robots.txt 生成器 - 可视化规则与拦截 AI 爬虫 - DevTools',
     description: '按 User-agent 分组可视化添加 Allow/Disallow 规则，一键拦截 GPTBot、ClaudeBot 等 AI 训练爬虫，生成标准 robots.txt',
     seoDescription: '在线 robots.txt 生成器，按 User-agent 分组可视化添加 Allow/Disallow 规则，一键禁止 GPTBot、ClaudeBot、Google-Extended 等主流 AI 训练爬虫抓取，配通俗规则解释，纯浏览器端生成可复制下载。',
     category: '开发与运维',
@@ -438,6 +475,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'sitemap-generator',
     name: 'sitemap 生成器',
+    title: 'sitemap 生成器 - 在线输出网站地图与 lastmod - DevTools',
     description: '逐条或批量粘贴录入 URL，设置更新频率、优先级与最后修改时间，生成标准 sitemap.xml，诚实提示字段有效性',
     seoDescription: '在线 sitemap 生成器，逐条添加或批量粘贴 URL 列表，设置 changefreq、priority 与 lastmod，生成标准 sitemap.xml 可复制下载，并诚实提示 priority/changefreq 已被 Google 忽略、仅 lastmod 有效，纯浏览器端生成。',
     category: '开发与运维',
@@ -449,6 +487,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'redis-config-generator',
     name: 'Redis 配置生成器',
+    title: 'Redis 配置生成器 - 按硬件与场景生成 redis.conf - DevTools',
     description: '按硬件画像与使用场景生成带版本标注的 redis.conf，支持单机/主从',
     seoDescription: '在线 Redis 配置文件生成器，按 CPU、内存、磁盘与使用场景实时生成可直接使用的 redis.conf，支持 7.0-8.4 版本联动过滤、单机与主从模式、参数中文说明与官方文档溯源，附带内核参数建议，可一键复制下载，纯浏览器端运算数据不上传。',
     category: '开发与运维',
@@ -460,6 +499,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'mysql-config-generator',
     name: 'MySQL 配置生成器',
+    title: 'MySQL 配置生成器 - 按硬件版本生成 my.cnf 与内核参数 - DevTools',
     description: '按内存/磁盘/场景/版本生成带版本标注的 my.cnf，支持单机/主从与 OS 参数建议',
     seoDescription: '在线 MySQL 配置文件生成器，按内存、磁盘、使用场景与并发实时生成可直接使用的 my.cnf，支持 5.7/8.0/8.4 版本联动过滤与废弃参数改名提示、单机与主从模式（server_id 随机种子、GTID）、参数中文说明与官方文档溯源，附带 OS 内核参数建议，纯浏览器端运算数据不上传。',
     category: '开发与运维',
@@ -471,6 +511,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'postgres-config-generator',
     name: 'PostgreSQL 配置生成器',
+    title: 'PostgreSQL 配置生成器 - 按硬件与版本生成 pg 配置 - DevTools',
     description: '按内存/CPU/磁盘/场景/版本生成带版本标注的 postgresql.conf，支持单机/主从与 OS 参数建议',
     seoDescription: '在线 PostgreSQL 配置文件生成器，按内存、CPU 核数、磁盘、使用场景与并发实时生成可直接使用的 postgresql.conf，支持 16/17/18 版本联动过滤、单机与主从模式（复制组参数与备库要点）、参数中文说明与官方文档溯源，附带 OS 内核参数建议，纯浏览器端运算数据不上传。',
     category: '开发与运维',
@@ -482,6 +523,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'qr-code-reader',
     name: '二维码识别器',
+    title: '二维码识别器 - 上传/粘贴截图在线解码与链接识别 - DevTools',
     description: '上传、拖拽或 Ctrl+V 粘贴二维码图片，纯浏览器端识别解码，支持 URL/邮箱/电话可点击',
     seoDescription: '免费在线二维码识别工具，支持拖拽上传、点击选择或 Ctrl+V 直接粘贴截图三种方式识读二维码，兼容 PNG、JPG、WebP 等常见图片格式，纯浏览器端本地解码数据绝不上传，识别结果自动区分网址、邮箱、电话与纯文本并提供可点击链接，模糊截图场景即开即用。',
     category: '前端与媒体',
@@ -493,6 +535,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-converter',
     name: '图片转换与压缩',
+    title: '图片转换与压缩 - PNG/WebP/AVIF 批量互转与质量缩放 - DevTools',
     description: 'PNG / JPG / WebP / AVIF / GIF / BMP 等格式互转与质量压缩、尺寸缩放，支持 SVG / HEIC 导入、EXIF 隐私擦除（无损去除 GPS 与设备信息）和逐图裁切，纯浏览器端本地处理',
     seoDescription: '免费在线图片转换与压缩工具，支持一次最多 30 张批量处理，输出 PNG、JPG、WebP、AVIF、TIFF、GIF、BMP，可读取 SVG、HEIC 等格式导入，自定义质量压缩与尺寸缩放，逐图裁切预览后一键打包 ZIP 下载，内置 EXIF 隐私擦除无损去除 GPS 定位等元数据，纯浏览器端本地处理图片绝不上传。',
     category: '前端与媒体',
@@ -504,6 +547,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'ico-maker',
     name: 'ICO 图标制作',
+    title: 'ICO 图标制作 - 多尺寸 favicon 生成与图标解析提取 - DevTools',
     description: '导入图片裁切创作多尺寸 ICO favicon，支持 ICO 解析提取内嵌 PNG，纯浏览器端',
     seoDescription: '免费在线 ICO 图标制作工具，导入图片裁切创作主体后多选 16 至 256 共 7 档尺寸，一键封装多尺寸 favicon .ico 文件并逐尺寸真实像素预览，可单独导出 PNG；支持解析 ICO/CUR 图标文件并提取内嵌 PNG/BMP 图像，网站 favicon 制作必备，纯浏览器端本地处理图片绝不上传。',
     category: '前端与媒体',
@@ -515,6 +559,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'tester',
     name: '正则表达式',
+    title: '正则表达式测试 - 实时高亮匹配与常用正则速查 - DevTools',
     description: '实时高亮匹配、查看捕获组，内置邮箱 / 手机号 / URL 等常用正则速查表',
     seoDescription: '免费的在线正则表达式测试工具，支持 g/i/m/s/u/y 六大标志位与命名捕获组，输入即实时高亮全部匹配、显示每个匹配的区间与捕获组内容，内置邮箱 / 手机号 / URL / IPv4 / 身份证号等常用正则速查表一键填入，大文本通过 Web Worker 异步匹配避免 ReDoS，纯浏览器端运算数据不上传。',
     category: '文本与编码',
@@ -526,6 +571,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'panel',
     name: '颜色面板',
+    title: '颜色面板 - HEX/RGB/HSL 互转与 WCAG 对比度检查 - DevTools',
     description: 'HEX/RGB/HSL/HSV 实时互转、WCAG 对比度检查、互补/类似/三角配色板',
     seoDescription: '免费在线颜色面板工具，支持 HEX、RGB、HSL、HSV 多色彩空间数值实时互转并提供直观取色器，内置 WCAG 无障碍对比度检查自动判定 AA/AAA 达标情况，一键生成互补色、类似色与三角配色方案辅助界面配色，前端开发与设计还原必备，纯浏览器端运算数据不上传。',
     category: '前端与媒体',
@@ -537,6 +583,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'unit-converter',
     name: 'CSS 单位转换器',
+    title: 'CSS 单位转换器 - px/rem/vw 实时互转与基准自定义 - DevTools',
     description: 'px / rem / em / vw / vh / % / pt 等 CSS 长度单位实时互转',
     seoDescription: '免费在线 CSS 单位转换工具，支持 px、rem、em、vw、vh、百分比、pt 七种前端常用长度单位实时互转，可自定义根字号、设计稿宽度与视口高度等基准参数，输入即自动联动换算，前端开发与设计稿还原必备助手，纯浏览器端运算数据绝不上传。',
     category: '前端与媒体',
@@ -548,6 +595,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'gradient',
     name: 'CSS 渐变生成器',
+    title: 'CSS 渐变生成器 - 线性径向圆锥可视化调色与预设 - DevTools',
     description: '可视化创建线性/径向/圆锥渐变并复制 CSS 代码',
     seoDescription: '免费在线 CSS 渐变生成器，支持线性、径向、圆锥三种渐变类型的可视化调色与色标拖动编辑，实时预览效果并一键复制标准 CSS 代码，内置日落、海洋、霓虹等多组精美预设渐变可直接套用，角度与位置参数精确可调，前端界面与海报设计必备，纯浏览器端运算数据绝不上传。',
     category: '前端与媒体',
@@ -559,6 +607,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'fake-data-generator',
     name: '假数据生成器',
+    title: '假数据生成器 - 自定义字段批量导出 JSON/CSV 测试数据 - DevTools',
     description: '按字段配置批量生成姓名、邮箱、手机号、UUID、Lorem 占位文等结构化假数据，输出 JSON 或 CSV',
     seoDescription: '免费在线假数据生成器，可自定义字段类型与列名，批量生成中英文姓名、邮箱、手机号、UUID、IPv4、Lorem 占位文、日期等 15 类结构化测试数据，一键导出 JSON 或 CSV 格式直接用于数据库灌库与接口 Mock，前后端开发测试必备，纯浏览器端生成数据绝不上传。',
     category: '文本与编码',
@@ -570,6 +619,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'image-scrambler',
     name: '图片混淆',
+    title: '图片混淆 - 可逆块级像素置乱与一键还原 - DevTools',
     description: '可逆块级像素混淆，将图片分块重排为抽象效果并一键还原；还原参数自动写入图片元数据，重新上传即可还原',
     seoDescription: '免费在线图片混淆工具，通过可调块大小（2/4/8/16/32/64/128）对图片进行可逆块级像素重排，可将图片打乱为抽象拼图噪点效果并一键还原；还原参数自动写入 PNG 元数据与文件名，重新上传即可自动还原，输出无损 PNG，纯浏览器端本地处理图片绝不上传。',
     category: '前端与媒体',
@@ -581,6 +631,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'phantom-tank',
     name: '幻影坦克',
+    title: '幻影坦克 - 双图合成透明 PNG 表里图效果 - DevTools',
     description: '将两张图合成为透明PNG：白底显示表图、黑底显示里图；也支持只上传里图、自动生成反相表图',
     seoDescription: '免费在线幻影坦克生成器，把两张图片合成一张带透明通道的PNG，纯白背景下呈现表图、纯黑背景下呈现里图；也可只上传里图，自动生成反相表图并通过暗化滑块调节黑底清晰度，逐像素计算透明度实现双重显示效果，纯浏览器端本地处理图片绝不上传，社交头像封面趣味图片制作必备。',
     category: '前端与媒体',
@@ -592,6 +643,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'toml-json-converter',
     name: 'TOML 与 JSON 互转',
+    title: 'TOML 与 JSON 互转 - 实时双向转换与美化紧凑输出 - DevTools',
     description: 'TOML 与 JSON 双向实时互转，支持美化与紧凑输出，纯浏览器端运算',
     seoDescription: '在线 TOML 与 JSON 双向互转工具，输入 TOML 实时生成 JSON、输入 JSON 实时生成 TOML，支持美化与紧凑输出，Rust Cargo.toml 与 pyproject.toml 配置转换必备，纯浏览器端运算数据不上传。',
     category: '格式化与转换',
@@ -603,6 +655,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'toml-yaml-converter',
     name: 'TOML 与 YAML 互转',
+    title: 'TOML 与 YAML 互转 - 缩进风格切换与并排对照 - DevTools',
     description: 'TOML 与 YAML 双向实时互转，支持 2/4 空格缩进，纯浏览器端运算',
     seoDescription: '免费在线 TOML 与 YAML 双向互转工具，输入 TOML 实时生成 YAML、输入 YAML 实时还原 TOML，支持 2/4 空格缩进风格切换与嵌套结构自动对齐，转换结果可并排对照查看，GitHub Actions 与 Cargo/pyproject 配置迁移必备，纯浏览器端解析数据绝不上传。',
     category: '格式化与转换',
@@ -614,6 +667,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'toml-formatter',
     name: 'TOML 格式化器',
+    title: 'TOML 格式化器 - 语法校验与错误行列定位 - DevTools',
     description: '在线 TOML 语法校验与格式美化工具，统一缩进与键值格式',
     seoDescription: '免费在线 TOML 格式化与校验工具，一键美化 TOML 配置的缩进空格与键值等号对齐，同时进行语法校验并精确定位错误行列号，支持表格、数组与内联表等全部语法元素，Rust Cargo.toml 与 Python pyproject.toml 编写维护必备，纯浏览器端解析数据绝不上传。',
     category: '格式化与转换',
@@ -625,6 +679,7 @@ export const tools: ToolMeta[] = [
   {
     id: 'wheel-picker',
     name: '转盘抽奖',
+    title: '转盘抽奖 - 自定义选项权重与链接分享抽签 - DevTools',
     description: '自定义选项的在线转盘抽奖与随机抽签工具，支持批量导入、权重、不重复抽取与配置分享',
     seoDescription: '免费在线转盘抽奖与随机抽签工具，自定义选项并批量粘贴导入，Canvas 彩色转盘配合缓动动画旋转指向结果，支持为选项设置权重调整中奖概率、不重复抽取（中奖自动移出可恢复），并可将转盘配置编码到链接一键分享，他人打开即用同款转盘，纯浏览器端运算数据不上传。',
     category: '文本与编码',

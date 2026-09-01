@@ -69,7 +69,9 @@
 
 每个工具页面必须具备完整的 SEO 元数据，由 ToolLayout 和 SeoHead 组件自动渲染：
 
-- **`<title>`**：在 `src/data/tools.ts` 中通过 `title` 字段定义，默认回退为 `{name} - DevTools`
+- **`<title>`**：在 `src/data/tools.ts` 中通过 `title` 字段定义，格式 `{工具名} - {长尾词/场景} - DevTools`，
+  目标 25–45 字符（守卫区间 25–60，按 JS 字符数计）；分类页用 `categories.ts` 的 `seoTitle`，同口径。
+  ToolLayout 对未配置的工具回退拼接 `{name} - {分类名}在线工具 - DevTools`，但守卫测试要求全部显式配置
 - **`<meta name="description">`**：在 `src/data/tools.ts` 中通过 `seoDescription` 字段定义，120–160 字符
 - **`<meta name="keywords">`**：在 `src/data/tools.ts` 中通过 `keywords` 数组定义，5–10 个长尾关键词
 - **JSON-LD 结构化数据**：ToolLayout 自动注入 `WebSite`、`BreadcrumbList`、`WebPage`、`SoftwareApplication` schema

@@ -1,0 +1,1 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "检查阶段按验证门禁执行 pnpm test/astro check/build"}

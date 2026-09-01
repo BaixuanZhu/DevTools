@@ -100,3 +100,36 @@ describe('tools.ts seoDescription 长度守卫', () => {
     }
   });
 });
+
+describe('tools.ts title 长度守卫', () => {
+  /**
+   * 页面 <title> 合规区间（按 JS 字符数，中文每字计 1）。
+   * 下限 25：显著高于 Bing Webmaster Tools「标题过短」判定线，避免整站 SEO 告警；
+   * 上限 60：超过该值在搜索结果中会被截断，目标带 25-45。与 tools.ts title 字段注释口径一致。
+   */
+  const MIN = 25;
+  const MAX = 60;
+
+  it('每个工具都显式配置 title，不依赖 ToolLayout 回退拼接', () => {
+    for (const t of tools) {
+      expect(t.title, `${t.id} 未配置 title 字段`).toBeDefined();
+    }
+  });
+
+  it('每个工具的 title 长度都在 25-60 字符区间', () => {
+    for (const t of tools) {
+      const len = [...(t.title ?? '')].length;
+      expect(
+        len,
+        `${t.id} 的 title 长度为 ${len}，要求 ${MIN}-${MAX}`,
+      ).toBeGreaterThanOrEqual(MIN);
+      expect(len, `${t.id} 的 title 长度为 ${len}，要求 ${MIN}-${MAX}`).toBeLessThanOrEqual(MAX);
+    }
+  });
+
+  it('每个工具的 title 无首尾空白', () => {
+    for (const t of tools) {
+      expect(t.title?.trim(), `${t.id} 的 title 含首尾空白`).toBe(t.title);
+    }
+  });
+});

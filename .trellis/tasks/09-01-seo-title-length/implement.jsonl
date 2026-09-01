@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁与测试约定，守卫测试需按此口径编写"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "数据层与页面文件布局约定，确认 title/seoTitle 字段落位"}

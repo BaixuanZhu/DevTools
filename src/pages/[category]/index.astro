@@ -29,7 +29,7 @@ const jsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${category.name} - DevTools`,
+    name: category.seoTitle,
     description: category.seoDescription,
     url: categoryUrl,
   },
@@ -65,7 +65,7 @@ const breadcrumb = [
 ---
 
 <ToolLayout
-  title={`${category.name} - DevTools`}
+  title={category.seoTitle}
   description={category.seoDescription}
   breadcrumb={breadcrumb}
   jsonLd={jsonLd}

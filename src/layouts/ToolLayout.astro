@@ -40,8 +40,15 @@ const standaloneTools = getStandaloneTools().map(({ id, path, name, icon }) => (
 /** 通过 toolId 查找工具元数据 */
 const toolMeta = toolId ? getToolBySlug(toolId) : undefined;
 
-/** 确定 title：props.title > toolMeta.title > 自动拼接 "{name} - DevTools" */
-const finalTitle = title || toolMeta?.title || (toolMeta ? `${toolMeta.name} - DevTools` : undefined);
+/** 确定 title：props.title > toolMeta.title > 回退拼接（分类工具带分类词，standalone 用通用后缀，均不低于 25 字符） */
+const finalTitle =
+  title ||
+  toolMeta?.title ||
+  (toolMeta
+    ? toolMeta.category
+      ? `${toolMeta.name} - ${toolMeta.category}在线工具 - DevTools`
+      : `${toolMeta.name} - DevTools 在线工具箱`
+    : undefined);
 
 /** 确定最终 description：优先 props → seoDescription → 默认值 */
 const finalDescription = description || toolMeta?.seoDescription || undefined;

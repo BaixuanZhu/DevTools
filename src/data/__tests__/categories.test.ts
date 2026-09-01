@@ -37,4 +37,20 @@ describe('categories.ts', () => {
       expect(c.seoDescription.trim(), `${c.slug} 的 seoDescription 含首尾空白`).toBe(c.seoDescription);
     }
   });
+
+  it('每条 seoTitle 显式配置、长度 25-60 字符区间且无首尾空白', () => {
+    // 与 tools.ts title 守卫同口径：显著高于 Bing「标题过短」防线下限 25、搜索结果截断上限 60
+    const MIN = 25;
+    const MAX = 60;
+    for (const c of categories) {
+      expect(c.seoTitle, `${c.slug} 未配置 seoTitle`).toBeDefined();
+      const len = [...c.seoTitle].length;
+      expect(
+        len,
+        `${c.slug} 的 seoTitle 长度为 ${len}，要求 ${MIN}-${MAX}`,
+      ).toBeGreaterThanOrEqual(MIN);
+      expect(len, `${c.slug} 的 seoTitle 长度为 ${len}，要求 ${MIN}-${MAX}`).toBeLessThanOrEqual(MAX);
+      expect(c.seoTitle.trim(), `${c.slug} 的 seoTitle 含首尾空白`).toBe(c.seoTitle);
+    }
+  });
 });

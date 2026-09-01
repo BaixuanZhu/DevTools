@@ -17,7 +17,7 @@ const tool = getToolById('markdown-editor');
 
 const siteUrl = Astro.site?.toString().replace(/\/$/, '') || 'https://tools.baixuanz.cn';
 const pageUrl = `${siteUrl}/markdown`;
-const pageTitle = tool ? `${tool.name} - DevTools` : 'Markdown 工作台 - DevTools';
+const pageTitle = tool?.title ?? `${tool?.name ?? 'Markdown 工作台'} - DevTools 在线工具箱`;
 const description = tool?.seoDescription ?? '免费在线 Markdown 工作台，纯浏览器端运行。';
 const keywordList = tool?.keywords ?? [];
 
