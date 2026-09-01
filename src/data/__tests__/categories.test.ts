@@ -24,4 +24,17 @@ describe('categories.ts', () => {
       expect(c.icon.trim().length).toBeGreaterThan(0);
     }
   });
+
+  it('每条 seoDescription 长度都在 120-160 字符区间且无首尾空白', () => {
+    // 与 tools.ts seoDescription 守卫口径一致：Bing 判定下限 120、搜索结果截断上限 160
+    for (const c of categories) {
+      const len = [...c.seoDescription].length;
+      expect(
+        len,
+        `${c.slug} 的 seoDescription 长度为 ${len}，要求 120-160`,
+      ).toBeGreaterThanOrEqual(120);
+      expect(len, `${c.slug} 的 seoDescription 长度为 ${len}，要求 120-160`).toBeLessThanOrEqual(160);
+      expect(c.seoDescription.trim(), `${c.slug} 的 seoDescription 含首尾空白`).toBe(c.seoDescription);
+    }
+  });
 });

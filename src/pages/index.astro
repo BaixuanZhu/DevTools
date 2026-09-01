@@ -18,24 +18,28 @@ const categoryCards = categories.map((c) => ({
 /** 全站工具总数（hero badge 展示） */
 const totalTools = categoryCards.reduce((sum, c) => sum + c.count, 0);
 
+/** 首页 meta description 与 ItemList JSON-LD 共用的站点描述（120-160 字符） */
+const homeDescription =
+  '免费在线开发者工具箱，收录文本编码、加密安全、格式转换、网络计算、日期时间、前端媒体与开发运维七大类常用小工具，覆盖 Base64 编解码、JSON 格式化、正则测试、时间戳转换、图片压缩与 Docker 配置生成等高频开发场景，即开即用无需注册，纯浏览器端本地运算数据绝不上传。';
+
 /** 首页 ItemList：列出 7 个分类（CollectionPage），工具级链接下放到分类页 */
 const itemListJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'ItemList',
   name: 'DevTools 在线工具箱',
-  description: '零门槛的浏览器端在线工具集合，按 7 个分类组织',
+  description: homeDescription,
   numberOfItems: categoryCards.length,
   itemListElement: categoryCards.map(({ category }, index) => ({
     '@type': 'ListItem',
     position: index + 1,
     name: `${category.name}工具集合`,
     url: `${siteUrl}/${category.slug}`,
-    description: category.description,
+      description: category.seoDescription,
   })),
 };
 ---
 
-<ToolLayout title="DevTools - 在线工具箱" jsonLd={itemListJsonLd}>
+<ToolLayout title="DevTools - 在线工具箱" description={homeDescription} jsonLd={itemListJsonLd}>
   <div class="mx-auto max-w-320">
     <!-- Hero Section：与 shadcn 视觉对齐（Badge + 大标题 + muted 副标题） -->
     <div class="mb-10 text-center">

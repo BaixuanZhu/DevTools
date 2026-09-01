@@ -9,8 +9,8 @@ import type { CategoryMeta } from '../../../data/categories';
 import type { QuickLinkTool } from '../../../data/quick-links';
 
 const categories: CategoryMeta[] = [
-  { name: '文本与编码', slug: 'text', icon: '🔤', description: '文本处理与编码' },
-  { name: '加密与安全', slug: 'crypto', icon: '🔒', description: '加密哈希' },
+  { name: '文本与编码', slug: 'text', icon: '🔤', description: '文本处理与编码', seoDescription: '文本处理与编码测试占位描述' },
+  { name: '加密与安全', slug: 'crypto', icon: '🔒', description: '加密哈希', seoDescription: '加密哈希测试占位描述' },
 ];
 const toolsByCategory = {
   '文本与编码': [

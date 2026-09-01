@@ -30,14 +30,14 @@ const jsonLd = [
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     name: `${category.name} - DevTools`,
-    description: category.description,
+    description: category.seoDescription,
     url: categoryUrl,
   },
   {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: `${category.name} 工具集合`,
-    description: category.description,
+    description: category.seoDescription,
     numberOfItems: categoryTools.length,
     itemListElement: categoryTools.map((tool, index) => ({
       '@type': 'ListItem',
@@ -66,7 +66,7 @@ const breadcrumb = [
 
 <ToolLayout
   title={`${category.name} - DevTools`}
-  description={category.description}
+  description={category.seoDescription}
   breadcrumb={breadcrumb}
   jsonLd={jsonLd}
 >

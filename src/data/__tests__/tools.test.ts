@@ -73,3 +73,30 @@ describe('tools.ts 分类与路径一致性', () => {
     expect(grouped.every((t) => !t.standalone)).toBe(true);
   });
 });
+
+describe('tools.ts seoDescription 长度守卫', () => {
+  /**
+   * meta description 合规区间（按 JS 字符数，中文每字计 1）。
+   * 下限 120：低于该值会被 Bing Webmaster Tools SEO 分析判定为"描述过短"；
+   * 上限 160：超过该值在搜索结果中会被截断。与 tools.ts 字段注释口径一致。
+   */
+  const MIN = 120;
+  const MAX = 160;
+
+  it('每个工具的 seoDescription 长度都在 120-160 字符区间', () => {
+    for (const t of tools) {
+      const len = [...t.seoDescription].length;
+      expect(
+        len,
+        `${t.id} 的 seoDescription 长度为 ${len}，要求 ${MIN}-${MAX}`,
+      ).toBeGreaterThanOrEqual(MIN);
+      expect(len, `${t.id} 的 seoDescription 长度为 ${len}，要求 ${MIN}-${MAX}`).toBeLessThanOrEqual(MAX);
+    }
+  });
+
+  it('每个工具的 seoDescription 无首尾空白', () => {
+    for (const t of tools) {
+      expect(t.seoDescription.trim(), `${t.id} 的 seoDescription 含首尾空白`).toBe(t.seoDescription);
+    }
+  });
+});
