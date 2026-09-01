@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "检查项：测试/类型/构建门禁与禁用模式扫描"}
+{"file": ".trellis/spec/guides/cross-layer-thinking-guide.md", "reason": "utils 层与组件层职责切面检查（产物生成单一路径）"}

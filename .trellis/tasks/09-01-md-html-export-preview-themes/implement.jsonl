@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "新建 HtmlExportDialog.vue 需遵循组件模式（script setup、props/emit、JSDoc）"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁与禁用模式（eval/Function、任意值语法等）"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TS strict 收窄模式，导出 options 类型设计"}
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "组件落位 src/components/markdown/、工具函数测试落位 __tests__/ 同目录规则"}

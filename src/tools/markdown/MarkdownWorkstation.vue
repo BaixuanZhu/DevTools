@@ -7,7 +7,8 @@
  * - 挂载 vue-sonner <Toaster />（独立页没有 Shell，toastStore 必须有渲染目标）
  *
  * 内核 md-editor-v3：分栏/仅编辑/仅预览的视图切换由其内置工具栏提供（preview / previewOnly 按钮）
- * + 多文档草稿箱（doc-store 自动保存）+ 图片粘贴/拖拽 base64 内联 + 导入 .md / 导出 md·html·PDF。
+ * + 多文档草稿箱（doc-store 自动保存）+ 图片粘贴/拖拽 base64 内联 + 导入 .md / 导出
+ * md·html（预览对话框选主题）·PDF。
  *
  * 扩展库全量本地化：md-editor-v3 默认在运行时从 unpkg CDN 加载 mermaid/katex/highlight.js/
  * prettier/cropper/screenfull/echarts（面向国内用户可达性不稳定），此处通过 config() 注入本地实例，
@@ -69,10 +70,11 @@ import { Button, buttonVariants } from '../../components/ui/button';
 import { DropdownMenuContent, DropdownMenuItem } from '../../components/ui/dropdown-menu';
 import { Toaster } from '../../components/ui/sonner';
 import DocumentSidebar from '../../components/markdown/DocumentSidebar.vue';
+import HtmlExportDialog from '../../components/markdown/HtmlExportDialog.vue';
 import { themeStore } from '../../stores/theme';
 import { toastStore } from '../../stores/toast';
 import { createDoc, deleteDoc, listDocs, renameDoc, saveDoc, type MarkdownDoc } from './doc-store';
-import { exportHtml, exportMarkdown, exportPdf } from '../../utils/editor/markdown-export';
+import { exportMarkdown, exportPdf } from '../../utils/editor/markdown-export';
 
 /** 注册代码高亮语言（hljs core + 按需语言，等价旧 CDN 全量包中面向开发者的高频子集） */
 const HIGHLIGHT_LANGUAGES: Array<[string, Parameters<typeof hljs.registerLanguage>[1]]> = [
@@ -201,6 +203,8 @@ const content = ref('');
 const sidebarOpen = ref(window.innerWidth >= 1024);
 /** 导入用的隐藏文件选择框 */
 const importInputRef = ref<HTMLInputElement | null>(null);
+/** HTML 导出预览对话框开合（HTML 菜单项不再直接下载，先预览选主题） */
+const htmlExportOpen = ref(false);
 
 /**
  * 用户显式重命名的标题（id → 标题）。
@@ -406,14 +410,15 @@ function handleExportMd(): void {
   }
 }
 
-/** 导出 .html 文件（markdown-export 内部用 marked 渲染并套独立模板） */
+/**
+ * 打开 HTML 导出预览对话框（预览选主题后经对话框内按钮下载）。
+ * 延迟到导出菜单卸载完成后再挂载 Dialog：reka-ui 菜单收起时的焦点还原
+ * 会把同 tick 挂载的 Dialog 判定为外部交互、秒开秒关（实测挂载 20ms 内即被移除）。
+ */
 function handleExportHtml(): void {
-  try {
-    exportHtml(content.value, buildExportFilename('html'));
-    toastStore.show('已导出 HTML 文件');
-  } catch {
-    toastStore.error('导出失败，请重试');
-  }
+  window.setTimeout(() => {
+    htmlExportOpen.value = true;
+  }, 100);
 }
 
 /**
@@ -617,6 +622,14 @@ function handleEditorSave(): void {
 
     <!-- 独立页无 Shell，Toaster 由本岛自含挂载 -->
     <Toaster />
+
+    <!-- HTML 导出预览：主题选择 + 所见即所得预览 + 下载 -->
+    <HtmlExportDialog
+      v-model:open="htmlExportOpen"
+      :markdown="content"
+      :title="activeDoc?.title ?? ''"
+      :filename="buildExportFilename('html')"
+    />
   </div>
 </template>
 

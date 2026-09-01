@@ -94,6 +94,14 @@
 
 **Fix**: 换名（如 `currentValueOf`）。实例：`RedisConfigGenerator.vue` 的 `currentValueOf()`。
 
+### Common Mistake: DropdownMenuItem 的 select 里同步开 Dialog → 秒开秒关
+
+**Symptom**: 点菜单项后 Dialog 完全不出现，console 无报错；用 MutationObserver 观察 `[role=dialog]`，可见「挂载后 ~20ms 内即被移除」。
+
+**Cause**: reka-ui 菜单收起流程（焦点还原 trigger / DismissableLayer 外部交互判定）与同 tick 挂载的 Dialog 焦点管理相撞，刚挂载的 Dialog 被判定为外部交互立即 dismiss。
+
+**Fix / Prevention**: select 处理器里 `window.setTimeout(() => open.value = true, 100)` 等菜单卸载完成后再置开（范式 `MarkdownWorkstation.vue` 的 `handleExportHtml`）。不要用 0ms/rAF—— dismissal 发生在挂载之后的任务里，仍有竞态窗口。
+
 ## Patterns
 
 ### Pattern: 可搜索选择（combobox）= reka-ui Popover 薄壳 + 既有 ui/command 系列
@@ -111,3 +119,7 @@
 ### Pattern: 重型编辑器扩展库本地实例注入（禁运行时 CDN）
 
 md-editor-v3 等组件库默认从 unpkg CDN 运行时加载扩展（mermaid/katex/highlight.js/prettier/cropperjs/screenfull/echarts 共 7 处），国内可达性不稳定。接入时一律 `pnpm add` 对应包并在模块级 `config({ editorExtensions: { *.instance } })` 注入本地实例（库源码守卫：有 instance 即跳过 script/link 追加，范式 `MarkdownWorkstation.vue` 顶部）；被替代的 CDN 样式（katex css+字体、cropper css、hljs 主题）也要本地 import。库体只允许进懒加载岛 chunk。两个易踩坑：echarts 6 ESM 无 default export（用 `import * as`），且其默认 `parseOption` 用 `new Function` 处理用户输入、触碰 Security Rules，必须覆写为 `JSON.parse`；同版本共存冲突（如 md-editor 需要 cropperjs v1 而站点用 v2）用 npm 别名解决（`"cropperjs1": "npm:cropperjs@^1.6.3"`），**禁止直接降级共享依赖版本**——会隐性打断不相关工具（image-converter/ico-maker 的裁切器用 v2 API，且 .vue 组件不受 astro check/单测覆盖，门禁全绿仍会放行）。
+
+### Pattern: 独立 HTML 导出产物（多主题内嵌 + 单一生成路径）
+
+导出类功能凡有「预览 + 下载」，预览与下载必须共用同一条产物生成函数（范式 `markdown-export.ts` 的 `buildHtmlDocument`，消费方 `HtmlExportDialog.vue`），杜绝两套渲染漂移。独立 HTML 产物遵守**零外部依赖契约**（无外链 css/js/字体，沙箱/file:// 均可用），由单测固化（`markdown-export.test.ts` 断言无 `<link`/`src="http`/`url(http`）。多主题实现：主题 = CSS 变量声明集挂 `:root[data-theme]`，基础排版只消费变量（新增主题成本 = 一组变量）；切换器脚本是静态字符串常量（不拼用户输入，过 Security Rules），localStorage 一律 try/catch 降级。预览 iframe 用 `sandbox="allow-scripts"`（**不给** allow-same-origin）：切换器在预览里真实可用，产物脚本又碰不到父页面与站点存储；所选主题烘为 `<html data-theme>` 默认值，导出文件打开即所见。
