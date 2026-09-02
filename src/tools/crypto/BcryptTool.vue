@@ -11,7 +11,7 @@
  */
 import { ref, computed, watch, onUnmounted } from 'vue';
 import ToolHeader from '../../components/layout/ToolHeader.vue';
-import CopyButton from '../../components/ui/CopyButton.vue';
+import CodePanel from '../../components/ui/CodePanel.vue';
 import ClearButton from '../../components/ui/ClearButton.vue';
 import SelectListbox from '../../components/ui/SelectListbox.vue';
 import {
@@ -272,8 +272,8 @@ onUnmounted(() => {
       </p>
     </div>
 
-    <!-- 生成按钮 + 错误 -->
-    <div class="flex items-center gap-3 mb-3">
+    <!-- 生成按钮 + 错误（错误与按钮同行展示，出现/消失不引起下方跳动） -->
+    <div class="flex items-center gap-3 mb-3 flex-wrap">
       <button
         type="button"
         class="px-4 py-2 bg-primary text-primary-foreground border border-primary rounded-sm text-[0.8125rem] font-sans cursor-pointer active:brightness-90 transition-opacity duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -282,33 +282,22 @@ onUnmounted(() => {
       >
         {{ isComputing && currentOp === 'hash' ? '计算中…' : '生成哈希' }}
       </button>
+      <p v-if="generateError" class="text-error text-[0.8125rem] m-0">{{ generateError }}</p>
     </div>
-    <p v-if="generateError" class="text-error text-[0.8125rem] m-0 mb-3">{{ generateError }}</p>
 
-    <!-- 生成结果卡片 -->
-    <div class="mb-4">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm font-medium">生成的哈希</span>
-        <div class="flex gap-2">
-          <CopyButton v-if="hashResult" :text="hashResult" />
-          <ClearButton label="清空生成区" @clear="handleGenerateClear" />
-        </div>
+    <!-- 结果面板：复制/清空内嵌标题栏（复制按钮无结果时禁用而非隐藏），内容区固定最小高度，生成前后布局稳定 -->
+    <CodePanel label="结果" show-copy show-clear :copy-text="hashResult" class="mb-4" @clear="handleGenerateClear">
+      <div class="p-4 min-h-24 flex flex-col justify-center gap-1">
+        <template v-if="hashResult">
+          <code
+            class="font-mono text-[0.8125rem] break-all text-foreground transition-opacity duration-150"
+            :class="{ 'opacity-60': hashStale }"
+          >{{ hashResult }}</code>
+          <p v-if="hashStale" class="text-warning text-xs m-0">输入已变化，结果与当前输入不再对应，请重新生成</p>
+        </template>
+        <p v-else class="text-muted-foreground text-sm m-0 text-center">输入密码后点击「生成哈希」</p>
       </div>
-      <div
-        v-if="hashResult"
-        class="border border-border rounded-md bg-card px-4 py-2.5 transition-opacity duration-150"
-        :class="{ 'opacity-60': hashStale }"
-      >
-        <code class="font-mono text-[0.8125rem] break-all text-foreground">{{ hashResult }}</code>
-        <p v-if="hashStale" class="text-warning text-xs m-0 mt-1">输入已变化，该哈希与当前输入不再对应，请重新生成。</p>
-      </div>
-      <div
-        v-else
-        class="border border-border rounded-md p-4 bg-card text-center text-muted-foreground text-sm"
-      >
-        输入密码后点击「生成哈希」
-      </div>
-    </div>
+    </CodePanel>
 
     <!-- 区块二：校验哈希 -->
     <div class="border-t border-border mt-6 pt-6">
@@ -331,14 +320,17 @@ onUnmounted(() => {
           :aria-invalid="!!verifyFormatError"
           :aria-describedby="verifyFormatError ? 'bcrypt-verify-hash-error' : undefined"
         />
-        <p v-if="parsedHash" class="text-xs text-muted-foreground m-0 mt-1">
-          版本 <code class="font-mono text-foreground">{{ parsedHash.prefix }}</code>
-          · cost {{ parsedHash.cost }}
-          · 盐 <code class="font-mono text-foreground">{{ parsedHash.salt }}</code>
-        </p>
-        <p v-else-if="verifyFormatError" id="bcrypt-verify-hash-error" class="text-error text-[0.8125rem] m-0 mt-1">
-          {{ verifyFormatError }}
-        </p>
+        <!-- 解析/格式错误行：固定高度预留，内容切换不引起布局跳动 -->
+        <div class="min-h-6 mt-1 flex items-center">
+          <p v-if="parsedHash" class="text-xs text-muted-foreground m-0">
+            版本 <code class="font-mono text-foreground">{{ parsedHash.prefix }}</code>
+            · cost {{ parsedHash.cost }}
+            · 盐 <code class="font-mono text-foreground">{{ parsedHash.salt }}</code>
+          </p>
+          <p v-else-if="verifyFormatError" id="bcrypt-verify-hash-error" class="text-error text-xs m-0">
+            {{ verifyFormatError }}
+          </p>
+        </div>
       </div>
 
       <!-- 密码输入 -->
@@ -368,23 +360,26 @@ onUnmounted(() => {
         <ClearButton label="清空校验区" @clear="handleVerifyClear" />
       </div>
 
-      <!-- 校验结果三态 -->
-      <p v-if="verifyError" class="text-error text-[0.8125rem] m-0">{{ verifyError }}</p>
-      <p
-        v-else-if="verifyResult === 'match'"
-        class="text-success text-[0.8125rem] m-0 font-medium transition-opacity duration-150"
-        :class="{ 'opacity-60': verifyStale }"
-      >
-        ✓ 密码匹配
-      </p>
-      <p
-        v-else-if="verifyResult === 'mismatch'"
-        class="text-error text-[0.8125rem] m-0 font-medium transition-opacity duration-150"
-        :class="{ 'opacity-60': verifyStale }"
-      >
-        ✗ 密码不匹配
-      </p>
-      <p v-if="verifyStale && verifyResult" class="text-warning text-xs m-0 mt-1">输入已变化，校验结果可能不再对应，请重新校验。</p>
+      <!-- 校验结果行：固定高度预留，点击校验前后布局稳定 -->
+      <div class="min-h-8 flex items-center gap-x-2" aria-live="polite">
+        <p v-if="verifyError" class="text-error text-[0.8125rem] m-0 font-medium">{{ verifyError }}</p>
+        <p
+          v-else-if="verifyResult === 'match'"
+          class="text-success text-[0.8125rem] m-0 font-medium transition-opacity duration-150"
+          :class="{ 'opacity-60': verifyStale }"
+        >
+          ✓ 密码匹配
+        </p>
+        <p
+          v-else-if="verifyResult === 'mismatch'"
+          class="text-error text-[0.8125rem] m-0 font-medium transition-opacity duration-150"
+          :class="{ 'opacity-60': verifyStale }"
+        >
+          ✗ 密码不匹配
+        </p>
+        <p v-else class="text-muted-foreground text-[0.8125rem] m-0">待校验</p>
+        <span v-if="verifyStale && verifyResult && !verifyError" class="text-warning text-xs">输入已变化，请重新校验</span>
+      </div>
     </div>
 
     <p class="text-xs text-muted-foreground m-0 mt-6">
