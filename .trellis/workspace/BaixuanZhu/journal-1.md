@@ -31,3 +31,4 @@
 - 关键设计：慢哈希按钮触发（DESIGN.md 慢操作例外）+ reqId 丢弃乱序 + 输入快照 stale 兜底 + 清空递增 reqSeq 防回填——已沉淀 component-guidelines「慢计算类工具交互」Pattern。盐自产（getRandomValues + bcrypt base64）不依赖库随机源探测；`$2x$` 前缀 compareSync 会 throw，比对前归一化 `$2a`（check 阶段抓出并修复）。
 - 验证：单测 29 例（1493 全绿）/ astro check 0 错 / build 74 页；dev + preview 生产冒烟（生成→回贴校验 ✓/✗、非法哈希错误、暗色截图目检）全过。
 - agent-browser 冒烟坑（已录记忆）：双引号 `$` 展开、client:idle 水合延迟需探针、旧 ref 点到备案链接导航走、主题是三选菜单。
+- 09-02 用户验收反馈迭代（931115d）：结果区改名「结果」并改用 CodePanel（复制/清空图标按钮入标题栏、禁用而非隐藏），生成/校验内容区固定高度预留——绝对坐标实测点击前后零位移；错误与按钮同行、过期提示内联化，消灭全部布局跳动源。
