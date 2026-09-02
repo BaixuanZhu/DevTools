@@ -1,0 +1,4 @@
+{"file": ".trellis/spec/frontend/directory-structure.md", "reason": "utils/tools/pages/data 目录对称落位约定，新工具文件放置依据"}
+{"file": ".trellis/spec/frontend/component-guidelines.md", "reason": "工具页 Vue 组件模式（script setup、props、复用 ui/ 通用组件）"}
+{"file": ".trellis/spec/frontend/state-management.md", "reason": "组件局部状态与模块 store 边界，本工具不新增 store 的依据"}
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "验证门禁、测试位置（__tests__ 同目录）与禁用模式"}

@@ -123,3 +123,7 @@ md-editor-v3 等组件库默认从 unpkg CDN 运行时加载扩展（mermaid/kat
 ### Pattern: 独立 HTML 导出产物（多主题内嵌 + 单一生成路径）
 
 导出类功能凡有「预览 + 下载」，预览与下载必须共用同一条产物生成函数（范式 `markdown-export.ts` 的 `buildHtmlDocument`，消费方 `HtmlExportDialog.vue`），杜绝两套渲染漂移；主题选择收敛在预览 UI，**产物只烘焙所选主题、不含任何脚本**（单测固化零 `<script>`/零外链，`markdown-export.test.ts`）。多主题实现：主题 = CSS 变量声明集挂 `:root[data-theme]`，基础排版只消费变量（新增主题成本 = 一组变量；变量表达不了的结构性特色用主题级 `extraCss` 附加规则）。预览 iframe 用空 `sandbox`（全沙箱禁脚本，静态展示）。另两条硬约束：① 嵌在 md-editor-v3 页面里的弹层（共享 `ui/dialog/DialogContent.vue`）z-index 必须 ≥ 21000——md-editor 内部 dropdown/modal 为 20000-20001，z-50 会被盖住；② 从 DropdownMenuItem select 里开 Dialog 必须 `setTimeout ≥100ms` 再置开（见上文 Common Mistake）。
+
+### Pattern: 慢计算类工具交互（按钮触发 + 输入快照 stale + reqId 丢弃）
+
+站内「输入即输出」默认对**故意慢**的操作（bcrypt 哈希/校验、cost 12+ 秒级计算）失效——DESIGN.md 明示"慢操作除外"。范式 `src/tools/crypto/BcryptTool.vue` + `src/utils/crypto/bcrypt.ts`（worker 协议类型），四条硬规则：① 按钮触发而非 watch 自动计算，计算中按钮 disabled 防连点；② 请求带递增 `reqId`，回包 reqId 与当前序号不符直接丢弃（worker 内同步计算不可中断，靠结果侧丢弃防乱序）；③ **stale 标记不能只靠 watch**——派发时记录输入快照，回包时与当前输入比对，不一致置 stale（弱化展示 + 警告文案），否则计算窗口（可达数十秒）内改输入会让旧结果以"新鲜"状态展示；④ 清空按钮必须同时递增 reqSeq 使在途响应失效并复位计算中状态，否则回包会把已清空的结果回填。慢计算本体放 Web Worker（`self.onmessage` 薄层风格同 `json-diff.worker.ts`，算法库只进 worker chunk 保主包零增长）。库特定坑：bcryptjs `compareSync` 遇 `$2x$` 前缀直接 throw（英文错误泄漏），比对前须归一化 `$2x`→`$2a`（`normalizeHashForCompare` 纯函数 + 单测）；盐用 Web Crypto `getRandomValues` 自产（不依赖库的运行时随机源探测）。

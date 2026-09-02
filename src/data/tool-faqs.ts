@@ -118,6 +118,28 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: 'MD5 本身已不安全，HMAC-MD5 在实际工程中几乎不再使用，主流 Webhook 与 API 签名均采用 HMAC-SHA256 及以上。本工具仅支持 HMAC-SHA-1 / SHA-256 / SHA-384 / SHA-512，与 Web Crypto 原生能力一致。',
     },
   ],
+  'bcrypt': [
+    {
+      question: 'bcrypt 和 SHA-256 存密码有什么区别？',
+      answer: 'SHA-256 是<strong>快速哈希</strong>，攻击者可用 GPU 每秒尝试数十亿次，不适合直接存密码。bcrypt 是<strong>自适应慢哈希</strong>：计算耗时由 cost 因子控制（可随硬件升级调高），且自带随机盐，彩虹表与暴力破解的成本都高得多。存用户密码应选 bcrypt（或 argon2），SHA-256 适合做完整性校验。',
+    },
+    {
+      question: 'cost 因子选多少合适？',
+      answer: '经验法则：<strong>让单次哈希耗时落在 100-300 毫秒</strong>。如今通常取 <strong>10-12</strong>：cost 每加 1 耗时翻倍，10 约几十毫秒，12 约 300-500 毫秒。注册/登录频率高的系统取低些，安全优先的系统取高些；已上线的哈希可通过逐步升级 cost 再哈希来加固。',
+    },
+    {
+      question: '$2a$、$2b$、$2y$ 前缀有什么区别？',
+      answer: '三者是 bcrypt 的<strong>版本标记</strong>，算法核心一致、校验互通：<code>$2a$</code> 是最早期版本（旧系统常见）；<code>$2b$</code> 是 OpenBSD 修正后的当前标准，本工具生成默认使用；<code>$2y$</code> 是 PHP <code>password_hash</code> 使用的标记，等价于修正版实现。另有罕见的 <code>$2x$</code>（历史兼容标记）。校验时本工具全前缀兼容。',
+    },
+    {
+      question: '为什么提示密码超过 72 字节会被截断？',
+      answer: 'bcrypt 规范只处理密码的<strong>前 72 字节</strong>，超出部分在运算前被静默丢弃——即「abc…后接任意字符」与「abc…」哈希相同。注意是<strong>字节</strong>不是字符：中文每字占 3 字节、emoji 占 4 字节，24 个汉字就会顶到上限。超长密码想不截断，可先对密码做一次 SHA-256 再送 bcrypt。',
+    },
+    {
+      question: '为什么每次生成的哈希都不一样？',
+      answer: '这是设计使然：每次生成都用<strong>新的随机盐</strong>，同一密码每次结果都不同。盐内嵌在哈希字符串里（第 8-29 位），校验时 bcrypt 会自动从哈希中取出盐再计算比对，因此<strong>无需单独保存盐</strong>，直接存整条 60 字符哈希即可。',
+    },
+  ],
   'uuid-generator': [
     {
       question: 'UUID 和 GUID 有什么区别？',

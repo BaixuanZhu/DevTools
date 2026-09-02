@@ -24,3 +24,10 @@
 - 新增 HtmlExportDialog.vue（radiogroup 主题胶囊 + `sandbox="allow-scripts"` iframe 预览，无 allow-same-origin 隔离不透明源）；工作台导出菜单 HTML 项改为开对话框。
 - 坑：从 DropdownMenuItem select 同步开 Dialog 会被 reka-ui 菜单收起的焦点还原秒关（MutationObserver 实测挂载 ~20ms 即被移除）→ `setTimeout 100ms` 再置开；已录 component-guidelines spec。
 - 验证：单测 9 例（1463 全绿）/ astro check 0 错误 / build 成功；浏览器冒烟 5 主题切换、iframe 内嵌切换器、下载产物（文件名/默认主题烘入）与独立打开后切换记忆全过。经验收报"已导出 HTML 文件"即旧直下路径，已由对话框替代。
+
+## 2026-09-02 BCrypt 密码哈希工具（09-02-bcrypt-tool）
+
+- crypto 分类第 5 个工具 `/crypto/bcrypt`：单次哈希生成（cost 4-15 + Web Crypto 自产盐）、单次校验三态、哈希即时解析、72 字节截断警告。bcryptjs 3.0.3 唯一新依赖，只进 `bcrypt.worker-*.js` chunk（gzip 9.4KB），主包字节级零增长。
+- 关键设计：慢哈希按钮触发（DESIGN.md 慢操作例外）+ reqId 丢弃乱序 + 输入快照 stale 兜底 + 清空递增 reqSeq 防回填——已沉淀 component-guidelines「慢计算类工具交互」Pattern。盐自产（getRandomValues + bcrypt base64）不依赖库随机源探测；`$2x$` 前缀 compareSync 会 throw，比对前归一化 `$2a`（check 阶段抓出并修复）。
+- 验证：单测 29 例（1493 全绿）/ astro check 0 错 / build 74 页；dev + preview 生产冒烟（生成→回贴校验 ✓/✗、非法哈希错误、暗色截图目检）全过。
+- agent-browser 冒烟坑（已录记忆）：双引号 `$` 展开、client:idle 水合延迟需探针、旧 ref 点到备案链接导航走、主题是三选菜单。

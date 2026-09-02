@@ -23,6 +23,7 @@
     "@lucide/vue": "^1.22.0",
     "@noble/ciphers": "^2.2.0",
     "astro": "^6.4.2",
+    "bcryptjs": "^3.0.3",
     "bowser": "^2.14.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

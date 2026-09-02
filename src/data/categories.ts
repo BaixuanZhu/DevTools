@@ -34,8 +34,8 @@ export const categories: CategoryMeta[] = [
     name: '加密与安全',
     slug: 'crypto',
     icon: '🔒',
-    description: 'MD5/SHA 哈希与 HMAC、AES/RSA/SM 国密对称与非对称加解密',
-    seoDescription: '加密与安全分类收录多款免费在线密码学工具：MD5、SHA-2 系列哈希与 HMAC 签名生成验证，AES、ChaCha20 对称加密与 RSA、ECDSA、Ed25519 非对称加解密，SM2/SM4 国密算法支持，密钥纯浏览器端 WebCrypto 运算，联调学习两相宜，数据绝不上传。',
+    description: 'MD5/SHA 哈希与 HMAC、BCrypt 密码哈希、AES/RSA/SM 国密对称与非对称加解密',
+    seoDescription: '加密与安全分类收录多款免费在线密码学工具：MD5、SHA-2 系列哈希、HMAC 签名与 BCrypt 密码哈希，AES、ChaCha20 对称加密与 RSA、ECDSA、Ed25519 非对称加解密，SM2/SM4 国密算法支持，密钥纯浏览器端运算，联调学习两相宜，数据绝不上传。',
     seoTitle: '加密与安全工具大全 - 哈希签名与对称非对称加解密 - DevTools',
   },
   {

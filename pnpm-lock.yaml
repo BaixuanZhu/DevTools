@@ -26,6 +26,9 @@ importers:
       astro:
         specifier: ^6.4.2
         version: 6.4.8(@types/node@26.1.1)(jiti@2.7.0)(lightningcss@1.32.0)(rollup@4.62.3)(yaml@2.9.0)
+      bcryptjs:
+        specifier: ^3.0.3
+        version: 3.0.3
       bowser:
         specifier: ^2.14.1
         version: 2.14.1
@@ -1852,6 +1855,10 @@ packages:
   baseline-browser-mapping@2.11.4:
     resolution: {integrity: sha512-s4+sLr9mZ/CyqeRritFeYV/Zx73OAtmaHn6kkBS1XRoJn1hrg3xIDUcpicAEX68tkcIN0iBCgti31C8zxtkhsQ==}
     engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  bcryptjs@3.0.3:
+    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
     hasBin: true
 
   birpc@2.9.0:
@@ -5850,6 +5857,8 @@ snapshots:
   base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.11.4: {}
+
+  bcryptjs@3.0.3: {}
 
   birpc@2.9.0: {}
 
