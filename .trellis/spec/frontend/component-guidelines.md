@@ -127,3 +127,10 @@ md-editor-v3 等组件库默认从 unpkg CDN 运行时加载扩展（mermaid/kat
 ### Pattern: 慢计算类工具交互（按钮触发 + 输入快照 stale + reqId 丢弃）
 
 站内「输入即输出」默认对**故意慢**的操作（bcrypt 哈希/校验、cost 12+ 秒级计算）失效——DESIGN.md 明示"慢操作除外"。范式 `src/tools/crypto/BcryptTool.vue` + `src/utils/crypto/bcrypt.ts`（worker 协议类型），四条硬规则：① 按钮触发而非 watch 自动计算，计算中按钮 disabled 防连点；② 请求带递增 `reqId`，回包 reqId 与当前序号不符直接丢弃（worker 内同步计算不可中断，靠结果侧丢弃防乱序）；③ **stale 标记不能只靠 watch**——派发时记录输入快照，回包时与当前输入比对，不一致置 stale（弱化展示 + 警告文案），否则计算窗口（可达数十秒）内改输入会让旧结果以"新鲜"状态展示；④ 清空按钮必须同时递增 reqSeq 使在途响应失效并复位计算中状态，否则回包会把已清空的结果回填。慢计算本体放 Web Worker（`self.onmessage` 薄层风格同 `json-diff.worker.ts`，算法库只进 worker chunk 保主包零增长）。库特定坑：bcryptjs `compareSync` 遇 `$2x$` 前缀直接 throw（英文错误泄漏），比对前须归一化 `$2x`→`$2a`（`normalizeHashForCompare` 纯函数 + 单测）；盐用 Web Crypto `getRandomValues` 自产（不依赖库的运行时随机源探测）。
+
+### Pattern: 密码慢哈希工具三件套同构（bcrypt / Argon2 / PBKDF2）
+
+站内密码哈希类工具（`/crypto/bcrypt`、`/crypto/argon2`、`/crypto/pbkdf2`）共享同一副骨架，新增同类工具（如未来 scrypt）**复制现有三件套而非重新发明**：工具页三分区（生成/派生 + 校验 + 粘贴即解析行）、`{kind, reqId, ok}` worker 消息形状（响应用 `kind` 归位错误）、上文的慢计算四件套、CodePanel「结果」+ min-h 预留零跳动。两条本任务踩出/固化的硬约束：
+
+1. **解析函数与格式错误函数的接受集必须完全一致**。util 层同时存在 `parseXxxHash`（喂校验区解析行）与 `getXxxFormatError`（派发前拦非法输入）时，不变式为 `formatError(x) 为空 ⟺ parse(x) !== null`——两函数用了不同的 b64/字符集容忍度（如一个拒绝 `=` padding 一个容忍）就会出现"解析行空白但校验按钮放行、错误落进 worker 兜底"的口径分裂（argon2 的 PHC 段就踩过：正则拒绝 `=`、错误函数用宽松 atob 放行）。修法是抽共享字符集校验（如 `PHC_B64_RE`）两处同用，并用双向一致性测试固化（同一输入断言 formatError 为空且 parse 非 null，反之亦然）。PHC 规范盐/哈希段**无 `=` padding**，与 Django 哈希的 b64 段（**容忍缺 padding、自动补齐**）口径相反，别混用同一套校验。
+2. **hash-wasm 依赖特性**（Argon2 选型，4.12.0）：ESM 单文件平铺（含全部算法的 base64 wasm）但 `sideEffects: false`，Rollup 能摇掉未用算法；wasm 内嵌 JS、无独立 `.wasm` 资产，worker chunk 无需处理 wasm 加载路径。2024-11 停更但 135 万周下载、API 冻结，接受。体积验收不靠 tree-shaking 假设、靠 **dist 特征扫描**：`grep -rl "AGFzbQ" dist/` 只允许命中对应 worker chunk 与既有 libheif。`argon2Verify` 对 v=16 老哈希 throw 英文错误——parse 层对 v≠19 提前拦（差异化中文文案），worker 内 try-catch 只做兜底。

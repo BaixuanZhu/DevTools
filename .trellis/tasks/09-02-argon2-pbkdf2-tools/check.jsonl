@@ -1,0 +1,2 @@
+{"file": ".trellis/spec/frontend/quality-guidelines.md", "reason": "核查口径：pnpm test / astro check / build 门禁与守卫测试要求"}
+{"file": ".trellis/spec/frontend/type-safety.md", "reason": "TS strict 收窄模式与类型约定核查依据"}

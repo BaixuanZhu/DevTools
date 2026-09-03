@@ -68,6 +68,9 @@ importers:
       gm-crypto:
         specifier: ^0.1.12
         version: 0.1.12
+      hash-wasm:
+        specifier: ^4.12.0
+        version: 4.12.0
       highlight.js:
         specifier: ^11.12.0
         version: 11.12.0
@@ -2458,6 +2461,9 @@ packages:
   happy-dom@20.11.1:
     resolution: {integrity: sha512-XSt8tMzbW9ymE7687xztkO1ckR7qJNQ3LywY9vlYGhGi3zXrGBHuUo2Cl1ztZaICW+1eAGdkLbj6iwVqDT33kg==}
     engines: {node: '>=20.0.0'}
+
+  hash-wasm@4.12.0:
+    resolution: {integrity: sha512-+/2B2rYLb48I/evdOIhP+K/DD2ca2fgBjp6O+GBEnCDk2e4rpeXIK8GvIyRPjTezgmWn9gmKwkQjjx6BtqDHVQ==}
 
   hast-util-from-html@2.0.3:
     resolution: {integrity: sha512-CUSRHXyKjzHov8yKsQjGOElXy/3EKpyX56ELnkHH34vDVw1N1XSQ1ZcAvTyAPtGqLTuKP/uxM+aLkSPqF/EtMw==}
@@ -6511,6 +6517,8 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
+
+  hash-wasm@4.12.0: {}
 
   hast-util-from-html@2.0.3:
     dependencies:

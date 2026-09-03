@@ -140,6 +140,50 @@ const toolFaqs: Record<string, FaqItem[]> = {
       answer: '这是设计使然：每次生成都用<strong>新的随机盐</strong>，同一密码每次结果都不同。盐内嵌在哈希字符串里（第 8-29 位），校验时 bcrypt 会自动从哈希中取出盐再计算比对，因此<strong>无需单独保存盐</strong>，直接存整条 60 字符哈希即可。',
     },
   ],
+  'argon2': [
+    {
+      question: 'Argon2 和 bcrypt 怎么选？',
+      answer: '新项目优先选 <strong>argon2id</strong>。bcrypt 有 72 字节密码截断且不抗 GPU 暴破（无内存困难性），Argon2 是 PHC 密码哈希竞赛冠军、OWASP 密码存储指引现行首推，内存参数使 GPU/ASIC 并行攻击成本高得多。已有 bcrypt 存量系统的用户可在登录时静默升级为 argon2id（bcrypt 校验通过后重哈希）。',
+    },
+    {
+      question: '内存 m、迭代 t、并行度 p 怎么调？',
+      answer: '经验法则：<strong>让单次哈希耗时落在 100-500 毫秒</strong>。先定内存（越大越抗 GPU，常见 19 MiB（m=19456）到 64 MiB（m=65536）），再用迭代次数补足耗时（默认 t=3），并行度 p 一般不动（浏览器端是单线程交错执行，加大 p 只增加内存下限）。OWASP 最低推荐档为 m=19456、t=2、p=1。',
+    },
+    {
+      question: 'PHC 哈希串怎么读？',
+      answer: '以 <code>$argon2id$v=19$m=65536,t=3,p=4$盐$哈希</code> 为例：<code>argon2id</code> 是类型（id/i/d），<code>v=19</code> 是版本，<code>m</code> 内存（KiB）、<code>t</code> 迭代、<code>p</code> 并行度，最后两段分别是 Base64 编码的<strong>盐</strong>与<strong>哈希</strong>。参数与盐全部内嵌，校验时解析即可复现计算，直接整串入库。',
+    },
+    {
+      question: '为什么浏览器里能算 Argon2？',
+      answer: '本工具通过 <strong>WebAssembly</strong>（hash-wasm）在浏览器本地执行 Argon2 官方实现，与服务器端结果完全一致。计算放在 Web Worker 中进行，内存与迭代拉满也不会卡住页面；密码与哈希全程不离开本机。',
+    },
+    {
+      question: 'argon2i 和 argon2id 有什么区别？',
+      answer: '<strong>argon2i</strong> 抗侧信道攻击（内存访问与数据无关），适合密钥派生等场景但抗 GPU 略弱；<strong>argon2d</strong> 抗 GPU 最强但抗侧信道最弱；<strong>argon2id</strong> 混合两者，是密码存储的通用推荐。存用户密码一律选 argon2id。',
+    },
+  ],
+  'pbkdf2': [
+    {
+      question: '迭代次数选多少合适？',
+      answer: '<strong>OWASP 2023 对 PBKDF2-HMAC-SHA256 推荐 60 万次</strong>（SHA-1 为 130 万、SHA-512 为 21 万，因为它们单次运算更便宜）。原则是单次派生控制在 100-500 毫秒；随硬件升级应逐步调高，Django 每个版本也会自动上调默认值。',
+    },
+    {
+      question: 'Django 的密码哈希怎么核对？',
+      answer: '从数据库 <code>auth_user.password</code> 字段复制形如 <code>pbkdf2_sha256$600000$Base64盐$Base64哈希</code> 的整串，粘贴到本工具校验区并输入明文密码即可比对。工具自动解析迭代次数、盐与哈希长度，passlib 的同款格式同样支持，盐的 Base64 有无 <code>=</code> 补位都能识别。',
+    },
+    {
+      question: '盐用文本还是十六进制？',
+      answer: '两种模式最终都转成<strong>字节序列</strong>参与运算：文本按 UTF-8 编码（中英文字符均可），hex 按两位十六进制表示一字节（适合对接 WPA2、加密 ZIP 等已有十六进制盐的场景）。点「随机盐」会按当前模式生成 16 字节的密码学随机盐。',
+    },
+    {
+      question: 'PBKDF2 和 Argon2 比怎么选？',
+      answer: '新项目优先 <strong>Argon2id</strong>：PBKDF2 仅迭代抗暴破、无内存困难性，GPU 并行破解成本更低。PBKDF2 的优势是<strong>兼容性</strong>：Web Crypto 原生支持、Django/WPA2/加密 ZIP 等存量场景大量使用，核对迁移数据、跨语言复现派生结果时选它。',
+    },
+    {
+      question: '派生长度 dkLen 怎么定？',
+      answer: '用作对称加密密钥时与算法匹配：AES-128 用 16 字节、AES-256 用 32 字节（本工具默认 32）；用作口令哈希存储时至少 32 字节。理论上 PBKDF2 可派生任意长度，但超过底层哈希输出（如 SHA-256 的 32 字节）会触发多轮计算，无特殊需求不必加长。',
+    },
+  ],
   'uuid-generator': [
     {
       question: 'UUID 和 GUID 有什么区别？',
